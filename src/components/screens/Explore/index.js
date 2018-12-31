@@ -371,9 +371,15 @@ class Explore extends Component {
                 >
                     {
                         this.state.cities.map((result, i) => { //eslint-disable-line
+                            const testID = __DEV__
+                                ? String(result.query).replace(',','_').replace(' ','_')
+                                : 'explore.auto-complete'+result.id
+                            ;
+
                             return (//eslint-disable-line
                                 <TouchableOpacity
                                     key={result.id}
+                                    testID={testID}
                                     style={i == nCities - 1 ? [styles.autocompleteTextWrapper, {borderBottomWidth: 1, elevation: 1}] : styles.autocompleteTextWrapper}
                                     onPress={() => this.handleAutocompleteSelect(result.id, result.query)}
                                 >

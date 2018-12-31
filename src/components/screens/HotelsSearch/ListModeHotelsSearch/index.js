@@ -101,7 +101,8 @@ class ListModeHotelsSearch extends Component {
     //     this.props.onFetch(page, startFetch, abortFetch);
     // }
 
-    renderItem = (item) => {
+    renderItem = (item, index, separator) => {
+        console.log('hotel item',{item,index,separator});
         return (
             <HotelItemView
                 item = {item}
