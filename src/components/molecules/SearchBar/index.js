@@ -26,13 +26,13 @@ class SearchBar extends Component {
         this.input.focus();
     }
 
-    renderLeftButton() {
+    renderLeftButton(testID) {
         const { leftIcon, onLeftPress } = this.props;
         let renderButton = null;
 
         if (leftIcon) {
             renderButton = (
-                <View style={styles.leftIconView}>
+                <View style={styles.leftIconView} testID={testID}>
                     <Text style={styles.leftIconText}>
                         <Icon name={leftIcon} size={22} color="#000" />
                         {/* <FontAwesome>{Icons[leftIcon]}</FontAwesome> */}
@@ -43,7 +43,7 @@ class SearchBar extends Component {
 
         if (leftIcon && onLeftPress) {
             renderButton = (
-                <TouchableOpacity onPress={() => onLeftPress()}>{ renderButton }</TouchableOpacity>
+                <TouchableOpacity testID={testID} onPress={() => onLeftPress()}>{ renderButton }</TouchableOpacity>
             );
         }
 
@@ -53,9 +53,10 @@ class SearchBar extends Component {
     render() {
         return (
             <View style={[styles.container]}>
-                { this.renderLeftButton() }
+                { this.renderLeftButton('searchbar.left-button') }
 
                 <TextInput
+                    testID={'searchbar.text-input'}
                     ref={(i) => { this.input = i; }}
                     underlineColorAndroid="#ffffff"
                     style={this.props.editable? styles.input : styles.input_disable}

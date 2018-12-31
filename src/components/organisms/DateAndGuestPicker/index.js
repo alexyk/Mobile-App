@@ -87,7 +87,7 @@ class DateAndGuestPicker extends Component {
                     }
                 </View>
 
-                <TouchableOpacity onPress={this.onSearch}>
+                <TouchableOpacity onPress={this.onSearch} testID={"date_guests_picker.search_button"}>
                     <View style={showSearchButton ?  styles.searchButtonView : {height: 0}}>
                         <Text style={showSearchButton ? styles.searchButtonText : {height: 0}}>Search</Text>
                     </View>

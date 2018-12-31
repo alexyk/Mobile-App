@@ -150,6 +150,7 @@ class Login extends Component {
                         <View style={styles.inputView}>
                             <SmartInput
                                 keyboardType="email-address"
+                                testID={'login.email'}
                                 autoCorrect={false}
                                 autoCapitalize="none"
                                 value={email}
@@ -163,6 +164,7 @@ class Login extends Component {
                         <View style={styles.inputView}>
                             <SmartInput
                                 secureTextEntry
+                                testID={'login.password'}
                                 autoCorrect={false}
                                 autoCapitalize="none"
                                 value={password}
@@ -175,6 +177,7 @@ class Login extends Component {
 
                         <TouchableOpacity
                             style={styles.buttonWrapper}
+                            testID={"login.login_button"}
                             disabled={!validateEmail(email) || !validatePassword1(password)}
                             onPress={() => this.onClickLogIn()}
                         >
