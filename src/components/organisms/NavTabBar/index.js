@@ -3,7 +3,7 @@ import { Text, TouchableWithoutFeedback, View } from 'react-native';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import PropTypes from 'prop-types';
 import styles from './styles';
-
+import SplashScreen from 'react-native-smart-splash-screen';
 
 export default class NavTabBar extends Component {
     static propTypes = {
@@ -16,18 +16,9 @@ export default class NavTabBar extends Component {
                 }))
             })
         }),
-        paymentInfo: PropTypes.shape({
-            currency: PropTypes.string
-        }),
-        loadInitialData: PropTypes.func
     }
 
     static defaultProps = {
-        paymentInfo: {
-            currency: 'USD',
-            currencySign: '$',
-            locRate: null
-        },
         navigation: {
             navigate: () => {},
             state: {
@@ -35,12 +26,16 @@ export default class NavTabBar extends Component {
                 routes: []
             }
         },
-        loadInitialData: () => {}
     }
 
-    async componentDidMount() {
-        const { currency } = this.props.paymentInfo;
-        await this.props.loadInitialData({ currency });
+    componentWillMount() {
+        //const { currency } = this.props.paymentInfo;
+        //console.log("Nav - componentDidMount", currency);
+        SplashScreen.close({
+            animationType: SplashScreen.animationType.scale,
+            duration: 0,
+            delay: 0
+        });
     }
 
     render() {
@@ -72,7 +67,7 @@ export default class NavTabBar extends Component {
                     </View>
                 </TouchableWithoutFeedback>
 
-                <TouchableWithoutFeedback onPress={() => navigate('MY_TRIPS')}>
+                <TouchableWithoutFeedback onPress={() => navigate('MY_TRIPS', {reload: this.props.reloadTab})}>
                     <View style={styles.tab}>
                         <Text style={active === 'MY_TRIPS' ? styles.activeIconStyle : styles.inactiveIconStyle}>
                             <FontAwesome>{Icons.suitcase}</FontAwesome>

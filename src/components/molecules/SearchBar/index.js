@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import PropTypes from 'prop-types';
 import styles from './styles';
 
@@ -8,11 +8,13 @@ import styles from './styles';
 class SearchBar extends Component {
     static propTypes = {
         onLeftPress: PropTypes.func,
-        leftIcon: PropTypes.string
+        leftIcon: PropTypes.string,
+        editable: PropTypes.bool
     }
     static defaultProps = {
         onLeftPress: () => {},
-        leftIcon: ''
+        leftIcon: '',
+        editable: true,
     }
     constructor() {
         super();
@@ -32,7 +34,8 @@ class SearchBar extends Component {
             renderButton = (
                 <View style={styles.leftIconView}>
                     <Text style={styles.leftIconText}>
-                        <FontAwesome>{Icons[leftIcon]}</FontAwesome>
+                        <Icon name={leftIcon} size={22} color="#000" />
+                        {/* <FontAwesome>{Icons[leftIcon]}</FontAwesome> */}
                     </Text>
                 </View>
             );
@@ -55,7 +58,7 @@ class SearchBar extends Component {
                 <TextInput
                     ref={(i) => { this.input = i; }}
                     underlineColorAndroid="#ffffff"
-                    style={styles.input}
+                    style={this.props.editable? styles.input : styles.input_disable}
                     {...this.props}
                 />
             </View>

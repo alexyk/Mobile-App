@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View, StyleSheet} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import PropTypes from 'prop-types';
 import styles from './styles';
@@ -19,7 +19,6 @@ class EditCurrencyModal extends Component {
 
     constructor(props) {
         super(props);
-        console.log('cccc=====CCCCC')
         this.state = {
             currencies: [],
             selectedCurrencyId: null,
@@ -29,10 +28,13 @@ class EditCurrencyModal extends Component {
 
     componentWillMount() {
         currencyArr = [];
-        this.props.currencies.map((item, i) => {
-            currencyArr.push({ 'label': item.code, 'value': item.id })
-        });
-        console.log('cccc=====', currencyArr)
+        for (var i = 0; i< this.props.currencies.length; i++){
+            let item = this.props.currencies[i];
+            if ( i > 2 ) {
+                break;
+            }
+            currencyArr.push({ 'label': item.code, 'value': item.id });
+        }
         this.setState({
             currencies: currencyArr,
             selectedCurrencyId: this.props.currency.id,
@@ -58,13 +60,13 @@ class EditCurrencyModal extends Component {
                                     selectedCurrencyId: value,
                                 });
                             }}
+                            style={{ ...pickerSelectStyles }}
                             value={this.state.selectedCurrencyId}
                         />
                         }
                     <View style={styles.footer}>
                         <TouchableOpacity
                             onPress={() => {
-                                console.log(this.state)
                                 currency = {
                                     id: this.state.selectedCurrencyId==null? '1': this.state.selectedCurrencyId,
                                     code: this.state.selectedCurrencyCode==null? 'USD': this.state.selectedCurrencyCode 
@@ -89,5 +91,18 @@ class EditCurrencyModal extends Component {
         )
     }
 }
+const pickerSelectStyles = StyleSheet.create({
+    inputIOS: {
+        fontSize: 16,
+        paddingTop: 13,
+        paddingHorizontal: 10,
+        paddingBottom: 12,
+        borderWidth: 1,
+        borderColor: 'gray',
+        borderRadius: 4,
+        backgroundColor: 'white',
+        color: 'black',
+    },
+});
 
 export default EditCurrencyModal;

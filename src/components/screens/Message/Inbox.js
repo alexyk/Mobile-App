@@ -1,33 +1,24 @@
-import PropTypes from 'prop-types';
-import React, {Component} from 'react';
 import {
-    StyleSheet,
+    FlatList,
+    ScrollView,
     Text,
     TouchableOpacity,
-    View,
-    Image,
-    ScrollView,
-    FlatList
+    View
 } from 'react-native';
-import FontAwesome, {Icons} from 'react-native-fontawesome';
-import {imgHost} from '../../../config'
-// import Image from 'react-native-remote-svg'; import GoBack from
-// '../common/GoBack';
-import {ListView} from 'react-native';
-import SplashScreen from 'react-native-smart-splash-screen';
-import {getMyConversations, approveMessage, declineMessage} from '../../../utils/requester';
+import React, { Component } from 'react';
+
 import InboxMessagesView from './InboxMessagesView';
-import BackButton from '../../atoms/BackButton';
 import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 import Toast from 'react-native-simple-toast';
-
-// You will find all component related to style in this class
+import requester from '../../../initDependencies';
 import styles from './inboxStyle';
 
-class Inbox extends Component {
 
+class Inbox extends Component {
+    static self;
     constructor(props) {
         super(props);
+        this.onConversation = this.onConversation.bind(this);
         this.state = {
             loading: false,
             data: [],
@@ -35,81 +26,124 @@ class Inbox extends Component {
             seed: 1,
             error: null,
             refreshing: false,
-            inboxMessages : [],
+            inboxMessages: [],
             showProgress: false,
         };
+
+        Inbox.self = this;
+    }
+
+    componentWillMount(){
+		this.list = [
+			this.props.navigation.addListener('didFocus', this._onFocus),
+        ];
+        
+        this.refreshMessage();
     }
 
     componentDidMount() {
-        this.setState({ showProgress: true });
-        getMyConversations()
-        .then(res => res.response.json())
-        // here you set the response in to json
-        .then(parsed => {
-            this.setState({ showProgress: false });
-            this.setState({
-                inboxMessages : parsed.content,
+
+    }
+
+    _onFocus() {
+        that = Inbox.self;
+        if (!that.isLoading) {
+            that.refreshMessage(false);
+        }
+	};
+
+    refreshMessage(isShowProgress = true) {
+        console.log("refreshMessage");
+        this.isLoading = true;
+        if (isShowProgress) {
+            this.setState({ showProgress: true});
+        }
+        requester.getMyConversations().then(res => {
+            // here you set the response in to json
+            res.body.then(data => {
+                // this.setState({ showProgress: false });
+                this.setState({
+                    showProgress: false,
+                    inboxMessages: data.content,
+                });
+                this.isLoading = false;
+            }).catch(err => {
+                console.log(err);
+                this.isLoading = false;
+                if (isShowProgress) {
+                    this.setState({ showProgress: false });
+                    Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
+                }
             });
-            console.log("message");
-            console.log(parsed.content);
-        })
-        .catch(err => {
-            this.setState({ showProgress: false });
-            Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-            console.log(err);
         });
     }
 
+    onConversation(item) {
+        const { navigate } = this.props.navigation;
+        if (item.unread == "true") {
+            let messages = this.state.inboxMessages;
+
+            let message = messages.find(x => x.id === item.id);
+            let messageIndex = messages.findIndex(x => x.id === item.id);
+
+            message.unread = 'false';
+
+            messages = messages.filter(x => x.id !== item.id);
+            messages.splice(messageIndex, 0, message);
+
+            this.setState({ inboxMessages: messages });
+        }
+        navigate('Chat', item);
+        // let messages = this.state.messages;
+        //
+        // let message = messages.find(x => x.id === id);
+        // let messageIndex = messages.findIndex(x => x.id === id);
+        //
+        // message.unread = unread === 'true' ? 'false' : 'true';
+        //
+        // messages = messages.filter(x => x.id !== id);
+        // messages.splice(messageIndex, 0, message);
+        //
+        // this.setState({ messages: messages });
+    }
+
     render() {
-        const {navigate} = this.props.navigation;
         return (
             <View style={styles.InboxView}>
-            {/* Main Container Start */}
-
-                <BackButton onPress={this.onBackPress}/>
-                <ScrollView>
-                    <View style={[styles.topText]}>
+                {/* Main Container Start */}
+                <View style={[styles.topText]}>
                     {/* Top Text Start */}
-                        <Text style={[styles.heading]}>Inbox</Text>
-                        <Text style={styles.subHeading}>You have {this.state.inboxMessages.length} unread messages</Text>
+                    <Text style={[styles.heading]}>Inbox</Text>
+                    <Text style={styles.subHeading}>You have {this.state.inboxMessages.length} unread messages</Text>
                     {/* Top Text end */}
-                    </View>
+                </View>
+                <ScrollView>
                     <FlatList data={this.state.inboxMessages} // Data source
-                    // List Start
-                        renderItem={({item, index}) => (
-                        <TouchableOpacity style={[styles.tr]} onPress={() => navigate('Chat', item)}>
-                            {/* Press to go on chat screen start*/}
+                        // List Start
+                        renderItem={({ item, index }) => (
+                            <TouchableOpacity style={[styles.tr]} onPress={() => { this.onConversation(item) }}>
+                                {/* Press to go on chat screen start*/}
                                 <InboxMessagesView
                                     inboxMessage={item}>
                                 </InboxMessagesView>
-                            {/* Press to go on chat screen end*/}
-                        </TouchableOpacity>
-                    )
-                    // List End
-                    }/>
+                                {/* Press to go on chat screen end*/}
+                            </TouchableOpacity>
+                        )
+                            // List End
+                        } />
                 </ScrollView>
 
-            {/* Main Container End */}
+                {/* Main Container End */}
 
                 <ProgressDialog
-                   visible={this.state.showProgress}
-                   title=""
-                   message="Loading Message..."
-                   animationType="slide"
-                   activityIndicatorSize="large"
-                   activityIndicatorColor="black"/>
+                    visible={this.state.showProgress}
+                    title=""
+                    message="Loading Message..."
+                    animationType="slide"
+                    activityIndicatorSize="large"
+                    activityIndicatorColor="black" />
             </View>
         );
     }
-
-    // to go back on the previous screen use this function start
-    onBackPress = () => {
-
-        this
-            .props
-            .navigation
-            .navigate('PROFILE');
-    }
-    // to go back on the previous screen use this function end
 }
 export default Inbox;

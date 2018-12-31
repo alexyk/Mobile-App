@@ -1,34 +1,31 @@
-import PropTypes from 'prop-types';
+import { AsyncStorage, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import React, { Component } from 'react';
-import { AsyncStorage, Clipboard, ScrollView, Text, TouchableOpacity, View, Modal } from 'react-native';
-import Image from 'react-native-remote-svg';
-import DateTimePicker from 'react-native-modal-datetime-picker';
-import ImagePicker from 'react-native-image-picker'
-import FontAwesome, { Icons } from 'react-native-fontawesome';
-import moment, { lang } from 'moment';
-import _ from 'lodash';
 import { connect } from 'react-redux';
+import moment, { lang } from 'moment';
+
 import BackButton from '../../atoms/BackButton';
-import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
-import UserProfileSummary from '../../organisms/UserProfileSummary'
-import ProfileHistoryItem from '../../atoms/ProfileHistoryItem';
-import UserProfileReviews from '../../organisms/UserProfileReviews'
-import UserProfileHomes from '../../organisms/UserProfileHomes'
-import EditNameModal from '../../atoms/EditNameModal';
-import EditGenderModal from '../../atoms/EditGenderModal';
+import DateTimePicker from 'react-native-modal-datetime-picker';
 import EditAboutModal from '../../atoms/EditAboutModal';
-import EditPhoneModal from '../../atoms/EditPhoneModal';
+import EditGenderModal from '../../atoms/EditGenderModal';
 import EditGovernmentModal from '../../atoms/EditGovenmentModal';
+import EditLanguageModal from '../../atoms/EditLanguageModal';
 import EditLocationModal from '../../atoms/EditLocationModal';
+import EditNameModal from '../../atoms/EditNameModal';
+import EditPhoneModal from '../../atoms/EditPhoneModal';
 import EditSchoolModal from '../../atoms/EditSchoolModal';
 import EditWorkModal from '../../atoms/EditWorkModal';
-import EditLanguageModal from '../../atoms/EditLanguageModal';
-import UserPropertyItemTypeInfo from '../../atoms/UserPropertyItemTypeInfo'
-import UserPropertyItemTypeAction from '../../atoms/UserPropertyItemTypeAction'
 import Footer from '../../atoms/Footer';
-import { getUserInfo, upperFirst, updateUserInfo, uploadPhoto } from '../../../utils/requester';
-import { imgHost } from '../../../config.js'
+import Image from 'react-native-remote-svg';
+import ImagePicker from 'react-native-image-picker';
+import ImageResizer from 'react-native-image-resizer';
+import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
+import PropTypes from 'prop-types';
+import UserPropertyItemTypeInfo from '../../atoms/UserPropertyItemTypeInfo';
+import  { userInstance } from '../../../utils/userInstance';
+import requester from '../../../initDependencies';
+import _ from 'lodash';
 import styles from './styles';
+import { apiHost, domainPrefix, imgHost, PUBLIC_URL } from '../../../config';
 
 class EditUserProfile extends Component {
 
@@ -40,7 +37,7 @@ class EditUserProfile extends Component {
 
     static defaultProps = {
         navigation: {
-            navigate: () => {}
+            navigate: () => { }
         }
     }
 
@@ -48,30 +45,32 @@ class EditUserProfile extends Component {
         super(props);
         this.state = {
             avatarSource: null,
-            birthday:'',
+            birthday: '',
             month: '',
             day: '',
             year: '',
-            city:{},
-            country:{},
-            email:'',
-            firstName:'',
-            lastName:'',
+            city: {},
+            country: {},
+            email: '',
+            firstName: '',
+            lastName: '',
             about: '',
-            gender:'',
+            gender: '',
             governmentId: '',
             countryId: 1,
+            stateId: '',
             school: '',
             work: '',
-            image:'',
-            locAddress:'',
-            phoneNumber:'',
-            preferredCurrency:'',
-            preferredLanguage:'',
+            image: '',
+            locAddress: '',
+            phoneNumber: '',
+            preferredCurrency: '',
+            preferredLanguage: '',
             modalVisible: false,
             isDateTimePickerVisible: false,
             jsonFile: '',
             showProgress: false,
+            countries: this.props.countries,
         }
         this.onPhoto = this.onPhoto.bind(this);
         this.onEditName = this.onEditName.bind(this);
@@ -100,120 +99,173 @@ class EditUserProfile extends Component {
         this.hideDateTimePicker = this.hideDateTimePicker.bind(this);
         this.handleDatePicked = this.handleDatePicked.bind(this);
         this.updateProfile = this.updateProfile.bind(this);
+        this.onBackPress = this.onBackPress.bind(this);
     }
 
     async componentDidMount() {
-        let about = await AsyncStorage.getItem('aboutme');
-        let governmentId = await AsyncStorage.getItem('governmentId');
-        let school = await AsyncStorage.getItem('school');
-        let work = await AsyncStorage.getItem('work');
-        
+        let firstName = await userInstance.getFirstName();
+        let lastName = await userInstance.getLastName();
+        let email = await userInstance.getEmail();
+        let phoneNumber = await userInstance.getPhoneNumber();
+        let preferredLanguage = await userInstance.getLanguage();
+        let preferredCurrency = await userInstance.getCurrency();
+        let gender = await userInstance.getGender();
+        let country = await userInstance.getCountry();
+        let countryState = await userInstance.getCountryState();
+        let city = await userInstance.getCity();
+        let locAddress = await userInstance.getLocAddress();
+        let jsonFile = await userInstance.getJsonFile();
+        let profileImage = await userInstance.getProfileImage();
+        let about = await userInstance.getAbout();
+        let governmentId = await userInstance.getGovernmentId();
+        let school = await userInstance.getSchool();
+        let work = await userInstance.getWork();
+        let day = '00';
+        let month = '00';
+        let year = '0000';
+        let birth = await userInstance.getBirthday();
+        if (birth !== null) {
+            let birthday = moment.utc(parseInt(birth, 10));
+            day = birthday.format('DD');
+            month = birthday.format('MM');
+            year = birthday.format('YYYY');
+        }
+
         this.setState({
             about: about,
             governmentId: governmentId,
             school: school,
             work: work,
-        })
-
-        getUserInfo()
-        .then(res => res.response.json())
-        .then(parsedResp => {
-
-            let day = '00';
-            let month = '00';
-            let year = '0000';
-
-            if (parsedResp.birthday !== null) {
-                let birthday = moment.utc(parsedResp.birthday);
-                day = birthday.format('DD');
-                month = birthday.format('MM');
-                year = birthday.format('YYYY');
-            }
-
-            this.setState({
-                city : parsedResp.city == null? '': parsedResp.city,
-                countries: parsedResp.countries == null? []: parsedResp.countries,
-                country : parsedResp.country == null? parsedResp.countries[0]: parsedResp.country,
-                email : parsedResp.email == null? '': parsedResp.email,
-                firstName : parsedResp.firstName == null? '': parsedResp.firstName,
-                lastName : parsedResp.lastName == null? '': parsedResp.lastName,
-                gender : parsedResp.gender == null? 'men': parsedResp.gender,
-                image : parsedResp.image == null? '': parsedResp.image,
-                locAddress : parsedResp.locAddress == null? '': parsedResp.locAddress,
-                phoneNumber : parsedResp.phoneNumber == null? '': parsedResp.phoneNumber,
-                preferredCurrency: parsedResp.preferredCurrency == null? parsedResp.currencies[0].id : parsedResp.preferredCurrency.id,
-                preferredLanguage: parsedResp.preferredLanguage == null? 'English': parsedResp.preferredLanguage,
-                jsonFile: parsedResp.jsonFile == null? '': parsedResp.jsonFile,
-                day: day,
-                month: month,
-                year: year,
-            });
-        })
-        .catch(err => {
-            console.log(err);
+            city: city,
+            country: country,
+            countryState: countryState,
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            gender: gender,
+            image: profileImage,
+            locAddress: locAddress,
+            phoneNumber: phoneNumber,
+            preferredCurrency: preferredCurrency == null ? 0 : preferredCurrency.id,
+            preferredLanguage: preferredLanguage == null ? 'English' : preferredLanguage,
+            jsonFile: jsonFile,
+            day: day,
+            month: month,
+            year: year,
         });
+        // requester.getCountries().then(res => {
+        //     res.body.then(data => {
+        //         this.setState({
+        //             countries: data,
+        //         })
+        //     })
+        // }).catch(err => {
+        //     console.log('countries--error--', err);
+        // });
+    }
+
+    
+    componentDidUpdate(prevProps) {
+        if (this.props.countries != prevProps.countries) {
+            this.setState({
+                countries: this.props.countries
+            })
+        }
+    }
+
+    upperFirst(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
     showModal() {
         return this.state.modalView
     }
 
-    dataURLtoFile(dataurl, filename) {
-        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-            bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-        while(n--){
-            u8arr[n] = bstr.charCodeAt(n);
-        }
-        return new File([u8arr], filename, {type:mime});
-    }
-
-    onPhoto() {
+    async onPhoto() {
         let options = {
             title: 'Select profile image',
             storageOptions: {
-              skipBackup: true,
-              path: '/'
+                skipBackup: true,
+                path: '/'
             }
         };
+        const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
         ImagePicker.showImagePicker(options, (response) => {
             if (response.didCancel) {
-              console.log('User cancelled image picker');
+                console.log('User cancelled image picker');
             }
             else if (response.error) {
-              console.log('ImagePicker Error: ', response.error);
+                console.log('ImagePicker Error: ', response.error);
             }
             else if (response.customButton) {
-              console.log('User tapped custom button: ', response.customButton);
+                console.log('User tapped custom button: ', response.customButton);
             }
             else {
                 this.setState({
                     showProgress: true,
-                })
+                });
+                const { uri, originalRotation } = response
+                let rotation = 0
 
-                uploadPhoto(response.uri).then(res => {
-                    if (res.ok){
-                        console.log('upload result', res.data.thumbnail)
-                        this.setState({
-                            image: res.data.thumbnail
+                if ( originalRotation === 90 ) {
+                    rotation = 90
+                } else if ( originalRotation === 270 ) {
+                    rotation = -90
+                }
+
+                ImageResizer.createResizedImage( uri, 500, 500, "JPEG", 80, rotation ).
+                then( ( { uri } ) => {
+                    var data = new FormData();
+                    data.append('image', {
+                        uri: uri,
+                        name: 'selfie.jpg',
+                        type: 'image/jpg'
+                    });
+                    fetch(`${apiHost}users/me/images/upload`, {
+                        method: 'post',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'multipart/form-data;',
+                            'Authorization': token_value
+                        },
+                        body: data
+                    }).then(res => { res.json().
+                        then(data => {
+                            this.setState({
+                                showProgress: false,
+                                image: data.thumbnail
+                            });
+                            userInstance.setProfileImage(data.thumbnail);
+                        }).catch(err => {
+                            console.log('upload error', err);
                         })
-                    }
+                    }).catch(err => {
+                        this.setState({
+                            showProgress: false,
+                        })
+                        console.log('upload error', err);
+                    });
+                } ).catch( err => {
                     this.setState({
                         showProgress: false,
                     })
-                })
+                    console.log( err )
+                } )
+
             }
-          });
+        });
     }
 
     onEditName() {
         this.setState({
             modalVisible: true,
-            modalView: <EditNameModal 
-                            onSave={(firstName, lastName) => this.onSaveName(firstName, lastName)} 
-                            onCancel={() => this.onCancel()} 
-                            firstName={this.state.firstName} 
-                            lastName={this.state.lastName}
-                        />
+            modalView: <EditNameModal
+                onSave={(firstName, lastName) => this.onSaveName(firstName, lastName)}
+                onCancel={() => this.onCancel()}
+                firstName={this.state.firstName}
+                lastName={this.state.lastName}
+                onRequestClose={() => { this.onCancel() }}
+            />
         });
         this.showModal();
     }
@@ -222,22 +274,24 @@ class EditUserProfile extends Component {
         this.setState({
             modalVisible: true,
             modalView: <EditAboutModal
-                            onSave={(about) => this.onSaveAbout(about)} 
-                            onCancel={() => this.onCancel()} 
-                            about={this.state.about}
-                        />
+                onSave={(about) => this.onSaveAbout(about)}
+                onCancel={() => this.onCancel()}
+                about={this.state.about}
+                onRequestClose={() => { this.onCancel() }}
+            />
         });
         this.showModal();
     }
-    
+
     onGender() {
         this.setState({
             modalVisible: true,
-            modalView: <EditGenderModal 
-                            onSave={(isFemale) => this.onSaveGender(isFemale)} 
-                            onCancel={() => this.onCancel()} 
-                            isFemale={this.state.gender=='women'? true: false}
-                        />
+            modalView: <EditGenderModal
+                onSave={(isFemale) => this.onSaveGender(isFemale)}
+                onCancel={() => this.onCancel()}
+                isFemale={this.state.gender == 'women' ? true : false}
+                onRequestClose={() => { this.onCancel() }}
+            />
         });
         this.showModal();
     }
@@ -247,17 +301,18 @@ class EditUserProfile extends Component {
     }
 
     onEmail() {
-        
+
     }
 
     onPhone() {
         this.setState({
             modalVisible: true,
-            modalView: <EditPhoneModal 
-                            onSave={(pickerData) => this.onSavePhone(pickerData)} 
-                            onCancel={() => this.onCancel()} 
-                            phone={this.state.phoneNumber}
-                        />
+            modalView: <EditPhoneModal
+                onSave={(pickerData) => this.onSavePhone(pickerData)}
+                onCancel={() => this.onCancel()}
+                phone={this.state.phoneNumber}
+                onRequestClose={() => { this.onCancel() }}
+            />
         });
         this.showModal();
     }
@@ -266,10 +321,11 @@ class EditUserProfile extends Component {
         this.setState({
             modalVisible: true,
             modalView: <EditGovernmentModal
-                            onSave={(governmentId) => this.onSaveGovernmentId(governmentId)} 
-                            onCancel={() => this.onCancel()} 
-                            governmentId={this.state.governmentId}
-                        />
+                onSave={(governmentId) => this.onSaveGovernmentId(governmentId)}
+                onCancel={() => this.onCancel()}
+                governmentId={this.state.governmentId}
+                onRequestClose={() => { this.onCancel() }}
+            />
         });
         this.showModal();
     }
@@ -278,12 +334,13 @@ class EditUserProfile extends Component {
         this.setState({
             modalVisible: true,
             modalView: <EditLocationModal
-                            onSave={(country, city) => this.onSaveLocation(country, city)} 
-                            onCancel={() => this.onCancel()} 
-                            countries={this.state.countries}
-                            country={this.state.country}
-                            city={this.state.city}
-                        />
+                onSave={(country, countryState) => this.onSaveLocation(country, countryState)}
+                onCancel={() => this.onCancel()}
+                countries={this.state.countries}
+                country={this.state.country}
+                countryState={this.state.countryState}
+                city={this.state.city}
+            />
         });
         this.showModal();
     }
@@ -292,10 +349,11 @@ class EditUserProfile extends Component {
         this.setState({
             modalVisible: true,
             modalView: <EditSchoolModal
-                            onSave={(school) => this.onSaveSchool(school)} 
-                            onCancel={() => this.onCancel()} 
-                            school={this.state.school}
-                        />
+                onSave={(school) => this.onSaveSchool(school)}
+                onCancel={() => this.onCancel()}
+                school={this.state.school}
+                onRequestClose={() => { this.onCancel() }}
+            />
         });
         this.showModal();
     }
@@ -304,10 +362,11 @@ class EditUserProfile extends Component {
         this.setState({
             modalVisible: true,
             modalView: <EditWorkModal
-                            onSave={(work) => this.onSaveWork(work)} 
-                            onCancel={() => this.onCancel()} 
-                            work={this.state.work}
-                        />
+                onSave={(work) => this.onSaveWork(work)}
+                onCancel={() => this.onCancel()}
+                work={this.state.work}
+                onRequestClose={() => { this.onCancel() }}
+            />
         });
         this.showModal();
     }
@@ -316,10 +375,11 @@ class EditUserProfile extends Component {
         this.setState({
             modalVisible: true,
             modalView: <EditLanguageModal
-                            onSave={(language) => this.onSaveLanguage(language)} 
-                            onCancel={() => this.onCancel()} 
-                            languageValue={this.state.preferredLanguage}
-                        />
+                onSave={(language) => this.onSaveLanguage(language)}
+                onCancel={() => this.onCancel()}
+                languageValue={this.state.preferredLanguage}
+                onRequestClose={() => { this.onCancel() }}
+            />
         });
         this.showModal();
     }
@@ -345,7 +405,7 @@ class EditUserProfile extends Component {
         this.setState({
             modalVisible: false,
         });
-        gender = isFemale? 'women': 'men';
+        gender = isFemale ? 'women' : 'men';
         this.setState({
             gender: gender,
         });
@@ -360,40 +420,40 @@ class EditUserProfile extends Component {
         });
     }
 
-    onSaveGovernmentId(governmentId){
+    onSaveGovernmentId(governmentId) {
         this.setState({
             modalVisible: false,
             governmentId: governmentId,
         });
     }
 
-    onSaveLocation(country, city) {
-        index = _.findIndex(this.state.countries, function(o){
-            return o.id == country.id;
-        })
-        country.name = this.state.countries[index].name
+    onSaveLocation(country, countryState) {
+        // index = _.findIndex(this.state.countries, function (o) {
+        //     return o.id == country.id;
+        // })
+        // country.name = this.state.countries[index].name
         this.setState({
             modalVisible: false,
             country: country,
-            city: city,
+            countryState: countryState,
         })
     }
 
-    onSaveSchool(school){
+    onSaveSchool(school) {
         this.setState({
             modalVisible: false,
             school: school,
         });
     }
 
-    onSaveWork(work){
+    onSaveWork(work) {
         this.setState({
             modalVisible: false,
             work: work,
         });
     }
 
-    onSaveLanguage(language){
+    onSaveLanguage(language) {
         this.setState({
             modalVisible: false,
             preferredLanguage: language,
@@ -428,12 +488,11 @@ class EditUserProfile extends Component {
         this.setState({
             showProgress: true
         });
-
-        AsyncStorage.setItem('aboutme', this.state.about);
-        AsyncStorage.setItem('governmentId', this.state.governmentId);
-        AsyncStorage.setItem('school', this.state.school);
-        AsyncStorage.setItem('work', this.state.work);
-
+        
+        userInstance.setAbout(this.state.about==null? '' : this.state.about);
+        userInstance.setGovernmentId(this.state.governmentId==null? '' : this.state.governmentId);
+        userInstance.setSchool(this.state.school==null? '' : this.state.school);
+        userInstance.setWork(this.state.work==null? '' : this.state.work);
 
         let userInfo = {
             firstName: this.state.firstName,
@@ -443,16 +502,30 @@ class EditUserProfile extends Component {
             preferredCurrency: parseInt(this.state.preferredCurrency, 10),
             gender: this.state.gender,
             country: parseInt(this.state.country.id, 10),
-            city: parseInt(this.state.city.id, 10),
+            countryState: this.state.countryState !== undefined && this.state.countryState !== null ? parseInt(this.state.countryState.id, 10) : '',
+            // city: parseInt(this.state.city.id, 10),
             birthday: `${this.state.day}/${this.state.month}/${this.state.year}`,
             locAddress: this.state.locAddress,
             jsonFile: this.state.jsonFile
         };
 
+        console.log("user info", userInfo);
+
         Object.keys(userInfo).forEach((key) => (userInfo[key] === null || userInfo[key] === '') && delete userInfo[key]);
 
-        updateUserInfo(userInfo, null).then((res) => {
+        requester.updateUserInfo(userInfo, null).then(res => {
+            console.log("------", res)
             if (res.success) {
+                userInstance.setFirstName(userInfo.firstName);
+                userInstance.setLastName(userInfo.lastName);
+                userInstance.setPhoneNumber(userInfo.phoneNumber);
+                userInstance.setLanguage(userInfo.preferredLanguage);
+                userInstance.setGender(userInfo.gender);
+                userInstance.setCountry(this.state.country);
+                // userInstance.setCountry(this.state.countryState);
+                // userInstance.setCity(this.state.city);
+                userInstance.setCountryState(this.state.countryState);
+                userInstance.setBirthday(new Date(`${this.state.year}/${this.state.month}/${this.state.day} 00:00:00`).getTime());
                 this.setState({
                     showProgress: false
                 });
@@ -466,50 +539,56 @@ class EditUserProfile extends Component {
 
     }
 
-    render() {
-        const { navigate, goBack } = this.props.navigation;
+    onBackPress = () => {
+        this.props.navigation.goBack();
+        this.props.navigation.state.params.updateGender(this.state.gender);
+    }
 
+    render() {
         let imageAvatar = '';
         if (this.state.image != '') {
-            if (this.state.image == 'https://staging.locktrip.com/images/default.png' || this.state.image == 'images/default.png') {
-                imageAvatar = {uri:'https://staging.locktrip.com/images/default.png'};
+            if (this.state.image.indexOf("images/default.png".toLowerCase()) != -1){ 
+                imageAvatar = { uri: PUBLIC_URL + 'images/default.png' };
             }
             else {
-                imageAvatar ={uri:imgHost+this.state.image}
+                imageAvatar = { uri: imgHost + this.state.image }
             }
         }
-        
+
         let location = '';
-        if (this.state.city == '') {
-            location = this.state.country.name;
+        console.log("location city", this.state.city, imageAvatar);
+        if (this.state.city == undefined || this.state.city == null || this.state.city == '') {
+            location = this.state.country==null? '' : this.state.country.name;
         }
         else {
-            location = this.state.city.name + " " + this.state.country.name;
+            let city_name = this.state.city==null? '' : this.state.city.name;
+            let country_name = this.state.country==null? '' : this.state.country.name;
+            location = city_name + " " + country_name;
         }
 
         return (
             <View style={styles.container}>
                 <View style={styles.topContainer}>
                     <View style={styles.titleConatiner}>
-                        <BackButton style={styles.closeButton} onPress={() => goBack()}/>
+                        <BackButton style={styles.closeButton} onPress={() => this.onBackPress()} />
                         <Text style={styles.title}>Edit Profile</Text>
                     </View>
                     <TouchableOpacity style={styles.cameraContainer} onPress={this.onPhoto}>
-                        <Image style={styles.cameraButton} source={require('../../../assets/png/camera.png')}/>
+                        <Image style={styles.cameraButton} source={require('../../../assets/png/camera.png')} />
                     </TouchableOpacity>
                 </View>
-                <ScrollView showsHorizontalScrollIndicator={false} style={{width: '100%'}}>
+                <ScrollView showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
                     <View style={styles.body}>
-                        <View>
-                    {
-                        imageAvatar == '' ?
-                            <Image style={styles.avatar} source={require('../../../assets/temple/user_profile_avatar.png')} />
-                        :
-                            <Image style={styles.avatar} source={imageAvatar} />
-                    }   
+                        <View style={styles.avatarWrapper}>
+                            {
+                                imageAvatar == '' ?
+                                    <Image style={styles.avatar} source={require('../../../assets/temple/user_profile_avatar.png')} />
+                                    :
+                                    <Image style={styles.avatar} source={imageAvatar} />
+                            }
                         </View>
 
-                        <View style={[styles.lineStyle, {marginLeft:0, marginRight:0, marginTop:0, marginBottom:15}]} />
+                        <View style={[styles.lineStyle, { marginLeft: 0, marginRight: 0, marginTop: 0, marginBottom: 15 }]} />
                         <View style={styles.nameContainer}>
                             <Text style={styles.nameText}>{this.state.firstName} {this.state.lastName}</Text>
                             <TouchableOpacity
@@ -517,107 +596,113 @@ class EditUserProfile extends Component {
                                 <Text style={styles.editButton}>Edit Name</Text>
                             </TouchableOpacity>
                         </View>
-                        <View style={[styles.lineStyle, {marginLeft:0, marginRight:0, marginTop:15, marginBottom:15}]} />
+                        <View style={[styles.lineStyle, { marginLeft: 0, marginRight: 0, marginTop: 15, marginBottom: 15 }]} />
                         <View style={styles.aboutContainer}>
                             <Text style={styles.aboutText}>About me</Text>
                             <Text style={styles.aboutText}>{this.state.about}</Text>
                             <TouchableOpacity
                                 onPress={this.onAbout}>
-                                <Text style={[styles.editButton, {marginTop:20}]}>Edit about me</Text>
+                                <Text style={[styles.editButton, { marginTop: 20 }]}>Edit about me</Text>
                             </TouchableOpacity>
                         </View>
-                        <View style={[styles.lineStyle, {marginLeft:0, marginRight:0, marginTop:15, marginBottom:20}]} />
+                        <View style={[styles.lineStyle, { marginLeft: 0, marginRight: 0, marginTop: 15, marginBottom: 20 }]} />
                         <View style={styles.subtitleContainer}>
                             <Text style={styles.subtitleText}>Private Details</Text>
                         </View>
 
                         <UserPropertyItemTypeInfo
-                            title = "Gender"
-                            info = { upperFirst(this.state.gender) }
-                            onPress={this.onGender}/>
+                            title="Gender"
+                            info={this.upperFirst(this.state.gender == 'men' ? 'Male' : 'Female')}
+                            onPress={this.onGender} />
                         <View style={styles.lineStyle} />
 
                         <UserPropertyItemTypeInfo
-                            title = "Birth date"
-                            info = { this.state.month + '/' + this.state.day + '/' + this.state.year }
-                            onPress={this.onBirthDate}/>
+                            title="Birth date"
+                            info={this.state.month + '/' + this.state.day + '/' + this.state.year}
+                            onPress={this.onBirthDate} />
                         <View style={styles.lineStyle} />
 
                         <UserPropertyItemTypeInfo
-                            title = "Email Address"
-                            info = {this.state.email}
-                            onPress={this.onEmail}/>
+                            title="Email Address"
+                            info={this.state.email}
+                            onPress={this.onEmail} />
                         <View style={styles.lineStyle} />
 
                         <UserPropertyItemTypeInfo
-                            title = "Phone"
-                            info = {this.state.phoneNumber}
-                            onPress={this.onPhone}/>
+                            title="Phone"
+                            info={this.state.phoneNumber}
+                            onPress={this.onPhone} />
                         <View style={styles.lineStyle} />
 
                         <UserPropertyItemTypeInfo
-                            title = "Government ID"
-                            info = {this.state.governmentId}
-                            onPress={this.onGovernmentID}/>
-                        <View style={[styles.lineStyle, {marginLeft:0, marginRight:0, marginTop:0, marginBottom:15}]} />
+                            title="Government ID"
+                            info={this.state.governmentId}
+                            onPress={this.onGovernmentID} />
+                        <View style={[styles.lineStyle, { marginLeft: 0, marginRight: 0, marginTop: 0, marginBottom: 15 }]} />
 
                         <View style={styles.subtitleContainer}>
                             <Text style={styles.subtitleText}>Optional Details</Text>
                         </View>
 
                         <UserPropertyItemTypeInfo
-                            title = "Location"
-                            info = {this.state.country.name + ', ' + this.state.city.name}
-                            onPress={this.onLocation}/>
+                            title="Location"
+                            info={location}
+                            onPress={this.onLocation} />
                         <View style={styles.lineStyle} />
 
                         <UserPropertyItemTypeInfo
                             title="School"
-                            info = {this.state.school}
-                            onPress={this.onSchool}/>
+                            info={this.state.school}
+                            onPress={this.onSchool} />
                         <View style={styles.lineStyle} />
 
                         <UserPropertyItemTypeInfo
                             title="Work"
-                            info = {this.state.work}
-                            onPress={this.onWork}/>
+                            info={this.state.work}
+                            onPress={this.onWork} />
                         <View style={styles.lineStyle} />
 
                         <UserPropertyItemTypeInfo
-                            style={{marginBottom:15}}
-                            info = {this.state.preferredLanguage}
+                            style={{ marginBottom: 15 }}
+                            info={this.state.preferredLanguage}
                             title="Languages"
-                            onPress={this.onLanguage}/>
+                            onPress={this.onLanguage} />
                     </View>
                 </ScrollView>
-                    <Footer style={styles.footer} button={'Save'} fullButton={true} onClick={this.updateProfile}/>
-                    <Modal
-                        animationType="fade"
-                        transparent={true}
-                        visible={this.state.modalVisible}
-                        fullScreen={false}
-                        onRequestClose={() => {}}>
-                        {this.showModal()}
-                    </Modal>
-                    <DateTimePicker
-                        datePickerModeAndroid={'default'}
-                        date={this.state.year=='0000'? new Date(): moment(this.state.month + '/' + this.state.day + '/' + this.state.year, 'MM/DD/YYYY').toDate()}
-                        isVisible={this.state.isDateTimePickerVisible}
-                        onConfirm={this.handleDatePicked}
-                        onCancel={this.hideDateTimePicker}
-                    />
-                    
-                    <ProgressDialog
-                        visible={this.state.showProgress}
-                        title=""
-                        message="Saving Profile info..."
-                        animationType="fade"
-                        activityIndicatorSize="large"
-                        activityIndicatorColor="black"/>
-                
+                <Footer style={styles.footer} button={'Save'} fullButton={true} onClick={this.updateProfile} />
+                <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={this.state.modalVisible}
+                    fullScreen={false}
+                    onRequestClose={() => { this.onCancel() }}>
+                    {this.showModal()}
+                </Modal>
+                <DateTimePicker
+                    datePickerModeAndroid={'default'}
+                    date={this.state.year == '0000' ? new Date() : moment(this.state.month + '/' + this.state.day + '/' + this.state.year, 'MM/DD/YYYY').toDate()}
+                    isVisible={this.state.isDateTimePickerVisible}
+                    onConfirm={this.handleDatePicked}
+                    onCancel={this.hideDateTimePicker}
+                />
+
+                <ProgressDialog
+                    visible={this.state.showProgress}
+                    title=""
+                    message="Saving Profile info..."
+                    animationType="fade"
+                    activityIndicatorSize="large"
+                    activityIndicatorColor="black" />
+
             </View>
         );
     }
 }
 
-export default EditUserProfile;
+const mapStateToProps = (state) => {
+    return {
+        countries: state.country.countries
+    };
+}
+
+export default connect(mapStateToProps, null)(EditUserProfile);

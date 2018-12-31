@@ -15,6 +15,7 @@ const styles = StyleSheet.create({
 
     InboxView: {
         flex: 1,
+        paddingTop: 40,
     },
 
     tr:{
@@ -163,7 +164,9 @@ const styles = StyleSheet.create({
           fontSize: 12
       },
       lastView:{
-          marginTop:5
+          marginTop:5,
+          width: 8,
+          height: 8,
       },
       statusView:{
           width: 8,

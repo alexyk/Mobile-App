@@ -1,15 +1,13 @@
 import React, { Component } from 'react';
 import { StatusBar, View } from 'react-native';
 import { Provider } from 'react-redux';
-
-import { AppNavigator } from '../../routing/routes';
 import store from '../../redux/store';
+import { AppNavigator } from '../../routing';
 
 class App extends Component {
     componentDidMount() {
         console.disableYellowBox = true;
     }
-
     render() {
         return (
             <View style={{ flex: 1 }}>
@@ -20,7 +18,7 @@ class App extends Component {
                 />
 
                 <Provider store={store}>
-                    <AppNavigator />
+                    <AppNavigator/>
                 </Provider>
             </View>
         );

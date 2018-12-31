@@ -29,7 +29,7 @@ export default class Filters extends Component {
         }
         const { params } = this.props.navigation.state
         this.state.isHotelSelected = params.isHotelSelected
-        this.state.count = params.count
+        //this.state.count = params.count
     }
 
     addCount(type) {
@@ -143,7 +143,7 @@ export default class Filters extends Component {
                        </View> */}
 
                        <View style= {this.state.isHotelSelected ? styles.pricingView :styles.emptyPricingView}>
-                           <Text style={styles.pricingText}>Room</Text>
+                           <Text style={styles.pricingText}>Room Options</Text>
                        </View>
                        <View style={this.state.isHotelSelected ? styles.set : styles.emptyPricingView}>
                            {/* <View style={[styles.group, styles.borderBottom]}>
