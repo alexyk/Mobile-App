@@ -1,5 +1,8 @@
 # Uncomment the next line to define a global platform for your project
-platform :ios, '9.0'
+platform :ios, '9.3'
+
+install! 'cocoapods',
+         :deterministic_uuids => false
 
 target 'MobileApp' do
   rn_path = '../node_modules/react-native'
