@@ -6,6 +6,16 @@ import com.airbnb.android.react.maps.MapsPackage;
 import com.dylanvann.fastimage.FastImageViewPackage;
 import com.facebook.CallbackManager;
 import com.facebook.react.ReactApplication;
+import com.oblador.vectoricons.VectorIconsPackage;
+import io.github.traviskn.rnuuidgenerator.RNUUIDGeneratorPackage;
+import com.reactnativecomponent.splashscreen.RCTSplashScreenPackage;
+import com.airbnb.android.react.maps.MapsPackage;
+import fr.bamlab.rnimageresizer.ImageResizerPackage;
+import com.imagepicker.ImagePickerPackage;
+import com.facebook.reactnative.androidsdk.FBSDKPackage;
+import com.dylanvann.fastimage.FastImageViewPackage;
+import com.kishanjvaghela.cardview.RNCardViewPackage;
+import com.transistorsoft.rnbackgroundfetch.RNBackgroundFetchPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -41,6 +51,16 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new RNCardViewPackage(),
           new MainReactPackage(),
+            new VectorIconsPackage(),
+            new RNUUIDGeneratorPackage(),
+            new RCTSplashScreenPackage(),
+            new MapsPackage(),
+            new ImageResizerPackage(),
+            new ImagePickerPackage(),
+            new FBSDKPackage(),
+            new FastImageViewPackage(),
+            new RNCardViewPackage(),
+            new RNBackgroundFetchPackage(),
           new ImageResizerPackage(),
           new RNUUIDGeneratorPackage(),
           new RCTSplashScreenPackage(),    //register Module
