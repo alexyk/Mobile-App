@@ -32,6 +32,8 @@
     "detox-verboseXS": "detox test  --artifacts-location e2e_logs --reuse --take-screenshots all --loglevel verbose --configuration ios.sim.debugXS",
     "detox-videos": "detox test --record-videos all --artifacts-location e2e_logs -r --take-screenshots all -l info -c ios.sim.debug",
     "detoxXS": "detox test  --artifacts-location e2e_logs --reuse --take-screenshots all --loglevel info --configuration ios.sim.debugXS",
+    "lstst": "ls e2e/*spec.js",
+    "detox-dev": "./scripts/setup-dev-e2e.sh e3e/",
     "detox": "detox test  --artifacts-location e2e_logs -r --take-screenshots all -l info -c ios.sim.debug"
   },
   "jest": {
