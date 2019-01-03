@@ -20,6 +20,7 @@ describe('Explore Sofia - loc price websocket test', () => {
     // await waitFor(element(by.id('searchbar.text-input'))).toBeVisible().withTimeout(10000);
     await expect(element(by.id('searchbar.text-input'))).toBeVisible();
     // await element(by.id('searchbar.text-input')).typeText('Sofia');
+    await element(by.id('searchbar.text-input')).tap();
     await element(by.id('searchbar.text-input')).typeText('Sofia, Bulgar');
     
     //await waitFor(element(by.id('explore.auto-complete'))).toBeVisible().withTimeout(5000);

@@ -23,12 +23,12 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "test": "node node_modules/jest/bin/jest.js",
-    "detox-build-trace": "detox build --configuration ios.sim.debug",
-    "detox-test-trace": "detox test --artifacts-location e2e_logs --reuse --loglevel trace --configuration ios.sim.debug",
     "detox-build-release": "detox build --configuration ios.sim.release",
-    "detox-test-release": "detox test --artifacts-location e2e_logs --reuse --configuration ios.sim.release",
     "detox-build": "detox build --configuration ios.sim.debug",
-    "detox-test": "detox test  --artifacts-location e2e_logs --reuse --take-screenshots all --configuration ios.sim.debug"
+    "detox-release": "detox test --artifacts-location e2e_logs --reuse --loglevel info --configuration ios.sim.release",
+    "detox-trace": "detox test --artifacts-location e2e_logs --reuse --loglevel trace --configuration ios.sim.debug",
+    "detox-verbose": "detox test  --artifacts-location e2e_logs --reuse --take-screenshots all --loglevel verbose --configuration ios.sim.debug",
+    "detox": "detox test  --artifacts-location e2e_logs --reuse --take-screenshots all --loglevel info --configuration ios.sim.debug"
   },
   "jest": {
     "preset": "react-native"
