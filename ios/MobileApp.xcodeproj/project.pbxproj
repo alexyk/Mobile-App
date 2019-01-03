@@ -422,7 +422,6 @@
 		1E5801C27BFC48BD90ABF518 /* FontAwesome5_Brands.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = FontAwesome5_Brands.ttf; path = "../node_modules/react-native-vector-icons/Fonts/FontAwesome5_Brands.ttf"; sourceTree = "<group>"; };
 		2D16E6891FA4F8E400B85C8A /* libReact.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libReact.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		410BBDA520E6422000AB0243 /* MobileApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = MobileApp.entitlements; path = MobileApp/MobileApp.entitlements; sourceTree = "<group>"; };
-		41E2AD5720E4EC15002D4BC7 /* MobileApp copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "MobileApp copy-Info.plist"; path = "/Users/Mac/Work/React Native/Locktrip-Forked/Mobile-App/ios/MobileApp copy-Info.plist"; sourceTree = "<absolute>"; };
 		45294B11ABBF4B7891E077D0 /* RNUUIDGenerator.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNUUIDGenerator.xcodeproj; path = "../node_modules/react-native-uuid-generator/ios/RNUUIDGenerator.xcodeproj"; sourceTree = "<group>"; };
 		462BFACB204FE8B800E32BF8 /* LaunchScreen.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = LaunchScreen.xib; path = MobileApp/LaunchScreen.xib; sourceTree = "<group>"; };
 		4687A9E120525437000F3A9D /* FuturaStd-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FuturaStd-Light.otf"; sourceTree = "<group>"; };
@@ -730,7 +729,6 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				840DF2F720D58F77005853D1 /* Recovered References */,
 				48BA10E3FC83DA4B323F1BBD /* Pods */,
-				41E2AD5720E4EC15002D4BC7 /* MobileApp copy-Info.plist */,
 				8863A731045D471CB09AF135 /* Resources */,
 			);
 			indentWidth = 2;
@@ -1474,7 +1472,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.locktrip;
+				PRODUCT_BUNDLE_IDENTIFIER = co.m.locktrip;
 				PRODUCT_NAME = MobileApp;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1515,7 +1513,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.locktrip;
+				PRODUCT_BUNDLE_IDENTIFIER = co.m.locktrip;
 				PRODUCT_NAME = MobileApp;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
