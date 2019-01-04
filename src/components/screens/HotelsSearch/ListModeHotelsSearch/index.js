@@ -26,6 +26,14 @@ class ListModeHotelsSearch extends Component {
         };
     }
 
+	// shouldComponentUpdate(nextProps) {
+    //     if (this.isRefresh) {
+    //         this.isRefresh = false;
+    //         return true;
+    //     }
+	// 	return false;
+	// }
+
     componentDidUpdate(prevProps) {
         // if (this.props.currency != prevProps.currency || this.props.locRate != prevProps.locRate) {
         let newState  = {};

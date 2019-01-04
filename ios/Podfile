@@ -1,8 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-platform :ios, '9.3'
-
-install! 'cocoapods',
-         :deterministic_uuids => false
+platform :ios, '9.0'
 
 target 'MobileApp' do
   rn_path = '../node_modules/react-native'
@@ -43,24 +40,19 @@ target 'MobileApp' do
 
   pod 'react-native-image-resizer', :path => '../node_modules/react-native-image-resizer'
 
-
-  pod 'RNBackgroundFetch', :path => '../node_modules/react-native-background-fetch'
+  pod 'react-native-fast-image', :path => '../node_modules/react-native-fast-image'
 
 end
 
 post_install do |installer|
-    installer.pods_project.targets.each do |target|
+  installer.pods_project.targets.each do |target|
     if target.name == 'react-native-google-maps'
-        target.build_configurations.each do |config|
-            config.build_settings['CLANG_ENABLE_MODULES'] = 'No'
-        end
+      target.build_configurations.each do |config|
+        config.build_settings['CLANG_ENABLE_MODULES'] = 'No'
+      end
     end
-#    if target.name == "React"
-#      target.remove_from_project
-#    end
-    targets_to_ignore = %w(React yoga)
-    if targets_to_ignore.include? target.name
-        target.remove_from_project
+    if target.name == "React"
+      target.remove_from_project
     end
   end
 end

@@ -33,7 +33,7 @@ class ReviewDetailItem extends Component {
                 <Text style={[styles.textFirst, styleFirst]}>{title}</Text>
                 <View style={{flexDirection:'row'}}>
                     <Text style={[styles.textLast, styleLast]}>{this.props.currencySign + defaultPrice.toFixed(2)}</Text>
-                    <LocPrice style={[styles.textLast, styleLast]} fiat={fiat} currencyCode={currencyCode} fromParentType={3}/>
+                    <LocPrice style={[styles.textLast, styleLast]} fiat={fiat} currencyCode={currencyCode}/>
                 </View>
             </View>
         );

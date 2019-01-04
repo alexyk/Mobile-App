@@ -106,7 +106,7 @@ android {
         applicationId "com.locktrip"
         minSdkVersion 16
         targetSdkVersion 27
-        versionCode 20
+        versionCode 19
         versionName "1.0." + versionCode
         multiDexEnabled  true
         ndk {
@@ -184,19 +184,10 @@ android {
             }
         }
     }
+
 }
 
 dependencies {
-    compile project(':react-native-vector-icons')
-    compile project(':react-native-uuid-generator')
-    compile project(':react-native-smart-splash-screen')
-    compile project(':react-native-maps')
-    compile project(':react-native-image-resizer')
-    compile project(':react-native-image-picker')
-    compile project(':react-native-fbsdk')
-    compile project(':react-native-fast-image')
-    compile project(':react-native-cardview')
-    compile project(':react-native-background-fetch')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'com.android.support:multidex:1.0.3'
     implementation "com.android.support:appcompat-v7:27.1.1"
@@ -210,6 +201,7 @@ dependencies {
     }
     implementation 'com.google.android.gms:play-services-base:16.0.1'
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
+    implementation 'com.facebook.fresco:animated-gif:1.3.0'
     implementation project(':react-native-uuid-generator')
     implementation project(':react-native-fbsdk')
     implementation project(':react-native-image-picker')
