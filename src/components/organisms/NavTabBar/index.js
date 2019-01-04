@@ -45,7 +45,7 @@ export default class NavTabBar extends Component {
 
         return (
             <View style={styles.container}>
-                <TouchableWithoutFeedback onPress={() => navigate('PROFILE')}>
+                <TouchableWithoutFeedback testID={'navbar.profile'} onPress={() => navigate('PROFILE')}>
                     <View style={styles.tab}>
                         <Text style={active === 'PROFILE' ? styles.activeIconStyle : styles.inactiveIconStyle}>
                             <FontAwesome>{Icons.userO}</FontAwesome>
@@ -56,7 +56,7 @@ export default class NavTabBar extends Component {
                     </View>
                 </TouchableWithoutFeedback>
 
-                <TouchableWithoutFeedback onPress={() => navigate('MESSAGES')}>
+                <TouchableWithoutFeedback  testID={'navbar.messages'} onPress={() => navigate('MESSAGES')}>
                     <View style={styles.tab}>
                         <Text style={active === 'MESSAGES' ? styles.activeIconStyle : styles.inactiveIconStyle}>
                             <FontAwesome>{Icons.commentingO}</FontAwesome>
@@ -67,7 +67,7 @@ export default class NavTabBar extends Component {
                     </View>
                 </TouchableWithoutFeedback>
 
-                <TouchableWithoutFeedback onPress={() => navigate('MY_TRIPS', {reload: this.props.reloadTab})}>
+                <TouchableWithoutFeedback testID={'navbar.mytrips'} onPress={() => navigate('MY_TRIPS', {reload: this.props.reloadTab})}>
                     <View style={styles.tab}>
                         <Text style={active === 'MY_TRIPS' ? styles.activeIconStyle : styles.inactiveIconStyle}>
                             <FontAwesome>{Icons.suitcase}</FontAwesome>
@@ -78,7 +78,7 @@ export default class NavTabBar extends Component {
                     </View>
                 </TouchableWithoutFeedback>
 
-                <TouchableWithoutFeedback onPress={() => navigate('FAVORITES')}>
+                <TouchableWithoutFeedback testID={'navbar.favorites'} onPress={() => navigate('FAVORITES')}>
                     <View style={styles.tab}>
                         <Text style={active === 'FAVORITES' ? styles.activeIconStyle : styles.inactiveIconStyle}>
                             <FontAwesome>{Icons.heartO}</FontAwesome>
@@ -89,7 +89,7 @@ export default class NavTabBar extends Component {
                     </View>
                 </TouchableWithoutFeedback>
 
-                <TouchableWithoutFeedback onPress={() => navigate('EXPLORE')}>
+                <TouchableWithoutFeedback testID={'navbar.explore'} onPress={() => navigate('EXPLORE')}>
                     <View style={styles.tab}>
                         <Text style={active === 'EXPLORE' ? styles.activeIconStyle : styles.inactiveIconStyle}>
                             <FontAwesome>{Icons.search}</FontAwesome>
