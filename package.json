@@ -21,7 +21,10 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "test": "node node_modules/jest/bin/jest.js",
-    "lint": "./node_modules/.bin/eslint ."
+    "lint": "./node_modules/.bin/eslint .",
+    "fix-ios-glog": "./scripts/fix-glog.sh",
+    "fix-ios-libfishook": "./scripts/fix-libfishhook.sh",
+    "postinstall": "npm run all fix-ios-glog fix-ios-libfishook"
   },
   "jest": {
     "preset": "react-native"
