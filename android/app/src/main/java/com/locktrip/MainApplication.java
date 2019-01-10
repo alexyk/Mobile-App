@@ -6,6 +6,7 @@ import com.airbnb.android.react.maps.MapsPackage;
 import com.dylanvann.fastimage.FastImageViewPackage;
 import com.facebook.CallbackManager;
 import com.facebook.react.ReactApplication;
+import com.apsl.versionnumber.RNVersionNumberPackage;
 import com.facebook.react.ReactNativeHost;
 import com.facebook.react.ReactPackage;
 import com.facebook.react.shell.MainReactPackage;
@@ -41,6 +42,7 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
           new RNCardViewPackage(),
           new MainReactPackage(),
+            new RNVersionNumberPackage(),
           new ImageResizerPackage(),
           new RNUUIDGeneratorPackage(),
           new RCTSplashScreenPackage(),    //register Module
