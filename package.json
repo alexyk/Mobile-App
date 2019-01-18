@@ -1,6 +1,6 @@
 {
   "name": "Mobile-App",
-  "version": "0.1.0",
+  "version": "1.0.21",
   "private": true,
   "devDependencies": {
     "babel-eslint": "^8.2.3",
@@ -15,7 +15,8 @@
     "jest-react-native": "^18.0.0",
     "mocha": "^5.2.0",
     "react-test-renderer": "16.2.0",
-    "redux-devtools-extension": "^2.13.5",  
+    "reactotron-react-native": "^2.1.4",
+    "redux-devtools-extension": "^2.13.5",
     "redux-logger": "^3.0.6"
   },
   "scripts": {
@@ -23,18 +24,7 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "test": "node node_modules/jest/bin/jest.js",
-    "detox-build-release": "detox build --configuration ios.sim.release",
-    "detox-build": "detox build --configuration ios.sim.debug",
-    "detox-release": "detox test --artifacts-location e2e_logs --reuse --loglevel info --configuration ios.sim.release",
-    "detox-trace": "detox test --artifacts-location e2e_logs --reuse --loglevel trace --configuration ios.sim.debug",
-    "detox-traceXS": "detox test --artifacts-location e2e_logs --reuse --loglevel trace --configuration ios.sim.debugXS",
-    "detox-verbose": "detox test  --artifacts-location e2e_logs --reuse --take-screenshots all --loglevel verbose --configuration ios.sim.debug",
-    "detox-verboseXS": "detox test  --artifacts-location e2e_logs --reuse --take-screenshots all --loglevel verbose --configuration ios.sim.debugXS",
-    "detox-videos": "detox test --record-videos all --artifacts-location e2e_logs -r --take-screenshots all -l info -c ios.sim.debug",
-    "detoxXS": "detox test  --artifacts-location e2e_logs --reuse --take-screenshots all --loglevel info --configuration ios.sim.debugXS",
-    "lstst": "ls e2e/*spec.js",
-    "detox-dev": "./scripts/setup-dev-e2e.sh e3e/",
-    "detox": "detox test  --artifacts-location e2e_logs -r --take-screenshots all -l info -c ios.sim.debug"
+    "lint": "./node_modules/.bin/eslint ."
   },
   "jest": {
     "preset": "react-native"

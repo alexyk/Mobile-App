@@ -2,5 +2,6 @@
     "javascript.implicitProjectConfig.experimentalDecorators": true,
     "eslint.enable": false,
     "git.ignoreLimitWarning": true,
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "editor.tabSize": 2
 }

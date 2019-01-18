@@ -3,7 +3,11 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from 'redux-thunk';
 import appReducers from '../reducers';
 import { middleware } from '../../routing'
-import { logger } from 'redux-logger'
+import {  createLogger } from 'redux-logger'
+
+const logger = createLogger({
+  collapsed: (getState, action, logEntry) => true
+});
 
 const middlewares = [thunk, middleware, logger];
 

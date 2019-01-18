@@ -61,7 +61,7 @@ class Profile extends Component {
         // Typical usage (don't forget to compare props):
         if (this.props.currency != prevProps.currency) {
             this.setState({
-                currency: this.props.currency,
+                currency: this.props.currency, 
                 currencySign:this.props.currencySign});
         }
     }
@@ -70,7 +70,7 @@ class Profile extends Component {
         console.log("onRefresh ---------------");
 
         if (this.state.walletAddress === null || this.state.walletAddress === '') {
-
+            
             let walletAddress = await userInstance.getLocAddress();
             if (walletAddress !== null && walletAddress !== '') {
                 this.setState({
@@ -131,6 +131,17 @@ class Profile extends Component {
         this.refs.toast.show('This feature is not enabled yet in the current alpha version.', 1500);
     }
 
+    onSendToken = () => {
+        const { locBalance, walletAddress, ethBalance } = this.state;
+        const {navigate} = this.props.navigation;
+        console.log("walletAddress ----", walletAddress);
+        if (walletAddress === undefined || walletAddress === null || walletAddress === "") {
+            this.refs.toast.show('Please create LOC wallet before send token.', 1500);
+            return;
+        }
+        navigate('SendToken', { locBalance: locBalance.toFixed(6), ethBalance: parseFloat(ethBalance).toFixed(6)});
+    }
+
     render() {
         const { navigate } = this.props.navigation;
         const { currency, locBalance, walletAddress, ethBalance } = this.state;
@@ -186,7 +197,7 @@ class Profile extends Component {
                             <Text style={styles.navItemText}>Switch to Hosting</Text>
                             <Image resizeMode="stretch" source={require('../../../assets/png/Profile/icon-switch.png')} style={styles.navIcon} />
                         </TouchableOpacity> */}
-                        <TouchableOpacity testID={'profile.tokens'} onPress={() => navigate('SendToken', { locBalance: locBalance.toFixed(6), ethBalance: parseFloat(ethBalance).toFixed(6)})} style={styles.navItem}>
+                        <TouchableOpacity testID={'profile.tokens'} onPress={this.onSendToken} style={styles.navItem}>
                             <Text style={styles.navItemText}>Send Tokens</Text>
                             <Image resizeMode="stretch" source={require('../../../assets/png/Profile/icon-switch.png')} style={styles.navIcon} />
                         </TouchableOpacity>

@@ -1,16 +1,78 @@
-This project was bootstrapped with [Create React Native App](https://github.com/react-community/create-react-native-app).
-
-Below you'll find information about performing common tasks. The most recent version of this guide is available [here](https://github.com/react-community/create-react-native-app/blob/master/react-native-scripts/template/README.md).
 
 ## Table of Contents
 
+* [Requirements to Run Mobile-App](#requirements-to-run-mobile-app)
+  * [Common](#common)
+  * [For Android - <small>macOS and Windows</small>](#for-android)
+  * [For iOS - <small>macOS only</small>](#for-ios)
+* [Steps to Run](#steps-to-run)
+  * [Windows](#windows)
+  * [macOS](#macos)
+* [Additional Requirements to Run E2E Tests](#additional-requirements-to-run-e2e-tests)
+  * [E2E on Android - <small>macOS and Windows</small>](#e2e-on-android)
+  * [E2E on iOS - <small>macOS only</small>](#e2e-on-ios)
+* [Staging and Continuous Integration](#staging-and-continuous-integration)
+* [Notes from Developers](#notes-from-developers)
+
+---
+### Default information in README.md
 * [Available Scripts](#available-scripts)
-  * [npm start](#npm-start)
-  * [npm test](#npm-test)
   * [npm run ios](#npm-run-ios)
   * [npm run android](#npm-run-android)
-* [Writing and Running Tests](#writing-and-running-tests)
-* [Adding Flow](#adding-flow)
+* [Other](#other)
+  * [Writing and Running Tests](#writing-and-running-tests)
+  * [Adding Flow](#adding-flow)
+
+## Requirements to Run Mobile-App
+### Common 
+ * `node 8.14.1` (with `npm 6.4.1`)  
+  <small>NodeJS version 8.15.x also is likely to work</small>
+  * ninja (for Android)  
+  <small>macOS - `brew install ninja`, Windows - instructions [here](https://github.com/rwols/CMakeBuilder/wiki/Ninja-for-Windows-Installation-Instructions)</small>
+#### For Android
+<small>(macOS and Windows)</small>  
+    * `Java 1.8` (jdk 8)  
+    * `Android Studio` *(optional)*
+#### For iOS
+<small>(macOS only)</small>  
+    * `macOS 10.13 High Sierra` or higher <small>(not tested on El Capitan and before)</small>  
+    * `Homebrew` - http://brew.sh  
+    * `CocoaPods` (`brew install pods`)  
+    * `Xcode 9.4.1`
+
+## Steps to Run
+### Windows
+  (1) `git clone git://github.com/LockTrip/Mobile-app.git`  
+  (2) `cd <project-folder>` for example `cd C:\projects\Mobile-App`  
+  (3) `npm install`  
+  (4) `react-native run-android` 
+### macOS
+(1) `git clone git://github.com/LockTrip/Mobile-app.git`  
+(2) `cd <project-folder>` for example `cd $HOME$/projects/Mobile-App`  
+(3) `npm install`  
+(4) `react-native run-ios` or `react-native run-android`
+
+## Additional Requirements to Run E2E Tests
+E2E tests (aka integration tests) are using `detox` (with Grey Box vs the common Black Box approach) with `mocha`.
+### E2E on Android
+ * ???
+### E2E on iOS (macOS only)
+  * `brew tap wix/brew`
+  * `brew install applesimutils`
+ 
+### Staging and Continuous Integration
+First application of CI is using Travis CI http://travis-ci.org.
+Later on to be applied in this branch.
+
+## Notes from developers  
+**Jinkai note on Building with Xcode 10:  
+BUILDING ISSUE FOR IOS 12, XCODE 10.1  
+https://zivost.com/blog/xcode-10-causes-haywire-for-react-native-developers/
+---
+---
+---
+# Default Information
+---
 
 ## Available Scripts
 
@@ -51,11 +113,13 @@ Like `npm start`, but also attempts to open your app on a connected Android devi
 2. Add the Genymotion tools directory to your path (instructions for [Mac](http://osxdaily.com/2014/08/14/add-new-path-to-path-command-line/), [Linux](http://www.computerhope.com/issues/ch001647.htm), and [Windows](https://www.howtogeek.com/118594/how-to-edit-your-system-path-for-easy-command-line-access/)).
 3. Make sure that you can run adb from your terminal.
 
-## Writing and Running Tests
+## Other
+
+### Writing and Running Tests
 
 This project is set up to use [jest](https://facebook.github.io/jest/) for tests. You can configure whatever testing strategy you like, but jest works out of the box. Create test files in directories called `__tests__` or with the `.test` extension to have the files loaded by jest. See the [the template project](https://github.com/react-community/create-react-native-app/blob/master/react-native-scripts/template/App.test.js) for an example test. The [jest documentation](https://facebook.github.io/jest/docs/en/getting-started.html) is also a wonderful resource, as is the [React Native testing tutorial](https://facebook.github.io/jest/docs/en/tutorial-react-native.html).
 
-## Adding Flow
+### Adding Flow
 
 Flow is a static type checker that helps you write code with fewer bugs. Check out this [introduction to using static types in JavaScript](https://medium.com/@preethikasireddy/why-use-static-types-in-javascript-part-1-8382da1e0adb) if you are new to this concept.
 

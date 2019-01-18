@@ -10,7 +10,9 @@ import {
     reduxifyNavigator,
     createReactNavigationReduxMiddleware,
 } from 'react-navigation-redux-helpers';
-import {Platform, BackHandler} from 'react-native';
+import {Platform, BackHandler, View} from 'react-native';
+
+import ExitConfirmDialog from '../components/molecules/ExitConfirmDialog'
 
 import AppLoading from '../components/app/AppLoading';
 
@@ -184,6 +186,10 @@ const AppWithNavigationState = reduxifyNavigator(RootNavigator, 'root');
 
 // create nav component
 class ReduxNavigation extends PureComponent {
+    state = {
+        visibleConfirmDialog: false,
+    }
+
     componentDidMount() {
         BackHandler.addEventListener("hardwareBackPress", this.onBackPress);
     }
@@ -193,23 +199,50 @@ class ReduxNavigation extends PureComponent {
     }
   
     onBackPress = () => {
-         const { dispatch, navigation } = this.props;
-        if (navigation.index === 0) {
-            return false;
+         const { dispatch, state } = this.props;
+        if (state.index === 0) {
+            console.log("exit-------");
+            this.setState({ visibleConfirmDialog: true });
+            return true;
         }
     
         dispatch(NavigationActions.back());
         return true;
     };
+
+    onConfirmOk = () => {
+        console.log("onConfirmOk ---");
+        this.setState({ visibleConfirmDialog: false }, () => {
+            console.log("onConfirmOk ---123123123");
+            BackHandler.exitApp();
+            // const { dispatch } = this.props;
+            // dispatch(NavigationActions.back());
+        });
+    }
+
+    onConfirmCancel = () => {
+        this.setState({ visibleConfirmDialog: false });
+    }
   
     render() {
-        const { dispatch, navigation } = this.props;
-        return <AppWithNavigationState dispatch={dispatch} state={navigation}/>;
+        const { dispatch, state } = this.props;
+        const { visibleConfirmDialog } = this.state;
+        return (
+            <View style={{flex: 1}}>
+                <AppWithNavigationState dispatch={dispatch} state={state}/>
+                <ExitConfirmDialog
+                    title = { "Confirm"}
+                    visible = { visibleConfirmDialog }
+                    onCancel = { this.onConfirmCancel }
+                    onOk = { this.onConfirmOk }
+                />
+            </View>
+        );
     }
 }
 
 const mapNavStateProps = state => ({
-    navigation: state.nav
+    state: state.nav
 });
 
 const AppNavigator = connect(mapNavStateProps)(ReduxNavigation);

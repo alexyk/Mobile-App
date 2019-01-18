@@ -7,7 +7,7 @@ import {
     View
 } from 'react-native';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
-import { apiHost, imgHost } from '../../../config';
+import { imgHost, basePath } from '../../../config';
 
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -95,7 +95,7 @@ class PropertyList extends React.Component {
                 justifyContent: 'center',
                 marginBottom: 10
             }}>
-                <Image style={{ height: 35, width: 35 }} source={{ uri: 'https://beta.locktrip.com/images/loader.gif' }} />
+                <Image style={{ height: 35, width: 35 }} source={{ uri: `${basePath}/images/loader.gif` }} />
             </View>
         );
     }
