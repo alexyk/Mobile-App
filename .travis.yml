@@ -5,14 +5,14 @@ node_js:
 
 
 stages:
-  - test ok
-  - test deploy
-  - build and deploy ios appetize release
+  - test2
+  - test1
+  - build
   
   
 jobs:
   include:
-    - stage: test depoly
+    - stage: test1
       before_script:
         - openssl aes-256-cbc -K $encrypted_5ada4aafeac8_key -iv $encrypted_5ada4aafeac8_iv -in deploy_key.enc -out ./deploy_key -d
       script:
@@ -45,7 +45,7 @@ jobs:
             -derivedDataPath ios/build \
             -quiet
 
-    - stage: test ok
+    - stage: test2
         - pwd && ls
         - echo "testing"
       #   - npm run test
