@@ -8,6 +8,10 @@ stages:
   - test2
   - test1
   - build
+  - name: test branch 1
+    if: branch = master
+  - name: test branch 2
+    if: branch = staging
   
   
 jobs:
@@ -48,4 +52,14 @@ jobs:
     - stage: test2
         - pwd && ls
         - echo "testing"
+      #   - npm run test
+
+    - stage: test branch 1
+        - pwd && ls
+        - echo "testing branch master"
+      #   - npm run test
+
+    - stage: test branch 2
+        - pwd && ls
+        - echo "testing branch staging"
       #   - npm run test
