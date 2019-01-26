@@ -28,8 +28,8 @@
     "test-jest": "node node_modules/jest/bin/jest.js",
     "e2e-ls": "ls e2e/*spec.js",
     "e2e-dev-setup": "./scripts/setup-dev-e2e.sh e3e/",
-    "e2e-ios-debug" : "detox test  --artifacts-location e2e_logs -r --take-screenshots all -l info -c ios.sim.debug",
-    "test" : "npm run e2e-ios-debug"
+    "e2e-ios-debug": "detox test  --artifacts-location e2e_logs -r --take-screenshots all -l info -c ios.sim.debug",
+    "test": "npm run e2e-ios-debug"
   },
   "jest": {
     "preset": "react-native"
@@ -90,9 +90,9 @@
     "moment": "^2.22.1",
     "prop-types": "^15.6.1",
     "query-string": "^6.1.0",
-    "react": "16.2.0",
+    "react": "^16.6.3",
     "react-mixin": "^2.0.2",
-    "react-native": "^0.55.4",
+    "react-native": "^0.58.1",
     "react-native-background-fetch": "^2.0.8",
     "react-native-cardview": "^1.1.5",
     "react-native-checkbox": "^2.0.0",
