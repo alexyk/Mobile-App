@@ -17,14 +17,10 @@ jobs:
        - date >> info.txt
        - date
        - ls -l
-       - openssl aes-256-cbc -K $encrypted_acf840ecd253_key -iv $encrypted_acf840ecd253_iv -in deploy_key.enc -out deploy_key -d
       install:
-        - eval "$(ssh-agent -s)"
-        - chmod 600 ./deploy_key
-        - ssh-add ./deploy_key
-        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $var3/$TRAVIS_BUILD_NUMBER"
         - npm install
         - ./scripts/travis_version.rb "src/version.js" "$TRAVIS_BUILD_NUMBER" "$TRAVIS_BRANCH"
+        - cat src/version.js
         - cd ios
         - pod install
         - cd ..
@@ -43,16 +39,13 @@ jobs:
         - pwd
         - zip -qr $app_ios MobileApp.app
         - ls -lh *zip
-        - scp -o "StrictHostKeyChecking no" $app_ios "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER"
         - cd $TRAVIS_BUILD_DIR
       after_script:
         - date
         - pwd
         - ls -lahtO
         - find ios/build/ -type d -maxdepth 5 | grep MobileApp.app
-        - scp -o "StrictHostKeyChecking no" $log_file "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER"
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_BUILD_ID/log.txt -o travis-ci_output.txt
-        - scp -o "StrictHostKeyChecking no" travis-ci_output.txt "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"
         - "echo \"branch: $TRAVIS_BRANCH\" >> info.txt"
         - "echo \"build dir: $TRAVIS_BUILD_DIR\" >> info.txt"
         - "echo \"commit: $TRAVIS_COMMIT\" >> info.txt"
@@ -60,8 +53,6 @@ jobs:
         - set >> info.txt
         - "echo -n \"Ending \" >> info.txt"
         - date >> info.txt
-        - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/info_ios.txt"
-        - scp -o "StrictHostKeyChecking no" $HOME/Library/Logs/CoreSimulator/CoreSimulator.log "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"
         - date
 
     - stage: build android
@@ -74,15 +65,10 @@ jobs:
           - android-27
       before_install:
         - date
-        - openssl aes-256-cbc -K $encrypted_acf840ecd253_key -iv $encrypted_acf840ecd253_iv -in deploy_key.enc -out deploy_key -d
         - which java
         - java -version
         - ls -l
       install:
-        - eval "$(ssh-agent -s)"
-        - chmod 600 ./deploy_key
-        - ssh-add ./deploy_key
-        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $var3/$TRAVIS_BUILD_NUMBER"
         - npm install
       script:
         - cd android
@@ -90,15 +76,10 @@ jobs:
       after_success:
         - zip -qr $app_ios $var1
         - ls -lh *zip
-        - scp -o "StrictHostKeyChecking no" $android_apk "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/$app_android"
-        - scp -o "StrictHostKeyChecking no" $android_out "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"$app_android"_output.json"
       after_script:
         - date
         - ls -lahtO
-        - ls -lahtOR $HOME > files_android.txt
         - find android/app/outputs/apk/ -type f | grep apk
-        - scp -o "StrictHostKeyChecking no" $log_file "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"
-        - scp -o "StrictHostKeyChecking no" files_android.txt "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_BUILD_ID/log.txt -o travis-ci_output.txt
-        - scp -o "StrictHostKeyChecking no" travis-ci_output.txt "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"
+        - ls -lahtO
         - date
