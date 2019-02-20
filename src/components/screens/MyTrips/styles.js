@@ -1,4 +1,19 @@
 import { StyleSheet } from 'react-native';
+
+export const commonStyles = {
+    hotelImageCommon: {
+        borderRadius: 10,
+        height: 150
+    },
+    hotelImageContainerCommon: {
+        marginTop: 10,
+        marginBottom: 5,
+    },
+    fontsCommon: {
+        fontFamily: 'FuturaStd-Medium',
+    }
+}
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -17,37 +32,81 @@ const styles = StyleSheet.create({
         marginTop: 75
     },
     hotelImage: {
-        marginBottom: 10,
-        marginTop: 10,
+        ...commonStyles.hotelImageCommon
+    },
+    hotelImageNoImage: {
         height: 150,
+        width: "100%",
+        alignContent: 'center',
+        flexDirection: 'column'
+    },
+    hotelImageContainerNoImage: {
+        ...commonStyles.hotelImageContainerCommon,
+        ...commonStyles.hotelImageCommon,
+        borderColor: 'black',
+        alignItems: 'center',
+        backgroundColor: "#DADADA",
+        justifyContent: 'center'
+    },
+    hotelImageContainer: {
+        ...commonStyles.hotelImageContainerCommon,
+        height: 150,
+        justifyContent: 'flex-start',
+    },
+    hotelBookingStatusContainer:{
+        marginTop: 10,
+        marginBottom: 10
+    },
+    searchAndPickWrapView:{
+        width: '100%',
+        marginTop: 20,
+        marginBottom:10
+    },
+    searchView: {
+        paddingHorizontal: 15,
+        backgroundColor: '#f0f1f3',
+    },
+
+    // texsts
+    txtHotelNoImage: {
+        fontSize: 22,
+        color: '#AAA',
+    },
+    textBookingStatus: {
+        ...commonStyles.fontsCommon,
+        fontSize: 16
+    },
+    textBookingId: {
+        ...commonStyles.fontsCommon,
+        fontSize: 16
     },
     title: {
-        fontFamily: 'FuturaStd-Medium',
+        ...commonStyles.fontsCommon,
         fontSize: 22,
         color: '#000',
         marginLeft: 20,
         marginTop: 10
     },
     subtitle: {
-        fontFamily: 'FuturaStd-Light',
+        ...commonStyles.fontsCommon,
         fontSize: 16,
-        marginRight: 10,
+        // marginRight: 10,
         color: '#000'
     },
     subtext: {
-        fontFamily: 'FuturaStd-Light',
+        ...commonStyles.fontsCommon,
         fontSize: 15,
         marginTop: 5,
         color: '#000'
     },
     subtext1: {
-        fontFamily: 'FuturaStd-Light',
+        ...commonStyles.fontsCommon,
         fontSize: 13,
         marginTop: 5,
         color: '#000'
     },
     hoteltext: {
-        fontFamily: 'FuturaStd-Light',
+        ...commonStyles.fontsCommon,
         fontSize: 12,
         color: '#000'
     },
@@ -58,7 +117,7 @@ const styles = StyleSheet.create({
         marginTop: 90
     },
     exploreBtnText: {
-        fontFamily: 'FuturaStd-Light',
+        ...commonStyles.fontsCommon,
         fontSize: 17,
         color: '#fff'
     },
@@ -116,7 +175,6 @@ const styles = StyleSheet.create({
     },
     chatToolbar: {
         alignSelf: 'flex-start',
-        marginBottom: 30
     },
     imageViewWrapper: {
         position: 'relative',
@@ -125,7 +183,7 @@ const styles = StyleSheet.create({
     flatListDataView : {flex: 1, marginRight:15},
     flatListTitleView : {marginTop: 0},
     flatListBottomView : {flex: 1, flexDirection: 'row'},
-    flatListUserProfileView : {height: 50, width:50, position: "absolute", bottom: 5, right: 5}
+    flatListUserProfileView : {height: 50, width:50, position: "absolute", bottom: 50, right: 5}
 
 });
 
