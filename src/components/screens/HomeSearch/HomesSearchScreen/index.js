@@ -13,7 +13,7 @@ import Toast from 'react-native-easy-toast';
 import DateAndGuestPicker from '../../../organisms/DateAndGuestPicker';
 import HomeItemView from '../../../organisms/HomeItemView';
 import requester from '../../../../initDependencies';
-import { UltimateListView } from '../../../../../library/UltimateListView';
+import { UltimateListView } from 'react-native-ultimate-listview';
 import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import { imgHost } from '../../../../config';
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';

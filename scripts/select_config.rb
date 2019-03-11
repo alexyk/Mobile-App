@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
-# PARAM 1 - prod|staging|dev
+# PARAM 1: prod|staging|dev
+# PARAM 2: native|web
 
 def replace_line_in_file(file_name, line_pattern, replacement)
   text = File.read(file_name)

@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     },
     cost: {
         color: 'black',
-        fontSize: 17,
+        fontSize: 13,
         fontFamily: 'FuturaStd-Medium'
     },
     costLoc: {

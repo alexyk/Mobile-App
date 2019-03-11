@@ -61,15 +61,26 @@ class HotelItemView extends Component {
     //         return 'Fair'
     //     }
     //     else if (count > 2 && count <= 3){
-    //         return 'Good'
-    //     }
-    //     else if (count > 3 && count <= 4){
-    //         return 'Very Good'
-    //     }
-    //     else if (count > 4 && count <= 5){
-    //         return 'Excellent'
-    //     }
-    // }
+        //         return 'Good'
+        //     }
+        //     else if (count > 3 && count <= 4){
+            //         return 'Very Good'
+            //     }
+            //     else if (count > 4 && count <= 5){
+                //         return 'Excellent'
+                //     }
+                // }
+
+                
+    renderLoading() {
+        if (isDoneSocket) {
+            return  <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Unavailable</Text>
+            
+        } else {
+            // <Image style={{width:35, height:35}} source={require('../../../assets/loader.gif')}/>
+            return   <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Loading price ...</Text>
+        }
+    }
 
     render() {
         const {
@@ -137,12 +148,7 @@ class HotelItemView extends Component {
                             </View>
                         :
                             <View style={styles.costView}>
-                                {
-                                    isDoneSocket ?
-                                    <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Unavailable</Text>
-                                    :
-                                    <Image style={{width:35, height:35}} source={require('../../../assets/loader.gif')}/>
-                                }
+                                { this.renderLoading(isDoneSocket) }
                             </View>
                         }
                     </View>

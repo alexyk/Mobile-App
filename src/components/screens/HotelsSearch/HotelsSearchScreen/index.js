@@ -14,9 +14,9 @@ import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import _ from 'lodash';
 import moment from 'moment';
 
-import { TabView } from 'react-native-tab-view';
-
-import ListModeHotelsSearch from '../ListModeHotelsSearch'
+import {UltimateListView} from 'react-native-ultimate-listview'
+import Image from 'react-native-remote-svg';
+import { DotIndicator } from 'react-native-indicators';
 import MapModeHotelsSearch from '../MapModeHotelsSearch'
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
@@ -56,7 +56,7 @@ class HotelsSearchScreen extends Component {
 
             hotelsInfo : [],
             allElements: false,
-            isMAP : -1,
+            isMAP : 0,      // TODO: Initial value was -1, is it needed
             initialLat: 42.698334,
             initialLon: 23.319941,
             
@@ -84,10 +84,6 @@ class HotelsSearchScreen extends Component {
             isNewSearch: false,
 
             index: 0,
-            routes: [
-                { key: 'list', title: 'List Mode' },
-                { key: 'map', title: 'Map Mode' },
-            ],
         };
         const { params } = this.props.navigation.state;//eslint-disable-line
 
@@ -111,10 +107,16 @@ class HotelsSearchScreen extends Component {
         }
 
         this.saveState();
+
+        // TODO: Figure out calls and refreshes:
+        //   (1) if getHotels() is needed to call after going back from map
+        //       e.i. when toggling Map/List view
+        //   (2) isMap - should it really be used as -1, 0, 1
+        this.dataSource = [];
     }
 
     componentWillMount() {
-        if(this.state.isHotel) {
+        if (this.state.isHotel) {
             this.getHotels();
         }
 
@@ -133,7 +135,7 @@ class HotelsSearchScreen extends Component {
         }
         this.hotelsInfoById = [];
         this.setState({
-            isMAP: -1, 
+            isMAP: 0, // TODO: Value was -1, set to 0 to be able to work
             hotelsInfo : [],
             allElements: false, 
             editable: false
@@ -148,8 +150,8 @@ class HotelsSearchScreen extends Component {
                     });
     
                     console.log("getStaticHotels", content);
-                    const hotels = content;
-                    this.listView.onFirstLoad(hotels, false);
+                    // this.dataSource = content;
+                    this.listView.onFirstLoad(content, false);
                     this.getHotelsInfoBySocket();
                 });
             });
@@ -257,18 +259,19 @@ class HotelsSearchScreen extends Component {
         this.props.navigation.goBack();
     }
 
-    switchMode = () => {
+    onToggleMapOrListResultsView = () => {
         if (this.state.isMAP == 0) {
             this.setState({
                 isMAP: 1,
                 index: 1,
-            });
+        });
         }
         else {
             this.setState({
                 isMAP: 0,
                 index: 0,
             });
+            this.getHotels();
         }
     }
 
@@ -339,8 +342,12 @@ class HotelsSearchScreen extends Component {
     }
 
     onFetch = (page = 1, startFetch, abortFetch) => {
-        console.log("onFetch", page);
+        console.log("### onFetch", page);
+
+        // This is required to determinate whether the first loading list is all loaded.
+        
         try {
+            let pageLimit = 6;
             if (!this.state.isFilterResult) {
                 requester.getStaticHotels(this.state.regionId, page - 1).then(res => {
                     res.body.then(data => {
@@ -353,7 +360,7 @@ class HotelsSearchScreen extends Component {
                         const hotels = listings;
                         console.log("onFetch--=- res  ", hotels);
                 
-                        startFetch(hotels, hotels.length, false)
+                        startFetch(hotels, pageLimit);
                     });
                 });
             }
@@ -370,7 +377,7 @@ class HotelsSearchScreen extends Component {
                             //         hotelsInfo: [...this.state.hotelsInfo, ...hotels]
                             //     });
                             // }
-                            startFetch(hotels, hotels.length, true)
+                            startFetch(hotels, pageLimit);
                         });
                     } 
                     else {
@@ -687,7 +694,7 @@ class HotelsSearchScreen extends Component {
 
     }
 
-    renderHotelTopView() {
+    renderBackButtonAndSearchField() {
         return (
             <View style={styles.SearchAndPickerwarp}>
                 <View style={styles.searchAreaView}>
@@ -706,39 +713,7 @@ class HotelsSearchScreen extends Component {
         );
     }
 
-    renderAutocomplete() {
-        const nCities = this.state.cities.length;
-        if (nCities > 0) {
-            return (
-                <ScrollView
-                    style={{
-                        marginLeft: 15,
-                        marginRight: 15,
-                        minHeight: 100,
-                        zIndex: 99,
-                    }}
-                >
-                    {
-                        this.state.cities.map((result, i) => { //eslint-disable-line
-                            return (//eslint-disable-line
-                                <TouchableOpacity
-                                    key={result.id}
-                                    style={i == nCities - 1 ? [styles.autocompleteTextWrapper, {borderBottomWidth: 1, elevation: 1}] : styles.autocompleteTextWrapper}
-                                    onPress={() => this.handleAutocompleteSelect(result.id, result.query)}
-                                >
-                                    <Text style={styles.autocompleteText}>{result.query}</Text>
-                                </TouchableOpacity>
-                            );//eslint-disable-line
-                        })
-                    }
-                </ScrollView>
-            );
-        } else {//eslint-disable-line
-            return null;//eslint-disable-line
-        }
-    }
-
-    renderFilterBar() {
+    renderCalendarAndFilters() {
         return (
             <View style={this.state.isNewSearch ?  {height:190, width:'100%'} : {height:70, width:'100%'}}>
                 <DateAndGuestPicker
@@ -764,85 +739,128 @@ class HotelsSearchScreen extends Component {
         );
     }
 
-    renderTabBar = () => {
+    renderPaginationFetchingView = () => (
+        <View style={{width, height:height - 160, justifyContent: 'center', alignItems: 'center'}}>
+            <Image style={{width:50, height:50}} source={require('../../../../assets/loader.gif')}/>
+        </View>
+    )
+    
+    renderPaginationWaitingView = () => {
         return (
-          <View style={styles.tabBar}>
-          </View>
-        );
-    };
-
-    renderScene = ({ route }) => {
-        switch (route.key) {
-            case 'list':
-                return <ListModeHotelsSearch 
-                            navigation = {this.props.navigation}
-                            ref = {ref => this.listView = ref}
-                            allElements = {this.state.allElements}
-                            daysDifference = {this.state.daysDifference}
-                            onFetch = {this.onFetch}
-                            gotoHotelDetailsPage = {this.gotoHotelDetailsPageByList} />;
-            case 'map':
-                return <MapModeHotelsSearch
-                            ref={ref => 
-                                {
-                                    if (!!ref) {
-                                        this.mapView = ref.getWrappedInstance()
-                                    }
-                                }
-                            }
-                            isFilterResult = {this.state.isFilterResult}
-                            initialLat = {this.state.initialLat}
-                            initialLon = {this.state.initialLon}
-                            daysDifference = {this.state.daysDifference}
-                            hotelsInfo = {this.state.hotelsInfo}
-                            gotoHotelDetailsPage = {this.gotoHotelDetailsPageByMap} />;
-            default:
-                return null;
-        }
+            <View style={
+                {
+                    flex: 0,
+                    width,
+                    height: 55,
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    alignItems: 'center'
+                }
+            }>
+                <DotIndicator color='#d97b61' count={3} size={9} animationDuration={777}/>
+            </View>
+        )
     }
 
+    renderPaginationAllLoadedView = () => {
+        return (<View/>)
+    }
+
+    renderResultsAsList () {
+        return <UltimateListView
+                    ref = {ref => this.listView = ref}
+                    key = {'hotelsList'} // this is important to distinguish different FlatList, default is numColumns
+                    onFetch = {this.onFetch}
+                    keyExtractor = {(item, index) => `${index} - ${item}`} // this is required when you are using FlatList
+                    firstLoader = { false }
+                    refreshableMode = { 'advanced' }
+                    item = {this.renderItem} // this takes three params (item, index, separator)
+                    numColumns = {1} // to use grid layout, simply set gridColumn > 1
+                    paginationFetchingView = {this.renderPaginationFetchingView}
+                    paginationWaitingView = {this.renderPaginationWaitingView}
+                    paginationAllLoadedView = {this.renderPaginationAllLoadedView}
+                />
+    }
+
+    renderResultsAsMap() {
+        return ( 
+            <MapModeHotelsSearch
+                ref={ref => 
+                    {
+                        if (!!ref) {
+                            this.mapView = ref.getWrappedInstance()
+                        }
+                    }
+                }
+                isFilterResult = {this.state.isFilterResult}
+                initialLat = {this.state.initialLat}
+                initialLon = {this.state.initialLon}
+                daysDifference = {this.state.daysDifference}
+                hotelsInfo = {this.state.hotelsInfo}
+                gotoHotelDetailsPage = {this.gotoHotelDetailsPageByMap} />
+        )
+    }
+
+    renderMapButton() {
+        return (
+            this.state.isMAP != -1 &&
+                <TouchableOpacity onPress={this.onToggleMapOrListResultsView} style={styles.switchButton}>
+                    <FontAwesome style={styles.icon}>{this.state.isMAP == 0 ? Icons.mapMarker : Icons.listUl}</FontAwesome>
+                </TouchableOpacity>    
+        )
+    }
+
+    // renderScene = ({ route }) => {
+    //     switch (route.key) {
+    //         case 'list': return this.renderResultsAsList();
+    //         case 'map':  return this.renderResultsAsMap();
+    //         default:     return null;
+    //     }
+    // }
+
+    // renderTabBar = () => {
+    //     return (
+    //       <View style={styles.tabBar}>
+    //       </View>
+    //     );
+    // };
+
+
+    // renderHotelSearchResults() {
+    //     return (
+    //         <TabView
+    //             navigationState={this.state}
+    //             renderTabBar={this.renderTabBar}
+    //             renderScene={this.renderScene}
+    //             onIndexChange={index => this.setState({ index })}
+    //             initialLayout={{ width: width }}
+    //             swipeEnabled={false}
+    //             animationEnabled={false}
+    //         />
+    //     )
+    // }
+
     render() {
+        console.log(`### index: ${this.state.index}`,{all:this.state.allElements});
+        
+
         return (
             <View style={styles.container}>
-                {this.renderHotelTopView()}
-                {this.renderAutocomplete()}
+                { this.renderBackButtonAndSearchField() }
+                
                 <View style={{position: 'absolute', top: 100, left: 0, right: 0, bottom: 0, width:'100%'}}>
-                    {this.renderFilterBar()}
+                    { this.renderCalendarAndFilters() }
+
                     <View style={styles.containerHotels}>
-                        {/* {
-                            this.state.isMAP == 1 && this.renderMap()
-                        } */}
-                        <TabView
-                            navigationState={this.state}
-                            renderTabBar={this.renderTabBar}
-                            renderScene={this.renderScene}
-                            onIndexChange={index => this.setState({ index })}
-                            initialLayout={{ width: width }}
-                            swipeEnabled={false}
-                            animationEnabled={false}
-                        />
-                        {/* <UltimateListView
-                            ref = {ref => this.listView = ref}
-                            isDoneSocket = {this.state.allElements}
-                            key = {'list'} // this is important to distinguish different FlatList, default is numColumns
-                            onFetch = {this.onFetch}
-                            keyExtractor = {(item, index) => `${index} - ${item}`} // this is required when you are using FlatList
-                            firstLoader = { false }
-                            refreshable = { false }
-                            item = {this.renderItem} // this takes three params (item, index, separator)
-                            numColumns = {1} // to use grid layout, simply set gridColumn > 1
-                            paginationFetchingView = {this.renderPaginationFetchingView}
-                            paginationWaitingView = {this.renderPaginationWaitingView}
-                            paginationAllLoadedView = {this.renderPaginationAllLoadedView}
-                        /> */}
-                        {
-                            this.state.isMAP != -1 &&
-                                <TouchableOpacity onPress={this.switchMode} style={styles.switchButton}>
-                                    <FontAwesome style={styles.icon}>{this.state.isMAP == 0? Icons.mapMarker : Icons.listUl}</FontAwesome>
-                                </TouchableOpacity>
+                        { 
+                            (this.state.index == 0)
+                                ? this.renderResultsAsList()
+                                : this.renderResultsAsMap()
                         }
+                        { this.renderMapButton()           }
                     </View>
                 </View>
+
                 <ProgressDialog
                     visible={this.state.isLoadingHotelDetails}
                     title="Please Wait"
@@ -862,7 +880,7 @@ class HotelsSearchScreen extends Component {
             clientRef.subscribe(`search/${this.uuid}`, this.handleReceiveSingleHotel);
             clientRef.send("search",
                 headers,
-                JSON.stringify({uuid: this.uuid, query : searchString})
+                JSON.stringify({uuid: this.uuid, query : this.searchString})
             )
         }, (error) => {
             clientRef.disconnect();
@@ -874,7 +892,7 @@ class HotelsSearchScreen extends Component {
     
     handleReceiveSingleHotel(message) {
         if (countIos === 0) {
-            this.applyFilters(false);
+            // this.applyFilters(false);
         }
         countIos = 1;
         const response = JSON.parse(message.body);
@@ -885,9 +903,12 @@ class HotelsSearchScreen extends Component {
                 }
             }
         } else {
-            this.setState(prevState => ({
-                listingsMap: [...prevState.listingsMap, response]
-            }));
+            console.log('### response',response);
+            
+            // TODO: Fix this - it seems like it never worked because listingsMapp never existed
+            // this.setState(prevState => ({
+            //     hotelsInfo: [...prevState.hotelsInfo, response]
+            // }));
         }
     }
 }
@@ -898,5 +919,3 @@ let mapStateToProps = (state) => {
     };
 }
 export default connect(mapStateToProps, null)(HotelsSearchScreen);
-
-// export default withNavigation(Property);
