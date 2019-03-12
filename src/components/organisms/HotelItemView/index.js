@@ -34,12 +34,15 @@ class HotelItemView extends Component {
 
     constructor(props) {
         super(props);
+        console.log('item props',props)
     }
 
     onFlatClick = (item) => {
-        if (item.price != undefined && item.price != null) {
+        console.log('flat click', item, this.props);
+
+        // if (item.price != undefined && item.price != null) {
             this.props.gotoHotelDetailsPage(item);
-        }
+        // }
     }
 
     renderStars = (count) => {
@@ -71,35 +74,72 @@ class HotelItemView extends Component {
                 //     }
                 // }
 
-                
-    renderLoading() {
-        if (isDoneSocket) {
-            return  <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Unavailable</Text>
+
+    renderPrice() {
+        const {exchangeRates, currency, item, currencySign} = this.props;
+
+        let price = item.price;
+        let isPriceReady = (price != null);
+        let fiatPrice = 0;
+        let priceToFixed2 = 0;
+
+        const rates = exchangeRates.currencyExchangeRates;
+        const roomCurrency = RoomsXMLCurrency.get();
+        const days = this.props.daysDifference;
+
+        let content = null;
+
+        try {
+            if (exchangeRates.currencyExchangeRates && price && days && rates && roomCurrency) {
+                const converted = CurrencyConverter.convert(rates, roomCurrency, currency, price);
+                price = (converted / days).toFixed(2);
+            }
+        } catch (error) {
+            // TODO: @@debug
+            isPriceReady = true;
+
+            price = -1;
+        }
+      
+        if (this.props.isDoneSocket) {
+            content =  <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Unavailable</Text>
             
         } else {
             // <Image style={{width:35, height:35}} source={require('../../../assets/loader.gif')}/>
-            return   <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Loading price ...</Text>
+            content =   <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Loading price ...</Text>
         }
+
+        if (isPriceReady) {
+            fiatPrice = (price / days).toFixed(0);
+            priceToFixed2 = parseFloat(price).toFixed(2);
+            content = [
+                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
+                        {currencySign}{priceToFixed2}
+                </Text>,
+                {/* <Text style={styles.costLoc} numberOfLines={1} ellipsizeMode="tail"> (LOC {parseFloat(price/locRate).toFixed(2)}) </Text> */},
+                <LocPrice style= {styles.costLoc} fiat={fiatPrice} fromParentType={0}/>,
+                <Text style={styles.perNight}>per night</Text>
+            ];
+        }
+
+        return (
+            <View style={styles.costView}>
+                {content}
+            </View>
+        )
     }
 
     render() {
-        const {
-            item, currencySign, isDoneSocket, exchangeRates, currency
-        } = this.props;
-        
+        const item = this.props.item;
+
+        //console.log(`hotel item ${item.id}`, item, this.props)
+
         let urlThumbnail = item.hotelPhoto != undefined && item.hotelPhoto != null?
                  (_.isString(item.hotelPhoto) ? imgHost + item.hotelPhoto : imgHost + item.hotelPhoto.url) 
                  : 
                  "";
         let stars = item.star;
-        let isLoadingPricing = true;
 
-        if (item.price != undefined && item.price != null) {
-            isLoadingPricing = false;
-        }
-
-        let price = exchangeRates.currencyExchangeRates && ((CurrencyConverter.convert(exchangeRates.currencyExchangeRates, RoomsXMLCurrency.get(), currency, item.price)) / this.props.daysDifference).toFixed(2);
-      
         return (
             <TouchableOpacity onPress={() => this.onFlatClick(item)}>
                 <CardView 
@@ -138,19 +178,7 @@ class HotelItemView extends Component {
                             {/* <Text style={styles.totalReviews}> 73 Reviews </Text> */}
                         </View>
 
-                        {
-                        !isLoadingPricing?
-                            <View style={styles.costView}>
-                                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">{currencySign}{parseFloat(price).toFixed(2)}</Text>
-                                {/* <Text style={styles.costLoc} numberOfLines={1} ellipsizeMode="tail"> (LOC {parseFloat(price/locRate).toFixed(2)}) </Text> */}
-                                <LocPrice style= {styles.costLoc} fiat={item.price / this.props.daysDifference} fromParentType={0}/>
-                                <Text style={styles.perNight}>per night</Text>
-                            </View>
-                        :
-                            <View style={styles.costView}>
-                                { this.renderLoading(isDoneSocket) }
-                            </View>
-                        }
+                        { this.renderPrice() }
                     </View>
                 </CardView>
             </TouchableOpacity>

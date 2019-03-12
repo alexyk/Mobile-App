@@ -17,6 +17,8 @@ class ListModeHotelsSearch extends Component {
     constructor(props) {
         super(props);
 
+        console.log('constructor --- ListModeHotelsSearch',{props})
+
         this.state = {
             allElements: this.props.allElements,
             currency: this.props.currency, 
@@ -104,32 +106,6 @@ class ListModeHotelsSearch extends Component {
         )
     }
 
-    renderPaginationFetchingView = () => (
-        <View style={{width, height:height - 160, justifyContent: 'center', alignItems: 'center'}}>
-            <Image style={{width:50, height:50}} source={require('../../../../assets/loader.gif')}/>
-        </View>
-    )
-    
-    renderPaginationWaitingView = () => {
-        return (
-            <View style={
-                {
-                    flex: 0,
-                    width,
-                    height: 55,
-                    flexDirection: 'row',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                }
-            }>
-                <DotIndicator color='#d97b61' count={3} size={9} animationDuration={777}/>
-            </View>
-        )
-    }
-
-    renderPaginationAllLoadedView = () => {
-        return (<View/>)
-    }
 
     render() {
         return (
@@ -137,11 +113,12 @@ class ListModeHotelsSearch extends Component {
                 <UltimateListView
                     ref = {ref => this.listView = ref}
                     isDoneSocket = {this.state.allElements}
-                    key = {'list'} // this is important to distinguish different FlatList, default is numColumns
+                    key = {'hotelsList'} // this is important to distinguish different FlatList, default is numColumns
                     onFetch = {this.props.onFetch}
                     keyExtractor = {(item, index) => `${index} - ${item}`} // this is required when you are using FlatList
                     firstLoader = { false }
                     refreshable = { false }
+                    dataSource = {this.props.dataSource}
                     item = {this.renderItem} // this takes three params (item, index, separator)
                     numColumns = {1} // to use grid layout, simply set gridColumn > 1
                     paginationFetchingView = {this.renderPaginationFetchingView}

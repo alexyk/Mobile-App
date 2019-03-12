@@ -7,6 +7,7 @@ import FontAwesome, { Icons } from 'react-native-fontawesome';
 import { imgHost, socketHost } from '../../../../config';
 import SearchBar from '../../../molecules/SearchBar';
 import DateAndGuestPicker from '../../../organisms/DateAndGuestPicker';
+import HotelItemView from '../../../organisms/HotelItemView';
 import requester from '../../../../initDependencies';
 
 import UUIDGenerator from 'react-native-uuid-generator';
@@ -21,145 +22,97 @@ import MapModeHotelsSearch from '../MapModeHotelsSearch'
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
 import styles from './styles';
+import {getHotelIndex, createInitialState, processHotelsData} from './utils';
 
 const { width, height } = Dimensions.get('window')
-const androidStomp = NativeModules.StompModule;
+
+let stompIOS = undefined;
+const stompAndroid = NativeModules.StompModule;
 const stomp = require('stomp-websocket-js');
 
-const clientRef = undefined;
-let countIos;
-
 class HotelsSearchScreen extends Component {
-    hotelsInfoById = [];
-    previousState = {};
     constructor(props) {
         super(props);
         console.disableYellowBox = true;
 
-        const startDate = moment()
-            .add(1, 'day');
-        const endDate = moment()
-            .add(2, 'day');
-        
-        let roomsData = [{
-            adults: 2,
-            children: []
-        }];
-
-        this.state = {
-            isFilterResult: false,
-            search: '',
-            cities: [],
-
-            isHotel: true,
-            regionId : '',
-
-            hotelsInfo : [],
-            allElements: false,
-            isMAP : 0,      // TODO: Initial value was -1, is it needed
-            initialLat: 42.698334,
-            initialLon: 23.319941,
-            
-            checkInDateFormated: startDate.format('DD/MM/YYYY').toString(),
-            checkOutDateFormated: endDate.format('DD/MM/YYYY').toString(),
-            checkInDate: startDate.format('ddd, DD MMM').toString(),
-            checkOutDate: endDate.format('ddd, DD MMM').toString(),
-
-            guests: 2,
-            adults: 2,
-            children: 0,
-            infants: 0,
-            childrenBool: false,
-            daysDifference: 1,
-            roomsDummyData: encodeURI(JSON.stringify(roomsData)),
-            //filters
-            showUnAvailable: false,
-            nameFilter: '',
-            selectedRating: [false, false, false, false, false],
-            orderBy: 'rank,desc',
-            priceRange: [1, 5000],
-
-            editable: false,
-
-            isNewSearch: false,
-
-            index: 0,
-        };
         const { params } = this.props.navigation.state;//eslint-disable-line
+        this.state = createInitialState(params);
 
-        if (params) {
-            this.state.isHotel = params.isHotel;
-            this.state.search = params.searchedCity;
-            this.state.regionId = params.regionId;
-            this.state.checkInDate = params.checkInDate;
-            this.state.checkInDateFormated = params.checkInDateFormated;
-            this.state.checkOutDate = params.checkOutDate;
-            this.state.checkOutDateFormated = params.checkOutDateFormated;
+        this.socketDown = true;
+        this.hotelsInfoById = null; // see getHotels()
 
-            this.state.guests = params.guests;
-            this.state.adults = params.adults;
-            this.state.children = params.children;
-            this.state.infants = params.infants;
-            this.state.childrenBool = params.childrenBool;
+        // Bind functions to this,
+        // thus optimising performance - by using bind(this) instead of "=> function".
+        this.parseHotelData = this.parseHotelData.bind(this)
+        this.gotoHotelDetailsPageByMap = this.gotoHotelDetailsPageByMap.bind(this)
+        this.saveState = this.saveState.bind(this)
+        this.unsubscribe = this.stopSocketConnection.bind(this)
 
-            this.state.roomsDummyData = params.roomsDummyData;
-            this.state.daysDifference = params.daysDifference;
-        }
-
-        this.saveState();
 
         // TODO: Figure out calls and refreshes:
         //   (1) if getHotels() is needed to call after going back from map
         //       e.i. when toggling Map/List view
         //   (2) isMap - should it really be used as -1, 0, 1
-        this.dataSource = [];
+        // this.dataSource = [];
     }
 
-    componentWillMount() {
+    componentDidMount() {
         if (this.state.isHotel) {
             this.getHotels();
         }
 
-        WebsocketClient.startGrouping();
+        // TODO: Figure out why is this call used
+        // It was initially called from the constructor body (why? how is it possible to work)
+        this.saveState();
     }
 
     componentWillUnmount() {
-        this.unsubscribe();
-
-        WebsocketClient.stopGrouping();
+        this.stopSocketConnection();
     }
 
     getHotels() {
-        if (this.listView != undefined && this.listView != null) {
-            this.listView.initListView();
-        }
+        console.log("### [HotelsSearchScreen] getHotels", {listView:this.listView});
+                    
         this.hotelsInfoById = [];
-        this.setState({
-            isMAP: 0, // TODO: Value was -1, set to 0 to be able to work
-            hotelsInfo : [],
-            allElements: false, 
-            editable: false
-        }, () => {
-            requester.getStaticHotels(this.state.regionId).then(res => {
-                res.body.then(data => {
-                    const { content } = data;
-                    content.forEach(l => {
-                        if (this.hotelsInfoById[l.id]) {
-                            l.price = this.hotelsInfoById[l.id].price;
+        this.setState(
+            // change function
+            function(prevState, updatedProps) {
+                // console.log('SET_STATE 1', {prevState,updatedProps})
+                return {
+                    isMAP: 0, // TODO: Value was -1, set to 0 to be able to work with whatever map behaviour was before
+                            // Figure out how to work with Map logic and whether this var isMAP is needed
+                    hotelsInfo : [],
+                    allElements: false, 
+                    editable: false
+                }
+            },
+
+            // callback (after above change)
+            () => {
+                // console.log('SET_STATE 2');
+                requester.getStaticHotels(this.state.regionId).then(res => {
+                    res.body.then(data => {
+                        console.log("### [HotelsSearchScreen][SERVER] getStaticHotels", data);
+
+                        processHotelsData(data, this.hotelsInfoById);
+        
+                        if (this.socketDown) {
+                            this.startSocketConnection();
                         }
                     });
-    
-                    console.log("getStaticHotels", content);
-                    // this.dataSource = content;
-                    this.listView.onFirstLoad(content, false);
-                    this.getHotelsInfoBySocket();
-                });
-            });
+                }
+            );
         });
     }
 
-    async getHotelsInfoBySocket() {
+    // TODO: Inspect this flow
+    async startSocketConnection() {
+        this.socketDown = false;
+
         this.uuid = await UUIDGenerator.getRandomUUID();
+
+        // common code
+        WebsocketClient.startGrouping();
 
         if (Platform.OS === 'ios') {
             this.stompIos();
@@ -168,20 +121,30 @@ class HotelsSearchScreen extends Component {
         }
     }
 
-    unsubscribe = () => {
-        if (Platform.OS === 'ios') {
-        } 
-        else if (Platform.OS === 'android') {
-            DeviceEventEmitter.removeAllListeners("onStompConnect");
-            DeviceEventEmitter.removeAllListeners("onStompError");
-            DeviceEventEmitter.removeAllListeners("onStompMessage");
+    // TODO: Inspect this flow
+    stopSocketConnection(removeListeners = true) {
+        // common code
+        if (removeListeners) {
+            WebsocketClient.stopGrouping();
+            this.socketDown = true;
+        }
 
-            androidStomp.close();
+        // platform specific
+        if (Platform.OS === 'ios') {
+            stompIOS.disconnect();
+        } else if (Platform.OS === 'android') {
+            if (removeListeners) {
+                DeviceEventEmitter.removeAllListeners("onStompConnect");
+                DeviceEventEmitter.removeAllListeners("onStompError");
+                DeviceEventEmitter.removeAllListeners("onStompMessage");
+            }
+
+            stompAndroid.close();
         }
     }
 
     stompAndroid() {
-        console.log("stompAndroid -------------");
+        // console.log("stompAndroid -------------");
         // console.log("stompAndroid---------------", this.uuid, this.searchString);
         const message = "{\"uuid\":\"" + this.uuid + "\",\"query\":\"" + this.searchString + "\"}";
         const destination = "search/" + this.uuid;
@@ -197,62 +160,42 @@ class HotelsSearchScreen extends Component {
         });
 
         DeviceEventEmitter.removeAllListeners("onStompMessage");
-        DeviceEventEmitter.addListener("onStompMessage", ({message}) => (
-            this.handleAndroidSingleHotel(message)
-        ));
+        DeviceEventEmitter.addListener("onStompMessage", ({message}) => {
+            console.warn('stomp message', message)            
+            return this.parseHotelData(message)
+        });
 
-        androidStomp.getData(message, destination);
+        stompAndroid.getData(message, destination);
     }
 
-    handleAndroidSingleHotel(message) {
-        if (this.state.isMAP == -1 && this.state.hotelsInfo.length > 0) {
-            this.setState({
-                isMAP: 0, 
-                initialLat: parseFloat(this.state.hotelsInfo[0].lat), 
-                initialLon: parseFloat(this.state.hotelsInfo[0].lon)
-            });
+    onDoneSocket = (hotelData) => {
+        console.log('onDoneSocket', {hotelData})
+
+        this.stopSocketConnection(false);
+
+        /*if (this.rows == undefined || this.rows == null) {
+            return;
         }
-        try {
-            console.log("jsonHotel ---", message);
-            const jsonHotel = JSON.parse(message);
-            if (jsonHotel.hasOwnProperty('allElements')) {
-                if (jsonHotel.allElements) {
-                    this.setState({ allElements: true, editable: true});
-                    if (this.listView) {
-                        this.listView.onDoneSocket();
-                    }
-                    androidStomp.close();
-                }
-            } else {
-                this.hotelsInfoById[jsonHotel.id] = jsonHotel;
-                this.state.hotelsInfo = [...this.state.hotelsInfo, jsonHotel];
-
-                //if (this.listView != null && (this.state.hotelsInfo.length < this.listView.getRows().length || this.state.hotelsInfo.length % 20 === 0)) {
-                    // this.setState(prevState => ({
-                    //     hotelsInfo: [...prevState.hotelsInfo, jsonHotel]
-                    // }));
-                    //this.state.hotelsInfo = [...this.state.hotelsInfo, jsonHotel];
-                    //this.setState({refresh: this.state.hotelsInfo.length})
-
-                if (this.state.isMAP === 1 && this.mapView != null && this.state.hotelsInfo.length % 20 === 0) {
-                    this.mapView.refresh(this.state.hotelsInfo);
-                }
-                else {
-                    //this.state.hotelsInfo = [...this.state.hotelsInfo, jsonHotel];
-                }
-
-                if (this.listView != null) {
-                    const index = this.listView.getIndex(jsonHotel.id);
-                    if (index !== -1) {
-                        this.listView.upgradePrice(index, this.hotelsInfoById[jsonHotel.id].price)
-                    }
-                }
-
+        
+        let refineHotels = [];
+        for (var i = 0; i < this.rows.length; i++){
+            if (this.rows[i].price != undefined && this.rows[i].price != null && !isNaN(this.rows[i].price) ) {
+                refineHotels.push(this.rows[i]);
             }
-        } catch (e) {
-            console.log("handleAndroidSingleHotel2222---", message, e);
-            // Error
         }
+        this.setRows(refineHotels);
+
+        if (this.rows.length > 0) {
+            this.setState({ dataSource: this.getRows() });
+        }
+        else {
+            this.setState( 
+                { 
+                    paginationStatus: PaginationStatus.allLoaded, 
+                    dataSource: this.getRows(),
+                } 
+            );
+        }*/
     }
 
     onCancel = () => {
@@ -276,12 +219,8 @@ class HotelsSearchScreen extends Component {
     }
 
     gotoHotelDetailsPageByList = (item) => {
-        // console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
+        console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
         
-        if (item.price == null || item.price == undefined) {
-            return;
-        }
-
         this.setState({isLoadingHotelDetails: true});
         requester.getHotelById(item.id, this.searchString.split('&')).then((res) => {
             console.log("requester.getHotelById", res);
@@ -309,7 +248,7 @@ class HotelsSearchScreen extends Component {
         });
     }
 
-    gotoHotelDetailsPageByMap = (item) => {
+    gotoHotelDetailsPageByMap (item) {
         console.log("gotoHotelDetailsPageByMap", item);
         
         if (item.price == null || item.price == undefined) {
@@ -341,34 +280,34 @@ class HotelsSearchScreen extends Component {
         });
     }
 
-    onFetch = (page = 1, startFetch, abortFetch) => {
-        console.log("### onFetch", page);
+    onRefreshResultsOnListView = (page = 1, startFetch, abortFetch) => {
+        console.log("### [HotelsSearchScreen] onFetch", page);
 
         // This is required to determinate whether the first loading list is all loaded.
         
         try {
             let pageLimit = 6;
+            console.log("### onFetch 0");
+
             if (!this.state.isFilterResult) {
+                console.log("### onFetch 1.1");
                 requester.getStaticHotels(this.state.regionId, page - 1).then(res => {
+                    console.log("### onFetch 1.2");
                     res.body.then(data => {
-                        const listings = data.content;
-                        listings.forEach(l => {
-                            if (this.hotelsInfoById[l.id]) {
-                                l.price = this.hotelsInfoById[l.id].price;
-                            }
-                        });
-                        const hotels = listings;
-                        console.log("onFetch--=- res  ", hotels);
+                        const hotels = processHotelsData(data, this.hotelsInfoById);
+                        console.log("### onFetch--=- res  ", hotels);
                 
                         startFetch(hotels, pageLimit);
                     });
                 });
             }
             else {
+                console.log("### onFetch 2.1");
                 const strSearch = this.getSearchString();
                 const strFilters = this.getFilterString(this.listView.getPage());
 
                 requester.getLastSearchHotelResultsByFilter(strSearch, strFilters).then((res) => {
+                    console.log("### onFetch 2.2");
                     if (res.success) {
                         res.body.then((data) => {
                             const hotels = data.content
@@ -388,6 +327,7 @@ class HotelsSearchScreen extends Component {
             }
             
         } catch (err) {
+            console.log("### onFetch Error", err);
             console.log("onFetch--=- error  ", err);
             abortFetch() // manually stop the refresh or pagination if it encounters network error
         //   console.log(err)
@@ -429,54 +369,65 @@ class HotelsSearchScreen extends Component {
     }
 
     gotoCancel = () => {
-        let baseInfo = {};
-        baseInfo['adults'] = this.previousState.adults;
-        baseInfo['children'] = [];
-        for (let i = 0; i < this.previousState.children.children; i ++) {
-            baseInfo['children'].push({"age": 0});
-        }
-        let roomsData = [baseInfo];
-        let roomsDummyData = encodeURI(JSON.stringify(roomsData));
+        this.setState(
+        // TODO: Previous State was cached separately
+        //       this was done in a non-react way, saving previousState
+        //       as a static object. If needed - do it again instead of using prevState 
+        //       as below it is suppossed to use in react-ways.
+        //       as below it is suppossed to use in react-ways.
+        // See: https://reactjs.org/docs/react-component.html#setstate
+        function(prevState, updatedProps) {
+                let baseInfo = {};
+                baseInfo['adults'] = prevState.adults;
+                baseInfo['children'] = [];
+                for (let i = 0; i < prevState.children.children; i ++) {
+                    baseInfo['children'].push({"age": 0});
+                }
+                let roomsData = [baseInfo];
+                let roomsDummyData = encodeURI(JSON.stringify(roomsData));
+                        
+                return {
+                    search: prevState.search,
+                    regionId: prevState.regionId,
 
-        this.setState({
-            search: this.previousState.search,
-            regionId: this.previousState.regionId,
+                    checkInDate: prevState.checkInDate,
+                    checkInDateFormated: prevState.checkInDateFormated,
+                    checkOutDate: prevState.checkOutDate,
+                    checkOutDateFormated: prevState.checkOutDateFormated,
+                    daysDifference: prevState.daysDifference,
 
-            checkInDate: this.previousState.checkInDate,
-            checkInDateFormated: this.previousState.checkInDateFormated,
-            checkOutDate: this.previousState.checkOutDate,
-            checkOutDateFormated: this.previousState.checkOutDateFormated,
-            daysDifference: this.previousState.daysDifference,
-
-            adults: this.previousState.adults,
-            children: this.previousState.children,
-            infants: this.previousState.infants,
-            guests: this.previousState.guests,
-            childrenBool: this.previousState.childrenBool,
-            roomsDummyData: roomsDummyData,
-            
-            isNewSearch: false,
-        });
+                    adults: prevState.adults,
+                    children: prevState.children,
+                    infants: prevState.infants,
+                    guests: prevState.guests,
+                    childrenBool: prevState.childrenBool,
+                    roomsDummyData: roomsDummyData,
+                    
+                    isNewSearch: false,
+                }
+            }
+        );
     }
 
     handleAutocompleteSelect = (id, name) => {
-        if (this.previousState.regionId != id) {
-            this.setState({
-                cities: [],
-                search: name,
-                regionId: id,
-                isNewSearch: true
-            });
-        }
-        else {
-            this.setState({
-                cities: [],
-                search: name,
-                regionId: id
-            });
-        }
+        // TODO: Previous State was cached separately
+        //       this was done in a non-react way, saving previousState
+        //       as a static object. If needed - do it again instead of using prevState 
+        //       as below it is suppossed to use in react-ways.
+        // See: https://reactjs.org/docs/react-component.html#setstate
+        this.setState(
+            function(prevState, updatedProps) {
+                let stateUpdate = {
+                    cities: [],
+                    search: name,
+                    regionId: id
+                };
 
-
+                if (prevState.regionId == id) {
+                    stateUpdate.isNewSearch = true
+                }
+            }
+        );
     }
 
     
@@ -521,32 +472,40 @@ class HotelsSearchScreen extends Component {
         });
     }
 
-    saveState = () => {
-        this.setState({
-            //filters
-            showUnAvailable: false,
-            nameFilter: '',
-            selectedRating: [false, false, false, false, false],
-            orderBy: 'rank,desc',
-            priceRange: [1, 5000],
-            
-            isNewSearch: false,
-        });
+    saveState() {
+        this.setState(
+            function(prevState, propsUpdated) {
+                // TODO: Previous State was cached separately
+                //       this was done in a non-react way, saving previousState
+                //       as a static object. If needed - include it 
+                // See: https://reactjs.org/docs/react-component.html#setstate
+/*                
+                prevState.search = this.state.search;
+                prevState.regionId = this.state.regionId;
 
-        this.previousState.search = this.state.search;
-        this.previousState.regionId = this.state.regionId;
+                prevState.checkInDate = this.state.checkInDate;
+                prevState.checkInDateFormated = this.state.checkInDateFormated;
+                prevState.checkOutDate = this.state.checkOutDate;
+                prevState.checkOutDateFormated = this.state.checkOutDateFormated;
+                prevState.daysDifference = this.state.daysDifference;
 
-        this.previousState.checkInDate = this.state.checkInDate;
-        this.previousState.checkInDateFormated = this.state.checkInDateFormated;
-        this.previousState.checkOutDate = this.state.checkOutDate;
-        this.previousState.checkOutDateFormated = this.state.checkOutDateFormated;
-        this.previousState.daysDifference = this.state.daysDifference;
-
-        this.previousState.adults = this.state.adults;
-        this.previousState.children = this.state.children;
-        this.previousState.infants = this.state.infants;
-        this.previousState.guests = this.state.guests;
-        this.previousState.childrenBool = this.state.childrenBool;
+                prevState.adults = this.state.adults;
+                prevState.children = this.state.children;
+                prevState.infants = this.state.infants;
+                prevState.guests = this.state.guests;
+                prevState.childrenBool = this.state.childrenBool;
+ */                
+                return {
+                    //filters
+                    showUnAvailable: false,
+                    nameFilter: '',
+                    selectedRating: [false, false, false, false, false],
+                    orderBy: 'rank,desc',
+                    priceRange: [1, 5000],
+                    isNewSearch: false,
+                }
+            }
+        );
 
         if (this.state.isHotel) {
             this.searchString = this.getSearchString();
@@ -766,15 +725,34 @@ class HotelsSearchScreen extends Component {
         return (<View/>)
     }
 
+    renderListItem = (item, index) => {
+        // console.log(`### [HotelsSearchScreen] renderListItem`,{item,index})
+
+        return (
+            <HotelItemView
+                item = {item}
+                gotoHotelDetailsPage = {this.gotoHotelDetailsPageByList}
+                daysDifference = {this.state.daysDifference}
+                isDoneSocket = {this.state.allElements}
+            />
+        )
+    }
+
     renderResultsAsList () {
+        // console.log(`### [HotelsSearchScreen] renderResultsAsList`)
+
         return <UltimateListView
                     ref = {ref => this.listView = ref}
                     key = {'hotelsList'} // this is important to distinguish different FlatList, default is numColumns
-                    onFetch = {this.onFetch}
-                    keyExtractor = {(item, index) => `${index} - ${item}`} // this is required when you are using FlatList
-                    firstLoader = { false }
+                    onFetch = {this.onRefreshResultsOnListView}
+                    keyExtractor = {(item, index) => {
+                        // console.log(`### [HotelsSearchScreen] item:${item}: index:${index}`)
+                        return `${index} - ${item}`
+                        }
+                    } // this is required when you are using FlatList
+                    firstLoader = { true }
                     refreshableMode = { 'advanced' }
-                    item = {this.renderItem} // this takes three params (item, index, separator)
+                    item = {this.renderListItem} // this takes three params (item, index, separator)
                     numColumns = {1} // to use grid layout, simply set gridColumn > 1
                     paginationFetchingView = {this.renderPaginationFetchingView}
                     paginationWaitingView = {this.renderPaginationWaitingView}
@@ -810,39 +788,8 @@ class HotelsSearchScreen extends Component {
         )
     }
 
-    // renderScene = ({ route }) => {
-    //     switch (route.key) {
-    //         case 'list': return this.renderResultsAsList();
-    //         case 'map':  return this.renderResultsAsMap();
-    //         default:     return null;
-    //     }
-    // }
-
-    // renderTabBar = () => {
-    //     return (
-    //       <View style={styles.tabBar}>
-    //       </View>
-    //     );
-    // };
-
-
-    // renderHotelSearchResults() {
-    //     return (
-    //         <TabView
-    //             navigationState={this.state}
-    //             renderTabBar={this.renderTabBar}
-    //             renderScene={this.renderScene}
-    //             onIndexChange={index => this.setState({ index })}
-    //             initialLayout={{ width: width }}
-    //             swipeEnabled={false}
-    //             animationEnabled={false}
-    //         />
-    //     )
-    // }
-
     render() {
-        console.log(`### index: ${this.state.index}`,{all:this.state.allElements});
-        
+        // console.log(`### [HotelsSearchScreen] index: ${this.state.index}`,{all:this.state.allElements});
 
         return (
             <View style={styles.container}>
@@ -857,7 +804,9 @@ class HotelsSearchScreen extends Component {
                                 ? this.renderResultsAsList()
                                 : this.renderResultsAsMap()
                         }
-                        { this.renderMapButton()           }
+
+                        {/* DISABLED FOR NOW */}
+                        {/* { this.renderMapButton()           } */}
                     </View>
                 </View>
 
@@ -873,43 +822,105 @@ class HotelsSearchScreen extends Component {
     }
 
     stompIos() {
-        countIos = 0;
-        clientRef = stomp.client(socketHost);
-        clientRef.connect({}, (frame) => {
+        console.log("stompiOS ---------------");
+
+        stompIOS = stomp.client(socketHost);
+        stompIOS.connect({}, (frame) => {
             var headers = {'content-length': false};
-            clientRef.subscribe(`search/${this.uuid}`, this.handleReceiveSingleHotel);
-            clientRef.send("search",
+            stompIOS.subscribe(`search/${this.uuid}`, this.parseHotelData);
+            stompIOS.send("search",
                 headers,
                 JSON.stringify({uuid: this.uuid, query : this.searchString})
             )
         }, (error) => {
-            clientRef.disconnect();
+            stompIOS.disconnect();
             this.setState({
                 isLoading: false,
             });
         });
     }
     
-    handleReceiveSingleHotel(message) {
-        if (countIos === 0) {
-            // this.applyFilters(false);
+    parseHotelData(data) {
+        if (this.state.isMAP == -1 && this.state.hotelsInfo.length > 0) {
+            this.setState({
+                isMAP: 0, 
+                initialLat: parseFloat(this.state.hotelsInfo[0].lat), 
+                initialLon: parseFloat(this.state.hotelsInfo[0].lon)
+            });
         }
-        countIos = 1;
-        const response = JSON.parse(message.body);
-        if (response.hasOwnProperty('allElements')) {
-            if (response.allElements) {         
-                if (clientRef) {
-                    clientRef.disconnect();
+        const {body} = data;
+        // try {
+            const hotelData = JSON.parse(body);
+
+            console.debug("[HotelsSearchScreen] stomp - parseHotelData ---", 
+                {body,data,hotelData,_th: this}
+            );
+
+
+            if (hotelData.hasOwnProperty('allElements')) {
+                if (hotelData.allElements) {
+                    this.setState({ allElements: true, editable: true});
+                    this.onDoneSocket(hotelData);
+                }
+            } else {
+                this.hotelsInfoById[hotelData.id] = hotelData;
+
+                // TODO: Remove this commented out code if it is indeed obsolete
+                //       It is some inherited old code - was commented out.
+                //if (this.listView != null && (this.state.hotelsInfo.length < this.listView.getRows().length || this.state.hotelsInfo.length % 20 === 0)) {
+                    // this.setState(prevState => ({
+                    //     hotelsInfo: [...prevState.hotelsInfo, jsonHotel]
+                    // }));
+                    //this.state.hotelsInfo = [...this.state.hotelsInfo, jsonHotel];
+                    //this.setState({refresh: this.state.hotelsInfo.length})
+
+                if (this.state.isMAP === 1 
+                        && this.mapView != null 
+                        && this.state.hotelsInfo.length % 20 === 0)
+                {
+                    this.mapView.refresh(this.state.hotelsInfo);
+                } else {
+                    this.setState(
+                        function(prev, props) {
+                            let arr = prev.hotelsInfo.slice(0);
+                            arr.push(hotelData);
+                            
+                            return {
+                                hotelsInfo: arr
+                            }
+                        }
+                    );
+                }
+
+                let upgradePrice = function(index, price) {
+                    this.setState(function (prevState) {
+                        let arr = [];
+                        let prev = prevState.hotelsInfo;
+                        let obj = (prev && (prev.length >= index-1) ) 
+                            ? prev[index] 
+                            : null;
+                        if (obj) {
+                            // console.log('Update price', obj);
+
+                            obj.price = price;
+                            arr[index] = obj;
+                            return { hotelsInfo: arr };
+                        } else {
+                            return {};
+                        }
+                    });
+                }
+                upgradePrice = upgradePrice.bind(this);
+            
+                const index = getHotelIndex(this.state.hotelsInfo, hotelData.id);
+                if (index !== -1) {
+                    upgradePrice(index, this.hotelsInfoById[hotelData.id].price)
                 }
             }
-        } else {
-            console.log('### response',response);
-            
-            // TODO: Fix this - it seems like it never worked because listingsMapp never existed
-            // this.setState(prevState => ({
-            //     hotelsInfo: [...prevState.hotelsInfo, response]
-            // }));
-        }
+        // } catch (e) {
+            // console.error("ERROR on socket Message", {message, e});
+            // Error
+        // }        
     }
 }
 
