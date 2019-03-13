@@ -72,7 +72,7 @@ class WS {
     }
 
     sendMessage(id, method, params, isMarked = false) {
-        console.log("WS - sendMessage", id, method, params, this.markedID);
+        console.log("WS - sendMessage", {id, method, params, markedID: this.markedID});
         if (this.ws.readyState === 1 && id) {
             method = method ? method : DEFAULT_SOCKET_METHOD;
             if (isMarked) {
