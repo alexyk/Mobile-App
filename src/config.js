@@ -8,7 +8,7 @@ export let domainPrefix;
 export let PUBLIC_URL;
 export let Config;
 export let xDeviceVersion;
-export let ROOMS_XML_CURRENCY;
+export let ROOMS_XML_CURRENCY = "EUR";
 
 // CONFIGS 
 const LT_PROD       = "PRODUCTION";
@@ -30,7 +30,6 @@ switch (LT_CFG) {
         socketHostPrice="wss://exchanger-stage.locktrip.com/websocket";
         socketHost = 'wss://dev.locktrip.com/socket';
         xDeviceVersion = "49365f68-42e1-11e8-842f-0ed5f89f718b";
-        ROOMS_XML_CURRENCY = 'EUR';
         routerPrefix = '.';
         domainPrefix = 'dev';
         PUBLIC_URL = 'https://dev.locktrip.com/';
@@ -89,7 +88,6 @@ switch (LT_CFG) {
         socketHostPrice="wss://exchanger.locktrip.com/websocket";
         socketHost = 'wss://beta.locktrip.com/socket';
         xDeviceVersion = "49365f68-42e1-11e8-842f-0ed5f89f718b";
-        ROOMS_XML_CURRENCY = 'EUR';
         routerPrefix = '.';
         domainPrefix = 'prod';
         PUBLIC_URL = 'https://beta.locktrip.com/';

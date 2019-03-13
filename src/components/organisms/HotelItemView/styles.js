@@ -72,17 +72,17 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     cost: {
+        fontFamily: 'FuturaStd-Medium',
         color: 'black',
-        fontSize: 13,
-        fontFamily: 'FuturaStd-Medium'
+        fontSize: 12,
     },
     costLoc: {
+        fontFamily: 'FuturaStd-Medium',
         color: 'black',
-        fontSize: 13,
-        fontFamily: 'FuturaStd-Medium'
+        fontSize: 12,
     },
     perNight: {
-        fontSize: 10,
+        fontSize: 12,
         fontFamily: 'FuturaStd-Light',
         color: 'black',
     },

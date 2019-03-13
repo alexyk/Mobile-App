@@ -1,17 +1,9 @@
 import moment from "moment"
 
-export const getHotelIndex = function(hotelsInfo, id) {
-    const index = (hotelsInfo != null) 
-        ? hotelsInfo.findIndex(h => (h && h.id ) ? h.id === id : false)
-        : null;
+export function createInitialState(params) {
 
-    return index;
-}
-
-
-export const createInitialState = function (params) {
     const startDate = moment()
-            .add(1, 'day');
+    .add(1, 'day');
     const endDate = moment()
         .add(2, 'day');
     
@@ -82,15 +74,20 @@ export const createInitialState = function (params) {
     return initialState;
 }
 
-export const processHotelsData = function(data, hotelsInfoById) {
-    console.log('[HotelsSearchScreen/utils.js] processHotelsData', {data, hotelsInfoById});
-
-    const { content } = data;
-    content.forEach(item => {
-        if (hotelsInfoById[item.id]) {
-            item.price = this.hotelsInfoById[item.id].price;
+export function updateIds(targetObject, array) {
+    array.map(
+        (item, index) => {
+            targetObject[item.id] = index;
+            return item;
         }
-    });
+    )
+}
 
-    return content;
-} 
+export function generateSearchString(state, props) {
+    let search = `?region=${state.regionId}`;
+    search += `&currency=${props.currency}`;
+    search += `&startDate=${state.checkInDateFormated}`;
+    search += `&endDate=${state.checkOutDateFormated}`;
+    search += `&rooms=${state.roomsDummyData}`;
+    return search;
+}

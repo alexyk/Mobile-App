@@ -20,7 +20,7 @@ import styles from './styles';
 
 class HotelItemView extends Component {
     static propTypes = {
-        item: PropTypes.object | PropTypes.array,
+        item: PropTypes.object,
         gotoHotelDetailsPage: PropTypes.func.isRequired,
         daysDifference: PropTypes.number,
         isDoneSocket: PropTypes.bool.isRequired
@@ -34,7 +34,7 @@ class HotelItemView extends Component {
 
     constructor(props) {
         super(props);
-        console.log('item props',props)
+        //console.log('item props',props)
     }
 
     onFlatClick = (item) => {
@@ -89,44 +89,36 @@ class HotelItemView extends Component {
 
         let content = null;
 
-        try {
-            if (exchangeRates.currencyExchangeRates && price && days && rates && roomCurrency) {
-                const converted = CurrencyConverter.convert(rates, roomCurrency, currency, price);
-                price = (converted / days).toFixed(2);
-            }
-        } catch (error) {
-            // TODO: @@debug
-            isPriceReady = true;
-
-            price = -1;
-        }
-      
-        if (this.props.isDoneSocket) {
-            content =  <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Unavailable</Text>
-            
-        } else {
-            // <Image style={{width:35, height:35}} source={require('../../../assets/loader.gif')}/>
-            content =   <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">Loading price ...</Text>
-        }
+        const converted = CurrencyConverter.convert(rates, roomCurrency, currency, price);
+        price = (converted / days).toFixed(2);
 
         if (isPriceReady) {
             fiatPrice = (price / days).toFixed(0);
             priceToFixed2 = parseFloat(price).toFixed(2);
-            content = [
-                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
-                        {currencySign}{priceToFixed2}
-                </Text>,
-                {/* <Text style={styles.costLoc} numberOfLines={1} ellipsizeMode="tail"> (LOC {parseFloat(price/locRate).toFixed(2)}) </Text> */},
-                <LocPrice style= {styles.costLoc} fiat={fiatPrice} fromParentType={0}/>,
-                <Text style={styles.perNight}>per night</Text>
-            ];
+            content = (
+                <View style={styles.costView}>
+                    <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
+                            {currencySign}{priceToFixed2}{" "}
+                    </Text>
+                    {/* <Text style={styles.costLoc} numberOfLines={1} ellipsizeMode="tail"> (LOC {parseFloat(price/locRate).toFixed(2)}) </Text> */}
+                    <LocPrice style= {styles.costLoc} fiat={fiatPrice} fromParentType={0}/>
+                    <Text style={styles.perNight}>{" per night"}</Text>
+                </View>
+            );
+        } else {
+            content = (
+                <View style={styles.costView}>
+                    <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
+                        {this.props.isDoneSocket
+                            ? "Unavailable"
+                            : "Loading price ..."
+                        }
+                    </Text>
+                </View>
+            )
         }
 
-        return (
-            <View style={styles.costView}>
-                {content}
-            </View>
-        )
+        return content;
     }
 
     render() {
