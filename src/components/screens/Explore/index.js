@@ -27,7 +27,8 @@ import LocRateButton from '../../atoms/LocRateButton'
 import { setCurrency } from '../../../redux/action/Currency'
 
 import {isNative} from '../../../version'
-const shouldBeNative = isNative.explore; // false: webview version, true: native search version
+import { gotoWebview } from '../HotelsSearch/HotelsSearchScreen/utils';
+const isExploreSearchNative = isNative.explore; // false: webview version, true: native search version
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
 
 class Explore extends Component {
@@ -269,7 +270,7 @@ class Explore extends Component {
     gotoSearch() {
         console.log("gotoSearch", this.state.checkOutDateFormated, this.state.checkInDateFormated);
         //Open new property screen that uses sock-js
-        if (shouldBeNative){
+        if (isExploreSearchNative){
             if (this.state.isHotel) {
                 console.log("this.state.regionId.", this.state.regionId);
                 if (this.state.regionId === "" || this.state.regionId === 0) {
@@ -291,6 +292,8 @@ class Explore extends Component {
                     checkInDateFormated: this.state.checkInDateFormated,
                     roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
                     daysDifference: this.state.daysDifference,
+                    token: this.state.token,
+                    email: this.state.email,
                 });
             }
             else {
@@ -327,18 +330,7 @@ class Explore extends Component {
                 return;
             }
             else {
-                this.props.navigation.navigate('PropertyScreen', {
-                    isHotelSelected: this.state.isHotel,
-                    guests: this.state.guests,
-                    countryId: this.state.countryId,
-                    regionId: this.state.regionId,
-                    checkOutDateFormated: this.state.checkOutDateFormated,
-                    checkInDateFormated: this.state.checkInDateFormated,
-                    roomsDummyData: this.state.roomsDummyData,//encodeURI(JSON.stringify(this.state.roomsData)),
-                    email: this.state.email,
-                    token: this.state.token,
-                    search: this.state.search
-                });
+                gotoWebview(this.state, this.navigation);
             }
         }
     }

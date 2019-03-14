@@ -21,9 +21,6 @@ import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import { basePath } from '../../../config'
 
-let baseHomeUrl = basePath + 'homes/listings/?'
-let baseHotelUrl = basePath + 'mobile/hotels/listings?'
-
 class Property extends Component {
     iconSize = 30;
 
@@ -52,8 +49,7 @@ class Property extends Component {
         const roomsDummyData        = params ? params.roomsDummyData : [];
         const regionId              = params ? params.regionId : 0;
 
-        this.state = {
-            paramsNavCopy:      Object.assign({}, params),
+        const initialState = {
             guests:             params ? params.guests          : 0,
             isHotelSelected:    params ? params.isHotelSelected : false,
             countryId:          params ? params.countryId       : 0,
@@ -63,20 +59,31 @@ class Property extends Component {
             roomsDummyData,
             email:  params? params.email : '',
             token:  params? params.token : '',
+            propertyName:  params? params.propertyName : '',
             urlForService: 'region=' + regionId
-                +'&currency=' + this.props.currency
-                +'&startDate=' + checkInDateFormated
-                +'&endDate=' + checkOutDateFormated
-                +'&rooms=' + roomsDummyData,
-            webViewUrl: '',
+            +'&currency=' + this.props.currency
+            +'&startDate=' + checkInDateFormated
+            +'&endDate=' + checkOutDateFormated
+            +'&rooms=' + roomsDummyData,
             buttonBarEnabled: false,
             canGoBack: false,
             canGoForward: false,
             canGoToResults: false,
             showProgress: true
         }
+        
+        const webViewUrl = basePath + this.generateSearchUrl(
+            initialState, 
+            (params && params.baseUrl)
+                ? params.baseUrl
+                : null
+        );
 
-      
+        this.state = {
+            ...initialState,
+            webViewUrl
+        }
+
         // Fix for using WebView::onMessage
         this.patchPostMessageFunction = function() {
             
@@ -93,9 +100,7 @@ class Property extends Component {
             };
             
             window.postMessage = patchedPostMessage;
-          };
-
-        this.generateSearchUrl()
+        };
 
         this.onBackPress = this.onBackPress.bind(this);
         this.onForwardPress = this.onForwardPress.bind(this);
@@ -119,41 +124,48 @@ class Property extends Component {
         }
     }
 
-    generateSearchUrl() {
-        var paramUrl = ''
-        if ( !this.state.isHotelSelected ) {
-            paramUrl = baseHomeUrl
-            paramUrl += 'countryId=' + this.state.countryId
-                     + '&startDate=' + this.state.checkInDateFormated
-                     + '&endDate=' + this.state.checkOutDateFormated
-                     + '&guests=' + this.state.guests
-                     + '&priceMin=1&priceMax=5000'
-                     + '&currency=' + this.props.currency
-        } else {
-            paramUrl = baseHotelUrl;
-            this.state.urlForService = 'region='+this.state.regionId
+    /**
+     * @baseUrl (String) null if automatically generated
+     */
+    generateSearchUrl(initialState, baseUrl=null) {
+        let result = baseUrl;
+        const baseHomeUrl = 'homes/listings/?'
+        const baseHotelUrl = 'mobile/hotels/listings?'
+            
+        if ( initialState.isHotelSelected ) {
+            // hotels search
+            if (!result) result = baseHotelUrl;
+            initialState.urlForService = 'region='+initialState.regionId
                 +'&currency='+this.props.currency
                 +'&startDate='
-                +this.state.checkInDateFormated
-                +'&endDate='+this.state.checkOutDateFormated
-                +'&rooms='+this.state.roomsDummyData;
-            paramUrl += this.state.urlForService;
+                +initialState.checkInDateFormated
+                +'&endDate='+initialState.checkOutDateFormated
+                +'&rooms='+initialState.roomsDummyData;
+            result += initialState.urlForService;
+        } else {
+            // homes search
+            if (!result) result = baseHomeUrl;
+            result += 'countryId=' + initialState.countryId
+                     + '&startDate=' + initialState.checkInDateFormated
+                     + '&endDate=' + initialState.checkOutDateFormated
+                     + '&guests=' + initialState.guests
+                     + '&priceMin=1&priceMax=5000'
+                     + '&currency=' + this.props.currency
         }
-        paramUrl += '&authEmail=' + this.state.email + '&authToken=' + this.state.token.replace(' ', '%20')
-        this.state.webViewUrl = paramUrl
+        result += '&authEmail=' + initialState.email + '&authToken=' + initialState.token.replace(' ', '%20')
 
-        console.log("Propery - generateSearchUrl", paramUrl);
+        return result;
     }
 
     onSearchPress(event) {
-        this.props.navigation.goBack();
+        // this.props.navigation.goBack();
     }
 
     onResultsPress(event) {
         if (this.state.canGoToResults) {
-            this.webViewRef.ref.goBack();
-            this.webViewRef.ref.goBack();
-            this.webViewRef.ref.goBack();
+            // this.webViewRef.ref.goBack();
+            // this.webViewRef.ref.goBack();
+            // this.webViewRef.ref.goBack();
             this.webViewRef.canGoBackAndroid = false;
             this.setState({canGoBack: false});
             this.setState({canGoForward: true});
@@ -164,10 +176,12 @@ class Property extends Component {
     onBackPress(event) {
         console.log('[Property] back', {wview:this.webViewRef, event});
 
-        if (this.state.canGoBack) {
-            this.webViewRef.ref.goBack();
-            this.setState({canGoForward:true})
-        }
+        // if (this.state.canGoBack) {
+        //     this.webViewRef.ref.goBack();
+        //     this.setState({canGoForward:true})
+        // }
+
+        this.props.navigation.goBack();
     }
 
     onForwardPress(event) {
@@ -224,14 +238,16 @@ class Property extends Component {
     }
 
     onAndroidBackPress = () => {
+        this.props.navigation.goBack();
+
+        /*
         if (this.webViewRef.canGoBackAndroid && this.webViewRef.ref) {
             this.webViewRef.ref.goBack();
             this.setState({canGoForward:true})
             return true;
         } else if (!this.webViewRef.canGoBackAndroid && this.webViewRef.ref) {
-            //
-        }
-    
+        }*/
+
         return false;
     }
 
@@ -370,6 +386,13 @@ class Property extends Component {
         let result = null;
 
         switch (type) {
+            case 'back':
+                result = (
+                    <TouchableOpacity onPress={onPressFunc} >
+                        <IconAwesome name={name} size={this.iconSize} />
+                    </TouchableOpacity>
+                );
+                break;
             case 'forward':
                 const canGoForward = this.state.canGoForward;
                 result = (
@@ -421,6 +444,7 @@ class Property extends Component {
                 {/* <View /> */}
                 {/* { this.renderIcon('map') } */}
                 {/* { this.renderIcon('forward','arrow-right', this.onForwardPress) } */}
+                { this.renderIcon('back','arrow-left', this.onBackPress) }
             </View>
         );
     }
@@ -480,8 +504,8 @@ class Property extends Component {
 
         return (
             <View style={styles.container}>
-                {                               (buttonBarStyle.layout == "top") ? 
-                    this.renderButtonBar(buttonBarStyle)                         : null }
+                {/* {                               (buttonBarStyle.layout == "top") ?  */}
+                    {/* this.renderButtonBar(buttonBarStyle)                         : null } */}
 
                 <View style={styles.content}>
                     <WebView
@@ -499,13 +523,13 @@ class Property extends Component {
 
                 {/* { this.renderButtonsOverBar('bottom') } */}
 
-                {                               (buttonBarStyle.layout == "bottom") ? 
-                    this.renderButtonBar(buttonBarStyle)                            : null }
-
+                {/* {                               (buttonBarStyle.layout == "bottom") ?  */}
+                    {/* this.renderButtonBar(buttonBarStyle)                            : null } */}
+                    { this.renderButtonsOverBar() }
                 <ProgressDialog
                    visible={this.state.showProgress}
-                   title="Searching"
-                   message={`Loading Results for: \r'${this.state.paramsNavCopy.search}'`}
+                   title="Loading"
+                   message={`Getting details for: \n'${this.state.propertyName}'`}
                    animationType="slide"
                    activityIndicatorSize="large"
                    activityIndicatorColor="black"/>
@@ -516,7 +540,8 @@ class Property extends Component {
 
 let mapStateToProps = (state) => {
     return {
-        currency: state.currency.currency
+        currency: state.currency.currency,
+        allState: state
     };
 }
 export default connect(mapStateToProps, null)(Property);

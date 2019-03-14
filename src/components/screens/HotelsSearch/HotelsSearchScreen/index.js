@@ -49,6 +49,7 @@ class HotelsSearchScreen extends Component {
         this.gotoHotelDetailsPageByMap = this.gotoHotelDetailsPageByMap.bind(this)
         this.saveState = this.saveState.bind(this)
         this.unsubscribe = this.stopSocketConnection.bind(this)
+        this.renderListItem = this.renderListItem.bind(this)
         this.onDataFromSocket = this.onDataFromSocket.bind(this)
         this.onStaticData = this.onStaticData.bind(this)
         this.onRefreshResultsOnListView = this.onRefreshResultsOnListView.bind(this)
@@ -80,6 +81,8 @@ class HotelsSearchScreen extends Component {
         console.log("### [HotelsSearchScreen] getHotels", {listView:this.listView});
                     
         this.hotelsIndicesById = {};
+        const _this = this;
+        
         this.setState(
             // change state function
             function(prevState, updatedProps) {
@@ -96,12 +99,12 @@ class HotelsSearchScreen extends Component {
             // callback (after change state above)
             function() {
                 // console.log('SET_STATE 2', {_th:this});
-                requester.getStaticHotels(this.state.regionId).then(res => {
+                requester.getStaticHotels(_this.state.regionId).then(res => {
                     res.body.then(data => {
                         console.log("### [HotelsSearchScreen][SERVER] getStaticHotels", data);
         
-                        if (this.socketDown) {
-                            this.startSocketConnection();
+                        if (_this.socketDown) {
+                            _this.startSocketConnection();
                         }
                     });
                 }
@@ -704,6 +707,7 @@ class HotelsSearchScreen extends Component {
                 gotoHotelDetailsPage = {this.gotoHotelDetailsPageByList}
                 daysDifference = {this.state.daysDifference}
                 isDoneSocket = {this.state.allElements}
+                parent = {this}
             />
         )
     }
@@ -861,14 +865,14 @@ class HotelsSearchScreen extends Component {
                             let hotelsInfo = [...prev.hotelsInfo];
                             let index = this.hotelsIndicesById[hotelData.id];
                             if (index != null) {
-                                // hotel exists in state - update it
+                                // hotel exists in state - update it:
+                                //  - add position (lat,lon) and price
                                 hotelData = Object.assign({},hotelsInfo[index], hotelData);
                                 hotelsInfo[index] = hotelData;
                             } else {
                                 // hotel data not present in state - add it
-                                index = prevHotels.length;
+                                index = hotelsInfo.push(hotelData);
                                 this.hotelsIndicesById[hotelData.id] = index;
-                                hotelsInfo.push(hotelData);
                             }
                             
                             return {

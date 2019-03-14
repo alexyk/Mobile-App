@@ -2,6 +2,7 @@ import {LT_CFG} from './config'
 
 const productVersion = require("../package.json").version;
 const exploreIsNative = true;   // false: webview version, true: native search version
+const hotelitemIsNative = false;
 const travisVersion='';         // this line is updated by .travis.yml, with sed command
 const branchName='';            // this line is updated by .travis.yml, with sed command
 
@@ -16,6 +17,7 @@ tmpDebug += ` - ${ui}`
 
 export const debugVersion = tmpDebug;
 export const isNative = {
-    explore:exploreIsNative
+    explore:exploreIsNative,
+    hotelitem:hotelitemIsNative
 }; 
 export default productVersion;

@@ -49,10 +49,12 @@ class AppLoading extends Component {
 
         console.log("currency", currency);
 
+        // TODO: Fix double caching? Is this outside of Redux cache?
         const keys = await AsyncStorage.getAllKeys();
         const isLoggedIn = keys.includes(`${domainPrefix}.auth.locktrip`) &&
                         keys.includes(`${domainPrefix}.auth.username`);
 
+        // TODO: Fix hidden stompjs code - put it in one place, visible and readable
         if (Platform.OS === 'ios') {
         } else if (Platform.OS === 'android') {
             androidStomp.connect(socketHost);

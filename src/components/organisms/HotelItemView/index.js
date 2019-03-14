@@ -17,6 +17,8 @@ import { CurrencyConverter } from '../../../services/utilities/currencyConverter
 import LocPrice from '../../atoms/LocPrice'
 
 import styles from './styles';
+import {isNative} from '../../../version'
+import { gotoWebview } from '../../screens/HotelsSearch/HotelsSearchScreen/utils';
 
 class HotelItemView extends Component {
     static propTypes = {
@@ -40,9 +42,21 @@ class HotelItemView extends Component {
     onFlatClick = (item) => {
         console.log('flat click', item, this.props);
 
-        // if (item.price != undefined && item.price != null) {
-            this.props.gotoHotelDetailsPage(item);
-        // }
+        if (isNative.hotelitem) {
+            // native
+            if (item.price != undefined && item.price != null) {
+                this.props.gotoHotelDetailsPage(item);
+            }            
+        } else {
+            const {props,state} = this.props.parent;
+            const extraParams = {
+                baseUrl: `mobile/hotels/listings/${item.id}?`,
+                token: props.navigation.state.params.token,
+                email: props.navigation.state.params.email,
+                propertyName: item.name
+            }
+            gotoWebview(state, props.navigation, extraParams);
+        }
     }
 
     renderStars = (count) => {
@@ -110,7 +124,7 @@ class HotelItemView extends Component {
                 <View style={styles.costView}>
                     <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
                         {this.props.isDoneSocket
-                            ? "Unavailable"
+                            ? "Price unavailable"
                             : "Loading price ..."
                         }
                     </Text>
@@ -185,6 +199,7 @@ let mapStateToProps = (state) => {
         
         locAmounts: state.locAmounts,
         exchangeRates: state.exchangeRates,
+        allState: state
     };
 }
 export default connect(mapStateToProps, null)(HotelItemView);

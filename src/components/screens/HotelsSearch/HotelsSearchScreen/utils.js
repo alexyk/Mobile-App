@@ -91,3 +91,20 @@ export function generateSearchString(state, props) {
     search += `&rooms=${state.roomsDummyData}`;
     return search;
 }
+
+
+export function gotoWebview(state, navigation, extraData={}) {
+    navigation.navigate('PropertyScreen', {
+        isHotelSelected: state.isHotel,
+        guests: state.guests,
+        countryId: state.countryId,
+        regionId: state.regionId,
+        checkOutDateFormated: state.checkOutDateFormated,
+        checkInDateFormated: state.checkInDateFormated,
+        roomsDummyData: state.roomsDummyData,//encodeURI(JSON.stringify(state.roomsData)),
+        email: state.email,
+        token: state.token,
+        search: state.search,
+        ...extraData
+    });
+}

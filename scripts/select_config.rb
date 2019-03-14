@@ -24,11 +24,20 @@ select_config = ['src/config.js',
 ]
 native_cfg = ['src/version.js', 
         /const exploreIsNative.*/,
-        'native'   => "const exploreIsNative = true;",
-        'web'      => "const exploreIsNative = false;",
-        'webview'  => "const exploreIsNative = false;",
-        'web-view' => "const exploreIsNative = false;",
-        'wview'    => "const exploreIsNative = false;"
+        {
+          'native'   => [
+            "const exploreIsNative = true;",
+            "const hotelitemIsNative = true;",
+          ],
+          'native1'   => [
+            "const exploreIsNative = true;",
+            "const hotelitemIsNative = false;",
+          ],
+          'web'   => [
+            "const exploreIsNative = false;",
+            "const hotelitemIsNative = false;",
+          ]
+        }
 ]
 
 # help case

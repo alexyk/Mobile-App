@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Debug 'select_config.rb'",
+            "type": "Ruby",
+            "request": "launch",
+            "program": "${workspaceRoot}/scripts/select_config.rb",
+            "args": ["staging","native1"]
+        },
+        {
             "name": "Debug Android",
             "program": "${workspaceRoot}/.vscode/launchReactNative.js",
             "type": "reactnative",
