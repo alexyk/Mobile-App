@@ -93,8 +93,40 @@ export function generateSearchString(state, props) {
 }
 
 
+/**
+ * @initialState (Object) all needed initial properties (see function body)
+ * @baseUrl (String) null if you want to leave it to be automatically generated
+ */
+export function generateWebviewUrl(initialState, rooms, baseUrl=null) {
+    let result = baseUrl;
+    const baseHomeUrl = 'homes/listings/?'
+    const baseHotelUrl = 'mobile/hotels/listings?'
+        
+    if ( initialState.isHotelSelected ) {
+        // hotels specific properties 
+        if (!result) result = baseHotelUrl;
+        result += 'region=' + initialState.regionId
+        result += '&rooms=' + rooms
+    } else {
+        // homes specific properties
+        if (!result) result = baseHomeUrl;
+        result += 'countryId=' + initialState.countryId
+        result += '&guests=' + initialState.guests
+    }
+    
+    // common properties
+    result += '&currency=' + initialState.currency
+    result += '&startDate=' + initialState.checkInDateFormated
+    result += '&endDate=' + initialState.checkOutDateFormated
+    result += '&priceMin=1&priceMax=5000'
+    result += '&authEmail=' + initialState.email 
+    result += '&authToken=' + initialState.token.replace(' ', '%20')
+
+    return result;
+}
+
 export function gotoWebview(state, navigation, extraData={}) {
-    navigation.navigate('PropertyScreen', {
+    navigation.navigate('WebviewScreen', {
         isHotelSelected: state.isHotel,
         guests: state.guests,
         countryId: state.countryId,

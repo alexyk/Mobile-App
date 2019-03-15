@@ -1,27 +1,25 @@
 /**
  * Note:
- *     No need for function.bind(this) for render* functions
- *     There are several render* functions below not binded
- *     in constructor for this reason.
+ *     No need for function.bind(this) for render* functions (except for renderItem)
+ *     There are several render* functions below not binded in constructor
+ *     for this reason. The one binded - renderItem - is not called in render
+ *     method, but it is called by the component UltimateListView.
  */
 
 import { 
-    BackHandler, Platform, Text, View, WebView, TouchableOpacity
+    BackHandler, Platform, View, WebView
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-// import BackButton from '../../atoms/BackButton';
-import UUIDGenerator from 'react-native-uuid-generator';
+import BackButton from '../../atoms/BackButton';
 import styles from './styles';
-// import Icon from "react-native-vector-icons/SimpleLineIcons"
-import IconAwesome from "react-native-vector-icons/FontAwesome"
-// import IconMaterialCommunity from "react-native-vector-icons/MaterialCommunityIcons"
 import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import { basePath } from '../../../config'
+import { generateWebviewUrl } from '../utils';
 
-class Property extends Component {
+class WebviewScreen extends Component {
     iconSize = 30;
 
     webViewRef = {
@@ -36,7 +34,7 @@ class Property extends Component {
     constructor(props) {
         super(props);
         const { params } = this.props.navigation.state;
-        console.log(`[${this.debug()}]### [Property] Constructor `, {params});
+        console.log(`[${this.debug()}]### [WebviewScreen] Constructor `, {params});
 
         // TODO: Figure out what is this for and how was it supposed to work  / commented on by Alex K, 2019-03-06
         // UUIDGenerator.getRandomUUID((uuid) => {
@@ -60,20 +58,16 @@ class Property extends Component {
             email:  params? params.email : '',
             token:  params? params.token : '',
             propertyName:  params? params.propertyName : '',
-            urlForService: 'region=' + regionId
-            +'&currency=' + this.props.currency
-            +'&startDate=' + checkInDateFormated
-            +'&endDate=' + checkOutDateFormated
-            +'&rooms=' + roomsDummyData,
             buttonBarEnabled: false,
             canGoBack: false,
             canGoForward: false,
             canGoToResults: false,
             showProgress: true
         }
-        
-        const webViewUrl = basePath + this.generateSearchUrl(
-            initialState, 
+
+        const webViewUrl = basePath + generateWebviewUrl(
+            initialState,
+            roomsDummyData,
             (params && params.baseUrl)
                 ? params.baseUrl
                 : null
@@ -124,39 +118,6 @@ class Property extends Component {
         }
     }
 
-    /**
-     * @baseUrl (String) null if automatically generated
-     */
-    generateSearchUrl(initialState, baseUrl=null) {
-        let result = baseUrl;
-        const baseHomeUrl = 'homes/listings/?'
-        const baseHotelUrl = 'mobile/hotels/listings?'
-            
-        if ( initialState.isHotelSelected ) {
-            // hotels search
-            if (!result) result = baseHotelUrl;
-            initialState.urlForService = 'region='+initialState.regionId
-                +'&currency='+this.props.currency
-                +'&startDate='
-                +initialState.checkInDateFormated
-                +'&endDate='+initialState.checkOutDateFormated
-                +'&rooms='+initialState.roomsDummyData;
-            result += initialState.urlForService;
-        } else {
-            // homes search
-            if (!result) result = baseHomeUrl;
-            result += 'countryId=' + initialState.countryId
-                     + '&startDate=' + initialState.checkInDateFormated
-                     + '&endDate=' + initialState.checkOutDateFormated
-                     + '&guests=' + initialState.guests
-                     + '&priceMin=1&priceMax=5000'
-                     + '&currency=' + this.props.currency
-        }
-        result += '&authEmail=' + initialState.email + '&authToken=' + initialState.token.replace(' ', '%20')
-
-        return result;
-    }
-
     onSearchPress(event) {
         // this.props.navigation.goBack();
     }
@@ -174,7 +135,7 @@ class Property extends Component {
     }
 
     onBackPress(event) {
-        console.log('[Property] back', {wview:this.webViewRef, event});
+        console.log('[WebviewScreen] back', {wview:this.webViewRef, event});
 
         // if (this.state.canGoBack) {
         //     this.webViewRef.ref.goBack();
@@ -185,7 +146,7 @@ class Property extends Component {
     }
 
     onForwardPress(event) {
-        console.log('[Property] forward', {wview:this.webViewRef, event});
+        console.log('[WebviewScreen] forward', {wview:this.webViewRef, event});
     
         if (this.state.canGoForward) {
             this.webViewRef.ref.goForward();
@@ -251,261 +212,12 @@ class Property extends Component {
         return false;
     }
 
-    renderButton(type, layout, order) {
-        /**
-         * type   - see switch in body below ('filters', 'back', 'forward' ...)
-         * layout - "top" or 'bottom'
-         */
-        let elements = [];
-        let viewStyles = [];
-        let enabledOpacity = true;
-        let isSmall = false;
-
-        switch (type) {
-
-            case 'filters':
-                elements = [
-                    <IconAwesome key={"iconFilters"} name={"filter"} size={this.iconSize} />,
-                    <Text style={styles.buttonText} key={"text"} >Filters</Text>
-                ];
-                viewStyles.push(
-                        {
-                            // backgroundColor:'yellow',
-                            // alignSelf: 'center'
-                        }
-                );
-                break;
-
-            case 'back':
-                elements = [
-                    <IconAwesome key={"iconBack"} name={"arrow-left"} size={this.iconSize*4/5} onPress={this.onBackPress} />,
-                    <Text style={styles.buttonTextSmall} key={"text"} >Back</Text>
-                ];
-                enabledOpacity = this.state.canGoBack;
-                isSmall = true;
-                viewStyles.push(
-                    {
-                        // backgroundColor:'yellow',
-                        // alignSelf: 'center'
-                        marginLeft: (order == 'simple') ? 20 : 0
-                    }
-                );
-                break;
-
-            case 'forward':
-                enabledOpacity = this.state.canGoForward;
-                elements = [
-                    <IconAwesome key={"iconForward"} name={"arrow-right"} size={this.iconSize*4/5} onPress={this.onForwardPress} />,
-                    <Text style={styles.buttonTextSmall} key={"text"}>Forward</Text>
-                ];
-                isSmall = true;
-                viewStyles.push(
-                    {
-                        // backgroundColor:'yellow',
-                        // alignSelf: 'center'
-                        marginRight: ['android','mirror'].indexOf(order)>-1 ? 10 : 0
-                    }
-                );
-                break;
-
-            case 'map':
-                elements = [
-                    <IconAwesome key={"iconMap"} name="map" size={this.iconSize} />,
-                    <Text key={"text"} style={styles.buttonText}>Map</Text>
-                ];
-                viewStyles.push(
-                    {
-                        // backgroundColor:'yellow',
-                        // alignSelf: 'center'
-                    }
-                );
-                break;
-
-            case 'resultsORsearch':
-                const isResults = this.state.canGoToResults;
-                elements = (
-                    isResults
-                        ? [
-                            <IconAwesome key={"iconResuts"} name="list" size={this.iconSize} onPress={this.onResultsPress} />,
-                            <Text style={styles.buttonText} key={"text"}>Results</Text>
-                        ]
-                        : [
-                            <IconAwesome key={"iconSearch"} name="search" size={this.iconSize} onPress={this.onSearchPress} />,
-                            <Text style={styles.buttonText} key={"text"}>Search</Text>
-                        ]
-                );
-                viewStyles.push(
-                    {
-                        // backgroundColor:'pink',
-                        justifyContent:"center",
-                        // borderColor: 'green',
-                        width: 70
-                    }
-                );
-                break;
-        }
-
-        // button text below or under buttons - if layout is top, text is bottom
-        if (layout == 'bottom') elements.reverse();
-
-        // button enabled - 100% opacity, else 10% opacity
-        const opacityStyle = (
-            ( this.state.buttonBarEnabled 
-              && enabledOpacity
-            )
-                ? {opacity: 1}
-                : {opacity: 0.1});
-        viewStyles.push(opacityStyle);
-
-        // container styles
-        if (layout == 'top') {
-            viewStyles.push(
-                isSmall
-                    ? styles.topBarButtonContainerSmall 
-                    : styles.topBarButtonContainer
-            );
-        } else {
-            viewStyles.push(
-                isSmall
-                    ? styles.bottomBarButtonContainerSmall
-                    : styles.bottomBarButtonContainer
-            );
-        }
-
-        // the result rendering
-        return (
-            <View key={type} style={viewStyles}>
-                { elements }
-            </View>
-        )
-    }
-
-    // TODO: Clear or use
-    // not used for now // 2019-03-06, Alex K
-    renderIcon(type, name, onPressFunc) {
-        let result = null;
-
-        switch (type) {
-            case 'back':
-                result = (
-                    <TouchableOpacity onPress={onPressFunc} >
-                        <IconAwesome name={name} size={this.iconSize} />
-                    </TouchableOpacity>
-                );
-                break;
-            case 'forward':
-                const canGoForward = this.state.canGoForward;
-                result = (
-                    canGoForward
-                    ?
-                    <TouchableOpacity onPress={onPressFunc} >
-                        <IconAwesome name={name} size={this.iconSize} />
-                    </TouchableOpacity>
-                    :
-                    <View />
-                );
-                break;
-        }
-        
-        return (
-            <View style={{
-                // backgroundColor: 'orange', 
-                borderWidth:0, 
-                // width: size,
-                // height: size,
-                justifyContent: 'center',
-                alignItems: 'center',
-                alignSelf: 'flex-end',
-                // borderColor:'orange',
-                // borderRadius: size*3/4,
-                marginHorizontal:40,
-                shadowOffset: {width: 0, height: 0},
-                shadowColor: 'red',
-                shadowOpacity: 0.5,
-                shadowRadius: 5
-            }}>
-                {result}
-            </View>
-        );
-    }
-
-    renderButtonsOverBar() {
-        return (
-            <View style={{
-                flexDirection:'row',
-                position:'absolute',
-                justifyContent: 'space-between',
-                width:'100%',
-                // backgroundColor:'red',
-                top: "90%",
-
-            }}>
-                {/* { this.renderIcon('globe-alt') } */}
-                {/* <View /> */}
-                {/* { this.renderIcon('map') } */}
-                {/* { this.renderIcon('forward','arrow-right', this.onForwardPress) } */}
-                { this.renderIcon('back','arrow-left', this.onBackPress) }
-            </View>
-        );
-    }
-
-    renderButtonBar({layout, order}) {
-        const style = ( layout == 'top' ? styles.topBar : styles.bottomBar );
-        const buttonsByOrder = {
-            simple: [
-                this.renderButton('back'           , layout, order),
-                this.renderButton('resultsORsearch', layout, order)
-            ],
-            normal: [
-                this.renderButton('back'           , layout, order),
-                this.renderButton('forward'        , layout, order),
-                this.renderButton('filters'        , layout, order),
-                this.renderButton('map'            , layout, order),
-                this.renderButton('resultsORsearch', layout, order)
-    
-            ],
-            mirror: [
-                this.renderButton('resultsORsearch', layout, order),
-                this.renderButton('map'            , layout, order),
-                this.renderButton('filters'        , layout, order),
-                this.renderButton('back'           , layout, order),
-                this.renderButton('forward'        , layout, order),
-            ],
-            android: [
-                this.renderButton('resultsORsearch', layout, order),
-                this.renderButton('map'            , layout, order),
-                this.renderButton('filters'        , layout, order),
-                this.renderButton('forward'        , layout, order),
-                <View style={{marginRight:10}} />
-                // this.renderButton('back'          , layout),
-            ]
-        };
-
-        return (
-            <View style={style}>
-                { buttonsByOrder[order] }
-            </View>
-        )
-    }
-
     render() {
         const patchPostMessageJsCode = '(' + String(this.patchPostMessageFunction) + ')();';
 
-        // console.log('### [RENDER] State', {
-        //     state: this.state,
-        //     props: this.props,
-        //     webViewRef: this.webViewRef,
-        // });
-        
-        const buttonBarStyle = {
-            layout: 'bottom', // top, bottom 
-            order:  'simple' // mirror, android, normal
-        }
-
         return (
             <View style={styles.container}>
-                {/* {                               (buttonBarStyle.layout == "top") ?  */}
-                    {/* this.renderButtonBar(buttonBarStyle)                         : null } */}
+                <BackButton onPress={this.onBackPress}/>
 
                 <View style={styles.content}>
                     <WebView
@@ -521,11 +233,6 @@ class Property extends Component {
                     />
                 </View>
 
-                {/* { this.renderButtonsOverBar('bottom') } */}
-
-                {/* {                               (buttonBarStyle.layout == "bottom") ?  */}
-                    {/* this.renderButtonBar(buttonBarStyle)                            : null } */}
-                    { this.renderButtonsOverBar() }
                 <ProgressDialog
                    visible={this.state.showProgress}
                    title="Loading"
@@ -544,4 +251,4 @@ let mapStateToProps = (state) => {
         allState: state
     };
 }
-export default connect(mapStateToProps, null)(Property);
+export default connect(mapStateToProps, null)(WebviewScreen);
