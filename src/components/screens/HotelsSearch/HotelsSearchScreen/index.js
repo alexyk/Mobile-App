@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Text, ScrollView, TouchableOpacity, View, Platform, NativeModules, DeviceEventEmitter, Dimensions } from 'react-native';
+import { TouchableOpacity, View, Platform, NativeModules, DeviceEventEmitter, Dimensions } from 'react-native';
 
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 
@@ -22,13 +22,13 @@ import MapModeHotelsSearch from '../MapModeHotelsSearch'
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
 import styles from './styles';
-import { createInitialState, updateIds, generateSearchString } from './utils';
+import { createInitialState, updateIds, generateSearchString } from '../../utils';
+import stomp from 'stomp-websocket-js';
 
 const { width, height } = Dimensions.get('window')
 
 let stompiOSClient = undefined;
-const stompAndroidClient = NativeModules.StompModule;
-const stomp = require('stomp-websocket-js');
+let stompAndroidClient = undefined;
 
 class HotelsSearchScreen extends Component {
     constructor(props) {
@@ -138,7 +138,10 @@ class HotelsSearchScreen extends Component {
 
         // platform specific
         if (Platform.OS === 'ios') {
+            // TODO: Figure out why this is null sometimes
+            if (stompiOSClient) {
             stompiOSClient.disconnect();
+            }
         } else if (Platform.OS === 'android') {
             if (removeListeners) {
                 DeviceEventEmitter.removeAllListeners("onStompConnect");
@@ -146,11 +149,14 @@ class HotelsSearchScreen extends Component {
                 DeviceEventEmitter.removeAllListeners("onStompMessage");
             }
 
+            if (stompAndroidClient) {
             stompAndroidClient.close();
         }
     }
 
     stompAndroidConnect() {
+        stompAndroidClient = NativeModules.StompModule;
+
         // console.log("stompAndroid -------------");
         // console.log("stompAndroid---------------", this.uuid, this.searchString);
         const message = "{\"uuid\":\"" + this.uuid + "\",\"query\":\"" + this.searchString + "\"}";
@@ -781,7 +787,7 @@ class HotelsSearchScreen extends Component {
                         }
 
                         {/* DISABLED FOR NOW */}
-                        {/* { this.renderMapButton()           } */}
+                        { this.renderMapButton()           }
 
                     </View>
                 </View>

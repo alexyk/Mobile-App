@@ -20,16 +20,18 @@ import { basePath } from '../../../config'
 import { generateWebviewUrl } from '../utils';
 
 class WebviewScreen extends Component {
-    iconSize = 30;
+    useDelay = true;
 
     webViewRef = {
         canGoBackAndroid: false,
         ref: null,
     };
 
+    // TODO: Remove this @@debug START
     debug = () => {
         return require('moment')().format('HH:MM:SS')
     }
+    // TODO: Remove this @@debug END
     
     constructor(props) {
         super(props);
@@ -58,7 +60,6 @@ class WebviewScreen extends Component {
             email:  params? params.email : '',
             token:  params? params.token : '',
             propertyName:  params? params.propertyName : '',
-            buttonBarEnabled: false,
             canGoBack: false,
             canGoForward: false,
             canGoToResults: false,
@@ -104,6 +105,9 @@ class WebviewScreen extends Component {
         this.onWebViewLoadEnd = this.onWebViewLoadEnd.bind(this);
         this.onWebViewMessage = this.onWebViewMessage.bind(this);
         this.onWebViewNavigationState = this.onWebViewNavigationState.bind(this);
+
+        this.showPageTimeout = 5;   // how many seconds to wait for loading page
+        this.timeout = null;        // the timer id
     }
 
     componentWillMount() {
@@ -112,10 +116,28 @@ class WebviewScreen extends Component {
         }
     }
 
+    componentDidMount() {
+        if (this.useDelay) {
+            this.showContentWithDelay(this.showPageTimeout);
+        }
+    }
+    
+
     componentWillUnmount() {
         if (Platform.OS === 'android') {
             BackHandler.removeEventListener('hardwareBackPress');
         }
+    }
+
+    showContentWithDelay(timeInSeconds) {
+        const func = () => {
+            this.setState({showProgress: false});
+        }
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(
+            func,
+            timeInSeconds * 1000,
+        );
     }
 
     onSearchPress(event) {
@@ -153,33 +175,66 @@ class WebviewScreen extends Component {
         }
     }
 
-
     onWebViewLoadStart(event) {
-        console.log(`[${this.debug()}] WebView::onLoadStart`,
-            {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state});
+        console.log(`[${this.debug()}] %c WebView::onLoadStart %c`,
+            // {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state},
+            // 'background: #899; color: #F55; font-weight: bold',
+            'color: #F55; font-weight: bold',
+            'background: #FFF; color: #000',
+        );
 
         this.setState({
-            buttonBarEnabled: false,
             canGoToResults: true
         })
     }
     
     onWebViewMessage(event) {
         console.log(`[${this.debug()}] WebView::onMessage`,
-            {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state,event});
+            {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state,event},
+        );
     }
 
     onWebViewLoadEnd(event) {
-        console.log(`[${this.debug()}] WebView::onLoadEnd`,{wview:this.webViewRef});
-        this.setState({
-            showProgress: false,
-            buttonBarEnabled: true
-        })
+        const target = event.target;
+        const ev = target.nativeEvent;
+
+        console.log(`[${this.debug()}] %c WebView::onLoadEnd %c `+
+            (ev != null)
+                ? (
+                    `url:${ev ? ev.url.substr(30,40) : 'n/a'}` +
+                    `back:${ev.canGoBack}` +
+                    `for:${ev.canGoForward}` +
+                    `loaging:${ev.loading}` +
+                    `target:${ev.target}`
+                  )
+                : '',
+            // {wview:this.webViewRef},
+            // 'background: #757; color: #0F0; font-weight: bold',
+            'color: #0A0; font-weight: bold',
+            'background: #FFF; color: #000',
+        );
+
+        debugger;
+
+        if (this.useDelay) {
+            if (this.state.showProgress) {
+                this.showContentWithDelay(0.3);
+            }
+        } else {
+            this.setState({showProgress:false})
+        }
     }
 
     onWebViewNavigationState(navState) {
-        console.log(`[${this.debug()}] WebView::onNavigationState`,
-              {url:String(navState.url).substr(0,60),forw:navState.canGoForward,["back/res"]:navState.canGoBack}, navState);
+        console.log(`[${this.debug()}]`
+            +`WebView::onNavigationState %c back %c:${navState.canGoBack}, %c for %c :${navState.canGoForward}`
+            +`, url:${navState.url.substr(30,40)}`,
+            'font-weight: bold',
+            'font-weight: normal',
+            'font-weight: bold',
+            'font-weight: normal',
+            // ,{url:String(navState.url).substr(0,60),forw:navState.canGoForward,["back/res"]:navState.canGoBack}, navState
+        );
 
         this.webViewRef.canGoBackAndroid = navState.canGoBack;
         this.setState({canGoForward:    navState.canGoForward});
@@ -217,9 +272,7 @@ class WebviewScreen extends Component {
 
         return (
             <View style={styles.container}>
-                <BackButton onPress={this.onBackPress}/>
-
-                <View style={styles.content}>
+                <View style={styles.webviewContainer}>
                     <WebView
                         ref={(webViewRef) => { this.webViewRef.ref = webViewRef; }}
                         onNavigationStateChange = {this.onWebViewNavigationState}
@@ -231,6 +284,10 @@ class WebviewScreen extends Component {
                         source = {{ uri: this.state.webViewUrl }}
                         // javaScriptEnabled={true}
                     />
+                </View>
+
+                <View style={styles.backButtonContainer}>
+                    <BackButton onPress={this.onBackPress} isWhite />
                 </View>
 
                 <ProgressDialog

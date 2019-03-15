@@ -6,7 +6,8 @@
     "development": {
       "plugins": [
         "transform-decorators-legacy",
-        "transform-react-jsx-source"
+        "transform-react-jsx-source",
+        "syntax-dynamic-import",
       ]
     }
   }
