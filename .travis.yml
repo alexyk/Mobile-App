@@ -19,7 +19,7 @@ jobs:
         - dir2=$dir1/logs_ios
         - core_sim_log=$HOME/Library/Logs/CoreSimulator/CoreSimulator.log
         - msg=$(git log  --pretty="format:%s" -1)
-        - var1=ios/build/MobileApp/Build/Products/Release-iphonesimulator/
+        - var1=ios/build/Build/Products/Release-iphonesimulator/
       before_install:
         - echo -n "Starting " > info.txt
         - date >> info.txt
