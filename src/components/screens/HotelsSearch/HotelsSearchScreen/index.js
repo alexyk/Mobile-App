@@ -150,7 +150,8 @@ class HotelsSearchScreen extends Component {
             }
 
             if (stompAndroidClient) {
-            stompAndroidClient.close();
+              stompAndroidClient.close();
+            }
         }
     }
 
