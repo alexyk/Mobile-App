@@ -28,7 +28,7 @@ xcodebuild \
 
 # zip
 if [ -n "$zip_name" ]; then
-    ls -Rlh
+    ls -Rlh ios/build
     cd $out_dir
     zip -qr $zip_name $app_name
     mv $zip_name $TRAVIS_BUILD_DIR/
