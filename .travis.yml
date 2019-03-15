@@ -12,12 +12,9 @@ jobs:
       node_js:
       - 8.14.1
       env:
-        - app_ios_prod=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.zip"
-          && tmp=${tmp//\//-} && echo $tmp)
-        - app_ios_staging=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.zip"
-          && tmp=${tmp//\//-} && echo $tmp)
-        - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER
-          && echo $tmp)
+        - app_ios_prod=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.zip" && tmp=${tmp//\//-} && echo $tmp)
+        - app_ios_staging=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.zip" && tmp=${tmp//\//-} && echo $tmp)
+        - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER && echo $tmp)
         - dir2=$dir1/logs_ios
         - core_sim_log=$HOME/Library/Logs/CoreSimulator/CoreSimulator.log
         - msg=$(git log  --pretty="format:%s" -1)
