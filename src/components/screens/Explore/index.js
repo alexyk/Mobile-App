@@ -27,7 +27,7 @@ import LocRateButton from '../../atoms/LocRateButton'
 import { setCurrency } from '../../../redux/action/Currency'
 
 import {isNative} from '../../../version'
-import { gotoWebview } from '../HotelsSearch/HotelsSearchScreen/utils';
+import { gotoWebview } from '../utils';
 const isExploreSearchNative = isNative.explore; // false: webview version, true: native search version
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
 

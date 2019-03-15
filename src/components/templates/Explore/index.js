@@ -85,7 +85,7 @@ class Explore extends Component {
     }
 
     gotoSearch() {
-        this.props.navigation.navigate('PropertyScreen');
+        this.props.navigation.navigate('WebviewScreen');
     }
 
     renderHomes() {

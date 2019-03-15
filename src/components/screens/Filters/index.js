@@ -238,7 +238,7 @@ export default class Filters extends Component {
         }
         
         console.log(this.state.rooms);
-        this.props.navigation.navigate('PropertyScreen', {
+        this.props.navigation.navigate('WebviewScreen', {
             searchedCity: params.search, 
             searchedCityId: 72, 
             checkInDate : params.checkInDate, 

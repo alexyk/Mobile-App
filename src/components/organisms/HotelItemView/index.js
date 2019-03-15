@@ -18,7 +18,7 @@ import LocPrice from '../../atoms/LocPrice'
 
 import styles from './styles';
 import {isNative} from '../../../version'
-import { gotoWebview } from '../../screens/HotelsSearch/HotelsSearchScreen/utils';
+import { gotoWebview } from '../../screens/utils';
 
 class HotelItemView extends Component {
     static propTypes = {

@@ -60,7 +60,7 @@ import ReviewSend from '../components/screens/Booking/ReviewSend';
 import ReviewTrip from '../components/screens/Booking/ReviewTrip';
 import RequestAccepted from '../components/screens/Booking/RequestAccepted';
 
-import PropertyScreen from '../components/screens/Property';
+import WebviewScreen from '../components/screens/Webview';
 import Filters from '../components/screens/Filters';
 import AvailableRoomsView from '../components/molecules/AvailableRoomsView'
 import UserProfile from '../components/screens/UserProfile';
@@ -134,7 +134,7 @@ const RootNavigator = createStackNavigator(
         CalendarScreen: {screen: Calendar},
         RoomDetailsReview: { screen: RoomDetailsReview},
         GuestInfoForm: { screen: GuestInfoForm},
-        PropertyScreen: {screen: PropertyScreen},
+        WebviewScreen: {screen: WebviewScreen},
         PropertyList : {screen: PropertyList},
         HotelDetails:{ screen: HotelDetails},
         PropertyFacilitesScreen: { screen: PropertyFacilites },
