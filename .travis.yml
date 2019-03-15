@@ -3,6 +3,7 @@ stages:
     if: branch IN (master, staging, tools/travis-ci, dev-my)
   - name: build android
     if: branch IN (tools/travis-ci_android)
+
 jobs:
   include:
     - stage: build ios
@@ -10,7 +11,7 @@ jobs:
       osx_image: xcode9.3
       language: node_js
       node_js:
-      - 8.14.1
+        - 8.14.1
       env:
         - app_ios_prod=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.zip" && tmp=${tmp//\//-} && echo $tmp)
         - app_ios_staging=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.zip" && tmp=${tmp//\//-} && echo $tmp)
@@ -56,13 +57,13 @@ jobs:
         - df -hs >> info.txt
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
         - zip ios.zip ios_staging.diff ios_prod.diff $app_ios_prod $app_ios_staging $TRAVIS_JOB_NUMBER.log $log_file info.txt
-    deploy:
-      provider: releases
-      api_key: 8a3befac36afe65c08a9e9d34a00402c5159e01f
-      file: "ios.zip"
-      on:
-        repo: alexyk/Mobile-App
-        branch: dev-my
+      deploy:
+        provider: releases
+        api_key: 8a3befac36afe65c08a9e9d34a00402c5159e01f
+        file: "ios.zip"
+        on:
+          repo: alexyk/Mobile-App
+          branch: dev-my
         
     - stage: build android
       os: linux
