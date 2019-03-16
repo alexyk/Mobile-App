@@ -11,11 +11,13 @@ jobs:
     - stage: test deploy
       env: dir=$HOME/tmp
       script:
+        - eval "$(ssh-agent -s)"
         - chmod 600 ./uploads_github
         - ssh-add ./uploads_github
-        - ssh -T git@github.com
+        - ssh  -o "StrictHostKeyChecking no" -T git@github.com
         - mkdir -p $dir
-#        - git clone https://github.com/alexyk/uploads $dir
+        - echo > ni
+        - scp -o "StrictHostKeyChecking no" ni git@github.com
         
     - stage: build ios
       os: osx
