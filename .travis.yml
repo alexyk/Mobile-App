@@ -62,7 +62,7 @@ jobs:
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
         - zip ios.zip ios_staging.diff ios_prod.diff $app_ios_prod $app_ios_staging $TRAVIS_JOB_NUMBER.log $log_file info.txt
         - mkdir -p $dir
-        - git clone git@github.com:alexyk/uploads.git $dir
+        - echo yes | git clone git@github.com:alexyk/uploads.git $dir
         - git add ios.zip
         - msg2=$(date)
         - GIT_COMMITTER_NAME="alexyk" GIT_COMMITTER_EMAIL="alexyk@travis-ci-Mac.local" git commit --author="Alex K" -m "Upload '$msg2'"
