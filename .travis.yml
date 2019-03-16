@@ -65,7 +65,7 @@ jobs:
         - git clone git://github.com/alexyk/uploads $dir
         - git add ios.zip
         - msg2=$(date)
-        - git commit -m "Upload '$msg2'"
+        - git commit --author alexyk -m "Upload '$msg2'"
         - git push origin HEAD:master
         
     - stage: build android
