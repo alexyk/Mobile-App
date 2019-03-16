@@ -1,11 +1,22 @@
 stages:
+  - name: test deploy
+    if: branch IN (dev-my)
   - name: build ios
-    if: branch IN (master, staging, tools/travis-ci, dev-my)
+    if: branch IN (master, staging, tools/travis-ci)
   - name: build android
     if: branch IN (tools/travis-ci_android)
 
 jobs:
   include:
+    - stage: test deploy
+      env: dir=$HOME/tmp
+      script:
+        - chmod 600 ./uploads_github
+        - ssh-add ./uploads_github
+        - ssh -T git@github.com
+        - mkdir -p $dir
+#        - git clone https://github.com/alexyk/uploads $dir
+        
     - stage: build ios
       os: osx
       osx_image: xcode9.3
