@@ -16,8 +16,11 @@ jobs:
         - ssh-add ./uploads_github
         - ssh  -o "StrictHostKeyChecking no" -T git@github.com
         - mkdir -p $dir
-        - echo > ni
-        - scp -o "StrictHostKeyChecking no" ni git@github.com
+        - git clone git://github.com/alexyk/uploads $dir
+        - ls -laht > $dir/info.txt
+        - cd $dir
+        - git add info.txt
+        - git push
         
     - stage: build ios
       os: osx
