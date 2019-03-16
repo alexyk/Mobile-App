@@ -1,27 +1,11 @@
 stages:
-  - name: test deploy
-    if: branch IN (dev-my)
   - name: build ios
-    if: branch IN (master, staging, tools/travis-ci)
+    if: branch IN (master, staging, tools/travis-ci, dev-my)
   - name: build android
     if: branch IN (tools/travis-ci_android)
 
 jobs:
   include:
-    - stage: test deploy
-      env: dir=$HOME/tmp
-      script:
-        - eval "$(ssh-agent -s)"
-        - chmod 600 ./uploads_github
-        - ssh-add ./uploads_github
-        - ssh  -o "StrictHostKeyChecking no" -T git@github.com
-        - mkdir -p $dir
-        - git clone git://github.com/alexyk/uploads $dir
-        - ls -laht > $dir/info.txt
-        - cd $dir
-        - git add info.txt
-        - git push
-        
     - stage: build ios
       os: osx
       osx_image: xcode9.3
@@ -36,7 +20,11 @@ jobs:
         - core_sim_log=$HOME/Library/Logs/CoreSimulator/CoreSimulator.log
         - msg=$(git log  --pretty="format:%s" -1)
         - var1=ios/build/Build/Products/Release-iphonesimulator/
+        - dir=$HOME/tmp
       before_install:
+        - eval "$(ssh-agent -s)"
+        - chmod 600 ./uploads_github
+        - ssh-add ./uploads_github
         - echo -n "Starting " > info.txt
         - date >> info.txt
         - date
@@ -73,13 +61,12 @@ jobs:
         - df -hs >> info.txt
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
         - zip ios.zip ios_staging.diff ios_prod.diff $app_ios_prod $app_ios_staging $TRAVIS_JOB_NUMBER.log $log_file info.txt
-      deploy:
-        provider: releases
-        api_key: 8a3befac36afe65c08a9e9d34a00402c5159e01f
-        file: "ios.zip"
-        on:
-          repo: alexyk/Mobile-App
-          branch: dev-my
+        - mkdir -p $dir
+        - git clone git://github.com/alexyk/uploads $dir
+        - git add ios.zip
+        - msg2=$(date)
+        - git commit -m "Upload '$msg2'"
+        - git push
         
     - stage: build android
       os: linux
@@ -87,12 +74,9 @@ jobs:
       language: android
       jdk: oraclejdk8
       env:
-        - app_ios_prod=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.apk"
-          && tmp=${tmp//\//-} && echo $tmp)
-        - app_ios_staging=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.apk"
-          && tmp=${tmp//\//-} && echo $tmp)
-        - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER
-          && echo $tmp)
+        - app_ios_prod=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.apk" && tmp=${tmp//\//-} && echo $tmp)
+        - app_ios_staging=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.apk" && tmp=${tmp//\//-} && echo $tmp)
+        - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER && echo $tmp)
         - dir2=$dir1/logs_android
         - msg=$(git log  --pretty="format:%s" -1)
       android:
@@ -119,8 +103,6 @@ jobs:
         - git diff > anrdoid_staging.diff
       after_success:
         - ls -lh *apk
-        - scp -o "StrictHostKeyChecking no" $apk_prod "$var_799cfba7:$dir1"
-        - scp -o "StrictHostKeyChecking no" $apk_staging "$var_799cfba7:$dir1"
       after_script:
         - date
         - ls -lahtO
