@@ -60,6 +60,7 @@ class WebviewScreen extends Component {
             email:  params? params.email : '',
             token:  params? params.token : '',
             propertyName:  params? params.propertyName : '',
+            message:  params? params.message : '',
             canGoBack: false,
             canGoForward: false,
             canGoToResults: false,
@@ -293,7 +294,7 @@ class WebviewScreen extends Component {
                 <ProgressDialog
                    visible={this.state.showProgress}
                    title="Loading"
-                   message={`Getting details for: \n'${this.state.propertyName}'`}
+                   message={this.state.message ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
                    animationType="slide"
                    activityIndicatorSize="large"
                    activityIndicatorColor="black"/>

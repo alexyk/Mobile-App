@@ -233,14 +233,13 @@ def main_exec(changes)
   changes.each_with_index do |current,i|
     current.each do |key,item|
       j+=1
-      puts("\n  Executing change (#{j}) #{key}")
+      puts("\n  Executing change (#{j}) #{key}, #{item['name']}")
       puts("  ------------------------------------------------")
       name = key
       regex = item["regex"]
       file = item["file"]
       target = item["target"]
-      puts("  Reading file #{file}")
-      # puts("  targetacing regex result of '#{regex}'(#{regex.class.to_s}) with '#{target}(#{target.class.to_s}')\n")
+      puts("  Reading file '#{file}'")
       replace_line_in_file(file, regex, target, item)
       puts("\n\n")
     end

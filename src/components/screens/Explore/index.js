@@ -330,7 +330,13 @@ class Explore extends Component {
                 return;
             }
             else {
-                gotoWebview(this.state, this.navigation);
+                const {props,state} = this;
+                const extraParams = {
+                    token: state.token,
+                    email: state.email,
+                    message: `Looking for hotels in\n"${state.search}"`
+                }
+                gotoWebview(state, props.navigation, extraParams);
             }
         }
     }

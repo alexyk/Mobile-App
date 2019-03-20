@@ -25,7 +25,7 @@
             // "args": ["native1"],
         },
         {
-            "name": "RN: Debug Android",
+            "name": "RN: Android",
             "program": "${workspaceRoot}/.vscode/launchReactNative.js",
             "type": "reactnative",
             "request": "launch",
@@ -34,7 +34,7 @@
             "outDir": "${workspaceRoot}/.vscode/.react"
         },
         {
-            "name": "RN: Debug iOS",
+            "name": "RN: iOS",
             "program": "${workspaceRoot}/.vscode/launchReactNative.js",
             "type": "reactnative",
             "request": "launch",
