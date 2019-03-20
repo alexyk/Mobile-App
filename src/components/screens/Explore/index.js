@@ -19,6 +19,7 @@ import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
 import requester from '../../../initDependencies';
 import styles from './styles';
+import lang from '../../../language';
 import { userInstance } from '../../../utils/userInstance';
 import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectMaterialDialog';
 
@@ -334,7 +335,14 @@ class Explore extends Component {
                 const extraParams = {
                     token: state.token,
                     email: state.email,
-                    message: `Looking for hotels in\n"${state.search}"`
+                    message: this.state.isHotel
+                        ? `Looking for hotels in\n"${state.search}"`
+                        : `Looking for homes in\n"${state.search}"`,
+                    title: this.state.isHotel
+                        ? lang.TEXT.SEARCH_HOTEL_RESULTS_TILE
+                        : lang.TEXT.SEARCH_HOME_RESULTS_TILE,
+                    isHotel: this.state.isHotel
+                    
                 }
                 gotoWebview(state, props.navigation, extraParams);
             }

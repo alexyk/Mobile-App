@@ -4,6 +4,7 @@ import React, { Component } from 'react';
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 import Switch from 'react-native-customisable-switch';
+import BackButton from '../../atoms/BackButton';
 import styles from './styles';
 import { userInstance } from '../../../utils/userInstance';
 
@@ -48,10 +49,7 @@ class Notifications extends Component {
 
                 <View style={styles.heading}>
 
-                    <TouchableOpacity onPress={() => navigate('PROFILE')}>
-                        <Image style={styles.btn_backImage} source={require('../../../../src/assets/icons/icon-back-black.png')} />
-                    </TouchableOpacity>
-
+                    <BackButton onPress={() => navigate('PROFILE')} />
 
                     <View><Text style={styles.titleText}>Notifications</Text></View>
 

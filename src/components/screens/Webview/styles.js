@@ -11,23 +11,29 @@ const styles = StyleSheet.create({
     webviewContainer: {
         flex: 0.89,
     },
+    backButton: {
+        marginLeft: 10,
+        // backgroundColor: 'pink',
+    },
+    backButtonImage: {
+        // backgroundColor: 'yellow',
+    },
     backButtonContainer:{
         flex: 0.11,
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        backgroundColor: '#FFF0',
+        backgroundColor: '#FFF8',
     },
-    backButtonText: {
+    title: {
         ...commonText,
         color: 'black',
-        alignSelf:'center',
-        paddingTop: 45,
-        paddingLeft: 10,
-        // backgroundColor: '#FF0',
+        marginTop: 5,
+        marginLeft: 20,
+        fontSize: 20
+        // backgroundColor: 'red',
     },
     webView: {
-        // marginTop: 10
     },
 });
 export default styles;

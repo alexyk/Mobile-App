@@ -1,18 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import SVGButton from '../SVGButton'
-import styles from './styles';
 
 const BackButton = function(props) {
+    let image = '';
     if (props.isWhite) {
-        return (
-            <SVGButton style={styles.BackButton} image={require('../../../assets/png/arrow-back-white.png')} onPress={props.onPress}/>
-        );
+        image = require('../../../assets/png/arrow-back-white.png');
     } else {
-        return (
-            <SVGButton style={styles.BackButton} image={require('../../../assets/png/arrow-back.png')} onPress={props.onPress}/>
-        );
+        image = require('../../../assets/png/arrow-back.png');
     }
+
+    return (
+        <SVGButton 
+            style={props.style}
+            imageStyle={props.imageStyle}
+            image={image}
+            onPress={props.onPress}/>
+    );
 }
 
 BackButton.propTypes = {

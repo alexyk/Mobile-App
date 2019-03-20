@@ -1,6 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native';
-const dimensionWindows = Dimensions.get('window');
+import { commonComponents } from "../../../common.styles"
 
+const dimensionWindows = Dimensions.get('window');
 const avatarWidth = dimensionWindows.width;
 const avatarHeight = avatarWidth * 30 / 55;
 
@@ -31,6 +32,7 @@ const styles = StyleSheet.create({
     },
 
     closeButton: {
+        ...commonComponents.backButton
     },
 
     title: {

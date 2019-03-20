@@ -17,6 +17,7 @@ import styles from './styles';
 import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import { basePath } from '../../../config'
+import lang from '../../../language'
 import { generateWebviewUrl } from '../utils';
 
 class WebviewScreen extends Component {
@@ -57,10 +58,12 @@ class WebviewScreen extends Component {
             checkInDateFormated,
             checkOutDateFormated,
             roomsDummyData,
-            email:  params? params.email : '',
-            token:  params? params.token : '',
-            propertyName:  params? params.propertyName : '',
-            message:  params? params.message : '',
+            email:  params ? params.email : '',
+            token:  params ? params.token : '',
+            propertyName: params ? params.propertyName : '',
+            message:  params ? params.message : '',
+            title:  params ? params.title : '',
+            isHotel:  params ? params.isHotel : null,
             canGoBack: false,
             canGoForward: false,
             canGoToResults: false,
@@ -131,8 +134,13 @@ class WebviewScreen extends Component {
     }
 
     showContentWithDelay(timeInSeconds) {
+        let _this = this;
         const func = () => {
-            this.setState({showProgress: false});
+            //console.log('[WebView] showContentWithDelay',_this)
+
+            if (_this) {
+                _this.setState({showProgress: false});
+            }
         }
         clearTimeout(this.timeout);
         this.timeout = setTimeout(
@@ -239,23 +247,36 @@ class WebviewScreen extends Component {
         this.webViewRef.canGoBackAndroid = navState.canGoBack;
         this.setState({canGoForward:    navState.canGoForward});
 
+
+        const urlIsItemDetails = String(navState.url).match(/listings\/[0-9]/)
+        const urlIsSearchResults = String(navState.url).match(/listings\//)
+
         // Page Name (flow step)    Url
         //------------------------  -----------------------------------------------------
         // 1) results               ...locktrip.com/mobile/listings?...
         // 2) hotel details         ...locktrip.com/mobile/listings/<hotel-id>...
         // 3) booking               (same as 2) - maybe it needs WebApp work to show??? // Alex K, 2019-03-06)
             // page/flow-step 2 for "Results" button enabled
-        this.setState({canGoToResults:  String(navState.url).match(/listings\//)}); 
+        this.setState({canGoToResults:  urlIsSearchResults}); 
             // page/flow-step 2 for "Results" button enabled
-        this.setState({canGoBack:       String(navState.url).match(/listings\/[0-9]/)});
+        this.setState({canGoBack:       urlIsItemDetails});
         // this.setState({canGoBack:       navState.canGoBack});
+
+        const title = (urlIsSearchResults
+            ? (this.state.isHotel 
+                    ? lang.TEXT.SEARCH_HOTEL_RESULTS_TILE
+                    : lang.TEXT.SEARCH_HOME_RESULTS_TILE
+            )
+            : (this.state.isHotel 
+                    ? lang.TEXT.SEARCH_HOTEL_DETAILS_TILE
+                    : lang.TEXT.SEARCH_HOME_DETAILS_TILE
+            )
+        );
 
         // console.log(`[${this.debug()}]@##@ onNavigationState`,{navState})
     }
 
     onAndroidBackPress = () => {
-        this.props.navigation.goBack();
-
         /*
         if (this.webViewRef.canGoBackAndroid && this.webViewRef.ref) {
             this.webViewRef.ref.goBack();
@@ -273,8 +294,8 @@ class WebviewScreen extends Component {
         return (
             <View style={styles.container}>
                 <View style={styles.backButtonContainer}>
-                    <BackButton onPress={this.onBackPress} />
-                    <Text style={styles.backButtonText}>Go Back</Text>
+                    <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
+                    <Text style={styles.title}>{this.state.title}</Text>
                 </View>
 
                 <View style={styles.webviewContainer}>

@@ -17,6 +17,7 @@ import { CurrencyConverter } from '../../../services/utilities/currencyConverter
 import LocPrice from '../../atoms/LocPrice'
 
 import styles from './styles';
+import lang from '../../../language';
 import {isNative} from '../../../version'
 import { gotoWebview } from '../../screens/utils';
 
@@ -53,7 +54,9 @@ class HotelItemView extends Component {
                 baseUrl: `mobile/hotels/listings/${item.id}?`,
                 token: props.navigation.state.params.token,
                 email: props.navigation.state.params.email,
-                propertyName: item.name
+                propertyName: item.name,
+                title: lang.TEXT.SEARCH_HOTEL_DETAILS_TILE,
+                isHotel: true
             }
             gotoWebview(state, props.navigation, extraParams);
         }

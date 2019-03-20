@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { commonComponents } from '../../../common.styles';
 
 const styles = StyleSheet.create({
     container: {
@@ -27,6 +28,7 @@ const styles = StyleSheet.create({
     },
 
     closeButton: {
+        ...commonComponents.backButton
     },
 
     gender: {
@@ -53,7 +55,7 @@ const styles = StyleSheet.create({
     },
 
     closeButton: {
-        zIndex: 1,
+        ...commonComponents.backButton
     },
 
     body: {

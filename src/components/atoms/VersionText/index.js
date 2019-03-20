@@ -12,7 +12,7 @@ import productVersion, {debugVersion} from '../../../version';
 class VersionText extends PureComponent {
     static propTypes = {
         color: PropTypes.string,
-        size: PropTypes.string,
+        size: PropTypes.number,
         style: PropTypes.object,
         textStyle: PropTypes.object,
         debug: PropTypes.bool
