@@ -73,7 +73,7 @@ def replace_line_in_file(file_name, line_pattern, target, item)
   end
 
   text = File.read(file_name)
-  puts("Replacing '#{line_pattern}' with '#{target}'")
+  puts("  Replacing '#{line_pattern}' with '#{target}'")
   new_contents = text.gsub(line_pattern, target)
   File.open(file_name, "w") {|file| file.puts new_contents }
 end

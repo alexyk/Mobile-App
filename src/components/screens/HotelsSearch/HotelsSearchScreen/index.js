@@ -153,6 +153,7 @@ class HotelsSearchScreen extends Component {
                 stompAndroidClient.close();
             }
         }
+    }
 
     stompAndroidConnect() {
         stompAndroidClient = NativeModules.StompModule;
