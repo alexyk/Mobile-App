@@ -7,7 +7,7 @@
  */
 
 import { 
-    BackHandler, Platform, View, WebView
+    BackHandler, Platform, View, WebView, Text
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -29,7 +29,7 @@ class WebviewScreen extends Component {
 
     // TODO: Remove this @@debug START
     debug = () => {
-        return require('moment')().format('HH:MM:SS')
+        return require('moment')().format('hh:mm:ss')
     }
     // TODO: Remove this @@debug END
     
@@ -162,9 +162,9 @@ class WebviewScreen extends Component {
         // if (this.state.canGoBack) {
         //     this.webViewRef.ref.goBack();
         //     this.setState({canGoForward:true})
+        // } else {
+            this.props.navigation.goBack();
         // }
-
-        this.props.navigation.goBack();
     }
 
     onForwardPress(event) {
@@ -199,22 +199,21 @@ class WebviewScreen extends Component {
         const ev = target.nativeEvent;
 
         console.log(`[${this.debug()}] %c WebView::onLoadEnd %c `+
-            (ev != null)
+            ((ev != null)
                 ? (
-                    `url:${ev ? ev.url.substr(30,40) : 'n/a'}` +
+                    `url:${ev ? ev.url.substr(29,40) : 'n/a'}` +
                     `back:${ev.canGoBack}` +
                     `for:${ev.canGoForward}` +
                     `loaging:${ev.loading}` +
                     `target:${ev.target}`
                   )
-                : '',
+                : ''
+            ),
             // {wview:this.webViewRef},
             // 'background: #757; color: #0F0; font-weight: bold',
             'color: #0A0; font-weight: bold',
             'background: #FFF; color: #000',
         );
-
-        debugger;
 
         if (this.useDelay) {
             if (this.state.showProgress) {
@@ -228,7 +227,7 @@ class WebviewScreen extends Component {
     onWebViewNavigationState(navState) {
         console.log(`[${this.debug()}]`
             +`WebView::onNavigationState %c back %c:${navState.canGoBack}, %c for %c :${navState.canGoForward}`
-            +`, url:${navState.url.substr(30,40)}`,
+            +`, url:${navState.url.substr(29,40)}`,
             'font-weight: bold',
             'font-weight: normal',
             'font-weight: bold',
@@ -272,6 +271,11 @@ class WebviewScreen extends Component {
 
         return (
             <View style={styles.container}>
+                <View style={styles.backButtonContainer}>
+                    <BackButton onPress={this.onBackPress} />
+                    <Text style={styles.backButtonText}>Go Back</Text>
+                </View>
+
                 <View style={styles.webviewContainer}>
                     <WebView
                         ref={(webViewRef) => { this.webViewRef.ref = webViewRef; }}
@@ -284,10 +288,6 @@ class WebviewScreen extends Component {
                         source = {{ uri: this.state.webViewUrl }}
                         // javaScriptEnabled={true}
                     />
-                </View>
-
-                <View style={styles.backButtonContainer}>
-                    <BackButton onPress={this.onBackPress} isWhite />
                 </View>
 
                 <ProgressDialog

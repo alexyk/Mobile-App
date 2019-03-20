@@ -1,10 +1,11 @@
 import {LT_CFG} from './config'
 
 const productVersion = require("../package.json").version;
-const exploreIsNative = true;   // false: webview version, true: native search version
-const hotelitemIsNative = false;
-const travisVersion='';         // this line is updated by .travis.yml, with sed command
-const branchName='';            // this line is updated by .travis.yml, with sed command
+const exploreIsNative = true;   // false: webview version, true: native search version (also updated by scripts/select_config.rb)
+const hotelitemIsNative = false;// this line is updated by scripts/select_config.rb
+const travisVersion='';         // this line is updated by scripts/select_config.rb
+const branchName='';            // this line is updated by scripts/select_config.rb
+const compilationTime = "";     // this line is updated by scripts/select_config.rb
 
 let ui = '';
 ui += `${exploreIsNative ? 'NX' : 'wvX'}`;
@@ -12,12 +13,14 @@ ui += `${exploreIsNative ? 'NX' : 'wvX'}`;
 let tmpDebug = `${productVersion}`
 if (travisVersion.length > 0)   tmpDebug += ` - ${travisVersion}`
 if (branchName.length > 0)      tmpDebug += ` - ${branchName}`
+tmpDebug += ` - [${compilationTime}] -- `
 tmpDebug += ` - ${LT_CFG.toLowerCase()}`
 tmpDebug += ` - ${ui}`
 
 export const debugVersion = tmpDebug;
 export const isNative = {
-    explore:exploreIsNative,
-    hotelitem:hotelitemIsNative
-}; 
+    explore: exploreIsNative,
+    hotelItem: hotelitemIsNative,
+};
+
 export default productVersion;

@@ -150,7 +150,7 @@ class Explore extends Component {
     // }
 
     setCountriesInfo() {
-        countryArr = [];
+        let countryArr = [];
         this.props.countries.map((item, i) => {
             countryArr.push({
                 label: item.name,

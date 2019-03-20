@@ -5,14 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug 'select_config.rb'",
+            "name": "Ruby: Listen for rdebug-ide",
+            "type": "Ruby",
+            "request": "attach",
+            "remoteHost": "127.0.0.1",
+            "remotePort": "1234",
+            "remoteWorkspaceRoot": "${workspaceRoot}"
+        },
+        {
+            "name": "Ruby: Debug 'select_config.rb'",
             "type": "Ruby",
             "request": "launch",
             "program": "${workspaceRoot}/scripts/select_config.rb",
-            "args": ["staging","native1"]
+            // "args": [],
+            // "args": ["staging","native1"],
+            // "args": ["staging","web"],
+            // "args": ["web"],
+            "args": ["web", "staging"],
+            // "args": ["native1"],
         },
         {
-            "name": "Debug Android",
+            "name": "RN: Debug Android",
             "program": "${workspaceRoot}/.vscode/launchReactNative.js",
             "type": "reactnative",
             "request": "launch",
@@ -21,7 +34,7 @@
             "outDir": "${workspaceRoot}/.vscode/.react"
         },
         {
-            "name": "Debug iOS",
+            "name": "RN: Debug iOS",
             "program": "${workspaceRoot}/.vscode/launchReactNative.js",
             "type": "reactnative",
             "request": "launch",
@@ -30,7 +43,7 @@
             "outDir": "${workspaceRoot}/.vscode/.react"
         },
         {
-            "name": "Attach to packager",
+            "name": "RN: Attach to packager",
             "program": "${workspaceRoot}/.vscode/launchReactNative.js",
             "type": "reactnative",
             "request": "attach",
@@ -38,7 +51,7 @@
             "outDir": "${workspaceRoot}/.vscode/.react"
         },
         {
-            "name": "Debug in Exponent",
+            "name": "RN: Debug in Exponent",
             "program": "${workspaceRoot}/.vscode/launchReactNative.js",
             "type": "reactnative",
             "request": "launch",

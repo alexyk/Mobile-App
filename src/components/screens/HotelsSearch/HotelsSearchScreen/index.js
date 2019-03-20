@@ -88,8 +88,8 @@ class HotelsSearchScreen extends Component {
             function(prevState, updatedProps) {
                 // console.log('SET_STATE 1', {prevState,updatedProps})
                 return {
-                    isMAP: 0, // TODO: Value was -1, set to 0 to be able to work with whatever map behaviour was before
-                            // Figure out how to work with Map logic and whether this var isMAP is needed
+                    isMAP: -1, // TODO: Value was -1, set to 0 to be able to work with whatever map behaviour was before
+                               // Figure out how to work with Map logic and whether this var isMAP is needed
                     hotelsInfo : [],
                     allElements: false, 
                     editable: false
@@ -140,7 +140,7 @@ class HotelsSearchScreen extends Component {
         if (Platform.OS === 'ios') {
             // TODO: Figure out why this is null sometimes
             if (stompiOSClient) {
-            stompiOSClient.disconnect();
+                stompiOSClient.disconnect();
             }
         } else if (Platform.OS === 'android') {
             if (removeListeners) {
@@ -150,9 +150,9 @@ class HotelsSearchScreen extends Component {
             }
 
             if (stompAndroidClient) {
-            stompAndroidClient.close();
+                stompAndroidClient.close();
+            }
         }
-    }
 
     stompAndroidConnect() {
         stompAndroidClient = NativeModules.StompModule;

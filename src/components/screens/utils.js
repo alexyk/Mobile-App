@@ -22,7 +22,7 @@ export function createInitialState(params) {
 
         hotelsInfo : [],
         allElements: false,
-        isMAP : 0,      // TODO: Initial value was -1, is it needed?
+        isMAP : -1,     // TODO: Initial value was -1, is it needed?
                         // Figure out how to work with Map logic and whether this var isMAP is needed
         initialLat: 42.698334,
         initialLon: 23.319941,
