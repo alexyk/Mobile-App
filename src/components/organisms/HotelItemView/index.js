@@ -41,7 +41,7 @@ class HotelItemView extends Component {
     }
 
     onFlatClick = (item) => {
-        console.log('flat click', item, this.props);
+        //console.log('flat click', item, this.props);
 
         if (isNative.hotelItem) {
             // native

@@ -21,7 +21,7 @@ class LocPriceUpdateTimer extends Component {
     // }
     
     componentWillReceiveProps(nextProps) {
-        console.log("LocPriceUpdateTimer - componentWillReceiveProps", nextProps);
+        //console.log("LocPriceUpdateTimer - componentWillReceiveProps", nextProps);
         if (nextProps.seconds != null && nextProps.seconds > this.state.seconds) {
             clearInterval(this.timer);
             this.props.reset();
@@ -42,7 +42,7 @@ class LocPriceUpdateTimer extends Component {
             let seconds = previousState.seconds - 1;
             if (seconds < 0) 
                 seconds = 0;
-            console.log("tick ------", seconds);
+            //console.log("tick ------", seconds);
             return {seconds};
         });
     }

@@ -9,7 +9,7 @@ import Icon from 'react-native-vector-icons/SimpleLineIcons';
 class DateAndGuestPicker extends Component {
     constructor(props) {
         super(props);
-        console.log("DateAndGuestPicker", props);
+        //console.log("DateAndGuestPicker", props);
     }
 
     onSettings = () => {

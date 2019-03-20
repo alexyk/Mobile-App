@@ -53,7 +53,7 @@ class Inbox extends Component {
 	};
 
     refreshMessage(isShowProgress = true) {
-        console.log("refreshMessage");
+        //console.log("refreshMessage");
         this.isLoading = true;
         if (isShowProgress) {
             this.setState({ showProgress: true});
@@ -68,7 +68,7 @@ class Inbox extends Component {
                 });
                 this.isLoading = false;
             }).catch(err => {
-                console.log(err);
+                //console.log(err);
                 this.isLoading = false;
                 if (isShowProgress) {
                     this.setState({ showProgress: false });

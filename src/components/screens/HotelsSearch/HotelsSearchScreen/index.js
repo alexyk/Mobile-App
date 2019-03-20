@@ -34,6 +34,7 @@ class HotelsSearchScreen extends Component {
     constructor(props) {
         super(props);
         console.disableYellowBox = true;
+        console.log('#now# 2.1/6  HotelSearchScreen constructor START');
 
         const { params } = this.props.navigation.state;//eslint-disable-line
         this.state = createInitialState(params);
@@ -60,9 +61,15 @@ class HotelsSearchScreen extends Component {
         //       e.i. when toggling Map/List view
         //   (2) isMap - should it really be used as -1, 0, 1
         // this.dataSource = [];
+
+        //TODO: @@debug - remove
+        console.log('#now# 2.2/6 HotelSearchScreen constructor END');
+        this.renderTimes = 0;
     }
 
     componentDidMount() {
+        console.log('#now# 3/6 HotelSearchScreen componentDidMount START');
+
         if (this.state.isHotel) {
             this.getHotels();
         }
@@ -78,7 +85,7 @@ class HotelsSearchScreen extends Component {
     }
 
     getHotels() {
-        console.log("### [HotelsSearchScreen] getHotels", {listView:this.listView});
+        console.log("#now# 4.1/6 [HotelsSearchScreen] getHotels");
                     
         this.hotelsIndicesById = {};
         const _this = this;
@@ -101,7 +108,7 @@ class HotelsSearchScreen extends Component {
                 // console.log('SET_STATE 2', {_th:this});
                 requester.getStaticHotels(_this.state.regionId).then(res => {
                     res.body.then(data => {
-                        console.log("### [HotelsSearchScreen][SERVER] getStaticHotels", data);
+                        //console.log("### [HotelsSearchScreen][SERVER] getStaticHotels", data);
         
                         if (_this.socketDown) {
                             _this.startSocketConnection();
@@ -165,17 +172,17 @@ class HotelsSearchScreen extends Component {
 
         DeviceEventEmitter.removeAllListeners("onStompConnect");
         DeviceEventEmitter.addListener("onStompConnect", () => {
-            console.log("onStompConnect -------------");
+            //console.log("onStompConnect -------------");
         });
         
         DeviceEventEmitter.removeAllListeners("onStompError");
         DeviceEventEmitter.addListener("onStompError", ({type, message}) => {
-            console.log("onStompError -------------", type, message);
+            //console.log("onStompError -------------", type, message);
         });
 
         DeviceEventEmitter.removeAllListeners("onStompMessage");
         DeviceEventEmitter.addListener("onStompMessage", ({message}) => {
-            console.warn('stomp message', message);
+            // console.info('stomp message', message);
             // TODO: (low priority) Solve this difference between iOS and Android
             return this.onDataFromSocket({body:message})
         });
@@ -184,7 +191,7 @@ class HotelsSearchScreen extends Component {
     }
 
     onDoneSocket = (data) => {
-        console.log('onDoneSocket', {data})
+        //console.log('onDoneSocket', {data})
 
         this.stopSocketConnection(false);
 
@@ -212,14 +219,14 @@ class HotelsSearchScreen extends Component {
     }
 
     gotoHotelDetailsPageByList = (item) => {
-        console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
+        //console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
         
         this.setState({isLoadingHotelDetails: true});
         requester.getHotelById(item.id, this.searchString.split('&')).then((res) => {
-            console.log("requester.getHotelById", res);
+            //console.log("requester.getHotelById", res);
             // here you set the response in to json
             res.body.then((data) => {
-                console.log("requester.getHotelById data", data);
+                //console.log("requester.getHotelById data", data);
                 const hotelPhotos = [];
                 for (let i = 0; i < data.hotelPhotos.length; i++) {
                     hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
@@ -236,13 +243,13 @@ class HotelsSearchScreen extends Component {
                     daysDifference: this.state.daysDifference
                 });
             }).catch((err) => {
-                console.log(err);
+                //console.log(err);
             });
         });
     }
 
     gotoHotelDetailsPageByMap (item) {
-        console.log("gotoHotelDetailsPageByMap", item);
+        //console.log("gotoHotelDetailsPageByMap", item);
         
         if (item.price == null || item.price == undefined) {
             return;
@@ -268,7 +275,7 @@ class HotelsSearchScreen extends Component {
                     daysDifference: this.state.daysDifference
                 });
             }).catch((err) => {
-                console.log(err);
+                //console.log(err);
             });
         });
     }
@@ -293,22 +300,22 @@ class HotelsSearchScreen extends Component {
     }
     // onFetch (page = 1, startFetch, abortFetch) {
     onRefreshResultsOnListView(page = 1, startFetch, abortFetch) {
-        console.log("### [HotelsSearchScreen] onFetch / onRefreshResultsOnListView", page);
+        //console.log("### [HotelsSearchScreen] onFetch / onRefreshResultsOnListView", page);
 
         // This is required to determinate whether the first loading list is all loaded.
     
         this.listViewHelpers = {startFetch, abortFetch};
 
         try {
-            console.log("### onFetch 0");
+            //console.log("### onFetch 0");
 
             if (!this.state.isFilterResult) {
-                console.log("### onFetch 1.1");
+                //console.log("### onFetch 1.1");
                 requester
                     .getStaticHotels(this.state.regionId, page - 1)
                     .then(this.onStaticData);
             } else {
-                console.log("### onFetch 2.1");
+                //console.log("### onFetch 2.1");
                 const strSearch = this.generateSearchString(this.state, this.props);
                 const strFilters = this.getFilterString(this.listView.getPage());
                 requester
@@ -316,10 +323,10 @@ class HotelsSearchScreen extends Component {
                     .then(this.onStaticData);
             }            
         } catch (err) {
-            console.log("### onFetch Error", err);
-            console.log("onFetch--=- error  ", err);
+            //console.log("### onFetch Error", err);
+            //console.log("onFetch--=- error  ", err);
             this.listViewHelpers.abortFetch() // manually stop the refresh or pagination if it encounters network error
-        //   console.log(err)
+        //   //console.log(err)
         }
     }
 
@@ -463,6 +470,8 @@ class HotelsSearchScreen extends Component {
     }
 
     saveState() {
+        console.log('#now# 5/6 HotelSearchScreen saveState END');
+
         this.setState(
             function(prevState, propsUpdated) {
                 // TODO: Previous State was cached separately
@@ -560,7 +569,7 @@ class HotelsSearchScreen extends Component {
     }
 
     updateFilter = (data) => {
-        console.log("updateFilter", data);
+        //console.log("updateFilter", data);
         
         if (this.listView != undefined && this.listView != null) {
             this.listView.initListView();
@@ -595,17 +604,17 @@ class HotelsSearchScreen extends Component {
     fetchFilteredResults = (strSearch, strFilters) => {
         let searchMap = strSearch + strFilters;
         //searchMap = searchMap.replace(/%22/g, '"');
-        console.log("fetchFilteredResults query", searchMap);
+        //console.log("fetchFilteredResults query", searchMap);
         //searchMap = '?region=15664&currency=USD&startDate=21/11/2018&endDate=22/11/2018&rooms=%5B%7B"adults":2,"children":%5B%5D%7D%5D&filters=%7B"showUnavailable":true,"name":"","minPrice":1,"maxPrice":5000,"stars":%5B0,1,2,3,4,5%5D%7D&page=0&sort=rank,desc';
 
         requester.getLastSearchHotelResultsByFilter(strSearch, strFilters).then((res) => {
             if (res.success) {
                 res.body.then((data) => {
-                    console.log("fetchFilteredResults", data);
+                    //console.log("fetchFilteredResults", data);
                     this.listView.onFirstLoad(data.content, true);
                     requester.getMapInfo(searchMap).then(res => {
                         res.body.then(dataMap => {
-                            console.log ("getMapInfo", dataMap);
+                            //console.log ("getMapInfo", dataMap);
                             const isCacheExpired = dataMap.isCacheExpired;
                             if (!isCacheExpired) {
                                 this.setState({
@@ -771,6 +780,10 @@ class HotelsSearchScreen extends Component {
     }
 
     render() {
+        // TODO: @@debug - remove this
+        this.renderTimes++;
+        if (this.renderTimes <= 10) console.log('#now# 6/6 HotelSearchScreen render');
+
         // console.log(`### [HotelsSearchScreen] index: ${this.state.index}`,{all:this.state.allElements});
 
         return (
@@ -805,7 +818,7 @@ class HotelsSearchScreen extends Component {
     }
 
     stompiOSConnect() {
-        console.log("stompiOSConnect ---------------");
+        //console.log("stompiOSConnect ---------------");
 
         stompiOSClient = stomp.client(socketHost);
         stompiOSClient.debug = null;
@@ -847,12 +860,17 @@ class HotelsSearchScreen extends Component {
  */
 
             if (parsedData.hasOwnProperty('allElements')) {
+                // TODO: @@debug - remove
+                console.warn(`[HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
+
                 if (parsedData.allElements) {
                     this.setState({ allElements: true, editable: true});
                     this.onDoneSocket(parsedData);
                 }
             } else {
                 let hotelData = parsedData;
+                // TODO: @@debug - remove
+                console.warn(`[HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}`);
 
                 // TODO: Remove this commented out code if it is indeed obsolete
                 //       It is some inherited old code - was commented out.

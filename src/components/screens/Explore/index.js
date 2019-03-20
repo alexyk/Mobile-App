@@ -110,11 +110,11 @@ class Explore extends Component {
             email: email_value,
         });
 
-        console.log('componentWillMount', token_value, email_value);
+        //console.log('componentWillMount', token_value, email_value);
         // Below line gives null cannot be casted to string error on ios please look into it
         requester.getUserInfo().then((res) => {
             res.body.then((data) => {
-                console.log('componentWillMount', data);
+                // console.log('componentWillMount', data);
                 if (email_value == undefined || email_value == null || email_value == "") {
                     AsyncStorage.setItem(`${domainPrefix}.auth.username`, data.email);
                     this.setState({
@@ -123,7 +123,7 @@ class Explore extends Component {
                 }
                 userInstance.setUserData(data);
             }).catch((err) => {
-                console.log('componentWillMount', err);
+                //console.log('componentWillMount', err);
             });
         });
         this.setCountriesInfo();
@@ -177,7 +177,7 @@ class Explore extends Component {
     }
 
     onDatesSelect({ startDate, endDate, startMoment, endMoment }) {
-        console.log("onDatesSelect", startDate, endDate);
+        //console.log("onDatesSelect", startDate, endDate);
         const year = (new Date()).getFullYear();
         const start = moment(startDate, 'ddd, DD MMM');
         const end = moment(endDate, 'ddd, DD MMM');
@@ -206,8 +206,8 @@ class Explore extends Component {
     }
 
     onValueChange = (value) => {
-        console.log(value);
-        console.log(this.state.loc);
+        //console.log(value);
+        //console.log(this.state.loc);
     };
 
     updateData(data) {
@@ -269,11 +269,11 @@ class Explore extends Component {
     }
 
     gotoSearch() {
-        console.log("gotoSearch", this.state.checkOutDateFormated, this.state.checkInDateFormated);
+        console.log(`#now# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`);
         //Open new property screen that uses sock-js
         if (isExploreSearchNative){
             if (this.state.isHotel) {
-                console.log("this.state.regionId.", this.state.regionId);
+                //console.log("this.state.regionId.", this.state.regionId);
                 if (this.state.regionId === "" || this.state.regionId === 0) {
                     this.refs.toast.show('Please input location to search hotels.', 2500);
                     return;
@@ -298,7 +298,7 @@ class Explore extends Component {
                 });
             }
             else {
-                console.log("this.state.value.", this.state.value);
+                //console.log("this.state.value.", this.state.value);
                 if (this.state.value === '' || this.state.value === 0) {
                     this.refs.toast.show('Please select country to book home.', 2500);
                     return;
@@ -649,7 +649,7 @@ class Explore extends Component {
                     visible = { this.state.currencySelectionVisible }
                     onCancel = { () =>this.setState({ currencySelectionVisible: false }) }
                     onOk = { result => {
-                        console.log("select country", result);
+                        //console.log("select country", result);
                         this.setState({ currencySelectionVisible: false });
                         this.props.setCurrency({currency: result.selectedItem.label});
                         // this.props.actions.getCurrency(result.selectedItem.label);

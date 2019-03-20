@@ -28,7 +28,7 @@ class UserMyTrips extends Component {
 
     constructor(props) {
         super(props);
-        console.log(props.navigation.state);
+        //console.log(props.navigation.state);
         //State
         this.state = {
             trips: props.navigation.state.params.trips.content.concat(), // make a copy
@@ -161,7 +161,7 @@ class UserMyTrips extends Component {
                 res.body
                     .then(this.onServerNextPageLoaded)
                     .catch(err => {
-                        console.log(err);
+                        //console.log(err);
                     });
             });
         }

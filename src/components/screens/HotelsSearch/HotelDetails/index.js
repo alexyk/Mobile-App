@@ -75,7 +75,7 @@ class HotelDetails extends Component {
 
     onBooking = (roomDetail) => {
         // onRoomPress = (roomDetail) => {
-        console.log("onRoomPress", roomDetail);
+        //console.log("onRoomPress", roomDetail);
         let hotelImg = this.state.hotel.hotelPhoto.url;
         if (hotelImg === undefined || hotelImg === null) {
             hotelImg = this.state.hotel.hotelPhoto;

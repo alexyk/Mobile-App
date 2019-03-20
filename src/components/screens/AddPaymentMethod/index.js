@@ -27,7 +27,7 @@ class AddPaymentMethod extends Component {
     createWallet = () => {
         const {navigate} = this.props.navigation;
 
-        console.log("walletAddress", this.state.walletAddress);
+        //console.log("walletAddress", this.state.walletAddress);
         if (this.state.walletAddress != '') {
             this.refs.toast.show('You already created LOC wallet.', 1500);
             return;

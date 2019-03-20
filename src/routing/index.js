@@ -201,7 +201,7 @@ class ReduxNavigation extends PureComponent {
     onBackPress = () => {
          const { dispatch, state } = this.props;
         if (state.index === 0) {
-            console.log("exit-------");
+            //console.log("exit-------");
             this.setState({ visibleConfirmDialog: true });
             return true;
         }
@@ -211,9 +211,9 @@ class ReduxNavigation extends PureComponent {
     };
 
     onConfirmOk = () => {
-        console.log("onConfirmOk ---");
+        //console.log("onConfirmOk ---");
         this.setState({ visibleConfirmDialog: false }, () => {
-            console.log("onConfirmOk ---123123123");
+            //console.log("onConfirmOk ---123123123");
             BackHandler.exitApp();
             // const { dispatch } = this.props;
             // dispatch(NavigationActions.back());

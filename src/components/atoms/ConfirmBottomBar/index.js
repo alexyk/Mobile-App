@@ -32,7 +32,7 @@ class ConfirmBottomBar extends Component {
     }
     
     componentWillReceiveProps(nextProps) {
-        console.log("ConfirmBottomBar - componentWillUnmount", this.props.params);
+        //console.log("ConfirmBottomBar - componentWillUnmount", this.props.params);
         if (nextProps.isLocPriceWebsocketConnected && nextProps.isLocPriceWebsocketConnected !== this.props.isLocPriceWebsocketConnected) {
             if (this.props.params.bookingId !== "") {
                 this.sendWebsocketMessage(null, null, this.props.params);
@@ -51,12 +51,12 @@ class ConfirmBottomBar extends Component {
     }
 
     sendWebsocketMessage(id, method, params) {
-        console.log("ConfirmBottomBar =- sendWebsocketMessage-------------", id, method, params);
+        //console.log("ConfirmBottomBar =- sendWebsocketMessage-------------", id, method, params);
         WebsocketClient.sendMessage(id || DEFAULT_QUOTE_LOC_ID, method || DEFAULT_QUOTE_LOC_METHOD, params);
     }
 
     redirectToHotelDetailsPage() {
-        console.log("redirectToHotelDetailsPage -------------");
+        //console.log("redirectToHotelDetailsPage -------------");
         // this.props.navigation.pop(3);
     }
 

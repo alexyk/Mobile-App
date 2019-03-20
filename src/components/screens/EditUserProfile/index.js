@@ -160,7 +160,7 @@ class EditUserProfile extends Component {
         //         })
         //     })
         // }).catch(err => {
-        //     console.log('countries--error--', err);
+        //     //console.log('countries--error--', err);
         // });
     }
 
@@ -192,13 +192,13 @@ class EditUserProfile extends Component {
         const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
         ImagePicker.showImagePicker(options, (response) => {
             if (response.didCancel) {
-                console.log('User cancelled image picker');
+                //console.log('User cancelled image picker');
             }
             else if (response.error) {
-                console.log('ImagePicker Error: ', response.error);
+                //console.log('ImagePicker Error: ', response.error);
             }
             else if (response.customButton) {
-                console.log('User tapped custom button: ', response.customButton);
+                //console.log('User tapped custom button: ', response.customButton);
             }
             else {
                 this.setState({
@@ -237,19 +237,19 @@ class EditUserProfile extends Component {
                             });
                             userInstance.setProfileImage(data.thumbnail);
                         }).catch(err => {
-                            console.log('upload error', err);
+                            //console.log('upload error', err);
                         })
                     }).catch(err => {
                         this.setState({
                             showProgress: false,
                         })
-                        console.log('upload error', err);
+                        //console.log('upload error', err);
                     });
                 } ).catch( err => {
                     this.setState({
                         showProgress: false,
                     })
-                    console.log( err )
+                    //console.log( err )
                 } )
 
             }
@@ -509,12 +509,12 @@ class EditUserProfile extends Component {
             jsonFile: this.state.jsonFile
         };
 
-        console.log("user info", userInfo);
+        //console.log("user info", userInfo);
 
         Object.keys(userInfo).forEach((key) => (userInfo[key] === null || userInfo[key] === '') && delete userInfo[key]);
 
         requester.updateUserInfo(userInfo, null).then(res => {
-            console.log("------", res)
+            //console.log("------", res)
             if (res.success) {
                 userInstance.setFirstName(userInfo.firstName);
                 userInstance.setLastName(userInfo.lastName);
@@ -556,7 +556,7 @@ class EditUserProfile extends Component {
         }
 
         let location = '';
-        console.log("location city", this.state.city, imageAvatar);
+        //console.log("location city", this.state.city, imageAvatar);
         if (this.state.city == undefined || this.state.city == null || this.state.city == '') {
             location = this.state.country==null? '' : this.state.country.name;
         }

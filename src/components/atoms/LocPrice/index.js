@@ -27,7 +27,7 @@ class LocPrice extends Component {
         if (exchangeRates.currencyExchangeRates) {
             fiatInEur = exchangeRates.currencyExchangeRates && CurrencyConverter.convert(exchangeRates.currencyExchangeRates, currencyCode, RoomsXMLCurrency.get(), fiat);
         
-            console.log("LocPrice WebsocketClient.sendMessage0", fiatInEur);
+            //console.log("LocPrice WebsocketClient.sendMessage0", fiatInEur);
             WebsocketClient.sendMessage(fiatInEur, null, { fiatAmount: fiatInEur });
             isLocPriceRendered = true;
         }
@@ -95,7 +95,7 @@ class LocPrice extends Component {
     }
     
     componentWillUnmount() {
-        console.log("LocPrice - componentWillUnmount", this.state.fiatInEur);
+        //console.log("LocPrice - componentWillUnmount", this.state.fiatInEur);
         WebsocketClient.sendMessage(this.state.fiatInEur, 'unsubscribe');
         if (this.props.locAmount) {
             removeLocAmount(this.state.fiatInEur);
@@ -103,19 +103,19 @@ class LocPrice extends Component {
     }
 
     resumeWebsocket() {
-        console.log("LocPrice  resumeWebsocket");
+        //console.log("LocPrice  resumeWebsocket");
         this.isPause = false;
         WebsocketClient.sendMessage(this.state.fiatInEur, null, { fiatAmount: this.state.fiatInEur });
     }
 
     pauseWebocket() {
-        console.log("LocPrice  pauseWebocket");
+        //console.log("LocPrice  pauseWebocket");
         this.isPause = true;
         WebsocketClient.sendMessage(this.state.fiatInEur, 'unsubscribe');
     }
 
     render() {
-        console.log("LOC Price render");
+        // console.log("LOC Price render");
         const {locAmount, hasBacket} = this.props;
 
         // let priceInCurrency = exchangeRates.currencyExchangeRates && CurrencyConverter.convert(exchangeRates.currencyExchangeRates, RoomsXMLCurrency.get(), currency, price);

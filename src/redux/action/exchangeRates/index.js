@@ -26,7 +26,7 @@ export const getLocRate = (baseCurrency) => {
     return dispatch => {
         requester.getLocRateByCurrency(baseCurrency).then(res => {
             res.body.then(data => {
-                console.log("getLocRate", data);
+                //console.log("getLocRate", data);
                 const currencyStr = (
                     baseCurrency && String(baseCurrency).length > 0
                         ? String(baseCurrency).toLowerCase()

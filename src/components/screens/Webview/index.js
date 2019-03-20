@@ -37,7 +37,7 @@ class WebviewScreen extends Component {
     constructor(props) {
         super(props);
         const { params } = this.props.navigation.state;
-        console.log(`[${this.debug()}]### [WebviewScreen] Constructor `, {params});
+        //console.log(`[${this.debug()}]### [WebviewScreen] Constructor `, {params});
 
         // TODO: Figure out what is this for and how was it supposed to work  / commented on by Alex K, 2019-03-06
         // UUIDGenerator.getRandomUUID((uuid) => {
@@ -89,7 +89,7 @@ class WebviewScreen extends Component {
             var originalPostMessage = window.postMessage;
           
             var patchedPostMessage = function(message, targetOrigin, transfer) { 
-                console.log('Patched', {message,targetOrigin,transfer});
+                //console.log('Patched', {message,targetOrigin,transfer});
                 
                 originalPostMessage(message, targetOrigin, transfer);
             };
@@ -166,7 +166,7 @@ class WebviewScreen extends Component {
     }
 
     onBackPress(event) {
-        console.log('[WebviewScreen] back', {wview:this.webViewRef, event});
+        //console.log('[WebviewScreen] back', {wview:this.webViewRef, event});
 
         // if (this.state.canGoBack) {
         //     this.webViewRef.ref.goBack();
@@ -177,7 +177,7 @@ class WebviewScreen extends Component {
     }
 
     onForwardPress(event) {
-        console.log('[WebviewScreen] forward', {wview:this.webViewRef, event});
+        //console.log('[WebviewScreen] forward', {wview:this.webViewRef, event});
     
         if (this.state.canGoForward) {
             this.webViewRef.ref.goForward();
@@ -185,12 +185,13 @@ class WebviewScreen extends Component {
     }
 
     onWebViewLoadStart(event) {
-        console.log(`[${this.debug()}] %c WebView::onLoadStart %c`,
+        /** console.log(`[${this.debug()}] %c WebView::onLoadStart %c`,
             // {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state},
             // 'background: #899; color: #F55; font-weight: bold',
             'color: #F55; font-weight: bold',
             'background: #FFF; color: #000',
         );
+        */
 
         this.setState({
             canGoToResults: true
@@ -198,16 +199,16 @@ class WebviewScreen extends Component {
     }
     
     onWebViewMessage(event) {
-        console.log(`[${this.debug()}] WebView::onMessage`,
-            {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state,event},
-        );
+        //console.log(`[${this.debug()}] WebView::onMessage`,
+            // {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state,event},
+        // );
     }
 
     onWebViewLoadEnd(event) {
         const target = event.target;
         const ev = target.nativeEvent;
 
-        console.log(`[${this.debug()}] %c WebView::onLoadEnd %c `+
+        /*console.log(`[${this.debug()}] %c WebView::onLoadEnd %c `+
             ((ev != null)
                 ? (
                     `url:${ev ? ev.url.substr(29,40) : 'n/a'}` +
@@ -222,7 +223,7 @@ class WebviewScreen extends Component {
             // 'background: #757; color: #0F0; font-weight: bold',
             'color: #0A0; font-weight: bold',
             'background: #FFF; color: #000',
-        );
+        );*/
 
         if (this.useDelay) {
             if (this.state.showProgress) {
@@ -234,7 +235,7 @@ class WebviewScreen extends Component {
     }
 
     onWebViewNavigationState(navState) {
-        console.log(`[${this.debug()}]`
+        /*console.log(`[${this.debug()}]`
             +`WebView::onNavigationState %c back %c:${navState.canGoBack}, %c for %c :${navState.canGoForward}`
             +`, url:${navState.url.substr(29,40)}`,
             'font-weight: bold',
@@ -242,7 +243,7 @@ class WebviewScreen extends Component {
             'font-weight: bold',
             'font-weight: normal',
             // ,{url:String(navState.url).substr(0,60),forw:navState.canGoForward,["back/res"]:navState.canGoBack}, navState
-        );
+        );*/
 
         this.webViewRef.canGoBackAndroid = navState.canGoBack;
         this.setState({canGoForward:    navState.canGoForward});

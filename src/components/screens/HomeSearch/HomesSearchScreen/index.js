@@ -115,7 +115,7 @@ class HomesSearchScreen extends Component {
     }
 
     setCountriesInfo() {
-        console.log("setCountriesInfo");
+        //console.log("setCountriesInfo");
         let countryArr = [];
         this.props.countries.map((item, i) => {
             countryArr.push({
@@ -148,11 +148,11 @@ class HomesSearchScreen extends Component {
             searchTerms.push(`propertyTypes=${this.state.propertyTypesToggled}`);
         }
         searchTerms.push(`page=0`);
-        console.log("searchTerms", searchTerms);
+        //console.log("searchTerms", searchTerms);
 
         requester.getListingsByFilter(searchTerms).then(res => {
             res.body.then(data => {
-                console.log("requester.getListingsByFilter", data);
+                //console.log("requester.getListingsByFilter", data);
 
                 if (this.isFilterResult) {
                     this.setState({
@@ -177,7 +177,7 @@ class HomesSearchScreen extends Component {
     }
     
     onFetch = async (page = 1, startFetch, abortFetch) => {
-        console.log("onFetch", page);
+        //console.log("onFetch", page);
         try {
             if (page < this.state.totalPages) {
                 let searchTerms = [];
@@ -194,10 +194,10 @@ class HomesSearchScreen extends Component {
                     searchTerms.push(`propertyTypes=${this.state.propertyTypesToggled}`);
                 }
                 searchTerms.push(`page=${page - 1}`);
-                console.log("onFetch - searchTerms", searchTerms);
+                //console.log("onFetch - searchTerms", searchTerms);
 
                 requester.getListingsByFilter(searchTerms).then(res => {
-                    console.log("onFetch - requester.getListingsByFilter", res);
+                    //console.log("onFetch - requester.getListingsByFilter", res);
                     res.body.then(data => {
                         startFetch(data.filteredListings.content, data.filteredListings.content.length, false);
                     });
@@ -341,7 +341,7 @@ class HomesSearchScreen extends Component {
     }
 
     updateFilter = (data) => {
-        console.log("updateFilter", data);
+        //console.log("updateFilter", data);
         
         this.isFilterResult = true;
         
@@ -397,11 +397,11 @@ class HomesSearchScreen extends Component {
     }
 
     gotoHomeDetailPage = async (home) => {
-        console.log (" home ---", home);
+        //console.log (" home ---", home);
         this.setState({isLoadingDetails: true});
         try {
             const resListing = await requester.getListing(home.id);
-            console.log("requester.getListing",resListing);
+            //console.log("requester.getListing",resListing);
             if (resListing.success === false) {
                 this.setState({isLoadingDetails: false}, () => {
                     this.refs.toast.show('Sorry, Cannot get home details.', 1500);
@@ -411,7 +411,7 @@ class HomesSearchScreen extends Component {
             const data = await resListing.body;
             const checks = this.calculateCheckInOuts(data);
         
-            console.log("resListing", data, checks);
+            //console.log("resListing", data, checks);
 
             const DAY_INTERVAL = 365;
 
@@ -423,19 +423,19 @@ class HomesSearchScreen extends Component {
                 `toCode=${this.props.currency}`,
                 `size=${DAY_INTERVAL}`];
         
-            console.log("searchTermMap", searchTermMap);
+            //console.log("searchTermMap", searchTermMap);
 
             const resCalendar =  await requester.getCalendarByListingIdAndDateRange(searchTermMap);
-            console.log("resCalendar", resCalendar);
+            //console.log("resCalendar", resCalendar);
             const dataCalendar = await resCalendar.body;
-            console.log("dataCalendar", dataCalendar);
+            //console.log("dataCalendar", dataCalendar);
             let calendar = dataCalendar.content;
             const resRoomDetails = await requester.getHomeBookingDetails(home.id);
             const roomDetails = await resRoomDetails.body;
 
             let nights = this.state.daysDifference;
             
-            console.log("123123", data, checks, calendar, roomDetails, nights);
+            //console.log("123123", data, checks, calendar, roomDetails, nights);
 
             const homePhotos = [];
             for (let i = 0; i < data.pictures.length; i++) {

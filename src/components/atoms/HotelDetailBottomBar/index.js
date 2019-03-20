@@ -29,7 +29,7 @@ class HotelDetailBottomBar extends Component {
         if (exchangeRates.currencyExchangeRates) {
             fiatInEur = exchangeRates.currencyExchangeRates && CurrencyConverter.convert(exchangeRates.currencyExchangeRates, RoomsXMLCurrency.get(), DEFAULT_CRYPTO_CURRENCY, price);
         
-            console.log("HotelDetailBottomBar WebsocketClient.sendMessage0", fiatInEur);
+            //console.log("HotelDetailBottomBar WebsocketClient.sendMessage0", fiatInEur);
             WebsocketClient.sendMessage(fiatInEur, null, { fiatAmount: fiatInEur }, true);
             isLocPriceRendered = true;
         }
@@ -44,7 +44,7 @@ class HotelDetailBottomBar extends Component {
         if (this.isStop) {
             return;
         }
-        console.log("HotelDetailBottomBar  componentWillReceiveProps");
+        //console.log("HotelDetailBottomBar  componentWillReceiveProps");
         if (nextProps.isLocPriceWebsocketConnected &&
             nextProps.isLocPriceWebsocketConnected !== this.props.isLocPriceWebsocketConnected) {
             WebsocketClient.sendMessage(this.state.fiatInEur, null, { fiatAmount: this.state.fiatInEur }, true);
@@ -70,7 +70,7 @@ class HotelDetailBottomBar extends Component {
     
     
     componentWillUnmount() {
-        console.log("LocPrice - componentWillUnmount", this.state.fiatInEur);
+        //console.log("LocPrice - componentWillUnmount", this.state.fiatInEur);
         WebsocketClient.sendMessage(this.state.fiatInEur, 'unsubscribe', null, true);
         if (this.props.locAmount) {
             removeLocAmount(this.state.fiatInEur);
@@ -86,16 +86,16 @@ class HotelDetailBottomBar extends Component {
         if (isLocPriceWebsocketConnected && !HotelDetailBottomBar.self.state.isLocPriceRendered) {
             HotelDetailBottomBar.self.state.isLocPriceRendered = true;
             WebsocketClient.sendMessage(HotelDetailBottomBar.self.state.fiatInEur, null, { fiatAmount: HotelDetailBottomBar.self.state.fiatInEur }, true);
-            console.log("HotelDetailBottomBar - _didFocus", HotelDetailBottomBar.self.props, HotelDetailBottomBar.self.state.fiatInEur);
+            //console.log("HotelDetailBottomBar - _didFocus", HotelDetailBottomBar.self.props, HotelDetailBottomBar.self.state.fiatInEur);
         }
         HotelDetailBottomBar.self.isStop = false;
     }
 
     _willBlur() {
-        console.log("HotelDetailBottomBar - _willBlur");
+        //console.log("HotelDetailBottomBar - _willBlur");
         const {isLocPriceWebsocketConnected} = HotelDetailBottomBar.self.props;
         if (isLocPriceWebsocketConnected && HotelDetailBottomBar.self.state.isLocPriceRendered) {
-            console.log("HotelDetailBottomBar - _willBlur", HotelDetailBottomBar.self.props, HotelDetailBottomBar.self.state.isLocPriceRendered, HotelDetailBottomBar.self.state.fiatInEur);
+            //console.log("HotelDetailBottomBar - _willBlur", HotelDetailBottomBar.self.props, HotelDetailBottomBar.self.state.isLocPriceRendered, HotelDetailBottomBar.self.state.fiatInEur);
             WebsocketClient.sendMessage(HotelDetailBottomBar.self.state.fiatInEur, 'unsubscribe', null, true);
             HotelDetailBottomBar.self.state.isLocPriceRendered = false;
         }

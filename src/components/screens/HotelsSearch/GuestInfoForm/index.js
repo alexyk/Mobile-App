@@ -31,7 +31,7 @@ class GuestInfoForm extends Component {
         };
     }
     async componentWillMount() {
-        console.log("GuestInfoForm componentWillMount", this.props.navigation.state.params.guests);
+        // console.log("GuestInfoForm componentWillMount", this.props.navigation.state.params.guests);
         let firstName = await userInstance.getFirstName();
         let lastName = await userInstance.getLastName();
 
@@ -66,7 +66,7 @@ class GuestInfoForm extends Component {
     }
 
     componentDidMount() {
-        console.log("----------------------componentDidMount");
+        //console.log("----------------------componentDidMount");
         WebsocketClient.stopGrouping();
     }
 
@@ -75,7 +75,7 @@ class GuestInfoForm extends Component {
     }
 
     handleFirstName(key,text){
-        console.log('firstName----', key, text);
+        //console.log('firstName----', key, text);
 
         if (text === "") {
             text = "Optional"
@@ -87,7 +87,7 @@ class GuestInfoForm extends Component {
     }
 
     handleLastName(key,text){
-        console.log('lastName----', key, text);
+        //console.log('lastName----', key, text);
         if (text === "") {
             text = "Optional"
         }
@@ -148,7 +148,7 @@ class GuestInfoForm extends Component {
 
     render() {
         const {params} = this.props.navigation.state
-        console.log("GuestInfoForm", params);
+        //console.log("GuestInfoForm", params);
         const imgURL = params.hotelImg;
         return (
             <View style={styles.container}>

@@ -25,7 +25,7 @@ class AppLoading extends Component {
 
     constructor(props) {
         super(props);
-        console.log("AppLoading - constructor")
+        //console.log("AppLoading - constructor")
         this.props.getCountries();
         this.props.getCurrencyRates();
         this.props.getLocRate(ROOMS_XML_CURRENCY);
@@ -33,21 +33,21 @@ class AppLoading extends Component {
     }
 
     async componentDidMount() {
-        console.log("AppLoading - componentDidMount")
+        //console.log("AppLoading - componentDidMount")
     }
 
     // Fetch the token from storage then navigate to our appropriate place
     bootstrapAsync = async () => {
-        console.log("AppLoading - bootstrapAsync")
+        //console.log("AppLoading - bootstrapAsync")
         let currency = await AsyncStorage.getItem('currency');
 
         if (currency != undefined && currency != null) {
-            console.log("currency--------------", currency);
+            //console.log("currency--------------", currency);
             this.props.setCurrency({currency});
             // this.props.navigation.dispatch(setCurrency({currency}));
         }
 
-        console.log("currency", currency);
+        //console.log("currency", currency);
 
         // TODO: Fix double caching? Is this outside of Redux cache?
         const keys = await AsyncStorage.getAllKeys();

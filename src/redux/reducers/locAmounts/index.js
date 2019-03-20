@@ -75,7 +75,7 @@ export default handleActions(
                         }
                     }
                 }
-                console.log("update locamounts array", locAmounts);
+                //console.log("update locamounts array", locAmounts);
                 return {
                     ...state, 
                     locAmounts

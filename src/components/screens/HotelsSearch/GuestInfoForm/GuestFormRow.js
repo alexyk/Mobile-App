@@ -30,7 +30,7 @@ export default class GuestFormRow extends Component {
         }
         // this.getUserName();
 
-        console.log("GuestFormRow--------------");
+        //console.log("GuestFormRow--------------");
     }
 
     // async getUserName() {
@@ -38,7 +38,7 @@ export default class GuestFormRow extends Component {
     //         let firstName = await userInstance.getFirstName();
     //         let lastName = await userInstance.getLastName();
 
-    //         console.log("--------getUserNamegetUserName--", firstName, lastName);
+    //         //console.log("--------getUserNamegetUserName--", firstName, lastName);
     //         this.setState({
     //             guest: { ...this.state.guest, firstName: firstName == null ? '' : firstName, lastName: lastName == null ? '' : lastName },
     //         });

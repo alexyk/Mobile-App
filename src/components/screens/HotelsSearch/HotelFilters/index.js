@@ -60,7 +60,7 @@ class HotelFilters extends Component {
     }
 
     handleRatingChange(index, status){
-        console.log(status);
+        //console.log(status);
         const items = this.state.selectedRating;
         items[index] = status;
 
@@ -360,7 +360,7 @@ class HotelFilters extends Component {
             }
         }
         
-        console.log(this.state.rooms);
+        //console.log(this.state.rooms);
         this.props.navigation.navigate('WebviewScreen', {
             searchedCity: params.search, 
             searchedCityId: 72, 

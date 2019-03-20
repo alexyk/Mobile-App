@@ -54,7 +54,7 @@ class RoomDetailsReview extends Component {
         this.refs.toast.show("Confirming Rooms", 1500);
         this.requestSafechargeMode();
         const { params } = this.props.navigation.state; //eslint-disable-line
-        console.log(params.guestRecord);
+        //console.log(params.guestRecord);
         const value = {
             quoteId: params.quoteId,
             rooms: [{
@@ -67,18 +67,18 @@ class RoomDetailsReview extends Component {
 
         const that = this;
 
-        console.log("createReservationcreateReservation  ---", value)
+        //console.log("createReservationcreateReservation  ---", value)
         requester.createReservation(value).then(res => {
-            console.log("createReservation  ---", res)
+            //console.log("createReservation  ---", res)
             if (res.success){
-                console.log("createReservation  ---", res)
+                //console.log("createReservation  ---", res)
                 res.body.then(data => {
                     // console.log("createReservation  ---", data)
                     const quoteBookingCandidate = { bookingId: data.preparedBookingId };
                     requester.quoteBooking(quoteBookingCandidate)
                         .then((res) => {
                             res.body.then(success => {
-                                console.log("quoteBooking  ---", success)
+                                //console.log("quoteBooking  ---", success)
                                 if (success.is_successful_quoted) {
 
                                     const bookingId = data.preparedBookingId;
@@ -110,12 +110,12 @@ class RoomDetailsReview extends Component {
                         });
 
                 }).catch((err) => {
-                    console.log(err); //eslint-disable-line
+                    //console.log(err); //eslint-disable-line
                 });
             }
             else {
                 res.errors.then(data => {
-                    console.log(data.errors);
+                    //console.log(data.errors);
                     // console.log(data.errors.RoomsXmlResponse.message);
                     const errors = data.errors;
                     if (errors.hasOwnProperty('RoomsXmlResponse')) {
@@ -137,8 +137,8 @@ class RoomDetailsReview extends Component {
             that.refs.toast.show("Unknown Error! Please try again.", 5000, () => {
                 that.props.navigation.navigation.goBack();
             });
-            console.log("Error Room");
-            console.log(main_err);
+            //console.log("Error Room");
+            //console.log(main_err);
         });
     }
 
@@ -149,7 +149,7 @@ class RoomDetailsReview extends Component {
     requestSafechargeMode = () => {
         requester.getConfigVarByName(SAFECHARGE_VAR)
         .then((res) => {
-            console.log("requester.getConfigVarByName", res);
+            //console.log("requester.getConfigVarByName", res);
             if (res.success) {
                 res.body.then((data) => {
                     this.setState({
@@ -158,7 +158,7 @@ class RoomDetailsReview extends Component {
                 });
             } else {
                 res.errors.then((err) => {
-                    console.log(err);
+                    //console.log(err);
                 });
             }
         });
@@ -193,12 +193,12 @@ class RoomDetailsReview extends Component {
         const quoteId = params.quoteId;
         if (quoteId) {
             const body = { quoteId, paymentMethod };
-            console.log(body);
+            //console.log(body);
             return requester.markQuoteIdAsLocked(quoteId, body)
                 .then(res => res.body)
                 .then(res => {
                     return new Promise((resolve, reject) => {
-                        console.log("-----------", res);
+                        //console.log("-----------", res);
                         if (res.success) {
                             resolve(true);
                         } else {
@@ -234,7 +234,7 @@ class RoomDetailsReview extends Component {
             // this.setState({ modalVisible: false });
 
             this.requestLockOnQuoteId('privateWallet').then( () => {
-                console.log("requestLockOnQuoteId -- ", this.props.locAmounts, DEFAULT_QUOTE_LOC_ID);
+                //console.log("requestLockOnQuoteId -- ", this.props.locAmounts, DEFAULT_QUOTE_LOC_ID);
 
                 const { password } = this.state;
                 const preparedBookingId = this.state.bookingId;
@@ -250,19 +250,19 @@ class RoomDetailsReview extends Component {
                 
                 const wei = (this.tokensToWei(locAmount.toString()));
 
-                console.log("payWithLocSingleWithdrawer wei", wei);
+                //console.log("payWithLocSingleWithdrawer wei", wei);
 
                 const booking = this.state.hotelBooking;
-                console.log("this.state.hotelBooking", this.state.hotelBooking);
+                //console.log("this.state.hotelBooking", this.state.hotelBooking);
                 const endDate = moment.utc(booking.arrivalDate, 'YYYY-MM-DD').add(booking.nights, 'days');
 
                 const queryString = params.searchString;
-                console.log("this.state.hotelBooking queryString", queryString);
-                console.log("this.state.hotelBooking endDate", endDate.unix().toString());
+                //console.log("this.state.hotelBooking queryString", queryString);
+                //console.log("this.state.hotelBooking endDate", endDate.unix().toString());
 
                 requester.getMyJsonFile().then(res => {
                     res.body.then(data => {
-                        console.log("getMyJsonFile -- ", data);
+                        //console.log("getMyJsonFile -- ", data);
 
                         HotelReservation.createSimpleReservationSingleWithdrawer(
                             data.jsonFile,
@@ -270,7 +270,7 @@ class RoomDetailsReview extends Component {
                             wei.toString(),
                             endDate.unix().toString(),
                         ).then(transaction => {
-                            console.log('transaction----', transaction);
+                            //console.log('transaction----', transaction);
                             this.setState({isLoading: false}, ()=>{
                                 setTimeout(() => {
                                     const bookingConfirmObj = {
@@ -286,7 +286,7 @@ class RoomDetailsReview extends Component {
                                             this.props.navigation.pop(5);
                                         });
                                     }).catch(error => {
-                                        console.log("--------requester.confirmBooking errr------", error);
+                                        //console.log("--------requester.confirmBooking errr------", error);
                                         this.restartQuote();
                                         this.refs.toast.show('Something with your transaction went wrong...', 2000);
                                     });
@@ -294,7 +294,7 @@ class RoomDetailsReview extends Component {
                             });
                             
                         }).catch(error => {
-                            console.log("--------payWithLocSingleWithdrawer errr------", error);
+                            //console.log("--------payWithLocSingleWithdrawer errr------", error);
                             this.restartQuote();
                             this.setState({isLoading: false }, () => {
                                 setTimeout(() => {
@@ -309,11 +309,11 @@ class RoomDetailsReview extends Component {
                                         this.refs.toast.show(error.err.message, 2000);
                                     } 
                                     else if (typeof x === 'string') {
-                                        console.log("--------payWithLocSingleWithdrawer string------", error);
+                                        //console.log("--------payWithLocSingleWithdrawer string------", error);
                                         this.refs.toast.show(error, 2000);
                                     } 
                                     else {
-                                        console.log("--------payWithLocSingleWithdrawer else------", error);
+                                        //console.log("--------payWithLocSingleWithdrawer else------", error);
                                         this.refs.toast.show(error, 2000);
                                     }
                                 }, 1000);
@@ -338,7 +338,7 @@ class RoomDetailsReview extends Component {
                 this.openConfirmModal();
             }
         }).catch((e) => {
-            console.log(e);
+            //console.log(e);
             NotificationManager.error(SERVICE_UNAVAILABLE);
         });
     }

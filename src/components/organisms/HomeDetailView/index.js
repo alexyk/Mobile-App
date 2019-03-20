@@ -58,7 +58,7 @@ class HomeDetailView extends Component {
 
     
     _handleTextReady = () => {
-        console.log('ready!');
+        //console.log('ready!');
     }
 
 

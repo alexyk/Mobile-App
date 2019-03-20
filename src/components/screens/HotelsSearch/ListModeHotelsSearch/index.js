@@ -17,7 +17,7 @@ class ListModeHotelsSearch extends Component {
     constructor(props) {
         super(props);
 
-        console.log('constructor --- ListModeHotelsSearch',{props})
+        //console.log('constructor --- ListModeHotelsSearch',{props})
 
         this.state = {
             allElements: this.props.allElements,
@@ -56,7 +56,7 @@ class ListModeHotelsSearch extends Component {
         if (isChanged) {
             // this.isRefresh = true;
             this.setState(newState);
-            console.log("this.isRefresh", newState);
+            //console.log("this.isRefresh", newState);
         }
         // }
     }
@@ -91,7 +91,7 @@ class ListModeHotelsSearch extends Component {
     }
 
     // onFetch = (page = 1, startFetch, abortFetch) => {
-    //     console.log("onFetch", page);
+    //     //console.log("onFetch", page);
     //     this.props.onFetch(page, startFetch, abortFetch);
     // }
 

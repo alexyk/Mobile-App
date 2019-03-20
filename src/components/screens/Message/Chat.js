@@ -53,7 +53,7 @@ class Chat extends Component {
 
     constructor(props) {
         super(props);
-        console.log(props.navigation.state.params);
+        //console.log(props.navigation.state.params);
         this.sendMessage = this.sendMessage.bind(this);
 
         this.state = {
@@ -78,7 +78,7 @@ class Chat extends Component {
                 //let messageDate = moment(parsed.content[0].createdAt, 'DD/MM/YYYY HH:mm:ss').format('DD/MM/YYYY');
                 // messageDate to set your date
                 // here you set you data from json into your variables
-                console.log(data);
+                //console.log(data);
                 this.setState({
                     showProgress: false,
                     messages: data.content,
@@ -91,7 +91,7 @@ class Chat extends Component {
             }).catch(err => {
                 this.setState({ showProgress: false });
                 Toast.showWithGravity('Cannot create wallet, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-                console.log(err);
+                //console.log(err);
             });
         });
     }
@@ -101,10 +101,10 @@ class Chat extends Component {
             conversationId: id,
             unread: unread === 'true' ? 'false' : 'true'
         };
-        console.log(conversationObj);
+        //console.log(conversationObj);
 
         requester.changeMessageStatus(conversationObj).then(() => {
-            console.log("changeMessageFlag");
+            //console.log("changeMessageFlag");
             // let messages = this.state.messages;
             //
             // let message = messages.find(x => x.id === id);
@@ -124,7 +124,7 @@ class Chat extends Component {
         const { text } = this.state;
 
         if (text == "") {
-            console.log(this.state.messages);
+            //console.log(this.state.messages);
             return;
         }
 
@@ -137,7 +137,7 @@ class Chat extends Component {
 
         requester.sendMessage(message, params.id).then(res => {
             res.body.then(data => {
-                console.log(data);
+                //console.log(data);
                 this.setState({
                     showProgress: false,
                     text: '',
@@ -147,7 +147,7 @@ class Chat extends Component {
         }).catch(err => {
             this.setState({ showProgress: false });
             Toast.showWithGravity('Cannot create wallet, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-            console.log(err);
+            //console.log(err);
         });
     }
 

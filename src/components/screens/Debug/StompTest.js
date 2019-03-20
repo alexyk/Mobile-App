@@ -59,7 +59,7 @@ class StompTest extends Component{
 
         this.state.urlForService = 'region='+this.state.regionId+'&currency='+this.state.currency+'&startDate='+this.state.checkInDateFormated+'&endDate='+this.state.checkOutDateFormated+'&rooms='+this.state.roomsDummyData;
 
-        console.log(this.state.urlForService);
+        //console.log(this.state.urlForService);
     }
 
     componentWillMount() {
@@ -76,21 +76,21 @@ class StompTest extends Component{
         const client = Stomp.client(url);
         this.client = client;
         client.connect({}, function (frame) {
-          console.log("connected to Stomp");
+          //console.log("connected to Stomp");
         //   client.subscribe(receiveDestination, function (message) {
-        //     console.log(message);
+        //     //console.log(message);
         //     if(JSON.parse(message.body).allElements){
-        //       console.log("ALL ELEMENTS");
+        //       //console.log("ALL ELEMENTS");
         //       client.disconnect();
         //     }
         //   });
         }, (error) => {
-            console.log('Error');
+            //console.log('Error');
         });
     }
 
     sendMessage() {
-        console.log("Sending message");
+        //console.log("Sending message");
         const uuid = 'ca7cd91e-79f8-11e8-adc0-fa7ae01bbebc';
         let query = this.state.urlForService;
         const msg = {

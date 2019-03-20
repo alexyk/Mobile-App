@@ -38,7 +38,7 @@ class EditPhoneModal extends Component {
           valid: this.phone.isValidNumber(),
           value: this.phone.getValue()
         });
-        console.log(this.state);
+        //console.log(this.state);
         if (this.phone.isValidNumber()){
             this.props.onSave(this.phone.getValue());
         }

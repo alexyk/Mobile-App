@@ -9,7 +9,7 @@ import colors from './colors';
 export default class SingleSelectMaterialDialog extends Component {
   constructor(props) {
     super(props);
-    console.log("SingleSelectMaterialDialog construct", props);
+    //console.log("SingleSelectMaterialDialog construct", props);
 
     const { items, selectedItem } = props;
 

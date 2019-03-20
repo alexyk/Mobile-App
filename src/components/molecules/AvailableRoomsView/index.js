@@ -44,13 +44,13 @@ class AvailableRoomsView extends Component {
             loading: true
         };
 
-        console.log ("AvailableRoomsView", props);
+        //console.log ("AvailableRoomsView", props);
     }
 
     componentDidMount() {
         let request = this.props.search.replace(/\?/ig, "")
         requester.getHotelRooms(this.props.id, request.split('&')).then(res => {
-            console.log("getHotelRooms", res);
+            //console.log("getHotelRooms", res);
             if (res.success) {
                 res.body.then(data => {
                     // const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
@@ -106,7 +106,7 @@ class AvailableRoomsView extends Component {
     };
 
     renderRoom = (item) => {
-        console.log("renderRoom", item);
+        //console.log("renderRoom", item);
         if (item.length > 0 && item[0].roomsResults) {
             let rowData = item[0];
             const fiat = this.getTotalPrice(rowData.roomsResults);
@@ -201,7 +201,7 @@ class AvailableRoomsView extends Component {
     }
 
     // onRoomPress = (roomDetail) => {
-    //     console.log("onRoomPress", roomDetail, this.props);
+    //     //console.log("onRoomPress", roomDetail, this.props);
     //     this.props.navigate('GuestInfoForm', { 
     //         roomDetail: roomDetail, 
     //         guests: this.props.guests, 

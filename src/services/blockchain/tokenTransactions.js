@@ -61,7 +61,7 @@ export class TokenTransactions {
         fromSignedkey = signedkey;
     });
 
-    console.log("fromPassword, fromSalt, fromN, fromR, fromP, fromDkLen", fromPassword, fromSalt, fromN, fromR, fromP, fromDkLen);
+    //console.log("fromPassword, fromSalt, fromN, fromR, fromP, fromDkLen", fromPassword, fromSalt, fromN, fromR, fromP, fromDkLen);
 
     if (fromSignedkey === null) {
         key = await crypto.scrypt(fromPassword, fromSalt, fromN, fromR, fromP, fromDkLen);

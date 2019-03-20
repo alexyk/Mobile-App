@@ -62,7 +62,7 @@ class MapModeHotelsSearch extends Component {
         }
 
         if (isChanged) {
-            console.log("--------------------", newState);
+            //console.log("--------------------", newState);
             this.setState(newState);
         }
     }
@@ -72,21 +72,21 @@ class MapModeHotelsSearch extends Component {
     }
 
     refresh = (hotelsInfo) => {
-        console.log("refresh--------------------");
+        //console.log("refresh--------------------");
         this.setState({hotelsInfo: hotelsInfo});
     }
     
     renderImageInCallout = (hotel) => {
         const that = this;
         let thumbnailURL;
-        console.log("renderImageInCallout", hotel);
+        //console.log("renderImageInCallout", hotel);
         if (hotel.lat === null || hotel.lat === undefined) {
             thumbnailURL = imgHost + hotel.hotelPhoto;
         }
         else {
             thumbnailURL = imgHost + hotel.thumbnail.url;
         }
-        console.log("----------------- renderImageInCallout", thumbnailURL);
+        //console.log("----------------- renderImageInCallout", thumbnailURL);
 
         return(
             <FastImage
@@ -129,7 +129,7 @@ class MapModeHotelsSearch extends Component {
     }
 
     renderCallout = (hotel) => {
-        console.log("----------------- renderCallout", hotel);
+        //console.log("----------------- renderCallout", hotel);
 
         if (hotel === undefined || hotel === null) {
             return null;
@@ -180,7 +180,7 @@ class MapModeHotelsSearch extends Component {
     }
 
     onPressMarker = (e, index) => {
-        console.log("onPressMarker", index);
+        //console.log("onPressMarker", index);
         if (this.state.selectedMarkerIndex === index) {
             return;
         }
@@ -188,12 +188,12 @@ class MapModeHotelsSearch extends Component {
     }
 
     onPressMap = (hotel) => {
-        console.log("1123123123123", hotel);
+        //console.log("1123123123123", hotel);
         // this.setState({selectedMarkerIndex: -1});
     }
 
     render() {
-        console.log("map view", this.state);
+        //console.log("map view", this.state);
         
 
         let hotel = null;

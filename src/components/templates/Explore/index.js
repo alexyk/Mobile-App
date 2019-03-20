@@ -74,7 +74,7 @@ class Explore extends Component {
 
 
     updateData(data) {
-        console.log(data);
+        //console.log(data);
         this.setState({ adults: data.adults, children: data.children, infants: data.infants });
     }
 

@@ -38,7 +38,7 @@ class ProfileWalletCard extends Component {
         return (
             <View style={styles.cardBox}>
                 <VersionText color={'white'} size={9} 
-                    style={{position: 'absolute', backgroundColor: 'trasparent', top: 10}}
+                    style={{position: 'absolute', backgroundColor: 'transparent', top: 10}}
                     textStyle={{textAlign: 'right'}}
                 />
 

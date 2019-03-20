@@ -19,8 +19,8 @@ class Wallet {
 
   static async getBalance(address) {
     const nodeProvider = getNodeProvider();
-    console.log("node provider ");
-    console.log(nodeProvider);
+    //console.log("node provider ");
+    //console.log(nodeProvider);
     let balance = await nodeProvider.getBalance(address);
     return balance;
   }

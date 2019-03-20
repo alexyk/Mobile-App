@@ -5,7 +5,11 @@ import appReducers from '../reducers';
 import { middleware } from '../../routing'
 import { logger } from 'redux-logger'
 
-const middlewares = [thunk, middleware, logger];
+let middlewares = [thunk, middleware];
+//TODO: @@debug - removing redux events logger in non __DEV__ mode
+if (__DEV__) {
+    middlewares.push(logger)
+}
 
 const enchancer = composeWithDevTools({
     serialize: true,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                

@@ -54,11 +54,11 @@ class MyTrips extends Component {
     }
 
     componentDidMount() {
-        console.log('did mount-----', this.props);
+        //console.log('did mount-----', this.props);
     }
 
     componentDidUpdate(prevProps) {
-        console.log('did update-----', prevProps.navigation.state.params);
+        //console.log('did update-----', prevProps.navigation.state.params);
         if (this.state.hasPendingTrips) {
             this.props.navigation.navigate('UserMyTrips', { trips: this.state.myTripsData, gotoBooking: this.gotoBooking });
         }
@@ -68,7 +68,7 @@ class MyTrips extends Component {
         //Here we will load trips
         requester.getMyHotelBookings().then(res => {
             res.body.then(data => {
-                console.log("getMyHotelBookings", data);
+                //console.log("getMyHotelBookings", data);
                 var tripArray = _.orderBy(data.content, ['arrival_date'], ['desc']);
                 // _.remove(tripArray, function(obj) {
                 //     var tripDate = moment(obj.arrival_date).utc();
@@ -86,7 +86,7 @@ class MyTrips extends Component {
         }).catch(err => {
             this.hideProgress();
             Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-            console.log(err);
+            //console.log(err);
         });
     }
 

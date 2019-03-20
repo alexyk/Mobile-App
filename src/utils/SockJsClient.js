@@ -101,7 +101,7 @@ class SockJsClient extends React.Component {
 
   log = (msg) => {
       if (this.props.debug) {
-          console.log(msg);
+          //console.log(msg);
       }
   }
 
