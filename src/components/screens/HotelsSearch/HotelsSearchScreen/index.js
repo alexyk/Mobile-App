@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+import { SafeAreaView } from 'react-native';
 import { connect } from 'react-redux';
-import { TouchableOpacity, View, Platform, NativeModules, DeviceEventEmitter, Dimensions } from 'react-native';
+import { TouchableOpacity, View, Platform, NativeModules, DeviceEventEmitter, Dimensions, Text } from 'react-native';
 
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 
@@ -20,9 +21,13 @@ import Image from 'react-native-remote-svg';
 import { DotIndicator } from 'react-native-indicators';
 import MapModeHotelsSearch from '../MapModeHotelsSearch'
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
+import lang from "../../../../language"
 
 import styles from './styles';
-import { createInitialState, updateIds, generateSearchString } from '../../utils';
+import { 
+    createInitialState, updateHotelIdsMap, generateSearchString, updateHotelFromSocket,
+    updateHotelsFromSocketCache, debugHotelData
+} from '../../utils';
 import stomp from 'stomp-websocket-js';
 
 const { width, height } = Dimensions.get('window')
@@ -33,8 +38,9 @@ let stompAndroidClient = undefined;
 class HotelsSearchScreen extends Component {
     constructor(props) {
         super(props);
+        console.log('#hotel-search# 2.1/6  HotelSearchScreen constructor START');
+
         console.disableYellowBox = true;
-        console.log('#now# 2.1/6  HotelSearchScreen constructor START');
 
         const { params } = this.props.navigation.state;//eslint-disable-line
         this.state = createInitialState(params);
@@ -42,8 +48,9 @@ class HotelsSearchScreen extends Component {
         this.pageLimit = 6;
         this.socketDown = true;
         this.hotelsIndicesById = null; // see getHotels() for populating this one
+        this.hotelsSocketCache = {}; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
 
-        this.listViewHelpers = {}; // startFetch & abbortFetch (see UltimateListView docs - react-native-ultimate-listview)
+        this.listViewHelpers = {}; // startFetch & abortFetch (see UltimateListView docs - react-native-ultimate-listview)
 
         // Bind functions to this,
         // thus optimising performance - by using bind(this) instead of "=> function".
@@ -51,6 +58,7 @@ class HotelsSearchScreen extends Component {
         this.saveState = this.saveState.bind(this)
         this.unsubscribe = this.stopSocketConnection.bind(this)
         this.renderListItem = this.renderListItem.bind(this)
+        this.renderFooter = this.renderFooter.bind(this)
         this.onDataFromSocket = this.onDataFromSocket.bind(this)
         this.onStaticData = this.onStaticData.bind(this)
         this.onRefreshResultsOnListView = this.onRefreshResultsOnListView.bind(this)
@@ -63,12 +71,13 @@ class HotelsSearchScreen extends Component {
         // this.dataSource = [];
 
         //TODO: @@debug - remove
-        console.log('#now# 2.2/6 HotelSearchScreen constructor END');
+        console.log('#hotel-search# 2.2/6 HotelSearchScreen constructor END');
         this.renderTimes = 0;
+        this.renderItemTimes = 0;
     }
 
     componentDidMount() {
-        console.log('#now# 3/6 HotelSearchScreen componentDidMount START');
+        console.log('#hotel-search# 3/6 HotelSearchScreen componentDidMount START');
 
         if (this.state.isHotel) {
             this.getHotels();
@@ -85,7 +94,7 @@ class HotelsSearchScreen extends Component {
     }
 
     getHotels() {
-        console.log("#now# 4.1/6 [HotelsSearchScreen] getHotels");
+        console.log("#hotel-search# 4.1/6 [HotelsSearchScreen] getHotels");
                     
         this.hotelsIndicesById = {};
         const _this = this;
@@ -93,7 +102,7 @@ class HotelsSearchScreen extends Component {
         this.setState(
             // change state function
             function(prevState, updatedProps) {
-                // console.log('SET_STATE 1', {prevState,updatedProps})
+                //console.log('SET_STATE 1', {prevState,updatedProps})
                 return {
                     isMAP: -1, // TODO: Value was -1, set to 0 to be able to work with whatever map behaviour was before
                                // Figure out how to work with Map logic and whether this var isMAP is needed
@@ -105,18 +114,13 @@ class HotelsSearchScreen extends Component {
 
             // callback (after change state above)
             function() {
-                // console.log('SET_STATE 2', {_th:this});
-                requester.getStaticHotels(_this.state.regionId).then(res => {
-                    res.body.then(data => {
-                        //console.log("### [HotelsSearchScreen][SERVER] getStaticHotels", data);
-        
-                        if (_this.socketDown) {
-                            _this.startSocketConnection();
-                        }
-                    });
-                }
-            );
-        });
+                //console.log('SET_STATE 2', {_th:this});
+                requester
+                    .getStaticHotels(_this.state.regionId)
+                    .then(this.onStaticData)
+            }
+        );
+        //console.log("#hotel-search# 4.2/6 [HotelsSearchScreen] getHotels");
     }
 
     // TODO: Inspect this flow - and create a component to implement it
@@ -160,13 +164,16 @@ class HotelsSearchScreen extends Component {
                 stompAndroidClient.close();
             }
         }
+
+        // stompAndroidClient = null;
+        // stompiOSClient = null;
     }
 
     stompAndroidConnect() {
         stompAndroidClient = NativeModules.StompModule;
 
-        // console.log("stompAndroid -------------");
-        // console.log("stompAndroid---------------", this.uuid, this.searchString);
+        //console.log("stompAndroid -------------");
+        //console.log("stompAndroid---------------", this.uuid, this.searchString);
         const message = "{\"uuid\":\"" + this.uuid + "\",\"query\":\"" + this.searchString + "\"}";
         const destination = "search/" + this.uuid;
 
@@ -182,7 +189,7 @@ class HotelsSearchScreen extends Component {
 
         DeviceEventEmitter.removeAllListeners("onStompMessage");
         DeviceEventEmitter.addListener("onStompMessage", ({message}) => {
-            // console.info('stomp message', message);
+            // console.warn('stomp message', message);
             // TODO: (low priority) Solve this difference between iOS and Android
             return this.onDataFromSocket({body:message})
         });
@@ -191,9 +198,11 @@ class HotelsSearchScreen extends Component {
     }
 
     onDoneSocket = (data) => {
-        //console.log('onDoneSocket', {data})
+        console.log(`#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`)
 
         this.stopSocketConnection(false);
+
+        this.setState({pricesFromSocket: data.totalElements})
 
         this.listViewHelpers.startFetch(this.state.hotelsInfo, this.pageLimit);
     }
@@ -250,10 +259,6 @@ class HotelsSearchScreen extends Component {
 
     gotoHotelDetailsPageByMap (item) {
         //console.log("gotoHotelDetailsPageByMap", item);
-        
-        if (item.price == null || item.price == undefined) {
-            return;
-        }
 
         this.setState({isLoadingHotelDetails: true});
         requester.getHotelById(item.id, this.searchString.split('&')).then((res) => {
@@ -282,12 +287,46 @@ class HotelsSearchScreen extends Component {
     
     onStaticData(res) {
         const _this = this;
+        //console.log(` RESULT: ${res.success} `, {res})
+
         if (res.success) {
-            res.body.then((data) => {
+            res.body.then(function(data) {
                 let hotels = data.content;
-                updateIds(this.hotelsIndicesById,hotels);
+                updateHotelIdsMap(_this.hotelsIndicesById, hotels);
+                updateHotelsFromSocketCache(hotels, _this.hotelsSocketCache)
+
+                //TODO: @@debug
+                /** console.log START */
+                // console.log("#hotel-search# [HotelsSearchScreen]  STATIC DATA", data);
+                console.log("#hotel-search# [HotelsSearchScreen] STATIC DATA " +
+                    `first: ${data.first}, last: ${data.last}, number: ${data.number},`+
+                    ` totalElements: ${data.totalElements}, totalPages: ${data.totalPages},` +
+                    ` pageLimit for list: ${_this.pageLimit}`
+                );
+                console.log('#hotel-search# [HotelsSearchScreen] STATIC DATA, Hotels:');
+                for (let i=0; i<hotels.length; i++) {
+                    let item = hotels[i];
+                    debugHotelData(item, _this.state.hotelsInfo, i, '.. STATIC DATA ..')
+                    /* console.log('    ' +
+                        `id: ${item.id.toString().padStart(7, ' ')}, ` +
+                        `photo: ${item.hotelPhoto.url.substr(0,20)}, ` +
+                        `name: ${item.name.substr(0,20).padEnd(20,' ')}, ` +
+                        `star: ${item.star}`
+                    ); */
+                }
+                /* console.log END */
+
+                if (_this.socketDown) {
+                    _this.startSocketConnection();
+                }
+
                 _this.setState(
-                    {hotelsInfo:hotels},
+                    (prev) => {
+                        return {
+                            hotelsInfo: prev.hotelsInfo.concat(hotels),
+                            totalHotels: data.totalElements
+                        }
+                    },
                     function() {
                         _this.listViewHelpers.startFetch(_this.state.hotelsInfo, _this.pageLimit);
                     }
@@ -295,12 +334,15 @@ class HotelsSearchScreen extends Component {
                 
             })
         } else {
+            console.error('[HotelsSearchScreen] Could not fetch Static Data for hotels')
             this.listViewHelpers.startFetch([], 0, true)
         }
     }
+
+
     // onFetch (page = 1, startFetch, abortFetch) {
     onRefreshResultsOnListView(page = 1, startFetch, abortFetch) {
-        //console.log("### [HotelsSearchScreen] onFetch / onRefreshResultsOnListView", page);
+        console.log(`#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`);
 
         // This is required to determinate whether the first loading list is all loaded.
     
@@ -309,17 +351,17 @@ class HotelsSearchScreen extends Component {
         try {
             //console.log("### onFetch 0");
 
-            if (!this.state.isFilterResult) {
-                //console.log("### onFetch 1.1");
-                requester
-                    .getStaticHotels(this.state.regionId, page - 1)
-                    .then(this.onStaticData);
-            } else {
+            if (this.state.isFilterResult) {
                 //console.log("### onFetch 2.1");
                 const strSearch = this.generateSearchString(this.state, this.props);
                 const strFilters = this.getFilterString(this.listView.getPage());
                 requester
                     .getLastSearchHotelResultsByFilter(strSearch, strFilters)
+                    .then(this.onStaticData);
+            } else {
+                //console.log("### onFetch 1.1");
+                requester
+                    .getStaticHotels(this.state.regionId, page - 1)
                     .then(this.onStaticData);
             }            
         } catch (err) {
@@ -470,7 +512,7 @@ class HotelsSearchScreen extends Component {
     }
 
     saveState() {
-        console.log('#now# 5/6 HotelSearchScreen saveState END');
+        //console.log('#hotel-search# 5/6 HotelSearchScreen saveState END');
 
         this.setState(
             function(prevState, propsUpdated) {
@@ -595,7 +637,7 @@ class HotelsSearchScreen extends Component {
                 // this.applyFilters();
                 const search = generateSearchString(this.state, this.props);
                 const filters = this.getFilterString(0);
-                //console.log("search --- filters", search, filters);
+                ////console.log("search --- filters", search, filters);
                 this.fetchFilteredResults(search, filters);
             }
         );
@@ -635,7 +677,7 @@ class HotelsSearchScreen extends Component {
                 });
             } 
             else {
-                // console.log('Search expired');
+                // //console.log('Search expired');
             }
         });
         
@@ -663,7 +705,9 @@ class HotelsSearchScreen extends Component {
 
     renderCalendarAndFilters() {
         return (
-            <View style={this.state.isNewSearch ?  {height:190, width:'100%'} : {height:70, width:'100%'}}>
+            <View style={[this.state.isNewSearch ?  {height:190, width:'100%'} : {height:70, width:'100%'},
+                {borderBottomWidth:1}
+            ]}>
                 <DateAndGuestPicker
                     checkInDate={this.state.checkInDate}
                     checkOutDate={this.state.checkOutDate}
@@ -714,8 +758,38 @@ class HotelsSearchScreen extends Component {
         return (<View/>)
     }
 
+    renderFooter = () => {
+        const {commonText} = require('../../../../common.styles');
+        
+        return (
+            <View style={{width:'100%', height:30,
+                flexDirection:'row',
+                justifyContent: 'space-evenly',
+                alignItems: 'flex-end',
+                borderTopWidth: 1,
+                borderColor: '#000',
+                paddingBottom: 5
+            }}>
+                <Text style={{...commonText, fontSize:12, fontWeight: 'normal', textAlign: 'left'}}>
+                    {
+                        lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES.replace('$$1',
+                                this.state.pricesFromSocket > 0
+                                    ? `${this.state.pricesFromSocketValid}/${this.state.pricesFromSocket}`
+                                    : `${this.state.pricesFromSocketValid}`
+                    )}
+                </Text>
+                <Text style={{...commonText, fontSize:12, fontWeight: 'normal', textAlign: 'right'}}>
+                    {lang.TEXT.SEARCH_HOTEL_RESULTS_FOUND.replace('$$1',
+                        `${this.state.hotelsInfo.length}/${this.state.totalHotels}`
+                    )}
+                </Text>
+            </View>
+        )
+    }
+
     renderListItem = (item, index) => {
-        // console.log(`### [HotelsSearchScreen] renderListItem`,{item,index})
+        this.renderItemTimes++;
+        // console.log(`    #hotel-search# [HotelsSearchScreen] renderListItem id: ${item.id}, index: ${index}, renderItemTimes: ${this.renderItemTimes}`)
 
         return (
             <HotelItemView
@@ -729,22 +803,23 @@ class HotelsSearchScreen extends Component {
     }
 
     renderResultsAsList () {
-        // console.log(`### [HotelsSearchScreen] renderResultsAsList`)
+        // //console.log(`### [HotelsSearchScreen] renderResultsAsList`)
 
         return <UltimateListView
                     ref = {ref => this.listView = ref}
                     key = {'hotelsList'} // this is important to distinguish different FlatList, default is numColumns
                     onFetch = {this.onRefreshResultsOnListView}
                     keyExtractor = {(item, index) => {
-                        // console.log(`### [HotelsSearchScreen] item:${item}: index:${index}`)
+                        // //console.log(`### [HotelsSearchScreen] item:${item}: index:${index}`)
                         return `${index} - ${item}`
                         }
                     } // this is required when you are using FlatList
                     firstLoader = { true }
-                    refreshableMode = { 'advanced' }
-                    item = {this.renderListItem} // this takes three params (item, index, separator)
+                    refreshableMode = { 'basic' }
                     data = {this.state.hotelsInfo}
                     numColumns = {1} // to use grid layout, simply set gridColumn > 1
+                    autoPagination
+                    item = {this.renderListItem} // this takes three params (item, index, separator)
                     paginationFetchingView = {this.renderPaginationFetchingView}
                     paginationWaitingView = {this.renderPaginationWaitingView}
                     paginationAllLoadedView = {this.renderPaginationAllLoadedView}
@@ -781,17 +856,17 @@ class HotelsSearchScreen extends Component {
 
     render() {
         // TODO: @@debug - remove this
-        this.renderTimes++;
-        if (this.renderTimes <= 10) console.log('#now# 6/6 HotelSearchScreen render');
+        // this.renderTimes++;
+        //if (this.renderTimes <= 20)
+        // console.log(`#hotel-search# 6/6 HotelSearchScreen render #${this.renderTimes}`);
 
         // console.log(`### [HotelsSearchScreen] index: ${this.state.index}`,{all:this.state.allElements});
 
         return (
-            <View style={styles.container}>
-                { this.renderBackButtonAndSearchField() }
-
-                <View style={{position: 'absolute', top: 100, left: 0, right: 0, bottom: 0, width:'100%'}}>
-                    { this.renderCalendarAndFilters() }
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.container}>
+                    { this.renderBackButtonAndSearchField() }
+                    { this.renderCalendarAndFilters()       }
 
                     <View style={styles.containerHotels}>
                         { 
@@ -801,19 +876,21 @@ class HotelsSearchScreen extends Component {
                         }
 
                         {/* DISABLED FOR NOW */}
-                        { this.renderMapButton()           }
+                        {/* { this.renderMapButton()           } */}
 
                     </View>
-                </View>
 
-                <ProgressDialog
-                    visible={this.state.isLoadingHotelDetails}
-                    title="Please Wait"
-                    message="Loading..."
-                    animationType="slide"
-                    activityIndicatorSize="large"
-                    activityIndicatorColor="black"/>
-            </View>
+                    { this.renderFooter()               }
+
+                    <ProgressDialog
+                        visible={this.state.isLoadingHotelDetails}
+                        title="Please Wait"
+                        message="Loading..."
+                        animationType="slide"
+                        activityIndicatorSize="large"
+                        activityIndicatorColor="black"/>
+                </View>
+            </SafeAreaView>
         );
     }
 
@@ -838,7 +915,7 @@ class HotelsSearchScreen extends Component {
     }
 
     setInitialPositionOnMap() {
-        if (this.state.isMAP == -1 && this.state.hotelsInfo.length == 1) {
+        if (this.state.isMAP == -1 && this.state.hotelsInfo.length > 0) {
             this.setState({
                 isMAP: 0, 
                 initialLat: parseFloat(this.state.hotelsInfo[0].lat), 
@@ -853,15 +930,16 @@ class HotelsSearchScreen extends Component {
         const {body} = data;
         // try {
             const parsedData = JSON.parse(body);
-/* 
-            console.debug("[HotelsSearchScreen] stomp - onDataFromSocket ---", 
+
+/*             
+            console.debug("#hotel-search# [HotelsSearchScreen] stomp - onDataFromSocket ---", 
                 {body,data,parsedData,_th: this}
             );
  */
 
             if (parsedData.hasOwnProperty('allElements')) {
                 // TODO: @@debug - remove
-                console.warn(`[HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
+                // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
 
                 if (parsedData.allElements) {
                     this.setState({ allElements: true, editable: true});
@@ -870,43 +948,30 @@ class HotelsSearchScreen extends Component {
             } else {
                 let hotelData = parsedData;
                 // TODO: @@debug - remove
-                console.warn(`[HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}`);
-
-                // TODO: Remove this commented out code if it is indeed obsolete
-                //       It is some inherited old code - was commented out.
-                //if (this.listView != null && (this.state.hotelsInfo.length < this.listView.getRows().length || this.state.hotelsInfo.length % 20 === 0)) {
-                    // this.setState(prevState => ({
-                    //     hotelsInfo: [...prevState.hotelsInfo, jsonHotel]
-                    // }));
-                    //this.state.hotelsInfo = [...this.state.hotelsInfo, jsonHotel];
-                    //this.setState({refresh: this.state.hotelsInfo.length})
+                // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);
 
                 this.setState(
                     // change state function
-                    function(prev, props) {
+                    function(prevState, updatedProps) {
+                        // Checking if this is HotelsSearchScreen
+                        // console.log(`#hotel-search# [HotelsSearchScreen::onDataFromSocket -> setState::func] this instanceof isHotelSearchScreen: ${this instanceof HotelsSearchScreen}`);
+                        
                         if (this.socketDown) {
-                            return null;
+                            return prevState;
                         } else {
-                            let hotelsInfo = [...prev.hotelsInfo];
-                            let index = this.hotelsIndicesById[hotelData.id];
-                            if (index != null) {
-                                // hotel exists in state - update it:
-                                //  - add position (lat,lon) and price
-                                hotelData = Object.assign({},hotelsInfo[index], hotelData);
-                                hotelsInfo[index] = hotelData;
-                            } else {
-                                // hotel data not present in state - add it
-                                index = hotelsInfo.push(hotelData);
-                                this.hotelsIndicesById[hotelData.id] = index;
+                            let result = {
+                                hotelsInfo: updateHotelFromSocket(hotelData, this.hotelsSocketCache, this.hotelsIndicesById, prevState, updatedProps)
                             }
-                            
-                            return {
-                                hotelsInfo
+                            if (hotelData.price && !isNaN(hotelData.price)) {
+                                result.pricesFromSocketValid = prevState.pricesFromSocketValid+1;
                             }
+                            return result;
                         }
                     },
                     // callback (after change state above)
                     function() {
+                        // Checking if this is HotelsSearchScreen
+                        // console.log(`#hotel-search# [HotelsSearchScreen::onDataFromSocket -> setState::callback] this instanceof isHotelSearchScreen: ${this instanceof HotelsSearchScreen}`);
                         
                         if (this.state.isMAP === 1 
                             && this.mapView != null 

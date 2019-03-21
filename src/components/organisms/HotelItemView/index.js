@@ -30,7 +30,7 @@ class HotelItemView extends Component {
     };
 
     static defaultProps = {
-        item: [],
+        item: {},
         daysDifference : 1,
         isDoneSocket: false
     };
@@ -38,10 +38,22 @@ class HotelItemView extends Component {
     constructor(props) {
         super(props);
         //console.log('item props',props)
+        this.onPress = this.onPress.bind(this);
     }
 
-    onFlatClick = (item) => {
+    shouldComponentUpdate(newProps, newState, newContext) {
+        const {item} = newProps;
+        const oldItem = this.props.item;
+        if (oldItem.price != item.price) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    onPress = (event) => {
         //console.log('flat click', item, this.props);
+        const item = this.props.item;
 
         if (isNative.hotelItem) {
             // native
@@ -150,7 +162,7 @@ class HotelItemView extends Component {
         let stars = item.star;
 
         return (
-            <TouchableOpacity onPress={() => this.onFlatClick(item)}>
+            <TouchableOpacity onPress={this.onPress}>
                 <CardView 
                     style = {styles.card}
                     cardElevation = {0.5}
@@ -199,10 +211,9 @@ let mapStateToProps = (state) => {
     return {
         currency: state.currency.currency,
         currencySign: state.currency.currencySign,
-        
-        locAmounts: state.locAmounts,
+        // locAmounts: state.locAmounts,
         exchangeRates: state.exchangeRates,
-        allState: state
+        // allState: state
     };
 }
 export default connect(mapStateToProps, null)(HotelItemView);

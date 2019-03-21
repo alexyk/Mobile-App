@@ -20,10 +20,12 @@ const TEXT = {
     MY_TRIPS_BOOKING_REF_NO: 'Reference no',
     MYTRIPS_NO_IMAGE: 'No image',
     MYTRIPS_FILTER: "Filter trips",
-    SEARCH_HOME_RESULTS_TILE: "Home Search",
+    SEARCH_HOME_RESULTS_TILE: "Home Search Results",
     SEARCH_HOME_DETAILS_TILE: "Home Details & Booking",
-    SEARCH_HOTEL_RESULTS_TILE: "Hotel Search",
+    SEARCH_HOTEL_RESULTS_TILE: "Hotel Search Results",
     SEARCH_HOTEL_DETAILS_TILE: "Hotel Details & Booking",
+    SEARCH_HOTEL_RESULTS_FOUND: "$$1 hotels",
+    SEARCH_HOTEL_RESULTS_PRICES: "$$1 prices",
 }
 
 

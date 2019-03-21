@@ -7,7 +7,7 @@
  */
 
 import { 
-    BackHandler, Platform, View, WebView, Text
+    BackHandler, Platform, View, WebView, Text, SafeAreaView
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -293,34 +293,36 @@ class WebviewScreen extends Component {
         const patchPostMessageJsCode = '(' + String(this.patchPostMessageFunction) + ')();';
 
         return (
-            <View style={styles.container}>
-                <View style={styles.backButtonContainer}>
-                    <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
-                    <Text style={styles.title}>{this.state.title}</Text>
-                </View>
+            <SafeAreaView style={styles.safeArea}>
+                <View style={styles.container}>
+                    <View style={styles.backButtonContainer}>
+                        <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
+                        <Text style={styles.title}>{this.state.title}</Text>
+                    </View>
 
-                <View style={styles.webviewContainer}>
-                    <WebView
-                        ref={(webViewRef) => { this.webViewRef.ref = webViewRef; }}
-                        onNavigationStateChange = {this.onWebViewNavigationState}
-                        onLoadStart = {this.onWebViewLoadStart}
-                        onLoadEnd   = {this.onWebViewLoadEnd}
-                        onMessage   = {this.onWebViewMessage}
-                        style       = {styles.webView}
-                        injectedJavaScript = {patchPostMessageJsCode}
-                        source = {{ uri: this.state.webViewUrl }}
-                        // javaScriptEnabled={true}
-                    />
-                </View>
+                    <View style={styles.webviewContainer}>
+                        <WebView
+                            ref={(webViewRef) => { this.webViewRef.ref = webViewRef; }}
+                            onNavigationStateChange = {this.onWebViewNavigationState}
+                            onLoadStart = {this.onWebViewLoadStart}
+                            onLoadEnd   = {this.onWebViewLoadEnd}
+                            onMessage   = {this.onWebViewMessage}
+                            style       = {styles.webView}
+                            injectedJavaScript = {patchPostMessageJsCode}
+                            source = {{ uri: this.state.webViewUrl }}
+                            // javaScriptEnabled={true}
+                        />
+                    </View>
 
-                <ProgressDialog
-                   visible={this.state.showProgress}
-                   title="Loading"
-                   message={this.state.message ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
-                   animationType="slide"
-                   activityIndicatorSize="large"
-                   activityIndicatorColor="black"/>
-            </View>
+                    <ProgressDialog
+                    visible={this.state.showProgress}
+                    title="Loading"
+                    message={this.state.message ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
+                    animationType="slide"
+                    activityIndicatorSize="large"
+                    activityIndicatorColor="black"/>
+                </View>
+            </SafeAreaView>
         );
     }
 }

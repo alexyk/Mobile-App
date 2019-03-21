@@ -5,7 +5,7 @@ import {
     StyleSheet,
     Text, 
     TouchableOpacity,
-    View
+    View, SafeAreaView
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -269,7 +269,7 @@ class Explore extends Component {
     }
 
     gotoSearch() {
-        console.log(`#now# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`);
+        console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`);
         //Open new property screen that uses sock-js
         if (isExploreSearchNative){
             if (this.state.isHotel) {
@@ -523,140 +523,143 @@ class Explore extends Component {
         } = this.state;
 
         return (
-            <View style={styles.container}>
-                <Toast
-                    ref="toast"
-                    style={{ backgroundColor: '#DA7B61' }}
-                    position='bottom'
-                    positionValue={150}
-                    fadeInDuration={500}
-                    fadeOutDuration={500}
-                    opacity={1.0}
-                    textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
-                />
-                {this.state.isHotel ? this.renderHotelTopView() : this.renderHomeTopView()}
-                {this.renderAutocomplete()}
+            <SafeAreaView style={styles.container}>
 
-                <ScrollView  style={styles.scrollView} automaticallyAdjustContentInsets={true}>
+                <View style={styles.container}>
+                    <Toast
+                        ref="toast"
+                        style={{ backgroundColor: '#DA7B61' }}
+                        position='bottom'
+                        positionValue={150}
+                        fadeInDuration={500}
+                        fadeOutDuration={500}
+                        opacity={1.0}
+                        textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
+                    />
+                    {this.state.isHotel ? this.renderHotelTopView() : this.renderHomeTopView()}
+                    {this.renderAutocomplete()}
 
-                    <View style={styles.scrollViewContentMain}>
-                        <DateAndGuestPicker
-                            checkInDate={checkInDate}
-                            checkOutDate={checkOutDate}
-                            checkInDateFormated={checkInDateFormated}
-                            checkOutDateFormated={checkOutDateFormated}
-                            adults={this.state.adults}
-                            children={this.state.children}
-                            guests={this.state.guests}
-                            infants={this.state.infants}
-                            gotoGuests={this.gotoGuests}
-                            gotoSearch={this.gotoSearch}
-                            onDatesSelect={this.onDatesSelect}
-                            gotoSettings={this.gotoSettings}
-                            showSearchButton={true}
-                            disabled={false}
-                            isFilterable={false}
-                        />
-                    </View>
+                    <ScrollView  style={styles.scrollView} automaticallyAdjustContentInsets={true}>
 
-                    <Text style={[styles.scrollViewTitles, { marginBottom: 10, marginTop: 5 }]}>Discover</Text>
-
-                    <View>
-
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15 }}>
-
-                            <TouchableOpacity onPress={() => this.setState({ isHotel: true })}
-                                style={[styles.homehotelsView, {marginRight:5}]}>
-                                <Image
-                                    style={styles.imageViewHotelsHomes} resizeMode='stretch'
-                                    source={require('../../../assets/home_images/hotels.png')} />
-                                {this.state.isHotel ? this.renderHotelSelected() : this.renderHotelDeSelected()}
-                            </TouchableOpacity>
-
-                            <TouchableOpacity onPress={() => this.setState({
-                                isHotel: false,
-                                cities: [],
-                                search: '',
-                                regionId: 0
-                            })}
-                            style={[styles.homehotelsView, {marginLeft:5}]}>
-                                <Image style={styles.imageViewHotelsHomes} resizeMode='stretch'
-                                    source={require('../../../assets/home_images/homes.png')} />
-                                {!this.state.isHotel ? this.renderHomeSelected() : this.renderHomeDeSelected()}
-                            </TouchableOpacity>
-
+                        <View style={styles.scrollViewContentMain}>
+                            <DateAndGuestPicker
+                                checkInDate={checkInDate}
+                                checkOutDate={checkOutDate}
+                                checkInDateFormated={checkInDateFormated}
+                                checkOutDateFormated={checkOutDateFormated}
+                                adults={this.state.adults}
+                                children={this.state.children}
+                                guests={this.state.guests}
+                                infants={this.state.infants}
+                                gotoGuests={this.gotoGuests}
+                                gotoSearch={this.gotoSearch}
+                                onDatesSelect={this.onDatesSelect}
+                                gotoSettings={this.gotoSettings}
+                                showSearchButton={true}
+                                disabled={false}
+                                isFilterable={false}
+                            />
                         </View>
 
-                        <Text style={[styles.scrollViewTitles,  { marginBottom: 10, marginTop: 5 }]}>Popular Destinations</Text>
+                        <Text style={[styles.scrollViewTitles, { marginBottom: 10, marginTop: 5 }]}>Discover</Text>
 
-                        <View style={styles.divsider} />
+                        <View>
 
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
-                            <TouchableOpacity onPress={() => this.handlePopularCities(52612, 'London , United Kingdom')}
-                                style={styles.subViewPopularHotelsLeft}>
-                                <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
-                                    source={require('../../../assets/home_images/london.png')} />
-                            </TouchableOpacity>
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15 }}>
 
-                            <TouchableOpacity onPress={() => this.handlePopularCities(18417, 'Madrid , Spain')}
-                                style={styles.subViewPopularHotelsRight}>
-                                <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
-                                    source={require('../../../assets/home_images/Madrid.png')} />
-                            </TouchableOpacity>
-                        </View>
+                                <TouchableOpacity onPress={() => this.setState({ isHotel: true })}
+                                    style={[styles.homehotelsView, {marginRight:5}]}>
+                                    <Image
+                                        style={styles.imageViewHotelsHomes} resizeMode='stretch'
+                                        source={require('../../../assets/home_images/hotels.png')} />
+                                    {this.state.isHotel ? this.renderHotelSelected() : this.renderHotelDeSelected()}
+                                </TouchableOpacity>
 
-                        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
+                                <TouchableOpacity onPress={() => this.setState({
+                                    isHotel: false,
+                                    cities: [],
+                                    search: '',
+                                    regionId: 0
+                                })}
+                                style={[styles.homehotelsView, {marginLeft:5}]}>
+                                    <Image style={styles.imageViewHotelsHomes} resizeMode='stretch'
+                                        source={require('../../../assets/home_images/homes.png')} />
+                                    {!this.state.isHotel ? this.renderHomeSelected() : this.renderHomeDeSelected()}
+                                </TouchableOpacity>
 
-                            <TouchableOpacity onPress={() => this.handlePopularCities(16471, 'Paris , France')}
-                                style={styles.subViewPopularHotelsLeft}>
-                                <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
-                                    source={require('../../../assets/home_images/paris.png')} />
-                            </TouchableOpacity>
-
-                            <TouchableOpacity onPress={() => this.handlePopularCities(15375, 'Sydney , Australia')}
-                                style={styles.subViewPopularHotelsRight}>
-                                <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
-                                    source={require('../../../assets/home_images/Sydney.png')} />
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* <TouchableOpacity onPress={this.showToast}>
-                            <View style={styles.searchButtonView}>
-                                <Text style={styles.searchButtonText}>Show All</Text>
                             </View>
-                        </TouchableOpacity> */}
 
-                        <View style={styles.bottomView}>
-                            <Image style={styles.bottomViewText} resizeMode='stretch'
-                                source={require('../../../assets/texthome.png')} />
-                            {/* <TouchableOpacity onPress={this.showToast} style={styles.getStartedButtonView}>
-                                <View >
-                                    <Text style={styles.searchButtonText}>Get Started</Text>
+                            <Text style={[styles.scrollViewTitles,  { marginBottom: 10, marginTop: 5 }]}>Popular Destinations</Text>
+
+                            <View style={styles.divsider} />
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
+                                <TouchableOpacity onPress={() => this.handlePopularCities(52612, 'London , United Kingdom')}
+                                    style={styles.subViewPopularHotelsLeft}>
+                                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
+                                        source={require('../../../assets/home_images/london.png')} />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity onPress={() => this.handlePopularCities(18417, 'Madrid , Spain')}
+                                    style={styles.subViewPopularHotelsRight}>
+                                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
+                                        source={require('../../../assets/home_images/Madrid.png')} />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
+
+                                <TouchableOpacity onPress={() => this.handlePopularCities(16471, 'Paris , France')}
+                                    style={styles.subViewPopularHotelsLeft}>
+                                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
+                                        source={require('../../../assets/home_images/paris.png')} />
+                                </TouchableOpacity>
+
+                                <TouchableOpacity onPress={() => this.handlePopularCities(15375, 'Sydney , Australia')}
+                                    style={styles.subViewPopularHotelsRight}>
+                                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
+                                        source={require('../../../assets/home_images/Sydney.png')} />
+                                </TouchableOpacity>
+                            </View>
+
+                            {/* <TouchableOpacity onPress={this.showToast}>
+                                <View style={styles.searchButtonView}>
+                                    <Text style={styles.searchButtonText}>Show All</Text>
                                 </View>
                             </TouchableOpacity> */}
-                            <Image style={styles.bottomViewBanner} resizeMode='stretch'
-                                source={require('../../../../src/assets/vector.png')} />
+
+                            <View style={styles.bottomView}>
+                                <Image style={styles.bottomViewText} resizeMode='stretch'
+                                    source={require('../../../assets/texthome.png')} />
+                                {/* <TouchableOpacity onPress={this.showToast} style={styles.getStartedButtonView}>
+                                    <View >
+                                        <Text style={styles.searchButtonText}>Get Started</Text>
+                                    </View>
+                                </TouchableOpacity> */}
+                                <Image style={styles.bottomViewBanner} resizeMode='stretch'
+                                    source={require('../../../../src/assets/vector.png')} />
+                            </View>
+
                         </View>
 
-                    </View>
+                    </ScrollView>
+                    <LocRateButton onPress={() => this.setState({ currencySelectionVisible: true })}/>
 
-                </ScrollView>
-                <LocRateButton onPress={() => this.setState({ currencySelectionVisible: true })}/>
-
-                <SingleSelectMaterialDialog
-                    title = { 'Select Currency' }
-                    items = { BASIC_CURRENCY_LIST.map((row, index) => ({ value: index, label: row })) }
-                    visible = { this.state.currencySelectionVisible }
-                    onCancel = { () =>this.setState({ currencySelectionVisible: false }) }
-                    onOk = { result => {
-                        //console.log("select country", result);
-                        this.setState({ currencySelectionVisible: false });
-                        this.props.setCurrency({currency: result.selectedItem.label});
-                        // this.props.actions.getCurrency(result.selectedItem.label);
-                        // this.setState({ singlePickerSelectedItem: result.selectedItem });
-                    }}
-                />
-            </View>
+                    <SingleSelectMaterialDialog
+                        title = { 'Select Currency' }
+                        items = { BASIC_CURRENCY_LIST.map((row, index) => ({ value: index, label: row })) }
+                        visible = { this.state.currencySelectionVisible }
+                        onCancel = { () =>this.setState({ currencySelectionVisible: false }) }
+                        onOk = { result => {
+                            //console.log("select country", result);
+                            this.setState({ currencySelectionVisible: false });
+                            this.props.setCurrency({currency: result.selectedItem.label});
+                            // this.props.actions.getCurrency(result.selectedItem.label);
+                            // this.setState({ singlePickerSelectedItem: result.selectedItem });
+                        }}
+                    />
+                </View>
+            </SafeAreaView>
         );
     }
 }

@@ -2,6 +2,10 @@ import { StyleSheet } from 'react-native';
 import { commonText } from '../../../common.styles';
 
 const styles = StyleSheet.create({
+    safeArea: {
+        flex: '1',
+        backgroundColor: '#f0f1f3'
+    },
     container: {
         width: '100%',
         height: '100%',
