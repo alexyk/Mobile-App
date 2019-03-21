@@ -100,12 +100,12 @@ export function updateHotelFromSocket(hotelData, hotelsFromSocketOnly, hotelsInd
     }
     if (indexNotNull && hotelsInfo) {
         // TODO: Performance - check if this is too intensive - creating a copy of all hotels
-        console.time('Create hotelsInfo copy on socket update');
+        // console.time('Create hotelsInfo copy on socket update');
         let hotelsInfoFresh = [...prevState.hotelsInfo]; // shallow copy, same as Array.slice() ???
-        console.timeEnd('Create hotelsInfo copy on socket update');
+        // console.timeEnd('Create hotelsInfo copy on socket update');
 
         // TODO: @@debug - remove
-        debugHotelData(hotelData, hotelsInfo, index, '>> SOCKET DATA <<');
+        // debugHotelData(hotelData, hotelsInfo, index, '>> SOCKET DATA <<');
 
         // update selected hotel data from socket data (not all)
         hotelData = Object.assign({},hotelsInfo[index], infoFromSocket);
@@ -135,14 +135,14 @@ export function updateHotelsFromSocketCache(hotelsArray, socketCacheMap) {
 
 export function updateHotelIdsMap(targetObject, array) {
     // TODO: Performance - check if this is too intensive
-    console.time('Update hotelIdsMap');
+    // console.time('Update hotelIdsMap');
     array.map(
         (item, index) => {
             targetObject[item.id] = index;
             return item;
         }
     );
-    console.timeEnd('Update hotelIdsMap');
+    // console.timeEnd('Update hotelIdsMap');
 }
 
 export function generateSearchString(state, props) {
@@ -213,6 +213,9 @@ export function debugHotelData(hotelData, hotelsInfo, index, funcName) {
             hotelData.hotelPhoto
                 ? `*${hotelData.hotelPhoto.url.substr(0,30).padEnd(29,' ')}`
                 : (hotelsInfo[index].hotelPhoto ? hotelsInfo[index].hotelPhoto.url.substr(0,30).padEnd(30,' ') : ''.padEnd(30,' '))
+        // `photo: ${item.hotelPhoto.url.substr(0,20)}, ` +
+        // `name: ${item.name.substr(0,20).padEnd(20,' ')}, ` +
+        // `star: ${item.star}`
         }',` 
     );
 }

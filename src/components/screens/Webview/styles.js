@@ -3,7 +3,7 @@ import { commonText } from '../../../common.styles';
 
 const styles = StyleSheet.create({
     safeArea: {
-        flex: '1',
+        flex: 1,
         backgroundColor: '#f0f1f3'
     },
     container: {

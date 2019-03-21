@@ -296,7 +296,7 @@ class HotelsSearchScreen extends Component {
                 updateHotelsFromSocketCache(hotels, _this.hotelsSocketCache)
 
                 //TODO: @@debug
-                /** console.log START */
+                /** console.log START *
                 // console.log("#hotel-search# [HotelsSearchScreen]  STATIC DATA", data);
                 console.log("#hotel-search# [HotelsSearchScreen] STATIC DATA " +
                     `first: ${data.first}, last: ${data.last}, number: ${data.number},`+
@@ -307,12 +307,6 @@ class HotelsSearchScreen extends Component {
                 for (let i=0; i<hotels.length; i++) {
                     let item = hotels[i];
                     debugHotelData(item, _this.state.hotelsInfo, i, '.. STATIC DATA ..')
-                    /* console.log('    ' +
-                        `id: ${item.id.toString().padStart(7, ' ')}, ` +
-                        `photo: ${item.hotelPhoto.url.substr(0,20)}, ` +
-                        `name: ${item.name.substr(0,20).padEnd(20,' ')}, ` +
-                        `star: ${item.star}`
-                    ); */
                 }
                 /* console.log END */
 
