@@ -44,25 +44,22 @@ class HotelItemView extends Component {
     shouldComponentUpdate(newProps, newState, newContext) {
         const {item} = newProps;
         const oldItem = this.props.item;
-        if (oldItem.price != item.price) {
-            return true;
-        } else {
-            return false;
-        }
+
+        return (oldItem.price != item.price);
     }
 
     onPress = (event) => {
-        //console.log('flat click', item, this.props);
         const item = this.props.item;
+
+        console.log('[HotelItemView] On Press', item);
 
         if (isNative.hotelItem) {
             // native
-            if (item.price != undefined && item.price != null) {
-                this.props.gotoHotelDetailsPage(item);
-            }            
+            this.props.gotoHotelDetailsPage(item);
         } else {
             const {props,state} = this.props.parent;
             const extraParams = {
+                currency: this.props.currency,
                 baseUrl: `mobile/hotels/listings/${item.id}?`,
                 token: props.navigation.state.params.token,
                 email: props.navigation.state.params.email,
@@ -70,7 +67,8 @@ class HotelItemView extends Component {
                 title: lang.TEXT.SEARCH_HOTEL_DETAILS_TILE,
                 isHotel: true
             }
-            gotoWebview(state, props.navigation, extraParams);
+            // gotoWebview(state, props.navigation, extraParams);
+            this.props.gotoHotelDetailsPage(item, state, extraParams)
         }
     }
 

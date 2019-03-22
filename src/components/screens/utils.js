@@ -1,6 +1,13 @@
 import moment from "moment"
+import { basePath } from '../../config'
 
-export function createInitialState(params) {
+export const DISPLAY_MODE_SEARCHING       = 'mode_searching'
+export const DISPLAY_MODE_RESULTS_AS_LIST = 'mode_results_as_list'
+export const DISPLAY_MODE_RESULTS_AS_MAP  = 'mode_results_as_map'
+export const DISPLAY_MODE_ITEM            = 'mode_hotel_details'
+
+
+export function createHotelSearchInitialState(params) {
 
     const startDate = moment()
     .add(1, 'day');
@@ -18,17 +25,19 @@ export function createInitialState(params) {
         cities: [],
 
         isHotel: true,
-        regionId : '',
+        regionId: '',
 
-        hotelsInfo : [],
-        totalHotels : 0,
-        pricesFromSocketValid : 0,
-        pricesFromSocket : 0,
+        hotelsInfo: [],
+        hotelsLoadedInList: 0, 
+        totalHotels: 0,
+        pricesFromSocketValid: 0,
+        pricesFromSocket: 0,
         allElements: false,
-        isMAP : -1,     // TODO: Initial value was -1, is it needed?
-                        // Figure out how to work with Map logic and whether this var isMAP is needed
+        displayMode: DISPLAY_MODE_SEARCHING,
         initialLat: 42.698334,
         initialLon: 23.319941,
+
+        isLoading: true, // progress dialog
         
         checkInDateFormated: startDate.format('DD/MM/YYYY').toString(),
         checkOutDateFormated: endDate.format('DD/MM/YYYY').toString(),
@@ -53,7 +62,8 @@ export function createInitialState(params) {
 
         isNewSearch: false,
 
-        index: 0,
+        // webview - to be removed
+        webViewUrl: ''
     };
     if (params) {
         initialState.isHotel = params.isHotel;
@@ -77,6 +87,14 @@ export function createInitialState(params) {
     return initialState;
 }
 
+/**
+ * 
+ * @param {Object} hotelData {id, price, hotelPhoto, star etc...}
+ * @param {Object} hotelsFromSocketOnly {id: socketData}
+ * @param {Object} hotelsIndicesById {id: index}
+ * @param {Object} prevState 
+ * @param {Object} updatedProps 
+ */
 export function updateHotelFromSocket(hotelData, hotelsFromSocketOnly, hotelsIndicesById, prevState, updatedProps) {
     let hotelsInfo = prevState.hotelsInfo;
     let result = hotelsInfo;
@@ -85,10 +103,10 @@ export function updateHotelFromSocket(hotelData, hotelsFromSocketOnly, hotelsInd
     const current = (indexNotNull && hotelsInfo ? hotelsInfo[index] : {lat:null, lon: null, price: null});
     const infoFromSocket = {
         id: hotelData.id,
-        price: !isNaN(hotelData.price) ? hotelData.price : current.price,
-        lat: hotelData.lat != null ? hotelData.lat : current.lat,
-        lon: hotelData.lon != null ? hotelData.lon : current.lon,
-        hotelPhoto: 
+        price: parseFloat(!isNaN(hotelData.price) ? hotelData.price : current.price),
+        lat: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
+        lon: parseFloat(hotelData.lon != null ? hotelData.lon : current.lon),
+        /*hotelPhoto: 
             (hotelData.thumbnail && hotelData.thumbnail.url 
                 && (current && current.hotelPhoto 
                         && current.hotelPhoto.url
@@ -96,7 +114,7 @@ export function updateHotelFromSocket(hotelData, hotelsFromSocketOnly, hotelsInd
                 )
             )
                 ? hotelData.thumbnail
-                : current.hotelPhoto        
+                : current.hotelPhoto*/
     }
     if (indexNotNull && hotelsInfo) {
         // TODO: Performance - check if this is too intensive - creating a copy of all hotels
@@ -154,6 +172,51 @@ export function generateSearchString(state, props) {
     return search;
 }
 
+export function generateWebviewInitialState(params, state=null) {
+    if (state) {
+        params = {
+            ...params,
+            ...getWebviewExtraData(state,params)
+        }
+    }
+    const checkInDateFormated   = params ? params.checkInDateFormated  : '';
+    const checkOutDateFormated  = params ? params.checkOutDateFormated  : '';
+    const roomsDummyData        = params ? params.roomsDummyData : [];
+    const regionId              = params ? params.regionId : 0;
+
+    const initialState = {
+        guests:             params ? params.guests          : 0,
+        isHotelSelected:    params ? params.isHotelSelected : false,
+        countryId:          params ? params.countryId       : 0,
+        regionId,
+        checkInDateFormated,
+        checkOutDateFormated,
+        roomsDummyData,
+        email:  params ? params.email : '',
+        token:  params ? params.token : '',
+        propertyName: params ? params.propertyName : '',
+        message:  params ? params.message : '',
+        title:  params ? params.title : '',
+        isHotel:  params ? params.isHotel : null,
+        canGoBack: false,
+        canGoForward: false,
+        canGoToResults: false,
+        showProgress: true
+    }
+
+    const webViewUrl = basePath + generateWebviewUrl(
+        initialState,
+        roomsDummyData,
+        (params && params.baseUrl)
+            ? params.baseUrl
+            : null
+    );
+
+    initialState.webViewUrl = webViewUrl;
+    
+    return initialState;
+}
+
 
 /**
  * @initialState (Object) all needed initial properties (see function body)
@@ -187,8 +250,8 @@ export function generateWebviewUrl(initialState, rooms, baseUrl=null) {
     return result;
 }
 
-export function gotoWebview(state, navigation, extraData={}) {
-    navigation.navigate('WebviewScreen', {
+export function getWebviewExtraData(state, extraData={}) {
+    return {
         isHotelSelected: state.isHotel,
         guests: state.guests,
         countryId: state.countryId,
@@ -200,7 +263,11 @@ export function gotoWebview(state, navigation, extraData={}) {
         token: state.token,
         search: state.search,
         ...extraData
-    });
+    }
+}
+
+export function gotoWebview(state, navigation, extraData={}) {
+    navigation.navigate('WebviewScreen', getWebviewExtraData(state, extraData));
 }
 
 export function debugHotelData(hotelData, hotelsInfo, index, funcName) {

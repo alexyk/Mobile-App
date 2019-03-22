@@ -15,15 +15,15 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f1f3F1'
     },
 
-    SearchAndPickerwarp:{
+    searchAndPickerwarp:{
         display: 'flex',
         flexDirection: 'row'
     },
     
     searchAreaView: {
         //width: '68%',
-       // height: 105,
-       flex:1,
+        // height: 105,
+        flex:1,
         backgroundColor: '#f0f1f3',
         // paddingTop: 40,
         paddingLeft: 15,

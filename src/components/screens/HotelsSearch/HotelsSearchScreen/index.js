@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { SafeAreaView } from 'react-native';
+import { SafeAreaView, WebView } from 'react-native';
 import { connect } from 'react-redux';
 import { TouchableOpacity, View, Platform, NativeModules, DeviceEventEmitter, Dimensions, Text } from 'react-native';
 
@@ -12,7 +12,6 @@ import HotelItemView from '../../../organisms/HotelItemView';
 import requester from '../../../../initDependencies';
 
 import UUIDGenerator from 'react-native-uuid-generator';
-import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import _ from 'lodash';
 import moment from 'moment';
 
@@ -25,10 +24,14 @@ import lang from "../../../../language"
 
 import styles from './styles';
 import { 
-    createInitialState, updateHotelIdsMap, generateSearchString, updateHotelFromSocket,
-    updateHotelsFromSocketCache, debugHotelData
+    createHotelSearchInitialState, generateWebviewInitialState, generateSearchString, 
+    updateHotelIdsMap, updateHotelFromSocket, updateHotelsFromSocketCache, 
+    DISPLAY_MODE_SEARCHING, DISPLAY_MODE_RESULTS_AS_LIST,
+    DISPLAY_MODE_RESULTS_AS_MAP, DISPLAY_MODE_ITEM, 
+    debugHotelData
 } from '../../utils';
 import stomp from 'stomp-websocket-js';
+import { isNative } from '../../../../version';
 
 const { width, height } = Dimensions.get('window')
 
@@ -43,7 +46,7 @@ class HotelsSearchScreen extends Component {
         console.disableYellowBox = true;
 
         const { params } = this.props.navigation.state;//eslint-disable-line
-        this.state = createInitialState(params);
+        this.state = createHotelSearchInitialState(params);
 
         this.pageLimit = 6;
         this.socketDown = true;
@@ -51,6 +54,7 @@ class HotelsSearchScreen extends Component {
         this.hotelsSocketCache = {}; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
 
         this.listViewHelpers = {}; // startFetch & abortFetch (see UltimateListView docs - react-native-ultimate-listview)
+        this.webViewRef = null;
 
         // Bind functions to this,
         // thus optimising performance - by using bind(this) instead of "=> function".
@@ -62,13 +66,6 @@ class HotelsSearchScreen extends Component {
         this.onDataFromSocket = this.onDataFromSocket.bind(this)
         this.onStaticData = this.onStaticData.bind(this)
         this.onRefreshResultsOnListView = this.onRefreshResultsOnListView.bind(this)
-
-
-        // TODO: Figure out calls and refreshes:
-        //   (1) if getHotels() is needed to call after going back from map
-        //       e.i. when toggling Map/List view
-        //   (2) isMap - should it really be used as -1, 0, 1
-        // this.dataSource = [];
 
         //TODO: @@debug - remove
         console.log('#hotel-search# 2.2/6 HotelSearchScreen constructor END');
@@ -104,8 +101,7 @@ class HotelsSearchScreen extends Component {
             function(prevState, updatedProps) {
                 //console.log('SET_STATE 1', {prevState,updatedProps})
                 return {
-                    isMAP: -1, // TODO: Value was -1, set to 0 to be able to work with whatever map behaviour was before
-                               // Figure out how to work with Map logic and whether this var isMAP is needed
+                    displayMode: DISPLAY_MODE_SEARCHING,
                     hotelsInfo : [],
                     allElements: false, 
                     editable: false
@@ -117,7 +113,7 @@ class HotelsSearchScreen extends Component {
                 //console.log('SET_STATE 2', {_th:this});
                 requester
                     .getStaticHotels(_this.state.regionId)
-                    .then(this.onStaticData)
+                    .then(_this.onStaticData)
             }
         );
         //console.log("#hotel-search# 4.2/6 [HotelsSearchScreen] getHotels");
@@ -169,6 +165,24 @@ class HotelsSearchScreen extends Component {
         // stompiOSClient = null;
     }
 
+    stompiOSConnect() {
+        //console.log("stompiOSConnect ---------------");
+
+        stompiOSClient = stomp.client(socketHost);
+        stompiOSClient.debug = null;
+        stompiOSClient.connect({}, (frame) => {
+            var headers = {'content-length': false};
+            stompiOSClient.subscribe(`search/${this.uuid}`, this.onDataFromSocket);
+            stompiOSClient.send("search",
+                headers,
+                JSON.stringify({uuid: this.uuid, query : this.searchString})
+            )
+        }, (error) => {
+            stompiOSClient.disconnect();
+            this.setState({isLoading: false});
+        });
+    }
+
     stompAndroidConnect() {
         stompAndroidClient = NativeModules.StompModule;
 
@@ -196,71 +210,156 @@ class HotelsSearchScreen extends Component {
 
         stompAndroidClient.getData(message, destination);
     }
+    
+    onDataFromSocket(data) {
+        this.initResultViews();
+
+        const {body} = data;
+        // try {
+            const parsedData = JSON.parse(body);
+
+/*             
+            console.debug("#hotel-search# [HotelsSearchScreen] stomp - onDataFromSocket ---", 
+                {body,data,parsedData,_th: this}
+            );
+ */
+
+            if (parsedData.hasOwnProperty('allElements')) {
+                // TODO: @@debug - remove
+                // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
+
+                if (parsedData.allElements) {
+                    this.setState({ allElements: true, editable: true});
+                    this.onDoneSocket(parsedData);
+                }
+            } else {
+                let hotelData = parsedData;
+                // TODO: @@debug - remove
+                // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);
+
+                this.setState(
+                    // change state function
+                    function(prevState, updatedProps) {
+                        // Checking if this is HotelsSearchScreen
+                        // console.log(`#hotel-search# [HotelsSearchScreen::onDataFromSocket -> setState::func] this instanceof isHotelSearchScreen: ${this instanceof HotelsSearchScreen}`);
+                        
+                        if (this.socketDown) {
+                            return prevState;
+                        } else {
+                            let result = {
+                                hotelsInfo: updateHotelFromSocket(hotelData, this.hotelsSocketCache, this.hotelsIndicesById, prevState, updatedProps)
+                            }
+                            if (hotelData.price && !isNaN(hotelData.price)) {
+                                result.pricesFromSocketValid = prevState.pricesFromSocketValid+1;
+                            }
+                            return result;
+                        }
+                    },
+                    // callback (after change state above)
+                    function() {
+                        // Checking if this is HotelsSearchScreen
+                        // console.log(`#hotel-search# [HotelsSearchScreen::onDataFromSocket -> setState::callback] this instanceof isHotelSearchScreen: ${this instanceof HotelsSearchScreen}`);
+                        
+                        if (this.state.displayMode === DISPLAY_MODE_RESULTS_AS_MAP
+                            && this.mapView != null 
+                            && this.state.hotelsInfo.length % 20 === 0)
+                        {
+                            this.mapView.refresh(this.state.hotelsInfo);
+                        }
+                    }
+                );
+            }
+        // } catch (e) {
+            // console.error("ERROR on socket Message", {message, e});
+            // Error
+        // }        
+    }
 
     onDoneSocket = (data) => {
         console.log(`#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`)
 
         this.stopSocketConnection(false);
-
         this.setState({pricesFromSocket: data.totalElements})
-
-        this.listViewHelpers.startFetch(this.state.hotelsInfo, this.pageLimit);
     }
 
-    onCancel = () => {
-        this.props.navigation.goBack();
+    onBackButtonPress = () => {
+        debugger;
+        switch (this.state.displayMode) {
+            case DISPLAY_MODE_ITEM:
+                this.setState({displayMode: DISPLAY_MODE_RESULTS_AS_LIST})
+                break;
+                
+            default:
+                this.props.navigation.goBack();
+                break;
+        }
     }
 
     onToggleMapOrListResultsView = () => {
-        if (this.state.isMAP == 0) {
-            this.setState({
-                isMAP: 1,
-                index: 1,
-        });
-        }
-        else {
-            this.setState({
-                isMAP: 0,
-                index: 0,
-            });
-            this.getHotels();
-        }
+        const displayMode = (
+            this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST
+                ? DISPLAY_MODE_RESULTS_AS_MAP
+                : DISPLAY_MODE_RESULTS_AS_LIST
+        );
+
+        const _this = this;
+        this.setState(
+            {
+                displayMode
+            },
+            function() {
+                _this.getHotels();
+            }
+        );
     }
 
-    gotoHotelDetailsPageByList = (item) => {
-        //console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
-        
-        this.setState({isLoadingHotelDetails: true});
-        requester.getHotelById(item.id, this.searchString.split('&')).then((res) => {
-            //console.log("requester.getHotelById", res);
-            // here you set the response in to json
-            res.body.then((data) => {
-                //console.log("requester.getHotelById data", data);
-                const hotelPhotos = [];
-                for (let i = 0; i < data.hotelPhotos.length; i++) {
-                    hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
-                }
-                this.setState({
-                    isLoadingHotelDetails: false
+    gotoHotelDetailsPageByList = (item, state, extraParams) => {
+        //@@debug
+        if (state && extraParams) {
+            // webview inside
+            let initialState = generateWebviewInitialState(extraParams, state);
+
+            console.log(`[HotelsSearchscreen] Loading hotel info`, {initialState,extraParams,item,state})
+
+            this.setState({
+                isLoading: true,
+                webViewUrl: initialState.webViewUrl,
+                displayMode: DISPLAY_MODE_ITEM
+            })
+        } else {
+            //console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
+            
+            this.setState({isLoading: true});
+            requester.getHotelById(item.id, this.searchString.split('&')).then((res) => {
+                //console.log("requester.getHotelById", res);
+                // here you set the response in to json
+                res.body.then((data) => {
+                    //console.log("requester.getHotelById data", data);
+                    const hotelPhotos = [];
+                    for (let i = 0; i < data.hotelPhotos.length; i++) {
+                        hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
+                    }
+                    this.setState({ isLoading: false });
+                    this.props.navigation.navigate('HotelDetails', {
+                        guests: this.state.guests,
+                        hotelDetail: item,
+                        searchString: this.searchString,
+                        hotelFullDetails: data,
+                        dataSourcePreview: hotelPhotos,
+                        daysDifference: this.state.daysDifference
+                    });
+                }).catch((err) => {
+                    //console.log(err);
                 });
-                this.props.navigation.navigate('HotelDetails', {
-                    guests: this.state.guests,
-                    hotelDetail: item,
-                    searchString: this.searchString,
-                    hotelFullDetails: data,
-                    dataSourcePreview: hotelPhotos,
-                    daysDifference: this.state.daysDifference
-                });
-            }).catch((err) => {
-                //console.log(err);
             });
-        });
+
+        }
     }
 
     gotoHotelDetailsPageByMap (item) {
         //console.log("gotoHotelDetailsPageByMap", item);
 
-        this.setState({isLoadingHotelDetails: true});
+        this.setState({isLoading: true});
         requester.getHotelById(item.id, this.searchString.split('&')).then((res) => {
             // here you set the response in to json
             res.body.then((data) => {
@@ -268,9 +367,7 @@ class HotelsSearchScreen extends Component {
                 for (let i = 0; i < data.hotelPhotos.length; i++) {
                     hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
                 }
-                this.setState({
-                    isLoadingHotelDetails: false
-                });
+                this.setState({isLoading: false});
                 this.props.navigation.navigate('HotelDetails', {
                     guests: this.state.guests,
                     hotelDetail: item,
@@ -315,24 +412,43 @@ class HotelsSearchScreen extends Component {
                 }
 
                 _this.setState(
-                    (prev) => {
+                    (prevState) => {
+                        const freshList = prevState.hotelsInfo.concat(hotels);
+                        const hotelsLoadedInList = freshList.length;
                         return {
-                            hotelsInfo: prev.hotelsInfo.concat(hotels),
+                            displayMode: (prevState.displayMode == DISPLAY_MODE_SEARCHING
+                                ? DISPLAY_MODE_RESULTS_AS_LIST
+                                : prevState.displayMode
+                            ),
+                            hotelsLoadedInList,
+                            hotelsInfo: freshList,
                             totalHotels: data.totalElements
                         }
                     },
                     function() {
                         _this.listViewHelpers.startFetch(_this.state.hotelsInfo, _this.pageLimit);
+                        if (_this.state.hotelsLoadedInList < 30) {
+                            this.setState({isLoading: false});
+                        }
                     }
                 )
                 
             })
         } else {
             console.error('[HotelsSearchScreen] Could not fetch Static Data for hotels')
-            this.listViewHelpers.startFetch([], 0, true)
+            this.listViewHelpers.startFetch([], 0, true);
         }
     }
 
+    initResultViews() {
+        if (this.state.displayMode == DISPLAY_MODE_SEARCHING && this.state.hotelsLoadedInList > 0) {
+            this.setState({
+                displayMode: DISPLAY_MODE_RESULTS_AS_LIST, 
+                initialLat: parseFloat(this.state.hotelsInfo[0].lat), 
+                initialLon: parseFloat(this.state.hotelsInfo[0].lon)
+            });
+        }
+    }
 
     // onFetch (page = 1, startFetch, abortFetch) {
     onRefreshResultsOnListView(page = 1, startFetch, abortFetch) {
@@ -393,22 +509,23 @@ class HotelsSearchScreen extends Component {
     }
 
     gotoSearch = () => {
-        this.setState({isFilterResult: false, isMAP: 0, index: 0}, () => {
-            this.saveState();
-
-            this.getHotels();
-        });
+        this.setState({isFilterResult: false, displayMode: DISPLAY_MODE_SEARCHING},
+            () => {
+                this.saveState();
+                this.getHotels();
+             }
+        );
     }
 
     gotoCancel = () => {
         this.setState(
-        // TODO: Previous State was cached separately
-        //       this was done in a non-react way, saving previousState
-        //       as a static object. If needed - do it again instead of using prevState 
-        //       as below it is suppossed to use in react-ways.
-        //       as below it is suppossed to use in react-ways.
-        // See: https://reactjs.org/docs/react-component.html#setstate
-        function(prevState, updatedProps) {
+            // TODO: Previous State was cached separately
+            //       this was done in a non-react way, saving previousState
+            //       as a static object. If needed - do it again instead of using prevState 
+            //       as below it is supposed to use in react-ways.
+            // See: https://reactjs.org/docs/react-component.html#setstate
+                // change state function
+            function(prevState, updatedProps) {
                 let baseInfo = {};
                 baseInfo['adults'] = prevState.adults;
                 baseInfo['children'] = [];
@@ -445,7 +562,7 @@ class HotelsSearchScreen extends Component {
         // TODO: Previous State was cached separately
         //       this was done in a non-react way, saving previousState
         //       as a static object. If needed - do it again instead of using prevState 
-        //       as below it is suppossed to use in react-ways.
+        //       as below it is supposed to use in react-ways.
         // See: https://reactjs.org/docs/react-component.html#setstate
         this.setState(
             // change state function
@@ -607,10 +724,12 @@ class HotelsSearchScreen extends Component {
     updateFilter = (data) => {
         //console.log("updateFilter", data);
         
+        // TODO: Fix this direct method call
         if (this.listView != undefined && this.listView != null) {
             this.listView.initListView();
         }
 
+        // TODO: Fix this direct method call
         if (this.mapView != undefined && this.mapView != null) {
             this.mapView.initMapView();
         }
@@ -680,7 +799,7 @@ class HotelsSearchScreen extends Component {
 
     renderBackButtonAndSearchField() {
         return (
-            <View style={styles.SearchAndPickerwarp}>
+            <View style={styles.searchAndPickerwarp}>
                 <View style={styles.searchAreaView}>
                     <SearchBar
                         autoCorrect={false}
@@ -689,7 +808,7 @@ class HotelsSearchScreen extends Component {
                         placeholder="Discover your next experience"
                         placeholderTextColor="#bdbdbd"
                         leftIcon="arrow-back"
-                        onLeftPress={this.onCancel}
+                        onLeftPress={this.onBackButtonPress}
                         editable={this.state.editable}
                     />
                 </View>
@@ -754,7 +873,17 @@ class HotelsSearchScreen extends Component {
 
     renderFooter = () => {
         const {commonText} = require('../../../../common.styles');
-        
+        const socketPriceText = (
+            <Text style={{...commonText, fontSize:12, fontWeight: 'normal', textAlign: 'left'}}>
+                {
+                    lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES.replace('$$1',
+                        this.state.pricesFromSocket > 0
+                            ? `${this.state.pricesFromSocketValid}/${this.state.pricesFromSocket}`
+                            : `${this.state.pricesFromSocketValid}`
+                )}
+            </Text>
+        )
+
         return (
             <View style={{width:'100%', height:30,
                 flexDirection:'row',
@@ -764,17 +893,17 @@ class HotelsSearchScreen extends Component {
                 borderColor: '#000',
                 paddingBottom: 5
             }}>
-                <Text style={{...commonText, fontSize:12, fontWeight: 'normal', textAlign: 'left'}}>
-                    {
-                        lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES.replace('$$1',
-                                this.state.pricesFromSocket > 0
-                                    ? `${this.state.pricesFromSocketValid}/${this.state.pricesFromSocket}`
-                                    : `${this.state.pricesFromSocketValid}`
-                    )}
-                </Text>
+                {
+                    (this.state.pricesFromSocketValid > 0
+                        ? socketPriceText
+                        : <Text/>
+                    )
+                        
+                        
+                }
                 <Text style={{...commonText, fontSize:12, fontWeight: 'normal', textAlign: 'right'}}>
                     {lang.TEXT.SEARCH_HOTEL_RESULTS_FOUND.replace('$$1',
-                        `${this.state.hotelsInfo.length}/${this.state.totalHotels}`
+                        `${this.state.hotelsLoadedInList}/${this.state.totalHotels}`
                     )}
                 </Text>
             </View>
@@ -840,12 +969,104 @@ class HotelsSearchScreen extends Component {
     }
 
     renderMapButton() {
+        const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
+        const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
+        const isShowingResults = (isMap || isList)
+
         return (
-            this.state.isMAP != -1 &&
-                <TouchableOpacity onPress={this.onToggleMapOrListResultsView} style={styles.switchButton}>
-                    <FontAwesome style={styles.icon}>{this.state.isMAP == 0 ? Icons.mapMarker : Icons.listUl}</FontAwesome>
+            isShowingResults &&
+                <TouchableOpacity
+                    onPress={this.onToggleMapOrListResultsView}
+                    style={styles.switchButton}
+                >
+                    <FontAwesome style={styles.icon}>{isMap ? Icons.mapMarker : Icons.listUl}</FontAwesome>
                 </TouchableOpacity>    
         )
+    }
+
+    renderContentMessage(text) {
+        return (
+            <View
+                style={{width:"100%", height: "100%", justifyContent: 'center', alignItems: 'center'}}
+            >
+            <Text style={{...(require('../../../../common.styles').commonText),
+                textAlign: 'center',
+                fontSize: 20
+            }}>
+                {text}
+            </Text>
+        </View>
+
+        )
+    }
+
+    onWebViewLoadStart() {
+        console.log('[HotelsSearchScreen] Webview load started')
+    }
+
+    onWebViewLoadEnd() {
+        console.log('[HotelsSearchScreen] Webview loaded')
+        this.setState({isLoading: false})
+    }
+
+    onWebViewNavigationState(navState) {
+        console.log('[HotelsSearchScreen] Webview nav state')
+    }
+
+    renderHotelDetailsAsWebview() {
+        let result = false;
+
+        if (this.state.isLoading) {
+            result = this.renderContentMessage(`Loading ${this.state.webViewUrl}`)
+        } else {
+            result = (
+                <WebView
+                    ref={(ref) => { this.webViewRef = ref; }}
+                    onWebviewNavigationStateChange = {(navState) => this.onWebViewNavigationState(navState)}
+                    onLoadStart = {() => this.onWebViewLoadStart}
+                    onLoadEnd   = {() => this.onWebViewLoadEnd()}
+                    source = {{ uri: this.state.webViewUrl }}
+                />
+            )
+        }
+
+        return result;
+    }
+
+    renderContent() {
+        let result = null;
+
+        switch (this.state.displayMode) {
+
+            case DISPLAY_MODE_RESULTS_AS_LIST:
+                result = this.renderResultsAsList();
+                break
+
+            case DISPLAY_MODE_RESULTS_AS_MAP:
+                result = this.renderResultsAsMap();
+                break
+
+            case DISPLAY_MODE_SEARCHING:
+                // TODO: Implement rendering of searching state
+                result = this.renderContentMessage(`Loading hotels in\n"${this.state.search}"...`)
+                break
+
+            case DISPLAY_MODE_ITEM:
+                if (!isNative.hotelItem) {
+                    result = this.renderHotelDetailsAsWebview()
+                } else {
+                    // TODO: Render native item inside here
+                    this.renderContentMessage('TODO: Native hotel details')
+                }
+                break
+
+            default:
+                result = this.renderContentMessage(`N/A (${this.state.displayMode})`)
+                break
+
+        }
+
+        return result;        
     }
 
     render() {
@@ -854,7 +1075,7 @@ class HotelsSearchScreen extends Component {
         //if (this.renderTimes <= 20)
         // console.log(`#hotel-search# 6/6 HotelSearchScreen render #${this.renderTimes}`);
 
-        // console.log(`### [HotelsSearchScreen] index: ${this.state.index}`,{all:this.state.allElements});
+        // console.log(`### [HotelsSearchScreen] {all:this.state.allElements});
 
         return (
             <SafeAreaView style={styles.safeArea}>
@@ -863,11 +1084,7 @@ class HotelsSearchScreen extends Component {
                     { this.renderCalendarAndFilters()       }
 
                     <View style={styles.containerHotels}>
-                        { 
-                            (this.state.index == 0)
-                                ? this.renderResultsAsList()
-                                : this.renderResultsAsMap()
-                        }
+                        { this.renderContent()                     }
 
                         {/* DISABLED FOR NOW */}
                         {/* { this.renderMapButton()           } */}
@@ -876,110 +1093,16 @@ class HotelsSearchScreen extends Component {
 
                     { this.renderFooter()               }
 
-                    <ProgressDialog
-                        visible={this.state.isLoadingHotelDetails}
+                    {/* <ProgressDialog
+                        visible={this.state.isLoading}
                         title="Please Wait"
                         message="Loading..."
                         animationType="slide"
                         activityIndicatorSize="large"
-                        activityIndicatorColor="black"/>
+                        activityIndicatorColor="black"/> */}
                 </View>
             </SafeAreaView>
         );
-    }
-
-    stompiOSConnect() {
-        //console.log("stompiOSConnect ---------------");
-
-        stompiOSClient = stomp.client(socketHost);
-        stompiOSClient.debug = null;
-        stompiOSClient.connect({}, (frame) => {
-            var headers = {'content-length': false};
-            stompiOSClient.subscribe(`search/${this.uuid}`, this.onDataFromSocket);
-            stompiOSClient.send("search",
-                headers,
-                JSON.stringify({uuid: this.uuid, query : this.searchString})
-            )
-        }, (error) => {
-            stompiOSClient.disconnect();
-            this.setState({
-                isLoading: false,
-            });
-        });
-    }
-
-    setInitialPositionOnMap() {
-        if (this.state.isMAP == -1 && this.state.hotelsInfo.length > 0) {
-            this.setState({
-                isMAP: 0, 
-                initialLat: parseFloat(this.state.hotelsInfo[0].lat), 
-                initialLon: parseFloat(this.state.hotelsInfo[0].lon)
-            });
-        }
-    }
-    
-    onDataFromSocket(data) {
-        this.setInitialPositionOnMap();
-
-        const {body} = data;
-        // try {
-            const parsedData = JSON.parse(body);
-
-/*             
-            console.debug("#hotel-search# [HotelsSearchScreen] stomp - onDataFromSocket ---", 
-                {body,data,parsedData,_th: this}
-            );
- */
-
-            if (parsedData.hasOwnProperty('allElements')) {
-                // TODO: @@debug - remove
-                // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
-
-                if (parsedData.allElements) {
-                    this.setState({ allElements: true, editable: true});
-                    this.onDoneSocket(parsedData);
-                }
-            } else {
-                let hotelData = parsedData;
-                // TODO: @@debug - remove
-                // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);
-
-                this.setState(
-                    // change state function
-                    function(prevState, updatedProps) {
-                        // Checking if this is HotelsSearchScreen
-                        // console.log(`#hotel-search# [HotelsSearchScreen::onDataFromSocket -> setState::func] this instanceof isHotelSearchScreen: ${this instanceof HotelsSearchScreen}`);
-                        
-                        if (this.socketDown) {
-                            return prevState;
-                        } else {
-                            let result = {
-                                hotelsInfo: updateHotelFromSocket(hotelData, this.hotelsSocketCache, this.hotelsIndicesById, prevState, updatedProps)
-                            }
-                            if (hotelData.price && !isNaN(hotelData.price)) {
-                                result.pricesFromSocketValid = prevState.pricesFromSocketValid+1;
-                            }
-                            return result;
-                        }
-                    },
-                    // callback (after change state above)
-                    function() {
-                        // Checking if this is HotelsSearchScreen
-                        // console.log(`#hotel-search# [HotelsSearchScreen::onDataFromSocket -> setState::callback] this instanceof isHotelSearchScreen: ${this instanceof HotelsSearchScreen}`);
-                        
-                        if (this.state.isMAP === 1 
-                            && this.mapView != null 
-                            && this.state.hotelsInfo.length % 20 === 0)
-                        {
-                            this.mapView.refresh(this.state.hotelsInfo);
-                        }
-                    }
-                );
-            }
-        // } catch (e) {
-            // console.error("ERROR on socket Message", {message, e});
-            // Error
-        // }        
     }
 }
 

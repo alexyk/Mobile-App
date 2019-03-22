@@ -16,9 +16,8 @@ import BackButton from '../../atoms/BackButton';
 import styles from './styles';
 import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
-import { basePath } from '../../../config'
 import lang from '../../../language'
-import { generateWebviewUrl } from '../utils';
+import { generateWebviewInitialstate } from '../utils';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -45,43 +44,7 @@ class WebviewScreen extends Component {
         // }); 
         console.disableYellowBox = true;
 
-        const checkInDateFormated   = params ? params.checkInDateFormated  : '';
-        const checkOutDateFormated  = params ? params.checkOutDateFormated  : '';
-        const roomsDummyData        = params ? params.roomsDummyData : [];
-        const regionId              = params ? params.regionId : 0;
-
-        const initialState = {
-            guests:             params ? params.guests          : 0,
-            isHotelSelected:    params ? params.isHotelSelected : false,
-            countryId:          params ? params.countryId       : 0,
-            regionId,
-            checkInDateFormated,
-            checkOutDateFormated,
-            roomsDummyData,
-            email:  params ? params.email : '',
-            token:  params ? params.token : '',
-            propertyName: params ? params.propertyName : '',
-            message:  params ? params.message : '',
-            title:  params ? params.title : '',
-            isHotel:  params ? params.isHotel : null,
-            canGoBack: false,
-            canGoForward: false,
-            canGoToResults: false,
-            showProgress: true
-        }
-
-        const webViewUrl = basePath + generateWebviewUrl(
-            initialState,
-            roomsDummyData,
-            (params && params.baseUrl)
-                ? params.baseUrl
-                : null
-        );
-
-        this.state = {
-            ...initialState,
-            webViewUrl
-        }
+        this.state = generateWebviewInitialstate(params);
 
         // Fix for using WebView::onMessage
         this.patchPostMessageFunction = function() {
