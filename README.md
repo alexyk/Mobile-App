@@ -107,7 +107,7 @@
 (1) VScode - use React Native run configurations to create one for Anrdoid  
 (2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator  
 (3) Reload while the footer of VSCode shows as orange  
-(4) Use logcat view in *Output* of VSCode to see console.log statements  
+(4) Use *Debug Console* or *Output/LogCat...* view to see console.log statements  
 
 ## Additional Requirements to Run E2E Tests
 E2E tests (aka integration tests) are using `detox` (with Grey Box vs the common Black Box approach) with `mocha`.
