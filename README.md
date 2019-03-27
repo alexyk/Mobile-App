@@ -105,7 +105,7 @@
 
 #### Anrdoid
 (1) VScode - use React Native run configurations to create one for Anrdoid  
-(2) When starting - make sure to have "Debug JS Remotely" *OFF* from the device/emulator  
+(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator  
 (3) Reload while the footer of VSCode shows as orange  
 (4) Use logcat view in *Output* of VSCode to see console.log statements  
 
