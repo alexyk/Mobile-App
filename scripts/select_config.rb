@@ -7,9 +7,18 @@ configs = {
   "regex" => /const LT_CFG.*/,
   "changes" => {
     'prod'    => "const LT_CFG = LT_PROD;",
+    'beta'    => "const LT_CFG = LT_PROD;",
+    'prod2'   => "const LT_CFG = LT_PROD2;",
     'staging' => "const LT_CFG = LT_STAGING;",
+    'stage'   => "const LT_CFG = LT_STAGING;",
     'dev'     => "const LT_CFG = LT_DEV;",
-    'local'   => "const LT_CFG = LT_LOCAL;"
+    'dev2'    => "const LT_CFG = LT_DEV2;",
+    'local'   => "const LT_CFG = LT_LOCAL;",
+    # 'dev-local'   => [
+    #   {
+    #     "regex" => /const LT_CFG.*/,
+    #     ""
+    # ]
   }
 }
 native_cfg = {

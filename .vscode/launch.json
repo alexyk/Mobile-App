@@ -6,6 +6,25 @@
     "configurations": [
         {
             "type": "node",
+            "name": "vscode-jest-tests",
+            "request": "launch",
+            "program": "${workspaceFolder}/node_modules/.bin/ng",
+            "args": [ "test", "lib-name", "--runInBand", "true" ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
+        {
+            "name": "Jest Tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/.bin/ng",
+            "args": ["test","--runInBand","-i"],
+            "outFiles": ["${workspaceRoot}/dist/**/*"],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
             "request": "launch",
             "name": "Mocha Tests",
             "program": "${workspaceFolder}/node_modules/mocha/bin/_mocha",

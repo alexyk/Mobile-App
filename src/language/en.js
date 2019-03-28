@@ -24,8 +24,12 @@ const TEXT = {
     SEARCH_HOME_DETAILS_TILE: "Home Details & Booking",
     SEARCH_HOTEL_RESULTS_TILE: "Hotel Search Results",
     SEARCH_HOTEL_DETAILS_TILE: "Hotel Details & Booking",
-    SEARCH_HOTEL_RESULTS_FOUND: "$$1 hotels",
-    SEARCH_HOTEL_RESULTS_PRICES: "$$1 prices",
+    SEARCH_HOTEL_RESULTS_FOUND: "Hotels: $$1",
+    SEARCH_HOTEL_RESULTS_PRICES: "Prices: $$1",
+    SEARCH_HOTEL_RESULTS_PRICES_LOADING: "Loading prices...",
+    SEARCH_HOTEL_RESULTS_HOTELS_LOADING: "Loading hotels...",
+    SEARCH_HOTEL_RESULTS_PRICES_TIMEOUT: "Prices service slow/unavailable",
+    SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT: "Hotels service slow/unavailable",
 }
 
 

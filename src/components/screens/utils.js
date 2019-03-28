@@ -1,6 +1,7 @@
 import moment from "moment"
 import { basePath } from '../../config'
 
+export const DISPLAY_MODE_NONE            = 'mode_none'
 export const DISPLAY_MODE_SEARCHING       = 'mode_searching'
 export const DISPLAY_MODE_RESULTS_AS_LIST = 'mode_results_as_list'
 export const DISPLAY_MODE_RESULTS_AS_MAP  = 'mode_results_as_map'
@@ -10,7 +11,7 @@ export const DISPLAY_MODE_ITEM            = 'mode_hotel_details'
 export function createHotelSearchInitialState(params) {
 
     const startDate = moment()
-    .add(1, 'day');
+        .add(1, 'day');
     const endDate = moment()
         .add(2, 'day');
     
@@ -33,9 +34,12 @@ export function createHotelSearchInitialState(params) {
         pricesFromSocketValid: 0,
         pricesFromSocket: 0,
         allElements: false,
-        displayMode: DISPLAY_MODE_SEARCHING,
+        displayMode: DISPLAY_MODE_NONE,
         initialLat: 42.698334,
         initialLon: 23.319941,
+
+        isSocketTimeout: false,
+        isStaticTimeout: false,
 
         isLoading: true, // progress dialog
         
@@ -87,21 +91,30 @@ export function createHotelSearchInitialState(params) {
     return initialState;
 }
 
-/**
- * 
- * @param {Object} hotelData {id, price, hotelPhoto, star etc...}
- * @param {Object} hotelsFromSocketOnly {id: socketData}
- * @param {Object} hotelsIndicesById {id: index}
- * @param {Object} prevState 
- * @param {Object} updatedProps 
- */
-export function updateHotelFromSocket(hotelData, hotelsFromSocketOnly, hotelsIndicesById, prevState, updatedProps) {
-    let hotelsInfo = prevState.hotelsInfo;
-    let result = hotelsInfo;
-    const index = hotelsIndicesById[hotelData.id];
+export function parseCoordinates(hotelsInfo) {
+    let data = null;
+    hotelsInfo.map((item) => {
+        if (item.lat != null && item.lon != null) {
+            data = item;
+        }
+    })
+
+    let result = null;
+    if (data) {
+        result = {
+            initialLat: parseFloat(data.lat), 
+            initialLon: parseFloat(data.lon)
+        }
+    }
+
+    return result
+}
+
+export function cacheHotelFromSocket(hotelData, hotelsFromSocketOnlyMap,  hotelsInfo, index=null) {
     const indexNotNull = (index != null);
     const current = (indexNotNull && hotelsInfo ? hotelsInfo[index] : {lat:null, lon: null, price: null});
     const infoFromSocket = {
+        index,
         id: hotelData.id,
         price: parseFloat(!isNaN(hotelData.price) ? hotelData.price : current.price),
         lat: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
@@ -116,6 +129,23 @@ export function updateHotelFromSocket(hotelData, hotelsFromSocketOnly, hotelsInd
                 ? hotelData.thumbnail
                 : current.hotelPhoto*/
     }
+    hotelsFromSocketOnlyMap[hotelData.id] = infoFromSocket;
+}
+    /**
+ * 
+ * @param {Object} hotelData {id, price, hotelPhoto, star etc...}
+ * @param {Object} hotelsFromSocketOnlyMap {id: socketData}
+ * @param {Object} hotelsIndicesByIdMap {id: index}
+ * @param {Object} prevState 
+ * @param {Object} updatedProps 
+ */
+export function updateHotelFromSocket(hotelData, hotelsFromSocketOnlyMap, hotelsIndicesByIdMap, prevState, updatedProps) {
+    let hotelsInfo = prevState.hotelsInfo;
+    let result = hotelsInfo;
+    const index = hotelsIndicesByIdMap[hotelData.id];
+    const indexNotNull = (index != null);
+    const infoFromSocket = cacheHotelFromSocket(hotelData, hotelsFromSocketOnlyMap, hotelsInfo, index);
+
     if (indexNotNull && hotelsInfo) {
         // TODO: Performance - check if this is too intensive - creating a copy of all hotels
         // console.time('Create hotelsInfo copy on socket update');
@@ -126,29 +156,46 @@ export function updateHotelFromSocket(hotelData, hotelsFromSocketOnly, hotelsInd
         // debugHotelData(hotelData, hotelsInfo, index, '>> SOCKET DATA <<');
 
         // update selected hotel data from socket data (not all)
-        hotelData = Object.assign({},hotelsInfo[index], infoFromSocket);
-        hotelsInfoFresh[index] = hotelData;
+        let newData = Object.assign({},hotelsInfo[index], infoFromSocket);
+        hotelsInfoFresh[index] = newData;
 
         result = hotelsInfoFresh;
+        console.log(`[utils::updateHotelFromSocket] Updated hotel with index ${index}`, {infoFromSocket});
     } else {
         // hotel data not present in state - add it to socket cache
         // since it was not retrieved by user scrolling down
-        hotelsFromSocketOnly[hotelData.id] = infoFromSocket;
+        hotelsFromSocketOnlyMap[hotelData.id] = infoFromSocket;
+
+        // console.log(`[utils::updateHotelFromSocket] Updated NOTHING, notNull:${indexNotNull}, hotels:${hotelsInfo != null}`, {hotelsIndicesByIdMap, hotelsInfo});
     }    
 
     return result;
 }
 
+export function popSocketCacheIntoHotelsArray(hotelsArray, socketCacheMap, idsMap) {
+    for (let id in socketCacheMap) {
+        const socketData = socketCacheMap[id];
+        const index = idsMap[id];
+        Object.assign(hotelsArray[index], socketData);
+        delete socketCacheMap[id];
+    }
+
+    return hotelsArray;
+}
+ 
 export function updateHotelsFromSocketCache(hotelsArray, socketCacheMap) {
-    hotelsArray.map(
+        let result = hotelsArray.map(
         (item, index) => {
             const cached = socketCacheMap[item.id];
             if (cached) {
                 Object.assign(item, cached);
+                item.index = index;
             }
             return item;
         }
     )
+
+    return hotelsArray;
 }
 
 export function updateHotelIdsMap(targetObject, array) {
@@ -185,6 +232,7 @@ export function generateWebviewInitialState(params, state=null) {
     const regionId              = params ? params.regionId : 0;
 
     const initialState = {
+        ...state,
         guests:             params ? params.guests          : 0,
         isHotelSelected:    params ? params.isHotelSelected : false,
         countryId:          params ? params.countryId       : 0,
@@ -192,6 +240,7 @@ export function generateWebviewInitialState(params, state=null) {
         checkInDateFormated,
         checkOutDateFormated,
         roomsDummyData,
+        currency: params.currency,
         email:  params ? params.email : '',
         token:  params ? params.token : '',
         propertyName: params ? params.propertyName : '',

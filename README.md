@@ -15,7 +15,7 @@
   - [VSCode](#vscode)
     - [Common](#common-2)
     - [iOS](#ios)
-    - [Anrdoid](#anrdoid)
+    - [Android](#android)
 - [Additional Requirements to Run E2E Tests](#additional-requirements-to-run-e2e-tests)
   - [E2E on Android](#e2e-on-android)
   - [E2E on iOS](#e2e-on-ios)
@@ -39,14 +39,19 @@
   - [Writing and Running Tests](#writing-and-running-tests)
   - [Adding Flow](#adding-flow)
 
----
+___
 ### Default information in README.md
-* [Available Scripts](#available-scripts)
-  * [npm run ios](#npm-run-ios)
-  * [npm run android](#npm-run-android)
-* [Other](#other)
-  * [Writing and Running Tests](#writing-and-running-tests)
-  * [Adding Flow](#adding-flow)
+- [Default Information](#default-information)
+  - [Available Scripts](#available-scripts)
+    - [`npm start`](#npm-start)
+      - [`npm test`](#npm-test)
+      - [`npm run ios`](#npm-run-ios)
+      - [`npm run android`](#npm-run-android)
+        - [Using Android Studio's `adb`](#using-android-studios-adb)
+        - [Using Genymotion's `adb`](#using-genymotions-adb)
+  - [Other](#other)
+    - [Writing and Running Tests](#writing-and-running-tests)
+    - [Adding Flow](#adding-flow)
 
 ## Requirements to Run Mobile-App
 ### Common 
@@ -94,18 +99,18 @@
 #### Common
 - Use VSCode breakpoints to or *"All expeptions"/"Uncaught exceptions"* to break into code  
 - If running any task before compilation (*preLaunchTask* in *launch.json*) - in VSCode Tasks - make sure to check Terminal view in VSCode if it needs input  
-- 
+- Use VScode *Output/React native...* views to see any issues with building the app before installing on device, simulator or emulator  
 
 
 #### iOS
 (1) VScode - use React Native run configurations to create one for iOS  
-(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator  
+(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator (shake it to see Debug menu with this option)  
 (3) Reload while the footer of VSCode shows as orange  
 (4) Use VSCode *Debug Console* view to see console.log output
 
-#### Anrdoid
+#### Android
 (1) VScode - use React Native run configurations to create one for Anrdoid  
-(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator  
+(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator (shake it to see Debug menu with this option)  
 (3) Reload while the footer of VSCode shows as orange  
 (4) Use *Debug Console* or *Output/LogCat...* view to see console.log statements  
 
@@ -137,11 +142,10 @@ Later on to be applied in this branch.
 **Jinkai note on Building with Xcode 10:  
 BUILDING ISSUE FOR IOS 12, XCODE 10.1  
 https://zivost.com/blog/xcode-10-causes-haywire-for-react-native-developers/
----
----
----
+
+____
+
 # Default Information
----
 
 ## Available Scripts
 

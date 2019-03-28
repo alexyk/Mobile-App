@@ -17,7 +17,7 @@ import styles from './styles';
 import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import lang from '../../../language'
-import { generateWebviewInitialstate } from '../utils';
+import { generateWebviewInitialState } from '../utils';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -44,7 +44,12 @@ class WebviewScreen extends Component {
         // }); 
         console.disableYellowBox = true;
 
-        this.state = generateWebviewInitialstate(params);
+        const allParams = Object.assign({},params,{currency:props.currency});
+        this.state = generateWebviewInitialState(allParams);
+
+        console.log(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
+        console.tron.log(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
+        
 
         // Fix for using WebView::onMessage
         this.patchPostMessageFunction = function() {
@@ -65,6 +70,7 @@ class WebviewScreen extends Component {
         };
 
         this.onBackPress = this.onBackPress.bind(this);
+        this.onDebugPress = this.onDebugPress.bind(this);
         this.onForwardPress = this.onForwardPress.bind(this);
         this.onResultsPress = this.onResultsPress.bind(this);
         this.onSearchPress = this.onSearchPress.bind(this);
@@ -126,6 +132,11 @@ class WebviewScreen extends Component {
             this.setState({canGoForward: true});
             this.setState({canGoToResults: false});
         }
+    }
+
+    onDebugPress(event) {
+        const func = () => this.webViewRef.ref.reload();
+        setTimeout(func,100);
     }
 
     onBackPress(event) {
@@ -261,6 +272,8 @@ class WebviewScreen extends Component {
                     <View style={styles.backButtonContainer}>
                         <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
                         <Text style={styles.title}>{this.state.title}</Text>
+                        <BackButton onPress={this.onDebugPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
+                        <Text style={styles.title}>{"Debug"}</Text>
                     </View>
 
                     <View style={styles.webviewContainer}>
