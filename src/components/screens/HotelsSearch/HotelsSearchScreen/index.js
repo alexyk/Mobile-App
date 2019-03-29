@@ -46,12 +46,12 @@ import {
   popSocketCacheIntoHotelsArray,
   cacheHotelFromSocket,
   parseCoordinates,
+  DISPLAY_MODE_NONE,
   DISPLAY_MODE_SEARCHING,
   DISPLAY_MODE_RESULTS_AS_LIST,
   DISPLAY_MODE_RESULTS_AS_MAP,
   DISPLAY_MODE_ITEM,
   debugHotelData,
-  DISPLAY_MODE_NONE
 } from "../../utils";
 import stomp from "stomp-websocket-js";
 import { isNative } from "../../../../version";
@@ -87,7 +87,8 @@ class HotelsSearchScreen extends Component {
     this.staticDataReceived = false;
     this.lastSocketUpdateTime = 0;
     this.hotelsIndicesByIdMap = null; // see getHotels() for populating this one
-    this.hotelsSocketCacheMap = {}; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
+    this.hotelsSocketCacheMap = {};   // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
+    this.hotelsSocketCacheCount = 0;  // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
 
     this.listViewHelpers = {}; // startFetch & abortFetch (see UltimateListView docs - react-native-ultimate-listview)
     this.webViewRef = null;
@@ -104,12 +105,8 @@ class HotelsSearchScreen extends Component {
     this.renderFooter = this.renderFooter.bind(this);
     this.onDataFromSocket = this.onDataFromSocket.bind(this);
     this.onStaticData = this.onStaticData.bind(this);
-    this.onRefreshResultsOnListView = this.onRefreshResultsOnListView.bind(
-      this
-    );
-    this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(
-      this
-    );
+    this.onRefreshResultsOnListView = this.onRefreshResultsOnListView.bind(this);
+    this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(this);
 
     //TODO: @@debug - remove
     console.log("#hotel-search# 2.2/6 HotelSearchScreen constructor END");
@@ -314,6 +311,7 @@ class HotelsSearchScreen extends Component {
                 {body,data,parsedData,_th: this}
             );
  */
+    // restart timeout (thus also clean red styling of footer)
     if (this.state.isSocketTimeout) {
       this.startSocketDataConnectionTimeOut();
     }
@@ -336,32 +334,38 @@ class HotelsSearchScreen extends Component {
       // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);
 
       //TODO: @@debug - temporary, remove
-      // let index = this.hotelsIndicesByIdMap[hotelData.id];
-      // console.log(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, index: ${index} id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`, 'font-weight: bold');
+      let index = this.hotelsIndicesByIdMap[hotelData.id];
+      if (index && index < 7 && index > 0) {
+        console.log(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, index: ${index} id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`, 'font-weight: bold');
+      }
 
       this.setState(
         // change state function
         function(prevState, updatedProps) {
-          // Checking if this is HotelsSearchScreen
-          // console.log(`#hotel-search# [HotelsSearchScreen::onDataFromSocket -> setState::func] this instanceof isHotelSearchScreen: ${this instanceof HotelsSearchScreen}`);
           let result = prevState;
-          if (!this.socketDown) {
-            // don't update if socket is not connected any more
+
+          if (!this.socketDown) { // don't update if socket is not connected any more
             if (hotelData.price && !isNaN(hotelData.price)) {
               // update socket prices loaded in footer
               this.validSocketPrices++;
               const currentTime = new Date().getTime();
-              const limitTime =
-                this.lastSocketUpdateTime +
-                HOTELS_SOCKET_CONNECTION_UPDATE_TICK * 1000;
+              const limitTime =this.lastSocketUpdateTime + HOTELS_SOCKET_CONNECTION_UPDATE_TICK * 1000;
               if (!this.lastSocketUpdateTime || limitTime < currentTime) {
                 result.pricesFromSocketValid = this.validSocketPrices;
                 this.lastSocketUpdateTime = currentTime;
               }
+              const newHotelInfo = cacheHotelFromSocket(
+                hotelData,
+                this.hotelsSocketCacheMap,
+                this.hotelsIndicesByIdMap,
+                result.hotelsInfo,
+                index
+              );
+              // update hotels data, setState(hotelsInfo)
+              const hotelsInfoFresh = [...prevState.hotelsInfo]; 
+              result = { hotelsInfo: hotelsInfoFresh }
+  
             }
-            // const hotelsInfo = updateHotelFromSocket(hotelData, this.hotelsSocketCacheMap, this.hotelsIndicesByIdMap, prevState, updatedProps);
-            // this.setState({hotelsInfo, pricesFromSocket: data.totalElements})
-            // return result;
           }
           return result;
         },
@@ -571,6 +575,7 @@ class HotelsSearchScreen extends Component {
             updateHotelIdsMap(_this.hotelsIndicesByIdMap, newHotels);
             const hotelsLoadedInList = freshList.length;
 
+            // update hotels data, setState(hotelsInfo)
             return {
               displayMode:
                 prevState.displayMode == DISPLAY_MODE_SEARCHING
@@ -952,6 +957,7 @@ class HotelsSearchScreen extends Component {
               res.body.then(dataMap => {
                 //console.log ("getMapInfo", dataMap);
                 const isCacheExpired = dataMap.isCacheExpired;
+                // update hotels data, setState(hotelsInfo)
                 if (!isCacheExpired) {
                   this.setState({
                     hotelsInfo: dataMap.content,
@@ -1333,7 +1339,7 @@ class HotelsSearchScreen extends Component {
             {this.renderContent()}
 
             {/* DISABLED FOR NOW */}
-            {this.renderMapButton()}
+            {/* {this.renderMapButton()} */}
           </View>
 
           {this.renderFooter()}
