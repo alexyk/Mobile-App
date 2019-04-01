@@ -117,8 +117,8 @@ export function cacheHotelFromSocket(hotelData, hotelsSocketCacheMap,  hotelsInd
     index,
     id: hotelData.id,
     price: parseFloat(!isNaN(hotelData.price) ? hotelData.price : current.price),
-    lat: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
-    lon: parseFloat(hotelData.lon != null ? hotelData.lon : current.lon),
+    latitude: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
+    longitude: parseFloat(hotelData.lon != null ? hotelData.lon : current.lon),
       // if update of image needed:
     /*hotelPhoto: 
         (hotelData.thumbnail && hotelData.thumbnail.url 

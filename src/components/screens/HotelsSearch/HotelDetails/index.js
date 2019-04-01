@@ -10,7 +10,7 @@ import AvailableRoomsView from '../../../molecules/AvailableRoomsView';
 import FacilitiesView from '../../../molecules/FacilitiesView';
 import HotelDetailView from '../../../organisms/HotelDetailView';
 import LocationView from '../../../atoms/LocationView';
-import WhiteBackButton from '../../../atoms/WhiteBackButton';
+import BackButton from '../../../atoms/BackButton';
 import styles from './styles';
 import ImageCarousel from '../../../atoms/ImagePage';
 
@@ -97,7 +97,7 @@ class HotelDetails extends Component {
             <View style={styles.container}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.topButtonContainer}>
-                        <WhiteBackButton onPress={this.onClose} />
+                        <BackButton style={styles.backButton} onPress={this.onClose} isWhite />
                     </View>
                     <View style={styles.body}>
                         <View style={{ width: logoWidth, height: logoHeight }}>

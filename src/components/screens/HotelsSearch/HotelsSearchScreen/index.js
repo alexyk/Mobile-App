@@ -425,7 +425,8 @@ class HotelsSearchScreen extends Component {
         ? DISPLAY_MODE_RESULTS_AS_MAP
         : DISPLAY_MODE_RESULTS_AS_LIST;
 
-    this.isFirstLoad = true;
+    // this.isFirstLoad = true;
+    //console.log(`[HotelsSearchScreen] displayMode: ${this.state.displayMode}`)
     this.setState({displayMode});
   }
 
@@ -632,9 +633,9 @@ class HotelsSearchScreen extends Component {
 
     if (this.isFirstLoad && this.state.hotelsInfo.length > 0) {
       // coming back from map view
-      const hotelsInfo = this.state.hotelsInfo;
-      const count = hotelsInfo.length;
-      startFetch(hotelsInfo, count);
+      // const hotelsInfo = this.state.hotelsInfo;
+      // const count = hotelsInfo.length;
+      // startFetch(hotelsInfo, count);
     } else if (this.isFirstLoad) {
       this.isFirstLoad = false;
     } else {
@@ -1189,21 +1190,27 @@ class HotelsSearchScreen extends Component {
   }
 
   renderResultsAsMap() {
-    return (
-      <MapModeHotelsSearch
-        ref={ref => {
-          if (!!ref) {
-            this.mapView = ref.getWrappedInstance();
-          }
-        }}
-        isFilterResult={this.state.isFilterResult}
-        initialLat={this.state.initialLat}
-        initialLon={this.state.initialLon}
-        daysDifference={this.state.daysDifference}
-        hotelsInfo={this.state.hotelsInfo}
-        gotoHotelDetailsPage={this.gotoHotelDetailsPageByMap}
-      />
-    );
+    let result = null;
+    if (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP) {
+      result = (
+        <MapModeHotelsSearch
+          ref={ref => {
+            if (!!ref) {
+              this.mapView = ref.getWrappedInstance();
+            }
+          }}
+          isFilterResult={this.state.isFilterResult}
+          initialLat={this.state.initialLat}
+          initialLon={this.state.initialLon}
+          daysDifference={this.state.daysDifference}
+          hotelsInfo={this.state.hotelsInfo}
+          gotoHotelDetailsPage={this.gotoHotelDetailsPageByMap}
+          style={{height:"100%"}}
+        />
+      );
+    }
+
+    return result;
   }
 
   renderMapButton() {
@@ -1291,15 +1298,11 @@ class HotelsSearchScreen extends Component {
     let result = null;
 
     switch (this.state.displayMode) {
-      case DISPLAY_MODE_SEARCHING:
-      // result = this.renderContentMessage(`Loading hotels in\n"${this.state.search}"...`)
-      // break
+      case DISPLAY_MODE_NONE:
       case DISPLAY_MODE_RESULTS_AS_LIST:
-        result = this.renderResultsAsList();
-        break;
-
       case DISPLAY_MODE_RESULTS_AS_MAP:
-        result = this.renderResultsAsMap();
+      case DISPLAY_MODE_SEARCHING:
+        // see render() method
         break;
 
       case DISPLAY_MODE_ITEM:
@@ -1334,10 +1337,13 @@ class HotelsSearchScreen extends Component {
           {this.renderCalendarAndFilters()}
 
           <View style={styles.containerHotels}>
-            {this.renderContent()}
+            { this.renderResultsAsMap()  }
+            { this.renderResultsAsList() }
+            { this.renderContent()       }
+            
 
             {/* DISABLED FOR NOW */}
-            {/* {this.renderMapButton()} */}
+            {this.renderMapButton()}
           </View>
 
           {this.renderFooter()}
