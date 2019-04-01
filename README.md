@@ -59,12 +59,11 @@ ___
   <small>NodeJS version 8.15.x also is likely to work</small>
   * ninja (for Android)  
   <small>macOS - `brew install ninja`, Windows - instructions [here](https://github.com/rwols/CMakeBuilder/wiki/Ninja-for-Windows-Installation-Instructions)</small>
-  * react-native-cli
-  <small>npm install -g react-native-cli</small>
+  * react-native-cli `npm install -g react-native-cli`
 #### For Android
 <small>(macOS and Windows)</small>  
     * `Java 1.8` (jdk 8)  
-    * `Android Studio` *(optional)*
+    * `Android Studio` or manual installation if SDK and platform tools (look at how to setup an Android project with gradle)
 #### For iOS
 <small>(macOS only)</small>  
     * `macOS 10.13 High Sierra` or higher <small>(not tested on El Capitan and before)</small>  

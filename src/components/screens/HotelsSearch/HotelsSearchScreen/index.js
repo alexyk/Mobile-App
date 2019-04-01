@@ -1049,8 +1049,6 @@ class HotelsSearchScreen extends Component {
   );
 
   renderPaginationWaitingView = () => {
-    return this.renderContentMessage('Pagination View')
-
     return (
       <View
         style={{
