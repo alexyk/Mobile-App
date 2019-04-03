@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import { commonComponents } from '../../../common.styles';
 
 const styles = StyleSheet.create({
     container: {
@@ -27,10 +26,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
 
-    closeButton: {
-        ...commonComponents.backButton
-    },
-
     gender: {
         position:'absolute',
         top:0,
@@ -52,10 +47,6 @@ const styles = StyleSheet.create({
         marginTop: 40,
         marginLeft: 20,
         height: 24,
-    },
-
-    closeButton: {
-        ...commonComponents.backButton
     },
 
     body: {

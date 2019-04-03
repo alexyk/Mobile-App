@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import {commonComponents} from "../../../../common.styles"
 
 const styles = StyleSheet.create({
 
@@ -10,10 +9,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f1f3',
         alignItems: 'center',
         justifyContent: 'flex-start'
-    },
-
-    backButton: {
-        ...commonComponents.backButton
     },
 
     topButtonContainer: {

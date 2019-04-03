@@ -1,5 +1,4 @@
 import { StyleSheet, Dimensions } from 'react-native';
-import { commonComponents } from "../../../common.styles"
 
 const dimensionWindows = Dimensions.get('window');
 const avatarWidth = dimensionWindows.width;
@@ -29,10 +28,6 @@ const styles = StyleSheet.create({
 
     titleConatiner: {
         flexDirection: 'row',
-    },
-
-    closeButton: {
-        ...commonComponents.backButton
     },
 
     title: {

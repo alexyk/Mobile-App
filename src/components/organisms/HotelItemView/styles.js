@@ -75,11 +75,14 @@ const styles = StyleSheet.create({
         fontFamily: 'FuturaStd-Medium',
         color: 'black',
         fontSize: 11,
+        textAlign: 'right',
+        width: "100%"
     },
     costLoc: {
         fontFamily: 'FuturaStd-Medium',
         color: 'black',
         fontSize: 11,
+        marginLeft: 5
     },
     perNight: {
         fontSize: 11,

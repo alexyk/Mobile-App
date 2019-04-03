@@ -40,14 +40,18 @@ class HotelItemView extends Component {
   shouldComponentUpdate(newProps, newState, newContext) {
     const { item } = newProps;
     const oldItem = this.props.item;
+    const oldIsDoneSocket = this.props.isDoneSocket;
 
-    return oldItem.price != item.price;
+    return (
+      oldItem.price != item.price
+        || oldIsDoneSocket != newProps.isDoneSocket
+    )
   }
 
   onPress = event => {
     const item = this.props.item;
 
-    console.log("[HotelItemView] On Press", item);
+    // console.log("[HotelItemView] On Press", item);
 
     if (isNative.hotelItem) {
       // native
@@ -109,7 +113,7 @@ class HotelItemView extends Component {
     const { exchangeRates, currency, item, currencySign } = this.props;
 
     let price = item.price;
-    let isPriceReady = price != null;
+    let isPriceReady = (price != null);
     let fiatPrice = 0;
     let priceToFixed2 = 0;
 
@@ -134,7 +138,8 @@ class HotelItemView extends Component {
         <View style={styles.costView}>
           <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
             {currencySign}
-            {priceToFixed2}{" "}
+            {priceToFixed2}
+            {"   "}
           </Text>
           {/* <Text style={styles.costLoc} numberOfLines={1} ellipsizeMode="tail"> (LOC {parseFloat(price/locRate).toFixed(2)}) </Text> */}
           <LocPrice
@@ -149,9 +154,9 @@ class HotelItemView extends Component {
       content = (
         <View style={styles.costView}>
           <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
-            {this.props.isDoneSocket
-              ? "Price unavailable"
-              : "Loading price ..."}
+                {this.props.isDoneSocket 
+                    ? lang.TEXT.SEARCH_HOTEL_ITEM_PRICE_NA
+                    : lang.TEXT.SEARCH_HOTEL_ITEM_PRICE_LOADING}
           </Text>
         </View>
       );
@@ -163,7 +168,9 @@ class HotelItemView extends Component {
   render() {
     const item = this.props.item;
 
-    //console.log(`hotel item ${item.id}`, item, this.props)
+    //TODO: @@debug remove
+    // console.log(`[HotelItemView] hotel item ${item.id}`, item, this.props)
+    // console.log(`[HotelItemView] id:${item.id} isDone:${this.props.isDoneSocket} index:${item.index} price:${item.price} name:${item.name}`)
 
     let urlThumbnail =
       item.hotelPhoto != undefined && item.hotelPhoto != null

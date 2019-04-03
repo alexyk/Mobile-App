@@ -30,6 +30,9 @@ const TEXT = {
     SEARCH_HOTEL_RESULTS_HOTELS_LOADING: "Loading hotels...",
     SEARCH_HOTEL_RESULTS_PRICES_TIMEOUT: "Prices service slow/unavailable",
     SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT: "Hotels service slow/unavailable",
+    SEARCH_HOTEL_ITEM_PRICE_NA: "Price unavailable",
+    SEARCH_HOTEL_ITEM_PRICE_LOADING: "Loading price ..."
+
 }
 
 

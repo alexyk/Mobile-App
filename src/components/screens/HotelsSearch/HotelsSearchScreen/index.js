@@ -43,8 +43,7 @@ import {
   generateSearchString,
   updateHotelIdsMap,
   updateHotelsFromSocketCache,
-  popSocketCacheIntoHotelsArray,
-  cacheHotelFromSocket,
+  parseAndCacheHotelDataFromSocket,
   parseCoordinates,
   DISPLAY_MODE_NONE,
   DISPLAY_MODE_SEARCHING,
@@ -105,7 +104,7 @@ class HotelsSearchScreen extends Component {
     this.renderFooter = this.renderFooter.bind(this);
     this.onDataFromSocket = this.onDataFromSocket.bind(this);
     this.onStaticData = this.onStaticData.bind(this);
-    this.onRefreshResultsOnListView = this.onRefreshResultsOnListView.bind(this);
+    this.onFetchNewListViewData = this.onFetchNewListViewData.bind(this);
     this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(this);
 
     //TODO: @@debug - remove
@@ -333,7 +332,7 @@ class HotelsSearchScreen extends Component {
       // TODO: @@debug - remove
       // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);
 
-      //TODO: @@debug - temporary, remove
+      //TODO: @@debug remove
       let index = this.hotelsIndicesByIdMap[hotelData.id];
       if (index && index < 7 && index > 0) {
         console.log(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, index: ${index} id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`, 'font-weight: bold');
@@ -348,23 +347,30 @@ class HotelsSearchScreen extends Component {
             if (hotelData.price && !isNaN(hotelData.price)) {
               // update socket prices loaded in footer
               this.validSocketPrices++;
-              const currentTime = new Date().getTime();
-              const limitTime =this.lastSocketUpdateTime + HOTELS_SOCKET_CONNECTION_UPDATE_TICK * 1000;
-              if (!this.lastSocketUpdateTime || limitTime < currentTime) {
-                result.pricesFromSocketValid = this.validSocketPrices;
-                this.lastSocketUpdateTime = currentTime;
-              }
-              const newHotelInfo = cacheHotelFromSocket(
+              parseAndCacheHotelDataFromSocket(
                 hotelData,
                 this.hotelsSocketCacheMap,
                 this.hotelsIndicesByIdMap,
                 result.hotelsInfo,
                 index
               );
-              // update hotels data, setState(hotelsInfo)
-              const hotelsInfoFresh = [...prevState.hotelsInfo]; 
-              result = { hotelsInfo: hotelsInfoFresh }
-  
+                
+              // At intervals of HOTELS_SOCKET_CONNECTION_UPDATE_TICK seconds
+              // refresh prices in footer and list prices loaded so far:
+              const currentTime = new Date().getTime();
+              const limitTime = this.lastSocketUpdateTime + HOTELS_SOCKET_CONNECTION_UPDATE_TICK * 1000;
+              if (!this.lastSocketUpdateTime || limitTime < currentTime) {
+                // refresh prices footer
+                result.pricesFromSocketValid = this.validSocketPrices;
+                this.lastSocketUpdateTime = currentTime;
+                
+                // update hotels data, setState(hotelsInfo)/setRows
+                if (prevState.hotelsInfo.length > 0) {
+                  const hotelsInfoFresh = updateHotelsFromSocketCache(prevState.hotelsInfo, this.hotelsSocketCacheMap, this.hotelsIndicesByIdMap);
+                  this.listViewRef.updateDataSource(hotelsInfoFresh);
+                  result = {hotelsInfo: hotelsInfoFresh}
+                }
+              }    
             }
           }
           return result;
@@ -398,13 +404,18 @@ class HotelsSearchScreen extends Component {
     );
 
     this.stopSocketConnection(false);
-    const hotelsInfo = popSocketCacheIntoHotelsArray(
-      this.state.hotelsInfo.concat(),
-      this.hotelsSocketCacheMap,
-      this.hotelsIndicesByIdMap
+
+    if (this.pageLimit > data.totalElements) {
+      this.pageLimit = data.totalElements;
+    }
+    const hotelsInfoFresh = updateHotelsFromSocketCache(this.state.hotelsInfo, this.hotelsSocketCacheMap, this.hotelsIndicesByIdMap);
+    this.listViewRef.updateDataSource(hotelsInfoFresh);
+    this.setState({
+        hotelsInfo: hotelsInfoFresh,
+        pricesFromSocket: data.totalElements,
+      },
+      () => this.setState({isDoneSocket: true})
     );
-    updateHotelsFromSocketCache(hotelsInfo, this.hotelsSocketCacheMap);
-    this.setState({ hotelsInfo, pricesFromSocket: data.totalElements });
   };
 
   onBackButtonPress = () => {
@@ -436,12 +447,12 @@ class HotelsSearchScreen extends Component {
       // webview inside
       let initialState = generateWebviewInitialState(extraParams, state);
 
-      console.log(`[HotelsSearchscreen] Loading hotel info`, {
+      /*console.log(`[HotelsSearchscreen] Loading hotel info`, {
         initialState,
         extraParams,
         item,
         state
-      });
+      });*/
 
       this.setState({
         isLoading: true,
@@ -518,9 +529,16 @@ class HotelsSearchScreen extends Component {
 
       res.body.then(function(data) {
         let hotels = data.content;
+        // add index
+        // hotels = hotels.map((item,index) => {item.index = index; return item;})
         
-        if (!this.isFirstLoad) { // skip first loading to be performed two times
-          updateHotelsFromSocketCache(hotels, _this.hotelsSocketCacheMap);
+        if (_this.isFirstLoad) {
+          _this.isFirstLoad = false;
+          if (_this.isSocketDown) {
+            _this.startSocketConnection();
+          }  
+        } else { // avoid two calls on first load
+          hotels = updateHotelsFromSocketCache(hotels, _this.hotelsSocketCacheMap, _this.hotelsIndicesByIdMap);
         }
 
         //TODO: @@debug
@@ -538,10 +556,6 @@ class HotelsSearchScreen extends Component {
                 }
                 /* console.log END */
 
-        if (_this.isSocketDown) {
-          _this.startSocketConnection();
-        }
-
         _this.setState(
           prevState => {
             //TODO: @@debug - remove/comment - log state of hotels
@@ -550,31 +564,29 @@ class HotelsSearchScreen extends Component {
 
             // filter repeating hotels out
             let newHotels = [];
+
             hotels.forEach(element => {
               if (_this.hotelsIndicesByIdMap[element.id] != null) {
-                console.log(
-                  `%c${element.name.padEnd(45, ' ')}%c: ${
-                    _this.hotelsIndicesByIdMap[element.id]
-                  }, id: ${element.id}`,
-                  "color: red; font-weight: bold",
-                  "color: black; font-weight: normal"
-                );
+                //TODO: @@debug - remove
+                // console.log(`%c${element.name.padEnd(45, ' ')}%c: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,"color: red; font-weight: bold","color: black; font-weight: normal");
               } else {
                 newHotels.push(element);
-                console.log(
-                  `'%c${element.name.padEnd(45, ' ')}',%c id:  ${element.id} is NEW`,
-                  "color: green",
-                  "color: black"
-                );
+                //TODO: @@debug - remove
+                // console.log(`'%c${element.name.padEnd(45, ' ')}',%c id:  ${element.id} is NEW`,"color: green","color: black");
               }
             });
 
+            updateHotelIdsMap(_this.hotelsIndicesByIdMap, hotels);
+
             // create a copy, add new data
-            const freshList = prevState.hotelsInfo.concat(newHotels);
+            const hotelsInfoFresh = prevState.hotelsInfo.concat(newHotels);
             // console.warn(`%c### next hotels length: ${freshList.length}`, 'font-weight: bold');
 
-            updateHotelIdsMap(_this.hotelsIndicesByIdMap, newHotels);
-            const hotelsLoadedInList = freshList.length;
+            const hotelsLoadedInList = hotelsInfoFresh.length;
+
+            if (_this.pageLimit < data.totalElements) {
+              _this.pageLimit = data.totalElements;
+            }
 
             // update hotels data, setState(hotelsInfo)
             return {
@@ -583,19 +595,19 @@ class HotelsSearchScreen extends Component {
                   ? DISPLAY_MODE_RESULTS_AS_LIST
                   : prevState.displayMode,
               hotelsLoadedInList,
-              hotelsInfo: freshList,
+              hotelsInfo: hotelsInfoFresh,
               totalHotels: data.totalElements
             };
           },
           function() {
-            if (_this.listViewRef) console.log(`------------ ${_this.listViewRef.getRows().length}`);
+            if (_this.listViewRef) console.log(`[HotelsScreenSearch] onStaticData - setState calback, rows=${_this.listViewRef.getRows().length}`);
             
             _this.listViewHelpers.startFetch(
               hotels,
               _this.pageLimit
             );
             if (_this.state.hotelsLoadedInList < 30) {
-              this.setState({ isLoading: false });
+              _this.setState({ isLoading: false });
             }
           }
         );
@@ -622,22 +634,18 @@ class HotelsSearchScreen extends Component {
   }
 
   // onFetch (page = 1, startFetch, abortFetch) {
-  onRefreshResultsOnListView(page = 1, startFetch, abortFetch) {
-    console.log(
+  onFetchNewListViewData(page = 1, startFetch, abortFetch) {
+    /*console.log(
       `#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`
-    );
+    );*/
 
     // This is required to determinate whether the first loading list is all loaded.
 
     this.listViewHelpers = { startFetch, abortFetch };
 
-    if (this.isFirstLoad && this.state.hotelsInfo.length > 0) {
-      // coming back from map view
-      // const hotelsInfo = this.state.hotelsInfo;
-      // const count = hotelsInfo.length;
-      // startFetch(hotelsInfo, count);
-    } else if (this.isFirstLoad) {
-      this.isFirstLoad = false;
+    if (this.isFirstLoad && this.state.hotelsInfo.length == 0) {
+      // don't fetch if real first load (not refreshing)
+      // this.isFirstLoad = false;
     } else {
       try {
         //console.log("### onFetch 0");
@@ -1072,7 +1080,9 @@ class HotelsSearchScreen extends Component {
   };
 
   renderPaginationAllLoadedView = () => {
-    return this.renderContentMessage('All Loaded View');
+    return null;
+    // @@debug
+    // return this.renderContentMessage('All Loaded View');
   };
 
   renderFooter = () => {
@@ -1160,7 +1170,7 @@ class HotelsSearchScreen extends Component {
         item={item}
         gotoHotelDetailsPage={this.gotoHotelDetailsPageByList}
         daysDifference={this.state.daysDifference}
-        isDoneSocket={this.state.allElements}
+        isDoneSocket={this.state.isDoneSocket}
         parent={this}
       />
     );
@@ -1168,47 +1178,55 @@ class HotelsSearchScreen extends Component {
 
   renderResultsAsList() {
     // console.log(`### [HotelsSearchScreen] renderResultsAsList len:${this.state.hotelsInfo.length}`)
+    const height = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST
+      ? null
+      : 0
+    );
 
     return (
       <UltimateListView
         ref={ref => (this.listViewRef = ref)}
         key={"hotelsList"} // this is important to distinguish different FlatList, default is numColumns
-        onFetch={this.onRefreshResultsOnListView}
+        onFetch={this.onFetchNewListViewData}
         keyExtractor={(item, index) => {
           // //console.log(`### [HotelsSearchScreen] item:${item}: index:${index}`)
           return `${index} - ${item}`;
         }} // this is required when you are using FlatList
         refreshableMode={"basic"}
-        data={this.state.hotelsInfo}
+        data={[]}
         numColumns={1} // to use grid layout, simply set gridColumn > 1
         item={this.renderListItem} // this takes three params (item, index, separator)
         paginationFetchingView={this.renderPaginationFetchingView}
         paginationWaitingView={this.renderPaginationWaitingView}
         paginationAllLoadedView={this.renderPaginationAllLoadedView}
+        style={{height}}
       />
     );
   }
 
   renderResultsAsMap() {
-    let result = null;
-    if (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP) {
-      result = (
-        <MapModeHotelsSearch
-          ref={ref => {
-            if (!!ref) {
-              this.mapView = ref.getWrappedInstance();
-            }
-          }}
-          isFilterResult={this.state.isFilterResult}
-          initialLat={this.state.initialLat}
-          initialLon={this.state.initialLon}
-          daysDifference={this.state.daysDifference}
-          hotelsInfo={this.state.hotelsInfo}
-          gotoHotelDetailsPage={this.gotoHotelDetailsPageByMap}
-          style={{height:"100%"}}
-        />
-      );
-    }
+    // console.log(`Render map with ${this.state.hotelsInfo.length} hotels`);
+
+    const height = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP
+      ? "100%"
+      : "0%"
+    );
+    const result = (
+      <MapModeHotelsSearch
+        ref={ref => {
+          if (!!ref) {
+            this.mapView = ref.getWrappedInstance();
+          }
+        }}
+        isFilterResult={this.state.isFilterResult}
+        initialLat={this.state.initialLat}
+        initialLon={this.state.initialLon}
+        daysDifference={this.state.daysDifference}
+        hotelsInfo={this.state.hotelsInfo}
+        gotoHotelDetailsPage={this.gotoHotelDetailsPageByMap}
+        style={{height}}
+      />
+    );
 
     return result;
   }

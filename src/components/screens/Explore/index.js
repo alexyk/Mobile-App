@@ -53,6 +53,7 @@ class Explore extends Component {
         this.handlePopularCities = this.handlePopularCities.bind(this);
         this.onDatesSelect = this.onDatesSelect.bind(this);
         this.onSearchHandler = this.onSearchHandler.bind(this);
+        this.onSearchEnterKey = this.onSearchEnterKey.bind(this);
         this.showToast = this.showToast.bind(this);
 
         let roomsData = [{
@@ -110,6 +111,10 @@ class Explore extends Component {
             email: email_value,
         });
 
+        if (__DEV__) {
+            this.searchBarRef.focus()
+        }
+
         //console.log('componentWillMount', token_value, email_value);
         // Below line gives null cannot be casted to string error on ios please look into it
         requester.getUserInfo().then((res) => {
@@ -143,6 +148,10 @@ class Explore extends Component {
 
         if (countries != prevProps.countries) {
             this.setCountriesInfo();
+        }
+
+        if (__DEV__) {
+            this.searchBarRef.focus()
         }
     }
 
@@ -190,6 +199,14 @@ class Explore extends Component {
         });
     }
     
+    onSearchEnterKey(event) {
+        if (__DEV__) {
+            const {id, query} = this.state.cities[0];
+            console.log(`[Explore] onSearchEnterKey: ${query}`);
+            this.handleAutocompleteSelect(id, query, this.gotoSearch);
+        }
+    }
+
     onSearchHandler(value) {
         this.setState({ search: value });
         if (value === '') {
@@ -349,12 +366,14 @@ class Explore extends Component {
         }
     }
 
-    handleAutocompleteSelect(id, name) {
+    handleAutocompleteSelect(id, name, callback=null) {
         this.setState({
-            cities: [],
-            search: name,
-            regionId: id
-        });
+                cities: [],
+                search: name,
+                regionId: id
+            },
+            () => (callback ? callback() : null) // execute callback after setting state - for dev needs mostly if calling this on Enter key in __DEV__
+        );
     }
 
     handlePopularCities(id, name) {
@@ -403,6 +422,8 @@ class Explore extends Component {
             <View style={styles.SearchAndPickerwarp}>
                 <View style={styles.searchAreaView}>
                     <SearchBar
+                        ref={(searchBar) => this.searchBarRef = searchBar}
+                        onTextEnter={this.onSearchEnterKey}
                         autoCorrect={false}
                         value={this.state.search}
                         onChangeText={this.onSearchHandler}

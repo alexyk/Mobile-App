@@ -1,5 +1,6 @@
 import moment from "moment"
 import { basePath } from '../../config'
+import _ from "lodash"
 
 export const DISPLAY_MODE_NONE            = 'mode_none'
 export const DISPLAY_MODE_SEARCHING       = 'mode_searching'
@@ -34,6 +35,7 @@ export function createHotelSearchInitialState(params) {
     displayMode: DISPLAY_MODE_NONE,
     initialLat: 42.698334,
     initialLon: 23.319941,
+    isDoneSocket: false,
 
     isSocketTimeout: false,
     isStaticTimeout: false,
@@ -107,14 +109,13 @@ export function parseCoordinates(hotelsInfo) {
   return result
 }
 
-export function cacheHotelFromSocket(hotelData, hotelsSocketCacheMap,  hotelsIndicesByIdMap, hotelsInfo, index=null) {
+export function parseAndCacheHotelDataFromSocket(hotelData, hotelsSocketCacheMap,  hotelsIndicesByIdMap, hotelsInfo, index=null) {
   if (index == null) {
     index = hotelsIndicesByIdMap[hotelData.id];
   }
   const indexNotNull = (index != null);
   const current = (indexNotNull && hotelsInfo ? hotelsInfo[index] : {lat:null, lon: null, price: null});
   const infoFromSocket = {
-    index,
     id: hotelData.id,
     price: parseFloat(!isNaN(hotelData.price) ? hotelData.price : current.price),
     latitude: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
@@ -136,14 +137,17 @@ export function cacheHotelFromSocket(hotelData, hotelsSocketCacheMap,  hotelsInd
 }
   
 /**
- * 
+ * (1) Gets previous hotels list
+ * (2) Makes a fresh copy
+ * (3) Updates with socket cache
+ * (4) Deletes socket cach
  * @param {Object} hotelData {id, price, hotelPhoto, star etc...}
  * @param {Object} hotelsSocketCacheMap {id: socketData}
  * @param {Object} hotelsIndicesByIdMap {id: index}
  * @param {Object} prevState 
  * @param {Object} updatedProps 
  */
-export function updateHotelsInfoStateFromSocket(prevHotelsInfo, socketHotelsCacheMap, hotelIdsMap) {
+export function updateHotelsFromSocketCache(prevHotelsInfo, socketHotelsCacheMap, hotelIdsMap) {
   let result = prevHotelsInfo;
   const ids = Object.keys(socketHotelsCacheMap);
 
@@ -163,10 +167,12 @@ export function updateHotelsInfoStateFromSocket(prevHotelsInfo, socketHotelsCach
           const socketData = socketHotelsCacheMap[id];
 
           //TODO: @@debug
-          // console.log(`[utils::updateHotelsInfoStateFromSocket] Updated hotel with index ${index}`, {socketData, staticData});
+          // console.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
 
-          Object.assign(staticData, socketData)
+          let refreshedData = _.merge({}, staticData, socketData)
           delete socketHotelsCacheMap[id];
+
+          hotelsInfoFresh[index] = refreshedData;
         }
 
         return null;
@@ -175,49 +181,26 @@ export function updateHotelsInfoStateFromSocket(prevHotelsInfo, socketHotelsCach
 
 
     result = hotelsInfoFresh;
-  }    
+  }
 
   return result;
 }
  
-export function updateHotelsFromSocketCache(hotelsArray, socketCacheMap) {
-  let result = hotelsArray.forEach(
-    (item, index) => {
-      const cached = socketCacheMap[item.id];
-      if (cached) {
-          Object.assign(item, cached);
-          item.index = index;
-      }
-      return item;
-    }
-  )
-
-  return result;
-}
-
-export function updateHotelIdsMap(targetObject, array) {
+/**
+ * Populate targetMap with indices from array
+ * @param {Object} targetMap The target map to update as "[index]: item.id"
+ * @param {Array} array The Array with items to get item.id from
+ */
+export function updateHotelIdsMap(targetMap, array) {
   // TODO: Performance - check if this is too intensive
   // console.time('Update hotelIdsMap');
   array.map(
     (item, index) => {
-        targetObject[item.id] = index;
+        targetMap[item.id] = index;
         return item;
     }
   );
   // console.timeEnd('Update hotelIdsMap');
-}
-
-export function popSocketCacheIntoHotelsArray(hotelsArray, socketCacheMap, idsMap) {
-  for (let id in socketCacheMap) {
-    const socketData = socketCacheMap[id];
-    const index = idsMap[id];
-    if (index != null) {
-      Object.assign(hotelsArray[index], socketData);
-      delete socketCacheMap[id];
-    }
-  }
-
-  return hotelsArray;
 }
 
 export function generateSearchString(state, props) {
