@@ -1,5 +1,8 @@
 import moment from "moment"
-import { basePath } from '../../config'
+import {
+  basePath,
+  MAP_INITIAL_COORDINATES
+} from '../../config'
 import _ from "lodash"
 
 export const DISPLAY_MODE_NONE            = 'mode_none'
@@ -27,14 +30,15 @@ export function createHotelSearchInitialState(params) {
     regionId: '',
 
     hotelsInfo: [],
+    hotelsInfoForMap: [],
     hotelsLoadedInList: 0, 
     totalHotels: 0,
     pricesFromSocketValid: 0,
     pricesFromSocket: 0,
     allElements: false,
     displayMode: DISPLAY_MODE_NONE,
-    initialLat: 42.698334,
-    initialLon: 23.319941,
+    initialLat: null,
+    initialLon: null,
     isDoneSocket: false,
 
     isSocketTimeout: false,
@@ -90,50 +94,49 @@ export function createHotelSearchInitialState(params) {
   return initialState;
 }
 
-export function parseCoordinates(hotelsInfo) {
-  let data = null;
-  hotelsInfo.map((item) => {
-    if (item.lat != null && item.lon != null) {
-        data = item;
-    }
-  })
-
-  let result = null;
-  if (data) {
-    result = {
-        initialLat: parseFloat(data.lat), 
-        initialLon: parseFloat(data.lon)
-    }
-  }
-
-  return result
-}
-
+/**
+ * Parse current hotelData and return it as initial coordinates
+ * @param {Object} hotelData 
+ * @param {Object} hotelsSocketCacheMap 
+ * @param {Object} hotelsIndicesByIdMap 
+ * @param {Array} hotelsInfo 
+ * @param {Number} index 
+ */
 export function parseAndCacheHotelDataFromSocket(hotelData, hotelsSocketCacheMap,  hotelsIndicesByIdMap, hotelsInfo, index=null) {
   if (index == null) {
     index = hotelsIndicesByIdMap[hotelData.id];
   }
   const indexNotNull = (index != null);
-  const current = (indexNotNull && hotelsInfo ? hotelsInfo[index] : {lat:null, lon: null, price: null});
+  const current = (indexNotNull && hotelsInfo ? hotelsInfo[index] : {lat:null, lon: null, price: null, hotelPhoto: {url:''}});
   const infoFromSocket = {
     id: hotelData.id,
+    name: hotelData.name,
     price: parseFloat(!isNaN(hotelData.price) ? hotelData.price : current.price),
-    latitude: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
-    longitude: parseFloat(hotelData.lon != null ? hotelData.lon : current.lon),
-      // if update of image needed:
-    /*hotelPhoto: 
-        (hotelData.thumbnail && hotelData.thumbnail.url 
-            && (current && current.hotelPhoto 
-                    && current.hotelPhoto.url
-                    && hotelData.thumbnail.url != current.hotelPhoto.url
-            )
-        )
+    lat: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
+    lon: parseFloat(hotelData.lon != null ? hotelData.lon : current.lon),
+    hotelPhoto: 
+        (hotelData.thumbnail && hotelData.thumbnail.url)
             ? hotelData.thumbnail
-            : current.hotelPhoto*/
+            : current.hotelPhoto
   }
   hotelsSocketCacheMap[hotelData.id] = infoFromSocket;
 
-  return infoFromSocket;
+  const result = {
+    initialLat: hotelData.lat,
+    initialLon: hotelData.lon
+  };
+  
+  return result;
+}
+
+export function hasValidCoordinatesForMap(state, isInitital=false) {
+  if (!state) return false;
+
+  if (isInitital) {
+    return ((state.initialLat != null) && (state.initialLon != null))
+  } else {
+    return ((state.lat != null) && (state.lon != null))
+  }
 }
   
 /**
@@ -147,43 +150,45 @@ export function parseAndCacheHotelDataFromSocket(hotelData, hotelsSocketCacheMap
  * @param {Object} prevState 
  * @param {Object} updatedProps 
  */
-export function updateHotelsFromSocketCache(prevHotelsInfo, socketHotelsCacheMap, hotelIdsMap) {
-  let result = prevHotelsInfo;
-  const ids = Object.keys(socketHotelsCacheMap);
-
-  if (ids.length > 0) {
+export function updateHotelsFromSocketCache(prevState, socketHotelsCacheMap, hotelIdsMap) {
+  let hotelsInfoFresh = prevState.hotelsInfo;
+  let hotelsInfoForMapFresh = prevState.hotelsInfoForMap;
+  const socketIds = Object.keys(socketHotelsCacheMap);
+  
+  if (socketIds.length > 0) {
     // TODO: Performance - check if this is too intensive - creating a copy of all hotels
     // console.time('Create hotelsInfo copy on socket update');
-    let hotelsInfoFresh = [...prevHotelsInfo]; // shallow copy, same as Array.slice() ???
+    hotelsInfoFresh = [...prevState.hotelsInfo]; // shallow copy, same as Array.slice() ???
     // console.timeEnd('Create hotelsInfo copy on socket update');
     // TODO: @@debug - remove
     // debugHotelData(hotelData, hotelsInfo, index, '>> SOCKET DATA <<');
 
     // update hotel data that has socket cache
-    ids.map((id) => {
+    socketIds.map((id) => {
         const index = hotelIdsMap[id]
-        const staticData = hotelsInfoFresh[index];
+        const staticData = (index != null ? hotelsInfoFresh[index] : null);
+        let refreshedData = staticData;
         if (staticData != null) {
           const socketData = socketHotelsCacheMap[id];
 
           //TODO: @@debug
           // console.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
 
-          let refreshedData = _.merge({}, staticData, socketData)
+          refreshedData = _.merge({}, socketData, staticData)
           delete socketHotelsCacheMap[id];
 
           hotelsInfoFresh[index] = refreshedData;
         }
 
-        return null;
-      }
-    )
+        if (hasValidCoordinatesForMap(refreshedData)) {
+          hotelsInfoForMapFresh.push(refreshedData);
+        }
 
-
-    result = hotelsInfoFresh;
+        return id;
+    })
   }
 
-  return result;
+  return {hotelsInfoFresh, hotelsInfoForMapFresh};
 }
  
 /**

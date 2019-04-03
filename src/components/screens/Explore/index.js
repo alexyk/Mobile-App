@@ -200,7 +200,7 @@ class Explore extends Component {
     }
     
     onSearchEnterKey(event) {
-        if (__DEV__) {
+        if (__DEV__ && this.state.cities.length > 0) {
             const {id, query} = this.state.cities[0];
             console.log(`[Explore] onSearchEnterKey: ${query}`);
             this.handleAutocompleteSelect(id, query, this.gotoSearch);

@@ -19,11 +19,13 @@ class MapModeHotelsSearch extends Component {
         super(props);
         this.state = {
             isFilterResult: props.isFilterResult, 
-            initialLat: props.initialLat,
-            initialLon: props.initialLon,
-            hotelsInfo: [],
+            initialLat: (props.initialLat == null) ? 42.698334 : props.initialLat,
+            initialLon: (props.initialLon == null) ? 23.319941 : props.initialLon,
+            hotelsInfo: props.hotelsInfo,
             selectedMarkerIndex: -1
         }
+        console.tron.debug(this.state)
+        console.tron.debug(`isNaN(inititalLat)=${isNaN(props.initialLat)}`)
     }
     
 	// shouldComponentUpdate(nextProps) {
@@ -201,37 +203,50 @@ class MapModeHotelsSearch extends Component {
             hotel = this.state.hotelsInfo[this.state.selectedMarkerIndex];
         }
 
+        const initialRegion = {
+            latitude: this.state.initialLat,
+            longitude: this.state.initialLon,
+            latitudeDelta: 0.2,
+            longitudeDelta: 0.2
+        }
+
         return (
-            <View style={styles.container}>
+            <View style={this.props.style}>
                 <MapView
                     ref={(ref) => this._map = ref}
-                    initialRegion={{
-                        latitude: this.state.initialLat,
-                        longitude: this.state.initialLon,
-                        latitudeDelta: 0.2,
-                        longitudeDelta: 0.2
-                    }}
+                    initialRegion={initialRegion}
                     style={styles.map}
                     onRegionChangeComplete={() => {if (this.selected_mark !== undefined && this.selected_mark !== null) this.selected_mark.showCallout();}}
                 >
                 {
-                    this.state.hotelsInfo.map((marker, i) => (marker.lat != null || marker.latitude != null) && (
-                        <Marker
-                            image={this.state.selectedMarkerIndex === i ? blue_marker : red_marker}
-                            style={this.state.selectedMarkerIndex === i ? {zIndex: 1} : null}
-                            // image={red_marker}
-                            key={i}
-                            ref={(ref) => this._markers[i] = ref}
-                            coordinate={{
-                                latitude: marker.lat === null || marker.lat === undefined? parseFloat(marker.latitude) : parseFloat(marker.lat),
-                                longitude: marker.lon === null || marker.lon === undefined? parseFloat(marker.longitude) : parseFloat(marker.lon)
-                            }}
-                            onPress={(e) => this.onPressMarker(e, i)}
-                            // onCalloutPress={() => {this.props.onClickHotelOnMap(marker)}} //eslint-disable-line
-                        >
-                            {/* {this.state.selectedMarkerIndex === i && this.renderCallout(marker)} */}
-                        </Marker>
-                    ))
+                    this.state.hotelsInfo.map((marker, i) => {
+
+                        if (marker.lat != null || marker.latitude != null) {
+                            const latitude = (marker.lat == null ? parseFloat(marker.latitude) : parseFloat(marker.lat));
+                            const longitude = (marker.lon == null ? parseFloat(marker.longitude) : parseFloat(marker.lon));
+                            
+                            //TODO: @@debug remove
+                            {/* console.log(`[MapModeHotelsSearch] Map Marker ${i}:  ${longitude}/${latitude} name='${marker.name}' lat=${marker.lat}/${marker.latitude} lon=${marker.lon}/${marker.longitude}, `) */}
+                            console.log(`[MapModeHotelsSearch] Map Marker ${i}:  lon=${longitude}/lat=${latitude} name='${marker.name}'`)
+
+                            return (
+                                <Marker
+                                    image={this.state.selectedMarkerIndex === i ? blue_marker : red_marker}
+                                    style={this.state.selectedMarkerIndex === i ? {zIndex: 1} : null}
+                                    // image={red_marker}
+                                    key={i}
+                                    ref={(ref) => this._markers[i] = ref}
+                                    coordinate={{latitude,longitude}}
+                                    onPress={(e) => this.onPressMarker(e, i)}
+                                    // onCalloutPress={() => {this.props.onClickHotelOnMap(marker)}} //eslint-disable-line
+                                >
+                                    {/* {this.state.selectedMarkerIndex === i && this.renderCallout(marker)} */}
+                                </Marker>
+                            )
+                        } else {
+                            return marker;
+                        }
+                    })
                 }
                 {
                     hotel !== null && 

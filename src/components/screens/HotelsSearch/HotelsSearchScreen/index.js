@@ -44,13 +44,12 @@ import {
   updateHotelIdsMap,
   updateHotelsFromSocketCache,
   parseAndCacheHotelDataFromSocket,
-  parseCoordinates,
   DISPLAY_MODE_NONE,
   DISPLAY_MODE_SEARCHING,
   DISPLAY_MODE_RESULTS_AS_LIST,
   DISPLAY_MODE_RESULTS_AS_MAP,
   DISPLAY_MODE_ITEM,
-  debugHotelData,
+  hasValidCoordinatesForMap,
 } from "../../utils";
 import stomp from "stomp-websocket-js";
 import { isNative } from "../../../../version";
@@ -106,6 +105,7 @@ class HotelsSearchScreen extends Component {
     this.onStaticData = this.onStaticData.bind(this);
     this.onFetchNewListViewData = this.onFetchNewListViewData.bind(this);
     this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(this);
+    this.onUpdateHotelsInfoStateFromSocket = this.onUpdateHotelsInfoStateFromSocket.bind(this);
 
     //TODO: @@debug - remove
     console.log("#hotel-search# 2.2/6 HotelSearchScreen constructor END");
@@ -347,13 +347,10 @@ class HotelsSearchScreen extends Component {
             if (hotelData.price && !isNaN(hotelData.price)) {
               // update socket prices loaded in footer
               this.validSocketPrices++;
-              parseAndCacheHotelDataFromSocket(
-                hotelData,
-                this.hotelsSocketCacheMap,
-                this.hotelsIndicesByIdMap,
-                result.hotelsInfo,
-                index
-              );
+              const initialCoord = parseAndCacheHotelDataFromSocket(hotelData,this.hotelsSocketCacheMap,this.hotelsIndicesByIdMap,result.hotelsInfo,index);
+              if (prevState.initialLat == null && prevState.initialLon == null) {
+                Object.assign(result,initialCoord);
+              }
                 
               // At intervals of HOTELS_SOCKET_CONNECTION_UPDATE_TICK seconds
               // refresh prices in footer and list prices loaded so far:
@@ -366,9 +363,7 @@ class HotelsSearchScreen extends Component {
                 
                 // update hotels data, setState(hotelsInfo)/setRows
                 if (prevState.hotelsInfo.length > 0) {
-                  const hotelsInfoFresh = updateHotelsFromSocketCache(prevState.hotelsInfo, this.hotelsSocketCacheMap, this.hotelsIndicesByIdMap);
-                  this.listViewRef.updateDataSource(hotelsInfoFresh);
-                  result = {hotelsInfo: hotelsInfoFresh}
+                  Object.assign(result, this.onUpdateHotelsInfoStateFromSocket(prevState));
                 }
               }    
             }
@@ -408,12 +403,10 @@ class HotelsSearchScreen extends Component {
     if (this.pageLimit > data.totalElements) {
       this.pageLimit = data.totalElements;
     }
-    const hotelsInfoFresh = updateHotelsFromSocketCache(this.state.hotelsInfo, this.hotelsSocketCacheMap, this.hotelsIndicesByIdMap);
-    this.listViewRef.updateDataSource(hotelsInfoFresh);
-    this.setState({
-        hotelsInfo: hotelsInfoFresh,
+    this.setState((prevState) => ({
+        ...this.onUpdateHotelsInfoStateFromSocket(prevState),
         pricesFromSocket: data.totalElements,
-      },
+      }),
       () => this.setState({isDoneSocket: true})
     );
   };
@@ -492,6 +485,15 @@ class HotelsSearchScreen extends Component {
     }
   };
 
+  onUpdateHotelsInfoStateFromSocket(prevState) {
+    const {hotelsInfoFresh,hotelsInfoForMapFresh} = updateHotelsFromSocketCache(prevState, this.hotelsSocketCacheMap, this.hotelsIndicesByIdMap);
+    this.listViewRef.updateDataSource(hotelsInfoFresh);
+
+    let result = {hotelsInfo: hotelsInfoFresh, hotelsInfoForMap: hotelsInfoForMapFresh};
+
+    return result;
+  }
+
   gotoHotelDetailsPageByMap(item) {
     //console.log("gotoHotelDetailsPageByMap", item);
 
@@ -538,7 +540,9 @@ class HotelsSearchScreen extends Component {
             _this.startSocketConnection();
           }  
         } else { // avoid two calls on first load
-          hotels = updateHotelsFromSocketCache(hotels, _this.hotelsSocketCacheMap, _this.hotelsIndicesByIdMap);
+          const prevState = {hotelsInfo:hotels, hotelsInfoForMap:[]}
+          let {hotelsInfoFresh} = updateHotelsFromSocketCache(prevState, _this.hotelsSocketCacheMap, _this.hotelsIndicesByIdMap);
+          hotels = hotelsInfoFresh;
         }
 
         //TODO: @@debug
@@ -625,10 +629,8 @@ class HotelsSearchScreen extends Component {
       this.state.displayMode == DISPLAY_MODE_SEARCHING &&
       this.state.hotelsLoadedInList > 0
     ) {
-      const coordinates = parseCoordinates(this.state.hotelsInfo);
       this.setState({
         displayMode: DISPLAY_MODE_RESULTS_AS_LIST,
-        ...coordinates
       });
     }
   }
@@ -970,14 +972,14 @@ class HotelsSearchScreen extends Component {
                 if (!isCacheExpired) {
                   this.setState({
                     hotelsInfo: dataMap.content,
-                    initialLat: parseFloat(dataMap.content[0].latitude),
-                    initialLon: parseFloat(dataMap.content[0].longitude)
+                    initialLat: parseFloat(dataMap.content[0].lat),
+                    initialLon: parseFloat(dataMap.content[0].lon)
                   });
                 } else {
                   this.setState({
                     hotelsInfo: data.content,
-                    initialLat: parseFloat(data.content[0].latitude),
-                    initialLon: parseFloat(data.content[0].longitude)
+                    initialLat: parseFloat(data.content[0].lat),
+                    initialLon: parseFloat(data.content[0].lon)
                   });
                 }
               });
@@ -1206,39 +1208,55 @@ class HotelsSearchScreen extends Component {
 
   renderResultsAsMap() {
     // console.log(`Render map with ${this.state.hotelsInfo.length} hotels`);
-
     const height = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP
       ? "100%"
       : "0%"
     );
-    const result = (
-      <MapModeHotelsSearch
-        ref={ref => {
-          if (!!ref) {
-            this.mapView = ref.getWrappedInstance();
-          }
-        }}
-        isFilterResult={this.state.isFilterResult}
-        initialLat={this.state.initialLat}
-        initialLon={this.state.initialLon}
-        daysDifference={this.state.daysDifference}
-        hotelsInfo={this.state.hotelsInfo}
-        gotoHotelDetailsPage={this.gotoHotelDetailsPageByMap}
-        style={{height}}
-      />
-    );
+    let result = null;
+
+    //@@@debug
+    // console.log(`[HotelsSearchScreen] Map hotels ${this.state.hotelsInfoForMap.length}/${this.state.hotelsInfo.length}`);
+    this.state.hotelsInfoForMap.map((item,index) => {
+      // if (item.lon)
+      // console.log(`    Hotel ${index} lat:${item.lat} lon:${item.lon}`);
+      
+      return item
+    })
+
+    if (hasValidCoordinatesForMap(this.state, true)) {
+      result = (
+        <MapModeHotelsSearch
+          ref={ref => {
+            if (!!ref) {
+              this.mapView = ref.getWrappedInstance();
+            }
+          }}
+          isFilterResult={this.state.isFilterResult}
+          initialLat={this.state.initialLat}
+          initialLon={this.state.initialLon}
+          daysDifference={this.state.daysDifference}
+          hotelsInfo={this.state.hotelsInfoForMap}
+          gotoHotelDetailsPage={this.gotoHotelDetailsPageByMap}
+          style={{height}}
+        />
+      );
+    }
 
     return result;
   }
 
   renderMapButton() {
-    if (this.state.allElements) {
+    if (hasValidCoordinatesForMap(this.state, true)) {
+      // if (this.state.allElements) {
       const isMap = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
       const isList = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST;
       const isShowingResults = isMap || isList;
+      const hasValidCoordinates = hasValidCoordinatesForMap(this.state, true);
 
-      return (
-        isShowingResults && (
+      // console.log(`---- coordinates: ${hasValidCoordinates}, ${this.state.initialLat}/${this.state.initialLon}`);
+      
+    return (
+        (isShowingResults || hasValidCoordinates) && (
           <TouchableOpacity
             onPress={this.onToggleMapOrListResultsView}
             style={styles.switchButton}

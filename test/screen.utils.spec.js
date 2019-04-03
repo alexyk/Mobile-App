@@ -1,8 +1,25 @@
 import {
     updateHotelsFromSocketCache,
     popSocketCacheIntoHotelsArray,
-    parseAndCacheHotelDataFromSocket
+    parseAndCacheHotelDataFromSocket,
+    hasValidCoordinatesForMap
 } from "../src/components/screens/utils"
+
+test('hasValidCoordinatesForMap', () => {
+    // initital coordinates check
+    const initCoord = {initialLat: 45.3, initialLon: 67.90}
+    let res = hasValidCoordinatesForMap(initCoord, true)
+    expect(res).toBeTruthy()
+    res = hasValidCoordinatesForMap(initCoord)
+    expect(res).not.toBeTruthy()
+
+    // hotel coordinates check
+    const coord = {lat: 45.3, lon: 67.90}
+    res = hasValidCoordinatesForMap(coord)
+    expect(res).toBeTruthy()
+    res = hasValidCoordinatesForMap(coord, true)
+    expect(res).not.toBeTruthy()
+})
 
 test('parseAndCacheHotelDataFromSocket', () => {
     // mock up
@@ -15,46 +32,53 @@ test('parseAndCacheHotelDataFromSocket', () => {
     let socketCacheMap = {}
 
     // the test
-    parseAndCacheHotelDataFromSocket(hotelSocket1, socketCacheMap, hotels);
+    let result = parseAndCacheHotelDataFromSocket(hotelSocket1, socketCacheMap, hotels);
 
-    expect(socketCacheMap[hotelSocket1.id].price    )   .toBe   (12.68)
-    expect(socketCacheMap[hotelSocket1.id].longitude)   .toBe   (8.7)
-    expect(socketCacheMap[hotelSocket1.id].latitude )   .toBe   (77.9)
-    expect(socketCacheMap[hotelSocket1.id].name     )   .toEqual(undefined)
-    expect(socketCacheMap[hotelSocket1.id].price    )   .toBe   (12.68)
+    expect(result.initialLat         )   .toEqual    (77.9)
+    expect(result.initialLon         )   .toEqual    (8.7)
+    const item = socketCacheMap[hotelSocket1.id];
+    expect(item.price                )   .toBe       (12.68)
+    expect(item.lon                  )   .toBe       (8.7)
+    expect(item.lat                  )   .toBe       (77.9)
+    expect(item.name                 )   .toEqual    (undefined)
 })
 
 test('updateHotelsFromSocketCache', () => {
     let staticData  = {id:12, name: "Ala bala", hotelPhoto: {url: "http://example.io"}};
-    let socketData  = {id:12, latitude:44.880235, longitude:15.987798, price: 23.9, thumbnail: {url: "http://example.io/7777777"}};
-    let socketData2 = {id:297, price:23.89, thumbnail: {url: "http://lala.io/snthoesnthu"}};
+    let socketData  = {id:12, lat:44.880235, lon:15.987798, price: 23.9, thumbnail: {url: "http://example.io/7777777"}};
+    let socketData2 = {id:297, price:23.89, name: "Hello There", thumbnail: {url: "http://lala.io/snthoesnthu"}};
+    let socketData3 = {id:9, price:3.04, lat: 56.3443, lon: 78.09, name: "Same Here", thumbnail: {url: "http://lio.so/kajshd"}};
 
     let hotelsIndicesById = {12: 0}
     let hotelsInfo = [staticData]
-    let hotelsSocketCacheMap = {12:socketData, 297:socketData2}
+    let state = {hotelsInfo, hotelsInfoForMap:[]}
+    let hotelsSocketCacheMap = {12:socketData, 297:socketData2, 9:socketData3}
     let cacheIds = Object.keys(hotelsSocketCacheMap);
 
-    expect(cacheIds.length)         .toBe(2)
+    expect(cacheIds.length)         .toBe(3)
 
     // ----------------------------- test 1 ----------------------------------
     // testing with socket cache
-    let result = updateHotelsFromSocketCache(hotelsInfo, hotelsSocketCacheMap, hotelsIndicesById);    
+    let r = updateHotelsFromSocketCache(state, hotelsSocketCacheMap, hotelsIndicesById);
 
-    expect(result instanceof Array) .toBeTruthy()
-    expect(result.length)           .toBe(1)
+    expect(r.hotelsInfoFresh instanceof Array)          .toBeTruthy()
+    expect(r.hotelsInfoFresh.length)                    .toBe(1)
+    expect(r.hotelsInfoForMapFresh instanceof Array)    .toBeTruthy()
 
-    let item1 = result[0];
+    expect(r.hotelsInfoForMapFresh.length)              .toBe(1)
+
+    let item1 = r.hotelsInfoFresh[0];
     expect(item1.price)             .toBe(23.9)
     expect(item1.name)              .toEqual("Ala bala")
 
     cacheIds = Object.keys(hotelsSocketCacheMap);
-    expect(cacheIds.length)         .toBe(1)    // no no no
+    expect(cacheIds.length)         .toBe(2)
 
     // ----------------------------- test 2 ----------------------------------
     // testing with EMPTY socket cache
-    result = updateHotelsFromSocketCache(hotelsInfo, hotelsSocketCacheMap, hotelsIndicesById);
+    r = updateHotelsFromSocketCache(state, hotelsSocketCacheMap, hotelsIndicesById);
 
-    item1 = result[0];
+    item1 = r.hotelsInfoFresh[0];
     expect(item1.price)             .toBe(undefined)
     expect(item1.price)             .toBe(undefined)
 });
