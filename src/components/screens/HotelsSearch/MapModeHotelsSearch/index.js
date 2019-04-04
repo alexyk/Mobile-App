@@ -24,8 +24,8 @@ class MapModeHotelsSearch extends Component {
             hotelsInfo: props.hotelsInfo,
             selectedMarkerIndex: -1
         }
-        console.tron.debug(this.state)
-        console.tron.debug(`isNaN(inititalLat)=${isNaN(props.initialLat)}`)
+        // console.tron.debug(this.state)
+        // console.tron.debug(`isNaN(inititalLat)=${isNaN(props.initialLat)}`)
     }
     
 	// shouldComponentUpdate(nextProps) {

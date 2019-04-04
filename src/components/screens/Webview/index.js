@@ -48,7 +48,7 @@ class WebviewScreen extends Component {
         this.state = generateWebviewInitialState(allParams);
 
         console.log(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
-        console.tron.log(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
+        // console.tron.log(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
         
 
         // Fix for using WebView::onMessage
