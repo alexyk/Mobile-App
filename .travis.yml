@@ -1,6 +1,6 @@
 stages:
   - name: build ios
-    if: branch IN (master, staging, tools/travis-ci)
+    if: branch IN (master, staging, tools/travis-ci, dev)
   - name: build android
     if: branch IN (tools/travis-ci_android)
 

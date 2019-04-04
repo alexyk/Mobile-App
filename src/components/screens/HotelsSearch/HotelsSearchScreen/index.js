@@ -440,7 +440,7 @@ class HotelsSearchScreen extends Component {
       // webview inside
       let initialState = generateWebviewInitialState(extraParams, state);
 
-      /*console.log(`[HotelsSearchscreen] Loading hotel info`, {
+      /*console.log(`[HotelsSearchScreen] Loading hotel info`, {
         initialState,
         extraParams,
         item,
@@ -1373,13 +1373,14 @@ class HotelsSearchScreen extends Component {
           {this.renderCalendarAndFilters()}
 
           <View style={styles.containerHotels}>
-            { this.renderResultsAsMap()  }
+            {/* TODO: Fix and enable Map for Android TNWA */}
+            { Platform.OS == 'ios' && this.renderResultsAsMap()  }
             { this.renderResultsAsList() }
             { this.renderContent()       }
             
 
-            {/* DISABLED FOR NOW */}
-            {this.renderMapButton()}
+            {/* TODO: Fix and enable Map for Android TNWA */}
+            { Platform.OS == 'ios' && this.renderMapButton()}
           </View>
 
           {this.renderFooter()}
