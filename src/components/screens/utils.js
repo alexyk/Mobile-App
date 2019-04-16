@@ -1,7 +1,6 @@
 import moment from "moment"
 import {
-  basePath,
-  MAP_INITIAL_COORDINATES
+  basePath
 } from '../../config'
 import _ from "lodash"
 
@@ -9,7 +8,7 @@ export const DISPLAY_MODE_NONE            = 'mode_none'
 export const DISPLAY_MODE_SEARCHING       = 'mode_searching'
 export const DISPLAY_MODE_RESULTS_AS_LIST = 'mode_results_as_list'
 export const DISPLAY_MODE_RESULTS_AS_MAP  = 'mode_results_as_map'
-export const DISPLAY_MODE_ITEM            = 'mode_hotel_details'
+export const DISPLAY_MODE_HOTEL_DETAILS   = 'mode_hotel_details'
 
 export function createHotelSearchInitialState(params) {
 
@@ -107,17 +106,17 @@ export function parseAndCacheHotelDataFromSocket(hotelData, hotelsSocketCacheMap
     index = hotelsIndicesByIdMap[hotelData.id];
   }
   const indexNotNull = (index != null);
-  const current = (indexNotNull && hotelsInfo ? hotelsInfo[index] : {lat:null, lon: null, price: null, hotelPhoto: {url:''}});
+  const current = (indexNotNull && hotelsInfo ? hotelsInfo[index] : {lat:null, lon: null, price: null, thumbnail: {url:''}});
   const infoFromSocket = {
     id: hotelData.id,
     name: hotelData.name,
     price: parseFloat(!isNaN(hotelData.price) ? hotelData.price : current.price),
     lat: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
     lon: parseFloat(hotelData.lon != null ? hotelData.lon : current.lon),
-    hotelPhoto: 
+    thumbnail: 
         (hotelData.thumbnail && hotelData.thumbnail.url)
             ? hotelData.thumbnail
-            : current.hotelPhoto
+            : current.thumbnail
   }
   hotelsSocketCacheMap[hotelData.id] = infoFromSocket;
 

@@ -80,7 +80,7 @@ switch (LT_CFG) {
         break;
 
     case LT_PROD:
-
+        // no changes from initial definition
         break;
 
     case LT_PROD2:

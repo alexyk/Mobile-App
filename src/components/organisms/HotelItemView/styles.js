@@ -47,17 +47,17 @@ const styles = StyleSheet.create({
     },
     placeReviewText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 11,
+        fontSize: 12,
         color: '#aeaeae'
     },
     placeReviewNumber: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 11,
+        fontSize: 12,
         color: '#aeaeae'
     },
     totalReviews: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 11,
+        fontSize: 12,
         color: '#aeaeae'
     },
     ratingIconsWrapper: {
@@ -74,18 +74,18 @@ const styles = StyleSheet.create({
     cost: {
         fontFamily: 'FuturaStd-Medium',
         color: 'black',
-        fontSize: 11,
+        fontSize: 12,
         textAlign: 'right',
         width: "100%"
     },
     costLoc: {
         fontFamily: 'FuturaStd-Medium',
         color: 'black',
-        fontSize: 11,
+        fontSize: 12,
         marginLeft: 5
     },
     perNight: {
-        fontSize: 11,
+        fontSize: 12,
         fontFamily: 'FuturaStd-Light',
         color: 'black',
     },

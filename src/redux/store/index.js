@@ -8,7 +8,7 @@ import { logger } from 'redux-logger'
 let middlewares = [thunk, middleware];
 //TODO: @@debug - removing redux events logger in non __DEV__ mode
 if (__DEV__) {
-    middlewares.push(logger)
+    // middlewares.push(logger)
 }
 
 const enchancer = composeWithDevTools({

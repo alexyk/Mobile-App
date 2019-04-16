@@ -21,6 +21,7 @@ import {
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK
 } from "../../../../config";
 import SearchBar from "../../../molecules/SearchBar";
+import LTLoader from "../../../molecules/LTLoader"
 import DateAndGuestPicker from "../../../organisms/DateAndGuestPicker";
 import HotelItemView from "../../../organisms/HotelItemView";
 import requester from "../../../../initDependencies";
@@ -30,7 +31,6 @@ import _ from "lodash";
 import moment from "moment";
 
 import { UltimateListView } from "react-native-ultimate-listview";
-import Image from "react-native-remote-svg";
 import { DotIndicator } from "react-native-indicators";
 import MapModeHotelsSearch from "../MapModeHotelsSearch";
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
@@ -48,7 +48,7 @@ import {
   DISPLAY_MODE_SEARCHING,
   DISPLAY_MODE_RESULTS_AS_LIST,
   DISPLAY_MODE_RESULTS_AS_MAP,
-  DISPLAY_MODE_ITEM,
+  DISPLAY_MODE_HOTEL_DETAILS,
   hasValidCoordinatesForMap,
 } from "../../utils";
 import stomp from "stomp-websocket-js";
@@ -413,7 +413,7 @@ class HotelsSearchScreen extends Component {
 
   onBackButtonPress = () => {
     switch (this.state.displayMode) {
-      case DISPLAY_MODE_ITEM:
+      case DISPLAY_MODE_HOTEL_DETAILS:
         this.setState({ displayMode: DISPLAY_MODE_RESULTS_AS_LIST });
         break;
 
@@ -431,7 +431,10 @@ class HotelsSearchScreen extends Component {
 
     // this.isFirstLoad = true;
     //console.log(`[HotelsSearchScreen] displayMode: ${this.state.displayMode}`)
-    this.setState({displayMode});
+
+    // prevent button from staying semi-transparent
+    const func = () => this.setState({displayMode});
+    setTimeout(func, 300);
   }
 
   gotoHotelDetailsPageByList = (item, state, extraParams) => {
@@ -450,7 +453,7 @@ class HotelsSearchScreen extends Component {
       this.setState({
         isLoading: true,
         webViewUrl: initialState.webViewUrl,
-        displayMode: DISPLAY_MODE_ITEM
+        displayMode: DISPLAY_MODE_HOTEL_DETAILS
       });
     } else {
       //console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
@@ -463,7 +466,7 @@ class HotelsSearchScreen extends Component {
           // here you set the response in to json
           res.body
             .then(data => {
-              //console.log("requester.getHotelById data", data);
+              console.log("requester.getHotelById data", data);
               const hotelPhotos = [];
               for (let i = 0; i < data.hotelPhotos.length; i++) {
                 hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
@@ -917,7 +920,7 @@ class HotelsSearchScreen extends Component {
   };
 
   updateFilter = data => {
-    //console.log("updateFilter", data);
+    console.log("[HotelsSearchScreen] updateFilter", {data});
 
     // TODO: Fix this direct method call
     if (this.listViewRef != undefined && this.listViewRef != null) {
@@ -1052,10 +1055,7 @@ class HotelsSearchScreen extends Component {
         alignItems: "center"
       }}
     >
-      <Image
-        style={{ width: 50, height: 50 }}
-        source={require("../../../../assets/loader.gif")}
-      />
+      <LTLoader />
     </View>
   );
 
@@ -1180,15 +1180,18 @@ class HotelsSearchScreen extends Component {
 
   renderResultsAsList() {
     // console.log(`### [HotelsSearchScreen] renderResultsAsList len:${this.state.hotelsInfo.length}`)
-    const height = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST
-      ? null
-      : 0
-    );
+    const scale = (
+      this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST
+        ? 1.0
+        : 0.0
+    )
+    const transform = [{scaleX: scale},{scaleY: scale}]
+    console.log(`#@# [HotelsSearchScreen] display: ${this.state.displayMode}, ListScale: ${scale}`)
 
     return (
       <UltimateListView
         ref={ref => (this.listViewRef = ref)}
-        key={"hotelsList"} // this is important to distinguish different FlatList, default is numColumns
+        key={"hotelsList_"+this.state.displayMode} // this is important to distinguish different FlatList, default is numColumns
         onFetch={this.onFetchNewListViewData}
         keyExtractor={(item, index) => {
           // //console.log(`### [HotelsSearchScreen] item:${item}: index:${index}`)
@@ -1201,7 +1204,7 @@ class HotelsSearchScreen extends Component {
         paginationFetchingView={this.renderPaginationFetchingView}
         paginationWaitingView={this.renderPaginationWaitingView}
         paginationAllLoadedView={this.renderPaginationAllLoadedView}
-        style={{height}}
+        style={{transform}}
       />
     );
   }
@@ -1298,7 +1301,7 @@ class HotelsSearchScreen extends Component {
   }
 
   onWebViewLoadEnd() {
-    console.log("[HotelsSearchScreen] Webview loaded");
+    console.log("[HotelsSearchScreen] Webview loaded");    
     this.setState({ isLoading: false });
   }
 
@@ -1310,7 +1313,8 @@ class HotelsSearchScreen extends Component {
     let result = false;
 
     if (this.state.isLoading) {
-      result = this.renderContentMessage(`Loading ${this.state.webViewUrl}`);
+      // result = this.renderContentMessage(`Loading ${this.state.webViewUrl}`);
+      result = <LTLoader />;
     } else {
       result = (
         <WebView
@@ -1341,7 +1345,7 @@ class HotelsSearchScreen extends Component {
         // see render() method
         break;
 
-      case DISPLAY_MODE_ITEM:
+      case DISPLAY_MODE_HOTEL_DETAILS:
         if (!isNative.hotelItem) {
           result = this.renderHotelDetailsAsWebview();
         } else {
@@ -1373,14 +1377,11 @@ class HotelsSearchScreen extends Component {
           {this.renderCalendarAndFilters()}
 
           <View style={styles.containerHotels}>
-            {/* TODO: Fix and enable Map for Android TNWA */}
-            { Platform.OS == 'ios' && this.renderResultsAsMap()  }
+            { this.renderResultsAsMap()  }
             { this.renderResultsAsList() }
             { this.renderContent()       }
             
-
-            {/* TODO: Fix and enable Map for Android TNWA */}
-            { Platform.OS == 'ios' && this.renderMapButton()}
+            { this.renderMapButton()     }
           </View>
 
           {this.renderFooter()}
