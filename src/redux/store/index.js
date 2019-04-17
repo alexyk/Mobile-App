@@ -4,11 +4,11 @@ import thunk from 'redux-thunk';
 import appReducers from '../reducers';
 import { middleware } from '../../routing'
 import { logger } from 'redux-logger'
+import { DebugSettings } from '../../config'
 
 let middlewares = [thunk, middleware];
-//TODO: @@debug - removing redux events logger in non __DEV__ mode
-if (__DEV__) {
-    // middlewares.push(logger)
+if (__DEV__ && DebugSettings.enableReduxLogging) {
+    middlewares.push(logger)
 }
 
 const enchancer = composeWithDevTools({

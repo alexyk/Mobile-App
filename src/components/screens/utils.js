@@ -1,36 +1,31 @@
-import moment from "moment"
-import {
-  basePath
-} from '../../config'
-import _ from "lodash"
+import moment from "moment";
+import { basePath } from "../../config";
+import _ from "lodash";
 
-export const DISPLAY_MODE_NONE            = 'mode_none'
-export const DISPLAY_MODE_SEARCHING       = 'mode_searching'
-export const DISPLAY_MODE_RESULTS_AS_LIST = 'mode_results_as_list'
-export const DISPLAY_MODE_RESULTS_AS_MAP  = 'mode_results_as_map'
-export const DISPLAY_MODE_HOTEL_DETAILS   = 'mode_hotel_details'
+export const DISPLAY_MODE_NONE = "mode_none";
+export const DISPLAY_MODE_SEARCHING = "mode_searching";
+export const DISPLAY_MODE_RESULTS_AS_LIST = "mode_results_as_list";
+export const DISPLAY_MODE_RESULTS_AS_MAP = "mode_results_as_map";
+export const DISPLAY_MODE_HOTEL_DETAILS = "mode_hotel_details";
 
 export function createHotelSearchInitialState(params) {
+  const startDate = moment().add(1, "day");
+  const endDate = moment().add(2, "day");
 
-  const startDate = moment().add(1, 'day');
-  const endDate = moment().add(2, 'day');
-  
-  let roomsData = [{
-    adults: 2,
-    children: []
-  }];
+  let roomsData = [
+    {
+      adults: 2,
+      children: []
+    }
+  ];
 
   let initialState = {
-    isFilterResult: false,
-    search: '',
-    cities: [],
-
     isHotel: true,
-    regionId: '',
+    regionId: "",
 
     hotelsInfo: [],
     hotelsInfoForMap: [],
-    hotelsLoadedInList: 0, 
+    hotelsLoadedInList: 0,
     totalHotels: 0,
     pricesFromSocketValid: 0,
     pricesFromSocket: 0,
@@ -44,11 +39,11 @@ export function createHotelSearchInitialState(params) {
     isStaticTimeout: false,
 
     isLoading: true, // progress dialog
-    
-    checkInDateFormated: startDate.format('DD/MM/YYYY').toString(),
-    checkOutDateFormated: endDate.format('DD/MM/YYYY').toString(),
-    checkInDate: startDate.format('ddd, DD MMM').toString(),
-    checkOutDate: endDate.format('ddd, DD MMM').toString(),
+
+    checkInDateFormated: startDate.format("DD/MM/YYYY").toString(),
+    checkOutDateFormated: endDate.format("DD/MM/YYYY").toString(),
+    checkInDate: startDate.format("ddd, DD MMM").toString(),
+    checkOutDate: endDate.format("ddd, DD MMM").toString(),
 
     guests: 2,
     adults: 2,
@@ -57,11 +52,15 @@ export function createHotelSearchInitialState(params) {
     childrenBool: false,
     daysDifference: 1,
     roomsDummyData: encodeURI(JSON.stringify(roomsData)),
+
     //filters
+    isFilterResult: false,
+    search: "",
+    cities: [],
     showUnAvailable: false,
-    nameFilter: '',
+    nameFilter: "",
     selectedRating: [false, false, false, false, false],
-    orderBy: 'rank,desc',
+    orderBy: "rank,desc",
     priceRange: [1, 5000],
 
     editable: false,
@@ -69,7 +68,7 @@ export function createHotelSearchInitialState(params) {
     isNewSearch: false,
 
     // webview - to be removed
-    webViewUrl: ''
+    webViewUrl: ""
   };
   if (params) {
     initialState.isHotel = params.isHotel;
@@ -95,49 +94,62 @@ export function createHotelSearchInitialState(params) {
 
 /**
  * Parse current hotelData and return it as initial coordinates
- * @param {Object} hotelData 
- * @param {Object} hotelsSocketCacheMap 
- * @param {Object} hotelsIndicesByIdMap 
- * @param {Array} hotelsInfo 
- * @param {Number} index 
+ * @param {Object} hotelData
+ * @param {Object} hotelsSocketCacheMap
+ * @param {Object} hotelsIndicesByIdMap
+ * @param {Array} hotelsInfo
+ * @param {Number} index
  */
-export function parseAndCacheHotelDataFromSocket(hotelData, hotelsSocketCacheMap,  hotelsIndicesByIdMap, hotelsInfo, index=null) {
+export function parseAndCacheHotelDataFromSocket(
+  hotelData,
+  hotelsSocketCacheMap,
+  hotelsIndicesByIdMap,
+  hotelsInfo,
+  index = null
+) {
   if (index == null) {
     index = hotelsIndicesByIdMap[hotelData.id];
   }
-  const indexNotNull = (index != null);
-  const current = (indexNotNull && hotelsInfo ? hotelsInfo[index] : {lat:null, lon: null, price: null, thumbnail: {url:''}});
+  const indexNotNull = index != null;
+  const current =
+    indexNotNull && hotelsInfo
+      ? hotelsInfo[index]
+      : hotelData;
+  const lat = (hotelData.latitude != null ? hotelData.latitude : hotelData.lat);
+  const lon = (hotelData.longitude != null ? hotelData.longitude : hotelData.lon);
   const infoFromSocket = {
     id: hotelData.id,
     name: hotelData.name,
-    price: parseFloat(!isNaN(hotelData.price) ? hotelData.price : current.price),
-    lat: parseFloat(hotelData.lat != null ? hotelData.lat : current.lat),
-    lon: parseFloat(hotelData.lon != null ? hotelData.lon : current.lon),
-    thumbnail: 
-        (hotelData.thumbnail && hotelData.thumbnail.url)
-            ? hotelData.thumbnail
-            : current.thumbnail
-  }
+    price: parseFloat(
+      !isNaN(hotelData.price) ? hotelData.price : current.price
+    ),
+    lat: parseFloat(lat != null ? lat : current.lat),
+    lon: parseFloat(lon != null ? lon : current.lon),
+    thumbnail:
+      hotelData.thumbnail && hotelData.thumbnail.url
+        ? hotelData.thumbnail
+        : current.thumbnail
+  };
   hotelsSocketCacheMap[hotelData.id] = infoFromSocket;
 
   const result = {
     initialLat: hotelData.lat,
     initialLon: hotelData.lon
   };
-  
+
   return result;
 }
 
-export function hasValidCoordinatesForMap(state, isInitital=false) {
+export function hasValidCoordinatesForMap(state, isInitital = false) {
   if (!state) return false;
 
   if (isInitital) {
-    return ((state.initialLat != null) && (state.initialLon != null))
+    return state.initialLat != null && state.initialLon != null;
   } else {
-    return ((state.lat != null) && (state.lon != null))
+    return state.lat != null && state.lon != null;
   }
 }
-  
+
 /**
  * (1) Gets previous hotels list
  * (2) Makes a fresh copy
@@ -146,14 +158,18 @@ export function hasValidCoordinatesForMap(state, isInitital=false) {
  * @param {Object} hotelData {id, price, hotelPhoto, star etc...}
  * @param {Object} hotelsSocketCacheMap {id: socketData}
  * @param {Object} hotelsIndicesByIdMap {id: index}
- * @param {Object} prevState 
- * @param {Object} updatedProps 
+ * @param {Object} prevState
+ * @param {Object} updatedProps
  */
-export function updateHotelsFromSocketCache(prevState, socketHotelsCacheMap, hotelIdsMap) {
+export function updateHotelsFromSocketCache(
+  prevState,
+  socketHotelsCacheMap,
+  hotelIdsMap
+) {
   let hotelsInfoFresh = prevState.hotelsInfo;
   let hotelsInfoForMapFresh = prevState.hotelsInfoForMap;
   const socketIds = Object.keys(socketHotelsCacheMap);
-  
+
   if (socketIds.length > 0) {
     // TODO: Performance - check if this is too intensive - creating a copy of all hotels
     // console.time('Create hotelsInfo copy on socket update');
@@ -163,33 +179,33 @@ export function updateHotelsFromSocketCache(prevState, socketHotelsCacheMap, hot
     // debugHotelData(hotelData, hotelsInfo, index, '>> SOCKET DATA <<');
 
     // update hotel data that has socket cache
-    socketIds.map((id) => {
-        const index = hotelIdsMap[id]
-        const staticData = (index != null ? hotelsInfoFresh[index] : null);
-        let refreshedData = staticData;
-        if (staticData != null) {
-          const socketData = socketHotelsCacheMap[id];
+    socketIds.map(id => {
+      const index = hotelIdsMap[id];
+      const staticData = index != null ? hotelsInfoFresh[index] : null;
+      let refreshedData = staticData;
+      if (staticData != null) {
+        const socketData = socketHotelsCacheMap[id];
 
-          //TODO: @@debug
-          // console.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
+        //TODO: @@debug
+        // console.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
 
-          refreshedData = _.merge({}, socketData, staticData)
-          delete socketHotelsCacheMap[id];
+        refreshedData = _.merge({}, socketData, staticData);
+        delete socketHotelsCacheMap[id];
 
-          hotelsInfoFresh[index] = refreshedData;
-        }
+        hotelsInfoFresh[index] = refreshedData;
+      }
 
-        if (hasValidCoordinatesForMap(refreshedData)) {
-          hotelsInfoForMapFresh.push(refreshedData);
-        }
+      if (hasValidCoordinatesForMap(refreshedData)) {
+        hotelsInfoForMapFresh.push(refreshedData);
+      }
 
-        return id;
-    })
+      return id;
+    });
   }
 
-  return {hotelsInfoFresh, hotelsInfoForMapFresh};
+  return { hotelsInfoFresh, hotelsInfoForMapFresh };
 }
- 
+
 /**
  * Populate targetMap with indices from array
  * @param {Object} targetMap The target map to update as "[index]: item.id"
@@ -198,13 +214,93 @@ export function updateHotelsFromSocketCache(prevState, socketHotelsCacheMap, hot
 export function updateHotelIdsMap(targetMap, array) {
   // TODO: Performance - check if this is too intensive
   // console.time('Update hotelIdsMap');
-  array.map(
-    (item, index) => {
-        targetMap[item.id] = index;
-        return item;
-    }
-  );
+  array.map((item, index) => {
+    targetMap[item.id] = index;
+    return item;
+  });
   // console.timeEnd('Update hotelIdsMap');
+}
+
+export function updateHotelsFromFilters(hotelsFromFilters) {
+  let indicesById = {};
+  let socketCache = {}
+  let index = 0;
+  let initialCordinates = null;
+  hotelsFromFilters.forEach((item) => {
+    // if anything needs to be parsed
+    indicesById[item.id] = index;
+    const res = parseAndCacheHotelDataFromSocket(item, socketCache, indicesById, null, index);
+    if (!initialCordinates) {
+      initialCordinates = res;
+    }
+    index++;
+
+    return item;
+  })
+
+  const result = {
+    hotelsFromFilters,
+    indicesById,
+    socketCache,
+    initialCordinates
+  };
+
+  return result
+}
+
+
+export function generateFilterInitialData(state, props) {
+  return {
+    showUnAvailable: false,
+    nameFilter: "",
+    selectedRating: "",
+    orderBy: "",
+    priceRange: [0, 500]
+  };
+}
+
+function mapStars(stars) {
+  let hasStars = false;
+  const mappedStars = [];
+  stars.forEach(s => {
+    if (s) {
+      hasStars = true;
+    }
+  });
+
+  if (!hasStars) {
+    for (let i = 0; i <= 5; i++) {
+      mappedStars.push(i);
+    }
+  } else {
+    mappedStars.push(0);
+    stars.forEach((s, i) => {
+      if (s) {
+        mappedStars.push(i + 1);
+      }
+    });
+  }
+
+  return mappedStars;
+}
+
+export function generateHotelFilterString(page, state) {
+  const filtersObj = {
+    showUnavailable: state.showUnAvailable,
+    name: state.nameFilter,
+    minPrice: state.priceRange[0],
+    maxPrice: state.priceRange[1],
+    stars: mapStars(state.selectedRating)
+  };
+
+  // const page = page;//this.listView.getPage();
+  const sort = state.orderBy;
+  const pagination = `&page=${page}&sort=${sort}`;
+
+  let filters =
+    `&filters=${encodeURI(JSON.stringify(filtersObj))}` + pagination; //eslint-disable-line
+
+  return filters;
 }
 
 export function generateSearchString(state, props) {
@@ -216,50 +312,50 @@ export function generateSearchString(state, props) {
   return search;
 }
 
-export function generateWebviewInitialState(params, state=null) {
+export function generateWebviewInitialState(params, state = null) {
   if (state) {
     params = {
-        ...params,
-        ...getWebviewExtraData(state,params)
-    }
+      ...params,
+      ...getWebviewExtraData(state, params)
+    };
   }
-  const checkInDateFormated   = params ? params.checkInDateFormated  : '';
-  const checkOutDateFormated  = params ? params.checkOutDateFormated  : '';
-  const roomsDummyData        = params ? params.roomsDummyData : [];
-  const regionId              = params ? params.regionId : 0;
+  const checkInDateFormated = params ? params.checkInDateFormated : "";
+  const checkOutDateFormated = params ? params.checkOutDateFormated : "";
+  const roomsDummyData = params ? params.roomsDummyData : [];
+  const regionId = params ? params.regionId : 0;
 
   const initialState = {
     ...state,
-    guests:             params ? params.guests          : 0,
-    isHotelSelected:    params ? params.isHotelSelected : false,
-    countryId:          params ? params.countryId       : 0,
+    guests: params ? params.guests : 0,
+    isHotelSelected: params ? params.isHotelSelected : false,
+    countryId: params ? params.countryId : 0,
     regionId,
     checkInDateFormated,
     checkOutDateFormated,
     roomsDummyData,
     currency: params.currency,
-    email:  params ? params.email : '',
-    token:  params ? params.token : '',
-    propertyName: params ? params.propertyName : '',
-    message:  params ? params.message : '',
-    title:  params ? params.title : '',
-    isHotel:  params ? params.isHotel : null,
+    email: params ? params.email : "",
+    token: params ? params.token : "",
+    propertyName: params ? params.propertyName : "",
+    message: params ? params.message : "",
+    title: params ? params.title : "",
+    isHotel: params ? params.isHotel : null,
     canGoBack: false,
     canGoForward: false,
     canGoToResults: false,
     showProgress: true
-  }
+  };
 
-  const webViewUrl = basePath + generateWebviewUrl(
-    initialState,
-    roomsDummyData,
-    (params && params.baseUrl)
-        ? params.baseUrl
-        : null
-  );
+  const webViewUrl =
+    basePath +
+    generateWebviewUrl(
+      initialState,
+      roomsDummyData,
+      params && params.baseUrl ? params.baseUrl : null
+    );
 
   initialState.webViewUrl = webViewUrl;
-  
+
   return initialState;
 }
 
@@ -267,35 +363,35 @@ export function generateWebviewInitialState(params, state=null) {
  * @initialState (Object) all needed initial properties (see function body)
  * @baseUrl (String) null if you want to leave it to be automatically generated
  */
-export function generateWebviewUrl(initialState, rooms, baseUrl=null) {
+export function generateWebviewUrl(initialState, rooms, baseUrl = null) {
   let result = baseUrl;
-  const baseHomeUrl = 'homes/listings/?'
-  const baseHotelUrl = 'mobile/hotels/listings?'
-    
-  if ( initialState.isHotelSelected ) {
-    // hotels specific properties 
+  const baseHomeUrl = "homes/listings/?";
+  const baseHotelUrl = "mobile/hotels/listings?";
+
+  if (initialState.isHotelSelected) {
+    // hotels specific properties
     if (!result) result = baseHotelUrl;
-    result += 'region=' + initialState.regionId
-    result += '&rooms=' + rooms
+    result += "region=" + initialState.regionId;
+    result += "&rooms=" + rooms;
   } else {
     // homes specific properties
     if (!result) result = baseHomeUrl;
-    result += 'countryId=' + initialState.countryId
-    result += '&guests=' + initialState.guests
+    result += "countryId=" + initialState.countryId;
+    result += "&guests=" + initialState.guests;
   }
-  
+
   // common properties
-  result += '&currency=' + initialState.currency
-  result += '&startDate=' + initialState.checkInDateFormated
-  result += '&endDate=' + initialState.checkOutDateFormated
-  result += '&priceMin=1&priceMax=5000'
-  result += '&authEmail=' + initialState.email 
-  result += '&authToken=' + initialState.token.replace(' ', '%20')
+  result += "&currency=" + initialState.currency;
+  result += "&startDate=" + initialState.checkInDateFormated;
+  result += "&endDate=" + initialState.checkOutDateFormated;
+  result += "&priceMin=1&priceMax=5000";
+  result += "&authEmail=" + initialState.email;
+  result += "&authToken=" + initialState.token.replace(" ", "%20");
 
   return result;
 }
 
-export function getWebviewExtraData(state, extraData={}) {
+export function getWebviewExtraData(state, extraData = {}) {
   return {
     isHotelSelected: state.isHotel,
     guests: state.guests,
@@ -303,32 +399,47 @@ export function getWebviewExtraData(state, extraData={}) {
     regionId: state.regionId,
     checkOutDateFormated: state.checkOutDateFormated,
     checkInDateFormated: state.checkInDateFormated,
-    roomsDummyData: state.roomsDummyData,//encodeURI(JSON.stringify(state.roomsData)),
+    roomsDummyData: state.roomsDummyData, //encodeURI(JSON.stringify(state.roomsData)),
     email: state.email,
     token: state.token,
     search: state.search,
     ...extraData
-  }
+  };
 }
 
-export function gotoWebview(state, navigation, extraData={}) {
-  navigation.navigate('WebviewScreen', getWebviewExtraData(state, extraData));
+export function gotoWebview(state, navigation, extraData = {}) {
+  navigation.navigate("WebviewScreen", getWebviewExtraData(state, extraData));
 }
 
 export function debugHotelData(hotelData, hotelsInfo, index, funcName) {
-  console.warn(`    #hotel-search# [HotelsSearchScreen] ${funcName} ` +
-    ` id:${hotelData.id.toString().padStart(7,' ')},` + 
-    ` price: [${(hotelsInfo[index] && hotelsInfo[index].price ? hotelsInfo[index].price : 'n/a').toString().padStart(7, ' ')}]=>` +
-        `${(hotelData.price ? hotelData.price.toString().padStart(7,' ') : ''.padEnd(7,' '))}` +
-    ` name: '${hotelData.name ? hotelData.name.substr(0,30).padEnd(30,' ') : ''.padEnd(30, ' ')}',` +
-    ` pic: '${
+  console.warn(
+    `    #hotel-search# [HotelsSearchScreen] ${funcName} ` +
+      ` id:${hotelData.id.toString().padStart(7, " ")},` +
+      ` price: [${(hotelsInfo[index] && hotelsInfo[index].price
+        ? hotelsInfo[index].price
+        : "n/a"
+      )
+        .toString()
+        .padStart(7, " ")}]=>` +
+      `${
+        hotelData.price
+          ? hotelData.price.toString().padStart(7, " ")
+          : "".padEnd(7, " ")
+      }` +
+      ` name: '${
+        hotelData.name
+          ? hotelData.name.substr(0, 30).padEnd(30, " ")
+          : "".padEnd(30, " ")
+      }',` +
+      ` pic: '${
         hotelData.hotelPhoto
-            ? `*${hotelData.hotelPhoto.url.substr(0,30).padEnd(29,' ')}`
-            : (hotelsInfo[index].hotelPhoto ? hotelsInfo[index].hotelPhoto.url.substr(0,30).padEnd(30,' ') : ''.padEnd(30,' '))
-    // `photo: ${item.hotelPhoto.url.substr(0,20)}, ` +
-    // `name: ${item.name.substr(0,20).padEnd(20,' ')}, ` +
-    // `star: ${item.star}`
-    }',` 
+          ? `*${hotelData.hotelPhoto.url.substr(0, 30).padEnd(29, " ")}`
+          : hotelsInfo[index].hotelPhoto
+          ? hotelsInfo[index].hotelPhoto.url.substr(0, 30).padEnd(30, " ")
+          : "".padEnd(30, " ")
+        // `photo: ${item.hotelPhoto.url.substr(0,20)}, ` +
+        // `name: ${item.name.substr(0,20).padEnd(20,' ')}, ` +
+        // `star: ${item.star}`
+      }',`
   );
 }
-

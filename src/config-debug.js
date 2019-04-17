@@ -15,10 +15,15 @@ if (__DEV__ || forceReactotronLogging) {
 // in both release & debug/dev
   // Check if reactotron enabled - make safe calls
 if (!console.tron) {
-  let func = (method) => console.warn(
+  let func;
+  if (__DEV__) {
+    func = (method) => console.warn(
       '[config-debug] Reactotron is disabled, but still calling it as '+
       `console.tron.${method}`
-  )
+    )
+  } else {
+    func = ()=>{}
+  }
   console.tron = {
       log: () => func('log'),
       debug: () => func('debug'),

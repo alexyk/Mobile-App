@@ -220,7 +220,7 @@ class MapModeHotelsSearch extends Component {
                             
                             //TODO: @@debug remove
                             {/* console.log(`[MapModeHotelsSearch] Map Marker ${index}:  ${longitude}/${latitude} name='${marker.name}' lat=${marker.lat}/${marker.latitude} lon=${marker.lon}/${marker.longitude}, `) */}
-                            console.tron.log(`[MapModeHotelsSearch] Map Marker ${index}:  lon=${longitude}/lat=${latitude} name='${marker.name}'`)
+                            {/* console.tron.log(`[MapModeHotelsSearch] Map Marker ${index}:  lon=${longitude}/lat=${latitude} name='${marker.name}'`) */}
 
                             return (
                                 <Marker

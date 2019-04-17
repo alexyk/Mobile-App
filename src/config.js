@@ -1,3 +1,8 @@
+// debug settings - do not remove see src/config-debug.js for details
+import debugConfig from './config-debug'
+
+export const DebugSettings = debugConfig;
+
 // normal production config, other configs follow
 export let apiHost = 'https://beta.locktrip.com/api/';
 export let imgHost = 'https://static.locktrip.com/';
