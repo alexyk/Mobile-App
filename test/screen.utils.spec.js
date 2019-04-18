@@ -83,10 +83,13 @@ test('updateHotelsFromSocketCache', () => {
 });
 
 test('updateHotelsFromFilters', function() {
-    const {hotelsInfo} = dummyData1()
-    const {hotelsFromFilters, indicesById, socketCache} = updateHotelsFromFilters(hotelsInfo);
+    const {filtered,ids} = dummyFilterData1()
+    const old = dummyHotelsLoaded1()
+    const {hotelsFromFilters, indicesById, socketCache} = updateHotelsFromFilters(filtered, old, ids);
 
-    // console.log(`Filtered: ${printAny(hotelsFromFilters)}`)
+    // console.log(`Param-Filtered: ${printAny(filtered)}`)
+    // console.log(`Param-Old: ${printAny(old)}`)
+    // console.log(`Parsed: ${printAny(hotelsFromFilters)}`)
     // console.log(`indicesById: ${printAny(indicesById)}`)
 
     // to be defined
@@ -96,8 +99,16 @@ test('updateHotelsFromFilters', function() {
 
     // length
     expect(hotelsFromFilters.length)    .toBeGreaterThanOrEqual(1)
-    expect(indicesById[hotelsInfo[0].id]).toBeDefined()
-    expect(socketCache[hotelsInfo[0].id]).toBeDefined()
+    expect(indicesById[filtered[0].id]) .toBeDefined()
+    expect(socketCache[filtered[0].id]) .toBeDefined()
+
+    // item1 properties check
+    const item1 = hotelsFromFilters[0]
+    expect(item1.name)                  .toBeDefined()
+    expect(item1.lat)                   .toBeDefined()
+    expect(item1.lon)                   .toBeDefined()
+    expect(item1.thumbnail)             .toBeDefined()
+    expect(item1.hotelPhoto)            .toBeDefined()
 })
 
 
@@ -141,6 +152,18 @@ function printAny(obj,indent=2) {
 
 
 //// ----------------------    DATA    ----------------------------
+function dummyHotelsLoaded1() {
+    let staticData1 = {id:12, name: "Ala bala", hotelPhoto: {url: "http://example.io"}, thumbnail: {url:"http://klj.gk/pic",lat:44.880235, lon:15.987798, price: 23.9}};
+    return [staticData1]
+}
+function dummyFilterData1() {
+    let item1 = {id:12, name: "Filtered Item 1", latitude:44.880235, longitude:15.987798, price: 23.9, thumbnail: {url: "http://example.io/filter1"}};
+    let item2 = {id:297, latitude:44.880235, longitude:15.987798, price:23.89, name: "Filtered Item 2", thumbnail: {url: "http://filter.io/snthoesnthu"}};
+    return {
+        filtered: [item1,item2],
+        ids: {12:0}
+    }
+}
 function dummyData1() {
     let staticData1 = {id:12, name: "Ala bala", hotelPhoto: {url: "http://example.io"}};
     let socketData1 = {id:12, lat:44.880235, lon:15.987798, price: 23.9, thumbnail: {url: "http://example.io/7777777"}};
@@ -164,7 +187,7 @@ function dummyData1() {
 function dummyData2() {
     const hotel1 = {id:1, name: "ala bala"} 
     const hotel2 = {id:2, name: "hello there"} 
-    const hotelSocket1 = {id:1, price: 12.68, lat: 77.9, lon: 8.7} 
+    const hotelSocket1 = {id:1, price: 12.68, latitude: 77.9, longitude: 8.7} 
 
     return {hotel1, hotel2, hotelSocket1}
 }

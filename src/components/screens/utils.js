@@ -105,19 +105,26 @@ export function parseAndCacheHotelDataFromSocket(
   hotelsSocketCacheMap,
   hotelsIndicesByIdMap,
   hotelsInfo,
-  index = null
+  index = null,
+  oldData = null
 ) {
   if (index == null) {
     index = hotelsIndicesByIdMap[hotelData.id];
   }
   const indexNotNull = index != null;
-  const current =
-    indexNotNull && hotelsInfo
-      ? hotelsInfo[index]
-      : hotelData;
+  const current = (
+    oldData
+      ? oldData
+      : indexNotNull && hotelsInfo
+        ? hotelsInfo[index]
+        : hotelData
+  );
+
   const lat = (hotelData.latitude != null ? hotelData.latitude : hotelData.lat);
   const lon = (hotelData.longitude != null ? hotelData.longitude : hotelData.lon);
-  const infoFromSocket = {
+  
+  const parsedInfo = {
+    ...hotelData,
     id: hotelData.id,
     name: hotelData.name,
     price: parseFloat(
@@ -125,16 +132,26 @@ export function parseAndCacheHotelDataFromSocket(
     ),
     lat: parseFloat(lat != null ? lat : current.lat),
     lon: parseFloat(lon != null ? lon : current.lon),
+    hotelPhoto:
+      current.hotelPhoto && current.hotelPhoto.url
+        ? current.hotelPhoto
+        : hotelData.hotelPhoto,
     thumbnail:
       hotelData.thumbnail && hotelData.thumbnail.url
         ? hotelData.thumbnail
         : current.thumbnail
   };
-  hotelsSocketCacheMap[hotelData.id] = infoFromSocket;
+  
+  if (parsedInfo.latitude != null) {
+    parsedInfo.latitude = parseFloat(parsedInfo.latitude)
+    parsedInfo.longitude = parseFloat(parsedInfo.longitude)
+  }
+
+  hotelsSocketCacheMap[hotelData.id] = parsedInfo;
 
   const result = {
-    initialLat: hotelData.lat,
-    initialLon: hotelData.lon
+    initialLat: parsedInfo.lat,
+    initialLon: parsedInfo.lon
   };
 
   return result;
@@ -221,25 +238,28 @@ export function updateHotelIdsMap(targetMap, array) {
   // console.timeEnd('Update hotelIdsMap');
 }
 
-export function updateHotelsFromFilters(hotelsFromFilters) {
+export function updateHotelsFromFilters(hotelsFromFilters, oldHotels, oldIdsById) {
   let indicesById = {};
   let socketCache = {}
-  let index = 0;
   let initialCordinates = null;
-  hotelsFromFilters.forEach((item) => {
-    // if anything needs to be parsed
+  const parsedHotels = hotelsFromFilters.map((item,index) => {
+    // try getting old one (oldHotels is usually state.hotelsInfo)
+    let oldHotel = {};
+    try {oldHotel = oldHotels[oldIdsById[item.id]];} catch (e) {console.error('[utils::updateHotelsFromFilters] Hotel old data not found')}
+    
+    // update hotel data
     indicesById[item.id] = index;
-    const res = parseAndCacheHotelDataFromSocket(item, socketCache, indicesById, null, index);
+    const res = parseAndCacheHotelDataFromSocket(item, socketCache, indicesById, null, index, oldHotel);
     if (!initialCordinates) {
       initialCordinates = res;
     }
-    index++;
+    item = socketCache[item.id];
 
     return item;
   })
 
   const result = {
-    hotelsFromFilters,
+    hotelsFromFilters: parsedHotels,
     indicesById,
     socketCache,
     initialCordinates

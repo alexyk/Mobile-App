@@ -6,6 +6,7 @@ import exchangerSocket from './exchangerSocket'
 import locAmounts from './locAmounts'
 import exchangeRates from './exchangeRates';
 import locPriceUpdateTimer from './locPriceUpdateTimer'
+import userInterface from './userInterface'
 
 function nav(state, action) {
     const nextState = RootNavigator.router.getStateForAction(action, state);
@@ -19,7 +20,8 @@ const appReducers = combineReducers({
     exchangerSocket,
     locAmounts,
     exchangeRates,
-    locPriceUpdateTimer
+    locPriceUpdateTimer,
+    userInterface
 });
 
 export default appReducers;

@@ -123,13 +123,12 @@ class HotelItemView extends Component {
 
     let content = null;
 
-    const converted = CurrencyConverter.convert(
-      rates,
-      roomCurrency,
-      currency,
-      price
-    );
-    price = (converted / days).toFixed(2);
+    const converted = CurrencyConverter.convert(rates, roomCurrency, currency, price);
+    if (converted != null) {
+      price = (converted / days).toFixed(2);
+    } else {
+      isPriceReady = false;
+    }
 
     if (isPriceReady) {
       fiatPrice = (price / days).toFixed(0);

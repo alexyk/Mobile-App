@@ -76,7 +76,7 @@ class MapModeHotelsSearch extends Component {
         const that = this;
         let thumbnailURL;
         //console.log("renderImageInCallout", hotel);
-        if (hotel.lat === null || hotel.lat === undefined) {
+        if (hotel.lat == null || hotel.lat == null || hotel.thumbnail == null) {
             thumbnailURL = imgHost + hotel.hotelPhoto;
         }
         else {

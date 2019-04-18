@@ -143,6 +143,8 @@ export default styles = StyleSheet.create({
   },
   pricingView: {
     padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     // borderTopWidth: 1,
     // borderTopColor: '#c6c6c6'
   },

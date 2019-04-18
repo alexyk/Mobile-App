@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+// import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, SafeAreaView} from 'react-native';
 import Image from 'react-native-remote-svg';
@@ -7,6 +8,8 @@ import PropTypes from 'prop-types';
 import CheckBox from 'react-native-checkbox';
 import RNPickerSelect from 'react-native-picker-select';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
+import LTLoader from '../../../molecules/LTLoader';
+// import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
 
 class HotelFilters extends Component {
   static propTypes = {
@@ -19,8 +22,11 @@ class HotelFilters extends Component {
       navigate: () => {}
     },
   }
+
   constructor(props) {
     super(props);
+
+    const { params } = this.props.navigation.state;
 
     this.state = {
       isHotelSelected: true,
@@ -35,7 +41,7 @@ class HotelFilters extends Component {
       rooms : [{ adults: 2, children: [] }],
       priceSort: 'rank,desc',//'priceForSort,asc',
       selectedRating: [false,false,false,false,false],
-      sliderValue: [1,5000],
+      sliderValue: params.priceRange,
       priceItems: [
         {
           label: 'Rank',
@@ -51,11 +57,24 @@ class HotelFilters extends Component {
         }
       ]
     }
-    const { params } = this.props.navigation.state
     this.state.selectedRating = params.selectedRating
     this.state.showUnAvailable = params.showUnAvailable
     this.state.hotelName = params.hotelName
     //this.state.count = params.count
+
+    this.priceMin = params.priceRange[0];
+    this.priceMax = params.priceRange[1];
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // go back to previous screen when isLoading is false and was true
+    /* const prevIsLoading = this.props.isLoading;
+    const isLoadingChangedToTrue = (prevIsLoading && !nextProps.isLoading)
+    if (isLoadingChangedToTrue) {
+      this.props.navigation.goBack();
+    } */
+    
+    // console.tron.log('Will receive props', {nextProps,prevProps:this.props})
   }
 
   handleRatingChange(index, status){
@@ -123,8 +142,9 @@ class HotelFilters extends Component {
   }
 
   onFilter = () => {
-    this.props.navigation.goBack();
+    // this.props.setIsApplyingFilter(true);
     this.props.navigation.state.params.updateFilter(this.state);
+    this.props.navigation.goBack();
   }
 
   renderBackButton() {
@@ -252,6 +272,12 @@ class HotelFilters extends Component {
       <View>
         <View style= {this.state.isHotelSelected ? styles.pricingView :styles.emptyPricingView}>
           <Text style={styles.pricingText}>Pricing</Text>
+          <CheckBox
+            checkboxStyle={{height: 15, width: 15, marginLeft: 15}}
+            label='Show Unavailable'
+            checked={this.state.showUnAvailable}
+            onChange={(checked) => this.setState({showUnAvailable: !checked})}
+           />
         </View>
         
         <View style={{flex:1, flexDirection: 'column', alignItems: 'center'}}>
@@ -264,8 +290,8 @@ class HotelFilters extends Component {
             selectedStyle = {{backgroundColor: '#cc8068',}}
             unselectedStyle = {{backgroundColor: 'silver',}}
             values = {[this.state.sliderValue[0], this.state.sliderValue[1]]}
-            min = {1}
-            max = {5000}
+            min = {this.priceMin}
+            max = {this.priceMax}
             step = {1}
             onValuesChangeFinish={this.multiSliderValuesChange}
           />
@@ -295,7 +321,6 @@ class HotelFilters extends Component {
   }
 
   render() {
-    const { params } = this.props.navigation.state;
     return (
       <SafeAreaView>
         <View style={styles.container}>
@@ -308,8 +333,8 @@ class HotelFilters extends Component {
             { this.renderFilterByName()         }
             { this.renderSeparator()            }
 
-            { this.renderFilterAvailability()   }
-            { this.renderSeparator()            }
+            {/* { this.renderFilterAvailability()   } */}
+            {/* { this.renderSeparator()            } */}
 
             { this.renderFilterOrderBy()        }
             { this.renderSeparator()            }
@@ -328,7 +353,8 @@ class HotelFilters extends Component {
               <Text style={styles.doneButtonText}>Show Hotels</Text>
             </TouchableOpacity>
           </View> */}
-
+        
+        <LTLoader isLoading={this.props.isApplyingFilter} />
           
         </View>
       </SafeAreaView>
@@ -402,65 +428,13 @@ const pickerSelectStyles = StyleSheet.create({
 let mapStateToProps = (state) => {
   return {
     currency: state.currency.currency,
-    currencySign: state.currency.currencySign
+    currencySign: state.currency.currencySign,
+    isApplyingFilter: state.userInterface.isApplyingFilter
   };
 }
 
-export default connect(mapStateToProps, null)(HotelFilters);
+const mapDispatchToProps = dispatch => ({
+  // setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
+})
 
-
-
-// commented out components from render function
-// were before apply button
-
-{/* <View style={styles.pricingView}>
-              <Text style={styles.pricingText}>Pricing</Text>
-            </View> */}
-
-            {/* <View style= {this.state.isHotelSelected ? styles.pricingView :styles.emptyPricingView}>
-              <Text style={styles.pricingText}>Room</Text>
-            </View> */}
-            {/* <View style={this.state.isHotelSelected ? styles.set : styles.emptyPricingView}> */}
-              {/* <View style={[styles.group, styles.borderBottom]}>
-                <View style={styles.type}>
-                  <Text style={styles.typeText}>Beds</Text>
-                </View>
-                <View style={styles.countView}>
-                  <TouchableOpacity style={[styles.minusButton, this.state.count.beds === 0? styles.opacity: '']} onPess={() => this.subtractCount(1)} onPess={() => this.subtractCount(0)}>
-                    <Text style={styles.minusText}>-</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.countText}>{this.state.count.beds}</Text>
-                  <TouchableOpacity style={styles.plusButton} onPess={() => this.addCount(0)}>
-                    <Text style={styles.plusText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View> */}
-              {/* <View style={this.state.isHotelSelected ? [styles.group, styles.borderBottom]:styles.emptyPricingView}>
-                <View style={styles.type}>
-                  <Text style={styles.typeText}>Rooms</Text>
-                </View>
-                <View style={styles.countView}>
-                  <TouchableOpacity style={[styles.minusButton, this.state.count.bedrooms === 0? styles.opacity: '']} onPress={() => this.subtractCount(1)}>
-                    <Text style={styles.minusText}>-</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.countText}>{this.state.count.bedrooms}</Text>
-                  <TouchableOpacity style={styles.plusButton} onPress={() => this.addCount(1)}>
-                    <Text style={styles.plusText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View> */}
-              {/* <View style={styles.group}>
-                <View style={styles.type}>
-                  <Text style={styles.typeText}>Bathrooms</Text>
-                </View>
-                <View style={styles.countView}>
-                  <TouchableOpacity style={[styles.minusButton, this.state.count.bathrooms === 0? styles.opacity: '']} onPess={() => this.subtractCount(1)} onPess={() => this.subtractCount(2)}>
-                    <Text style={styles.minusText}>-</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.countText}>{this.state.count.bathrooms}</Text>
-                  <TouchableOpacity style={styles.plusButton} onPess={() => this.addCount(2)}>
-                    <Text style={styles.plusText}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              </View> */}
-            {/* </View> */}
+export default connect(mapStateToProps, mapDispatchToProps)(HotelFilters);
