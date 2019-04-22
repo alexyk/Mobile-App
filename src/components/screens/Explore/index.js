@@ -17,6 +17,7 @@ import RNPickerSelect from 'react-native-picker-select';//eslint-disable-line
 import SearchBar from '../../molecules/SearchBar';
 import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
+import { autoHotelSearch } from '../../../config-debug';
 import requester from '../../../initDependencies';
 import styles from './styles';
 import lang from '../../../language';
@@ -111,7 +112,7 @@ class Explore extends Component {
             email: email_value,
         });
 
-        if (__DEV__) {
+        if (__DEV__ && autoHotelSearch) {
             this.searchBarRef.focus()
         }
 
@@ -136,6 +137,12 @@ class Explore extends Component {
 
     async componentDidMount() {
         console.disableYellowBox = true;
+
+        if (__DEV__ && autoHotelSearch) {
+            // enable automatic search
+            setTimeout(() => this.handlePopularCities(15664, 'Sofia, Bulgaria',100))
+            setTimeout(() => this.gotoSearch(),200)
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -150,7 +157,7 @@ class Explore extends Component {
             this.setCountriesInfo();
         }
 
-        if (__DEV__) {
+        if (__DEV__ && autoHotelSearch) {
             this.searchBarRef.focus()
         }
     }
@@ -200,9 +207,9 @@ class Explore extends Component {
     }
     
     onSearchEnterKey(event) {
-        if (__DEV__ && this.state.cities.length > 0) {
+        if (this.state.cities.length > 0) {
             const {id, query} = this.state.cities[0];
-            console.log(`[Explore] onSearchEnterKey: ${query}`);
+            // console.tron.log(`[Explore] onSearchEnterKey: ${query}, id: ${id}`);
             this.handleAutocompleteSelect(id, query, this.gotoSearch);
         }
     }

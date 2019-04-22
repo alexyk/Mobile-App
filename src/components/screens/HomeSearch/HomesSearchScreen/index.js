@@ -328,7 +328,7 @@ class HomesSearchScreen extends Component {
         });
     }
 
-    gotoSettings = () => {
+    gotoFilter = () => {
         if (this.state.cities == null || this.state.cities.length == 0) {
             return;
         }
@@ -563,7 +563,7 @@ class HomesSearchScreen extends Component {
                     gotoSearch={this.gotoSearch}
                     gotoCancel={this.gotoCancel}
                     onDatesSelect={this.onDatesSelect}
-                    gotoSettings={this.gotoSettings}
+                    gotoFilter={this.gotoFilter}
                     showSearchButton={this.state.isNewSearch}
                     showCancelButton={this.state.isNewSearch}
                     isFilterable={true}

@@ -8,7 +8,7 @@ import PropTypes from 'prop-types';
 import CheckBox from 'react-native-checkbox';
 import RNPickerSelect from 'react-native-picker-select';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-import LTLoader from '../../../molecules/LTLoader';
+// import LTLoader from '../../../molecules/LTLoader';
 // import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
 
 class HotelFilters extends Component {
@@ -41,7 +41,7 @@ class HotelFilters extends Component {
       rooms : [{ adults: 2, children: [] }],
       priceSort: 'rank,desc',//'priceForSort,asc',
       selectedRating: [false,false,false,false,false],
-      sliderValue: params.priceRange,
+      priceRange: params.priceRange,
       priceItems: [
         {
           label: 'Rank',
@@ -90,7 +90,7 @@ class HotelFilters extends Component {
 
   multiSliderValuesChange = (values) => {
     this.setState({
-      sliderValue: values,
+      priceRange: values,
     });
     }
 
@@ -282,14 +282,14 @@ class HotelFilters extends Component {
         
         <View style={{flex:1, flexDirection: 'column', alignItems: 'center'}}>
           <View style={{width: '80%', flexDirection: 'row', justifyContent: 'space-between'}}>
-            <Text>{this.props.currencySign} {this.state.sliderValue[0]}</Text>
-            <Text>{this.props.currencySign} {this.state.sliderValue[1]}</Text>
+            <Text>{this.props.currencySign} {this.state.priceRange[0]}</Text>
+            <Text>{this.props.currencySign} {this.state.priceRange[1]}</Text>
           </View>
           <MultiSlider
             isMarkersSeparated = {true}
             selectedStyle = {{backgroundColor: '#cc8068',}}
             unselectedStyle = {{backgroundColor: 'silver',}}
-            values = {[this.state.sliderValue[0], this.state.sliderValue[1]]}
+            values = {[this.state.priceRange[0], this.state.priceRange[1]]}
             min = {this.priceMin}
             max = {this.priceMax}
             step = {1}
@@ -327,26 +327,25 @@ class HotelFilters extends Component {
           { this.renderBackButton() }
 
           <ScrollView>
-          <View style={{height: '100%',}}>
-            { this.renderHeaderIcon()           }
+            <View style={{height: '100%',}}>
+              { this.renderHeaderIcon()           }
 
-            { this.renderFilterByName()         }
-            { this.renderSeparator()            }
+              { this.renderFilterByName()         }
+              { this.renderSeparator()            }
 
-            {/* { this.renderFilterAvailability()   } */}
-            {/* { this.renderSeparator()            } */}
+              {/* { this.renderFilterAvailability()   } */}
+              {/* { this.renderSeparator()            } */}
 
-            { this.renderFilterOrderBy()        }
-            { this.renderSeparator()            }
+              { this.renderFilterOrderBy()        }
+              { this.renderSeparator()            }
 
-            { this.renderFilterStars()          }
-            { this.renderSeparator()            }
+              { this.renderFilterStars()          }
+              { this.renderSeparator()            }
 
-            { this.renderFilterPricing()        }
+              { this.renderFilterPricing()        }
 
-            { this.renderApplyButton()          }
-        </View>
-            
+              { this.renderApplyButton()          }
+            </View>
           </ScrollView>
           {/* <View style={styles.bottomBar}>
             <TouchableOpacity style={styles.doneButton} onPress={this.onSearchPress.bind(this)}>
@@ -354,7 +353,9 @@ class HotelFilters extends Component {
             </TouchableOpacity>
           </View> */}
         
-        <LTLoader isLoading={this.props.isApplyingFilter} />
+        {/* <LTLoader isLoading={this.props.isApplyingFilter} 
+          style={{height:'80%', marginTop:'20%'}}
+        /> */}
           
         </View>
       </SafeAreaView>

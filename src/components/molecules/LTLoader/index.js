@@ -8,18 +8,27 @@ export default class LTLoader extends PureComponent {
   }
 
   render() {
+    if (this.props.isLoading) {
+      const defaultStyle = {
+        position:'absolute',
+        width: "100%",
+        height: "100%",
+        
+        justifyContent: 'center', 
+        alignItems: 'center',
+        
+        display: (this.props.isLoading ? "flex" : 'none'),
+        
+        backgroundColor: '#FFFD'
+      }
+
       const style = (
         this.props.style
           ? {
-              display: (this.props.isLoading ? "flex" : 'none'),
+              ...defaultStyle,
               ...this.props.style
             }
-          : {
-            position:'absolute', width: "100%", height: "100%",
-            justifyContent: 'center', alignItems: 'center',
-            display: (this.props.isLoading ? "flex" : 'none'),
-            backgroundColor: '#FFFA'
-          }
+          : defaultStyle
       )
       
       return (
@@ -30,5 +39,8 @@ export default class LTLoader extends PureComponent {
           />
         </View>
       );
+    } else {
+      return null;
+    }
   }
 }

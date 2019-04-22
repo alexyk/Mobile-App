@@ -1,8 +1,13 @@
-import Reactotron, {openInEditor,trackGlobalErrors} from 'reactotron-react-native'
+// import Reactotron, {openInEditor,trackGlobalErrors} from 'reactotron-react-native'
+import {Platform} from 'react-native'
+
+const r = require('reactotron-react-native')
+const Reactotron = r.default;
+const {openInEditor,trackGlobalErrors} = r;
 
 Reactotron
   .configure({
-    name: "Locktrip - Mobile App",
+    name: `Locktrip - Mobile App (${(Platform.OS == 'android' ? 'Android' : 'iOS')})`,
     host: "localhost"
   })
   .useReactNative({

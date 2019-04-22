@@ -1,21 +1,31 @@
-// enable features
+
+  // features
 export const reactotronLoggingInReleaseForceEnabled  = false;
 export const reactotronReduxLoggingEnabled           = false;
-export const reduxConsoleLoggingEnabled              = false;
+export const reduxConsoleLoggingEnabled              = true;
 export const raiseConverterExceptions                = false;
 export const logConverterError                       = false;
 export const logConverterErrorToReactrotron          = false;
-// options
+  // options
 export const reduxConsoleCollapsedLogging            = true;
+
+  // other
+// Offline mode
+// Enabled if: (__DEV__ == true) and (isOffline == true)
+                                      let isOffline  = false;
+if (!__DEV__) isOffline = false;
+export const isOnline = (!isOffline);
+export const autoHotelSearch                         = true;
 
 
 // code
 export function configureDebug() {
   // if in dev mode or forceReactotronLogging
-  if (__DEV__ || forceReactotronLoggingInRelease) {
+  if (__DEV__ || reactotronLoggingInReleaseForceEnabled) {
     // Reactotron config
     try {
-      require('./utils/reactotronLogging') //.then(() => console.log('Reactotron connected'));
+      require('./utils/reactotronLogging')
+      console.log('Reactotron connected');
     } catch (e) {
       console.warn('Reactotron could not be enabled');
     }

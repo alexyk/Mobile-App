@@ -32,7 +32,7 @@ export let Config = {
     // timeouts in seconds
 export let HOTELS_STATIC_CONNECTION_TIMEOUT = 10;
 export let HOTELS_SOCKET_CONNECTION_TIMEOUT = 15;
-export let HOTELS_SOCKET_CONNECTION_UPDATE_TICK = 2;
+export let HOTELS_SOCKET_CONNECTION_UPDATE_TICK = 1;
 
 // CONFIGS 
 const LT_PROD       = "PRODUCTION";
@@ -45,7 +45,7 @@ const LT_LOCAL      = "LOCAL";
 // ----------------------------
 //       CHOOSE CONFIG
 // ----------------------------
-export const LT_CFG = LT_DEV;
+export const LT_CFG = LT_STAGING;
 
 
 switch (LT_CFG) {

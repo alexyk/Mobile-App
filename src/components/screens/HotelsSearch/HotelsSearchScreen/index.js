@@ -21,6 +21,7 @@ import {
   HOTELS_STATIC_CONNECTION_TIMEOUT,
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK
 } from "../../../../config";
+import Toast from 'react-native-easy-toast';//eslint-disable-line
 import SearchBar from "../../../molecules/SearchBar";
 import LTLoader from "../../../molecules/LTLoader";
 import DateAndGuestPicker from "../../../organisms/DateAndGuestPicker";
@@ -58,6 +59,7 @@ import {
 import stomp from "stomp-websocket-js";
 import { isNative } from "../../../../version";
 import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
+import { isOnline } from '../../../../initDependencies'
 
 const { width, height } = Dimensions.get("window");
 
@@ -72,6 +74,8 @@ const debug = () => {
 //TODO: remove this @@debug END
 
 class HotelsSearchScreen extends Component {
+  PAGE_LIMIT = 10;
+
   constructor(props) {
     super(props);
     console.log("#hotel-search# 2.1/6  HotelSearchScreen constructor START");
@@ -80,7 +84,7 @@ class HotelsSearchScreen extends Component {
     const { params } = this.props.navigation.state; //eslint-disable-line
     this.state = createHotelSearchInitialState(params);
 
-    this.pageLimit = 10;
+    this.pageLimit = this.PAGE_LIMIT;
     this.isFirstLoad = true;
     this.isSocketDown = true;
     this.validSocketPrices = 0;
@@ -139,7 +143,8 @@ class HotelsSearchScreen extends Component {
   }
 
   startSocketDataConnectionTimeOut() {
-    console.tron.logImportant('Starting Socket connection timeout', {ala:'bala'})
+    console.tron.logImportant(`Starting Socket connection timeout, ${isOnline?'online':'offline'}`, {ala:'bala'})
+    if (!isOnline) return;
 
     const _this = this;
     const funcSocketTimeout = function() {
@@ -214,21 +219,27 @@ class HotelsSearchScreen extends Component {
   // TODO: Inspect this flow - and create a component to implement it
   async startSocketConnection() {
     this.isSocketDown = false;
+    
+    if (isOnline) {
+		this.uuid = await UUIDGenerator.getRandomUUID();
 
-    this.uuid = await UUIDGenerator.getRandomUUID();
+		// common code
+		WebsocketClient.startGrouping();
 
-    // common code
-    WebsocketClient.startGrouping();
-
-    if (Platform.OS === "ios") {
-      this.stompiOSConnect();
-    } else if (Platform.OS === "android") {
-      this.stompAndroidConnect();
+		if (Platform.OS === "ios") {
+		  this.stompiOSConnect();
+		} else if (Platform.OS === "android") {
+		  this.stompAndroidConnect();
+		}
+    } else {
+    	requester.startSocketConnection(this.onDataFromSocket, this)
     }
   }
 
   // TODO: Inspect this flow - and create a component to implement it
   stopSocketConnection(removeListeners = true) {
+  	if (!isOnline) return;
+  	
     // common code
     if (removeListeners) {
       WebsocketClient.stopGrouping();
@@ -313,6 +324,7 @@ class HotelsSearchScreen extends Component {
     this.initResultViews();
 
     const { body } = data;
+   
     // try {
     const parsedData = JSON.parse(body);
 
@@ -352,6 +364,7 @@ class HotelsSearchScreen extends Component {
 
       // TODO: @@debug - remove
       // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);
+	  // console.tron.log(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);      
 
       //TODO: @@debug remove
       let index = this.hotelsIndicesByIdMap[hotelData.id];
@@ -424,16 +437,18 @@ class HotelsSearchScreen extends Component {
 
     this.stopSocketConnection(false);
 
-    if (this.pageLimit > data.totalElements) {
-      this.listSetPageLimit(data.totalElements);
-    }
+    // if (this.pageLimit > data.totalElements) {
+      // this.listSetPageLimit(data.totalElements);
+    // }
     this.setState((prevState) => ({
         ...this.onUpdateHotelsInfo(prevState),
         pricesFromSocket: data.totalElements,
-        priceRange: [this.priceMin, this.priceMax]
+        priceRange: [this.priceMin, this.priceMax],
       }),
       () => {
-        this.setState({ isDoneSocket: true });
+        // this.listSetPageLimit(this.state.totalHotels)
+	    console.tron.log('onDoneSocket', {data,state:this.state,props:this.props});
+        this.setState({ isDoneSocket: true, isLoading: false });
         // this.updateFilter(generateFilterInitialData());
       }
     );
@@ -466,53 +481,58 @@ class HotelsSearchScreen extends Component {
   }
 
   gotoHotelDetailsPageByList = (item, state, extraParams) => {
-    //@@debug
-    if (state && extraParams) {
-      // webview inside
-      let initialState = generateWebviewInitialState(extraParams, state);
+    //console.tron.logImportant('isNative',isNative)
+    if (isNative.hotelItem) {
+      this.gotoHotelDetailsPageByMap(item)
+    } else{
+      if (state && extraParams) {
+        // webview inside
+        let initialState = generateWebviewInitialState(extraParams, state);
 
-      /*console.log(`[HotelsSearchScreen] Loading hotel info`, {
-        initialState,
-        extraParams,
-        item,
-        state
-      });*/
+        /*console.log(`[HotelsSearchScreen] Loading hotel info`, {
+          initialState,
+          extraParams,
+          item,
+          state
+        });*/
 
-      this.setState({
-        isLoading: true,
-        webViewUrl: initialState.webViewUrl,
-        displayMode: DISPLAY_MODE_HOTEL_DETAILS
-      });
-    } else {
-      //console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
-
-      this.setState({ isLoading: true });
-      requester
-        .getHotelById(item.id, this.searchString.split("&"))
-        .then(res => {
-          //console.log("requester.getHotelById", res);
-          // here you set the response in to json
-          res.body
-            .then(data => {
-              console.log("requester.getHotelById data", data);
-              const hotelPhotos = [];
-              for (let i = 0; i < data.hotelPhotos.length; i++) {
-                hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
-              }
-              this.setState({ isLoading: false });
-              this.props.navigation.navigate("HotelDetails", {
-                guests: this.state.guests,
-                hotelDetail: item,
-                searchString: this.searchString,
-                hotelFullDetails: data,
-                dataSourcePreview: hotelPhotos,
-                daysDifference: this.state.daysDifference
-              });
-            })
-            .catch(err => {
-              //console.log(err);
-            });
+        this.setState({
+          isLoading: true,
+          // webViewUrl: initialState.webViewUrl,
+          webViewUrl: 'https://abv.bg',
+          displayMode: DISPLAY_MODE_HOTEL_DETAILS,
         });
+      } else {
+        //console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
+
+        this.setState({ isLoading: true });
+        requester
+          .getHotelById(item.id, this.searchString.split("&"))
+          .then(res => {
+            //console.log("requester.getHotelById", res);
+            // here you set the response in to json
+            res.body
+              .then(data => {
+                console.log("requester.getHotelById data", data);
+                const hotelPhotos = [];
+                for (let i = 0; i < data.hotelPhotos.length; i++) {
+                  hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
+                }
+                this.setState({ isLoading: false });
+                this.props.navigation.navigate("HotelDetails", {
+                  guests: this.state.guests,
+                  hotelDetail: item,
+                  searchString: this.searchString,
+                  hotelFullDetails: data,
+                  dataSourcePreview: hotelPhotos,
+                  daysDifference: this.state.daysDifference
+                });
+              })
+              .catch(err => {
+                //console.log(err);
+              });
+          });
+      }
     }
   };
 
@@ -531,6 +551,8 @@ class HotelsSearchScreen extends Component {
     let extraData = {};
 
     if (isSocket) {
+      console.tron.log('Refresh Hotels from socket', {socketMap:this.hotelsSocketCacheMap,hotels:this.state.hotelsInfo});
+      
       const {
         hotelsInfoFresh,hotelsInfoForMapFresh
       } = updateHotelsFromSocketCache(prevState,this.hotelsSocketCacheMap,this.hotelsIndicesByIdMap);
@@ -602,13 +624,18 @@ class HotelsSearchScreen extends Component {
         // not used so far
         // const isCacheExpired = data.isCacheExpired;
 
+        
+        const count = data.content.length;
+        if (this.PAGE_LIMIT > count) {
+          this.listSetPageLimit(count);
+        } else {
+          this.listSetPageLimit(this.PAGE_LIMIT);
+        }
+
         this.setState((prevState) => {
           const newState = this.onUpdateHotelsInfo(prevState, false, data.content)
           return newState;
         }, () => {
-          if (this.pageLimit > data.totalElements) {
-            this.listSetPageLimit(data.totalElements);
-          }
           this.props.setIsApplyingFilter(false);      
         })
       });
@@ -683,9 +710,9 @@ class HotelsSearchScreen extends Component {
 
             const hotelsLoadedInList = hotelsInfoFresh.length;
 
-            if (_this.pageLimit < data.totalElements) {
-              _this.listSetPageLimit(data.totalElements);
-            }
+            // if (_this.pageLimit < data.totalElements) {
+            //   _this.listSetPageLimit(data.totalElements);
+            // }
 
             // update hotels data, setState(hotelsInfo)
             return {
@@ -702,9 +729,6 @@ class HotelsSearchScreen extends Component {
             if (_this.listViewRef) console.log(`[HotelsScreenSearch] onStaticData - setState calback, rows=${_this.listViewRef.getRows().length}`);
 
             _this.listStartFetch(hotels, _this.pageLimit);
-            if (_this.state.hotelsLoadedInList < 30) {
-              _this.setState({ isLoading: false });
-            }
           }
         );
       });
@@ -721,12 +745,12 @@ class HotelsSearchScreen extends Component {
   }
 
   listStartFetch(dataArray, pageLimit) {
-    console.tron.log(`[HotelsSearchScreen] listStartFetch, data: ${dataArray.length}, pageLimit: ${pageLimit}`);    
+    //console.tron.log(`[HotelsSearchScreen] listStartFetch, data: ${dataArray.length}, pageLimit: ${pageLimit}`);    
     this.listViewHelpers.startFetch(dataArray, pageLimit)
   }
 
   listUpdateDataSource(data) {
-    console.tron.log(`[HotelsSearchScreen] listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {state:this.state, props:this.props});
+    //console.tron.log(`[HotelsSearchScreen] listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {state:this.state, props:this.props});
     this.listViewRef.updateDataSource(data)
   }
 
@@ -752,7 +776,8 @@ class HotelsSearchScreen extends Component {
       `#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`
     );*/
 
-    if (this.state.isFilterResult) {
+    const isAllHotelsLoaded = (this.state.totalHotels == this.state.hotelsLoadedInList);
+    if (this.state.isFilterResult && isAllHotelsLoaded) {
       // TODO: Figure this out - how to load results after isDoneSocket
       // (1) For WebApp after isDoneSocket results are shown page by page
       // (2) For MobileApp I suggest it loads all results all the time
@@ -980,17 +1005,25 @@ class HotelsSearchScreen extends Component {
     }
   }
 
-  gotoSettings = () => {
-    if (this.state.allElements) {
-      if (this.state.isHotel) {
-        this.props.navigation.navigate("HotelFilterScreen", {
-          isHotelSelected: true,
-          updateFilter: this.updateFilter,
-          selectedRating: this.state.selectedRating,
-          showUnAvailable: this.state.showUnAvailable,
-          hotelName: this.state.nameFilter,
-          priceRange: [this.socketPriceMin, this.socketPriceMax]
-        });
+  gotoFilter = () => {
+    // console.tron.log('[HotelsSearchScreen] gotoFilter', {props:this.props, state: this.state, refs:this.refs, th:this})
+
+    if (this.state.isLoading || this.props.isApplyingFilter) {
+      console.log('[HotelsSearch] gotoFilter::toast', {state:this.state, props:this.props, refs:this.refs})
+      this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTER_NA, 3000);
+    } else 
+    {
+      if (this.state.allElements) {
+        if (this.state.isHotel) {
+          this.props.navigation.navigate("HotelFilterScreen", {
+            isHotelSelected: true,
+            updateFilter: this.updateFilter,
+            selectedRating: this.state.selectedRating,
+            showUnAvailable: this.state.showUnAvailable,
+            hotelName: this.state.nameFilter,
+            priceRange: [this.socketPriceMin, this.socketPriceMax]
+          });
+        }
       }
     }
   };
@@ -1011,8 +1044,8 @@ class HotelsSearchScreen extends Component {
     // set isLoading in Redux
     this.props.setIsApplyingFilter(true);
 
-    this.priceMin = data.sliderValue[0];
-    this.priceMax = data.sliderValue[1];
+    this.priceMin = data.priceRange[0];
+    this.priceMax = data.priceRange[1];
 
     this.setState(
       // change state (object in this case)
@@ -1022,7 +1055,7 @@ class HotelsSearchScreen extends Component {
         nameFilter: data.hotelName,
         selectedRating: data.selectedRating,
         orderBy: data.priceSort,
-        priceRange: data.sliderValue,
+        priceRange: data.priceRange,
         // hotelsInfo: [],
         // hotelsInfoForMap: [],
       },
@@ -1085,11 +1118,12 @@ class HotelsSearchScreen extends Component {
   renderCalendarAndFilters() {
     return (
       <View
+        key={'calendarAndFilters'}
         style={[
           this.state.isNewSearch
             ? { height: 190, width: "100%" }
             : { height: 70, width: "100%" },
-          { borderBottomWidth: 1 }
+          { borderBottomWidth: 0 }
         ]}
       >
         <DateAndGuestPicker
@@ -1105,7 +1139,7 @@ class HotelsSearchScreen extends Component {
           gotoSearch={this.gotoSearch}
           gotoCancel={this.gotoCancel}
           onDatesSelect={this.onDatesSelect}
-          gotoSettings={this.gotoSettings}
+          gotoFilter={this.gotoFilter}
           disabled={!this.state.editable}
           showSearchButton={this.state.isNewSearch}
           showCancelButton={this.state.isNewSearch}
@@ -1140,12 +1174,12 @@ class HotelsSearchScreen extends Component {
           alignItems: "center"
         }}
       >
-        <DotIndicator
+        {/* <DotIndicator
           color="#d97b61"
           count={3}
           size={9}
           animationDuration={777}
-        />
+        /> */}
       </View>
     );
   };
@@ -1156,10 +1190,26 @@ class HotelsSearchScreen extends Component {
     // return this.renderContentMessage('All Loaded View');
   };
 
+  renderToast = () => {
+    return (
+      <Toast
+          ref="toast"
+          style={{ backgroundColor: '#DA7B61' }}
+          position='bottom'
+          positionValue={150}
+          fadeInDuration={500}
+          fadeOutDuration={500}
+          opacity={0.80}
+          textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
+      />
+    )
+  }
+
   renderFooter = () => {
     // options to set
-    const isShowAllSockets = true;
-    const isFilterStatusEnabled = false;
+    const isShowAllSockets = false;
+    const isShowAllHotels = false;
+    const isFilterStatusEnabled = true;
     const isFiltered = (this.state.isFilterResult && isFilterStatusEnabled);
 
     const { commonText } = require("../../../../common.styles");
@@ -1174,19 +1224,28 @@ class HotelsSearchScreen extends Component {
     const isSocketRedColor = (this.state.isSocketTimeout && !isFiltered);
 
     // format hotels count information
-    const hotelsLoadedCount = `${this.state.hotelsLoadedInList}/${this.state.totalHotels}`
+    const hotelsLoadedCount = (
+      isShowAllHotels
+        ? `${this.state.hotelsLoadedInList}/${this.state.totalHotels}`
+        : `${this.state.totalHotels}`
+    )
+
+    // common text
+    const fontSize = 13;
+    const leftWidth = "70%"
+    const rightWidth = "30%"
 
     // create visual text components
     const leftText = (
       <Text
         style={{
           ...commonText,
-          fontSize: 12,
+          fontSize,
           fontWeight: "normal",
           textAlign: (isFiltered  ? "center" : "left"),
           color: isSocketRedColor ? "red" : "black",
           paddingLeft: 5,
-          width: (isFiltered ? "100%" : "50%"),
+          width: (isFiltered ? "100%" : leftWidth),
           // backgroundColor: '#0F02'
         }}
       >
@@ -1210,12 +1269,13 @@ class HotelsSearchScreen extends Component {
       <Text
         style={{
           ...commonText,
-          fontSize: 12,
+          fontSize,
           fontWeight: "normal",
           textAlign: "right",
-          width: isFiltered ? 0 : "50%",
+          width: isFiltered ? 0 : rightWidth,
           color: this.state.isStaticTimeout ? "red" : "black",
-          paddingRight: 5
+          paddingRight: 5,
+          marginTop: 10
         }}
       >
         {
@@ -1237,14 +1297,20 @@ class HotelsSearchScreen extends Component {
     return (
       <View
         style={{
-          width: "100%",
+          // width: "95%",
           height: 30,
           flexDirection: "row",
           justifyContent: "space-evenly",
           alignItems: "flex-end",
-          borderTopWidth: 1,
-          borderColor: "#000",
-          paddingBottom: 5
+          borderBottomWidth: 0.5,
+          // borderWidth: 0.5,
+          borderColor: "#777",
+          paddingBottom: 5,
+          paddingHorizontal: 5,
+          borderRadius: 10,
+          // backgroundColor: '#DDD3',
+          marginTop: 10,
+          marginHorizontal: 10,
         }}
       >
         {leftText}
@@ -1276,7 +1342,7 @@ class HotelsSearchScreen extends Component {
         : 0.0
     )
     const transform = [{scaleX: scale},{scaleY: scale}]
-    console.log(`#@# [HotelsSearchScreen] renderResultsAsList, display: ${this.state.displayMode}, ListScale: ${scale}, data: ${this.state.hotelsInfo}`)
+    // console.log(`#@# [HotelsSearchScreen] renderResultsAsList, display: ${this.state.displayMode}, ListScale: ${scale}, data: ${this.state.hotelsInfo}`)
 
     return (
       <UltimateListView
@@ -1291,9 +1357,9 @@ class HotelsSearchScreen extends Component {
         data={[]}
         numColumns={1} // to use grid layout, simply set gridColumn > 1
         item={this.renderListItem} // this takes three params (item, index, separator)
-        paginationFetchingView={this.renderPaginationFetchingView}
+        // paginationFetchingView={this.renderPaginationFetchingView}
         paginationWaitingView={this.renderPaginationWaitingView}
-        paginationAllLoadedView={this.renderPaginationAllLoadedView}
+        // paginationAllLoadedView={this.renderPaginationAllLoadedView}
         style={{ transform }}
       />
     );
@@ -1301,10 +1367,8 @@ class HotelsSearchScreen extends Component {
 
   renderResultsAsMap() {
     // console.log(`Render map with ${this.state.hotelsInfo.length} hotels`);
-    const height = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP
-      ? "100%"
-      : "0%"
-    );
+    const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
+    const height = (isMap ? '100%' : '0%')
     let result = null;
 
     //@@@debug
@@ -1319,6 +1383,7 @@ class HotelsSearchScreen extends Component {
     if (hasValidCoordinatesForMap(this.state, true)) {
       result = (
         <MapModeHotelsSearch
+          key={'resultsAsMap'}
           ref={ref => {
             if (!!ref) {
               this.mapView = ref.getWrappedInstance();
@@ -1330,7 +1395,8 @@ class HotelsSearchScreen extends Component {
           daysDifference={this.state.daysDifference}
           hotelsInfo={this.state.hotelsInfoForMap}
           gotoHotelDetailsPage={this.gotoHotelDetailsPageByMap}
-          style={{ height }}
+          isVisible={isMap}
+          style={{ height, borderRadius: 10, marginHorizontal: 5, borderColor: '#FFF3', borderWidth: 3 }}
         />
       );
     }
@@ -1351,6 +1417,7 @@ class HotelsSearchScreen extends Component {
       return (
         (isShowingResults || hasValidCoordinates) && (
           <TouchableOpacity
+            key={'mapButton'}
             onPress={this.onToggleMapOrListResultsView}
             style={styles.switchButton}
           >
@@ -1366,6 +1433,7 @@ class HotelsSearchScreen extends Component {
   renderContentMessage(text) {
     return (
       <View
+        key={'contentMessage'}
         style={{
           width: "100%",
           height: "100%",
@@ -1400,12 +1468,16 @@ class HotelsSearchScreen extends Component {
   }
 
   renderHotelDetailsAsWebview() {
-    let result = false;
+    const isWebviewHotelDetail = (
+      this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS
+      && !isNative.hotelItem
+      )
+      let result = false;
+      
+      // console.tron.logImportant(`Webview: ${isWebviewHotelDetail}`)
 
-    if (this.state.isLoading) {
-      // result = this.renderContentMessage(`Loading ${this.state.webViewUrl}`);
-      result = <LTLoader />;
-    } else {
+    // debugger;
+    if (isWebviewHotelDetail) {
       result = (
         <WebView
           ref={ref => {
@@ -1417,9 +1489,11 @@ class HotelsSearchScreen extends Component {
           onLoadStart={() => this.onWebViewLoadStart}
           onLoadEnd={() => this.onWebViewLoadEnd()}
           source={{ uri: this.state.webViewUrl }}
+          style={{flex: 1}}
         />
       );
     }
+    
 
     return result;
   }
@@ -1440,7 +1514,7 @@ class HotelsSearchScreen extends Component {
           result = this.renderHotelDetailsAsWebview();
         } else {
           // TODO: Render native item inside here
-          this.renderContentMessage("TODO: Native hotel details");
+          // this.renderContentMessage("TODO: Native hotel details");
         }
         break;
 
@@ -1467,14 +1541,17 @@ class HotelsSearchScreen extends Component {
           {this.renderCalendarAndFilters()}
 
           <View style={styles.containerHotels}>
+            {this.renderHotelDetailsAsWebview()}
             {this.renderResultsAsMap()}
             {this.renderResultsAsList()}
-            {this.renderContent()}
-
+            {/* {this.renderContent()} */}
+  
+            <LTLoader isLoading={this.state.isLoading || this.props.isApplyingFilter} />
             {this.renderMapButton()}
           </View>
 
           {this.renderFooter()}
+          {this.renderToast() }
         </View>
 
         {/* <ProgressDialog
@@ -1484,7 +1561,6 @@ class HotelsSearchScreen extends Component {
                       animationType="slide"
                       activityIndicatorSize="large"
                       activityIndicatorColor="black"/> */}
-        <LTLoader isLoading={this.state.isApplyingFilter || this.state.isLoading} />
       </SafeAreaView>
     );
   }

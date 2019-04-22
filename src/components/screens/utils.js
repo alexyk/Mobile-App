@@ -124,7 +124,6 @@ export function parseAndCacheHotelDataFromSocket(
   const lon = (hotelData.longitude != null ? hotelData.longitude : hotelData.lon);
   
   const parsedInfo = {
-    ...hotelData,
     id: hotelData.id,
     name: hotelData.name,
     price: parseFloat(
@@ -204,7 +203,7 @@ export function updateHotelsFromSocketCache(
         const socketData = socketHotelsCacheMap[id];
 
         //TODO: @@debug
-        // console.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
+        //console.tron.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
 
         refreshedData = _.merge({}, socketData, staticData);
         delete socketHotelsCacheMap[id];

@@ -214,7 +214,7 @@ class MapModeHotelsSearch extends Component {
                 >
                 {
                     this.state.hotelsInfo.map((marker, index) => {
-                        if (marker.lat != null) {
+                        if (marker.lat != null && this.props.isVisible) {
                             const latitude = parseFloat(marker.lat);
                             const longitude = parseFloat(marker.lon);
                             
