@@ -59,7 +59,7 @@ import {
 import stomp from "stomp-websocket-js";
 import { isNative } from "../../../../version";
 import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
-import { isOnline } from '../../../../initDependencies'
+import { isOnline } from '../../../../config-debug'
 
 const { width, height } = Dimensions.get("window");
 
