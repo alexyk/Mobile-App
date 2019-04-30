@@ -148,8 +148,7 @@ export default styles = StyleSheet.create({
     paddingTop: 15,
     paddingBottom: 15,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    flex: 0.3,
+    justifyContent: 'space-between'
     // backgroundColor: 'red'
     // borderTopWidth: 1,
     // borderTopColor: '#c6c6c6'
@@ -158,6 +157,15 @@ export default styles = StyleSheet.create({
     padding: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    // borderTopWidth: 1,
+    // borderTopColor: '#c6c6c6'
+  },
+  orderByTitle: {
+    padding: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+		width: "60%",
+    //backgroundColor: 'blue'
     // borderTopWidth: 1,
     // borderTopColor: '#c6c6c6'
   },
@@ -237,12 +245,13 @@ export default styles = StyleSheet.create({
     borderBottomColor: '#e2e2e2',
     borderBottomWidth: 1
   },
-  pickerWrap:{
+  orderyByPickerWrap:{
     // paddingTop: 10,
     // paddingRight: 17,
     marginLeft: 8,
     justifyContent: 'flex-end',  
     alignItems: 'center',
+		width: "40%",
   },
   inputIOS: {
     height: 50,
@@ -271,3 +280,28 @@ export default styles = StyleSheet.create({
     padding: 14
   },
 })
+
+
+export const orderbyPickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    height: 50,
+    fontSize: 16,
+    color: 'black',
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+    width: "100%",
+//     backgroundColor: 'red'
+  },
+  inputAndroid: {
+    height: 50,
+    width: 120,
+    //fontSize: 16,
+    // color: 'black',
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+    width: "100%",
+//     backgroundColor: 'red'
+  }
+});

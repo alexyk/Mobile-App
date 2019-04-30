@@ -26,7 +26,7 @@
  * 
  */
 import React, { Component } from "react";
-import { SafeAreaView, WebView } from "react-native";
+import { SafeAreaView, WebView, BackHandler } from "react-native";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import {
@@ -174,7 +174,18 @@ class HotelsSearchScreen extends Component {
     this.saveState();
   }
 
+  
+  componentWillMount() {
+    if (Platform.OS == 'android') {
+      BackHandler.addEventListener('hardwareBackPress', this.onBackButtonPress);
+    }
+  }
+  
+
   componentWillUnmount() {
+    if (Platform.OS == 'android') {
+      BackHandler.removeEventListener('hardwareBackPress', this.onBackButtonPress);
+    }
     this.isSocketDown = true;
     this.stopSocketConnection();
   }
@@ -466,6 +477,7 @@ class HotelsSearchScreen extends Component {
 
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
+    // log('onDoneSocket','socket cache',{fromSocket:this.hotelsSocketCacheMap})
 
     this.stopSocketConnection(false);
 
@@ -497,12 +509,16 @@ class HotelsSearchScreen extends Component {
   onBackButtonPress = () => {
     switch (this.state.displayMode) {
       case DISPLAY_MODE_HOTEL_DETAILS:
-        this.setState({ displayMode: DISPLAY_MODE_RESULTS_AS_LIST });
+        this.setState({ displayMode: DISPLAY_MODE_RESULTS_AS_LIST, isLoading: false });
         break;
 
       default:
         this.props.navigation.goBack();
         break;
+    }
+
+    if (Platform.OS == 'android') {
+      return true;
     }
   };
 
@@ -697,10 +713,12 @@ class HotelsSearchScreen extends Component {
           this.listSetPageLimit(this.PAGE_LIMIT);
         }
         
+        // log('filtered-hotels',`before processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax})
         const {priceMin,priceMax,newIdsMap} = processFilteredHotels(hotelsAll, this.state.hotelsInfo, this.hotelsIndicesByIdMap, this.priceMin, this.priceMax)
         this.priceMin = priceMin;
         this.priceMax = priceMax;
         this.hotelsIndicesByIdMap = newIdsMap;        
+        // log('filtered-hotels',`after processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax,fromSocket:this.hotelsSocketCacheMap})
 
         // update state with new hotels
         this.setState(
@@ -752,7 +770,7 @@ class HotelsSearchScreen extends Component {
         // add index
         // hotels = hotels.map((item,index) => {item.index = index; return item;})
 
-        log('static-hotels',`${hotels.length} static hotels`, {hotels})
+        // log('static-hotels',`${hotels.length} static hotels`, {hotels})
 
         if (_this.isFirstLoad) {
           _this.isFirstLoad = false;
@@ -878,6 +896,8 @@ class HotelsSearchScreen extends Component {
     /*console.log(
       `#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`
     );*/
+
+    // log('fetch',`res:${this.state.isFilterResult} && loaded:${isAllHotelsLoaded}`)
 
     const isAllHotelsLoaded = (this.state.totalHotels == this.state.hotelsInfoForMap);
     if (this.state.isFilterResult && isAllHotelsLoaded) {
@@ -1007,7 +1027,9 @@ class HotelsSearchScreen extends Component {
     // if (this.mapView != undefined && this.mapView != null) {
     // this.mapView.initMapView();
     // }
-    
+    // log('update-filter',`fromUI: ${fromUI}`, {fromUI,data})
+
+
     console.time('*** HotelsSearchScreen::updateFilter()')
     const filterParams = {
       isFilterResult: true,
@@ -1359,7 +1381,7 @@ class HotelsSearchScreen extends Component {
         data={[]}
         numColumns={1} // to use grid layout, simply set gridColumn > 1
         item={this.renderListItem} // this takes three params (item, index, separator)
-        // paginationFetchingView={this.renderPaginationFetchingView}
+        paginationFetchingView={this.renderPaginationFetchingView}
         paginationWaitingView={this.renderPaginationWaitingView}
         // paginationAllLoadedView={this.renderPaginationAllLoadedView}
         style={{ transform }}

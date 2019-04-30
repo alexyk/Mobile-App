@@ -53,6 +53,7 @@ class HotelItemView extends Component {
     const item = this.props.item;
 
     // console.log("[HotelItemView] On Press", item);
+    // log('hotel-item', `On Press: image:${item.hotelPhoto.url} thumb:${item.thumbnail.url}`, {item})
 
     if (isNative.hotelItem) {
       // native
@@ -188,17 +189,17 @@ class HotelItemView extends Component {
     //TODO: @@debug remove
     // console.log(`[HotelItemView] hotel item ${item.id}`, item, this.props)
     // console.log(`[HotelItemView] id:${item.id} isDone:${this.props.isDoneSocket} index:${item.index} price:${item.price} name:${item.name}`)
-
+    const photo = item.hotelPhoto;
     let urlThumbnail =
-      item.hotelPhoto != undefined && item.hotelPhoto != null
-        ? _.isString(item.hotelPhoto)
-          ? imgHost + item.hotelPhoto
-          : ( item.hotelPhoto.url == ''
-              ? (imgHost) + item.hotelPhoto.url
-              : DEFAULT_HOTEL_PNG
+      photo != null
+        ? _.isString(photo)
+          ? imgHost + photo
+          : ( photo.url != ''
+              ? imgHost + photo.url
+              : imgHost + DEFAULT_HOTEL_PNG
           )
-        : "";
-    let {id,name,star:stars} = item;
+        : imgHost + DEFAULT_HOTEL_PNG;
+    let {name, star:stars} = item;
 
     return (
       <TouchableOpacity onPress={this.onPress}>
@@ -219,7 +220,7 @@ class HotelItemView extends Component {
               numberOfLines={1}
               ellipsizeMode="tail"
             >
-              {item.name}
+              {name}
             </Text>
 
             <View style={styles.aboutPlaceView}>

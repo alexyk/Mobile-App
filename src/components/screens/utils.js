@@ -438,25 +438,32 @@ export function processFilteredHotels(filtered, hotelsOld, hotelsOldIdsMap, pric
 
   // calculate min &max price
   filtered.map((item,index) => {
+    const {price} = item;
+
     // process images
+    // log('processing',`${index}, id:${item.id}, name:'${item.name}', price:${price}, min:${priceMin} max:${priceMax}`)
+
     const oldIndex = hotelsOldIdsMap[item.id];
     if (oldIndex != null) {
-      filtered.hotelPhoto = hotelsOld[oldIndex].hotelPhoto;
-      filtered.thumbnail = hotelsOld[oldIndex].thumbnail;
+      item.hotelPhoto = hotelsOld[oldIndex].hotelPhoto;
+      item.thumbnail = hotelsOld[oldIndex].thumbnail;
     }
     newIdsMap[item.id] = index;
 
     // process price
-    if (item.price != null) {
-      if (priceMax < item.price) {
-        priceMax = item.price;
+    if (price != null) {
+      if (priceMax < price) {
+        priceMax = price;
       }
-      if (priceMin > item.price) {
-        priceMin = item.price;
+      if (priceMin > price) {
+        priceMin = price;
       }
     }
     return null
   })
+
+  // process images
+  // log('processing',`priceMin:${priceMin}, priceMax:${priceMax}`,{priceMin, priceMax, newIdsMap})
 
   return {
     priceMin, priceMax, newIdsMap

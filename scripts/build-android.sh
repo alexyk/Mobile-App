@@ -23,6 +23,8 @@ apk="app-release.apk"
 # select config
 if [ -n "$cfg" ] && [ "$cfg" != "debug" ]; then
 	./scripts/select_config.rb "$cfg"
+else
+  ./scripts/select_config.rb
 fi
 
 # build

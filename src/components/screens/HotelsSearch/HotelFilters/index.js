@@ -3,7 +3,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, SafeAreaView} from 'react-native';
 import Image from 'react-native-remote-svg';
-import styles from './styles';
+import styles, {orderbyPickerSelectStyles} from './styles';
 import PropTypes from 'prop-types';
 import CheckBox from 'react-native-checkbox';
 import RNPickerSelect from 'react-native-picker-select';
@@ -219,17 +219,17 @@ class HotelFilters extends Component {
   renderFilterOrderBy() {
     return (
       <View style={styles.filterComponentHorizontalContainer}>
-        <View style= {this.state.isHotelSelected ? styles.pricingView :styles.emptyPricingView}>
+        <View style= {this.state.isHotelSelected ? styles.orderByTitle :styles.emptyPricingView}>
           <Text style={styles.pricingText}>Order By</Text>
         </View>
-        <View style={styles.pickerWrap}>
+        <View style={styles.orderyByPickerWrap}>
             <RNPickerSelect
                 items={this.state.priceItems}
                 onValueChange={(value) => {
                     this.setState({orderBy: value})
                 }}
                 value={this.state.orderBy}
-                style={pickerSelectStyles}
+                style={orderbyPickerSelectStyles}
             />
         </View>
       </View>
@@ -423,28 +423,6 @@ class HotelFilters extends Component {
     });
   }
 }
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    height: 50,
-    fontSize: 16,
-    color: 'black',
-    alignSelf: 'flex-end',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-  },
-  inputAndroid: {
-    height: 50,
-    width: 120,
-    //fontSize: 16,
-    // color: 'black',
-    alignSelf: 'flex-end',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-    //backgroundColor: 'red'
-  }
-});
-
 
 let mapStateToProps = (state) => {
   return {

@@ -85,7 +85,7 @@ class WebviewScreen extends Component {
     }
 
     componentWillMount() {
-        if (Platform.OS === 'android') {
+        if (Platform.OS == 'android') {
             BackHandler.addEventListener('hardwareBackPress', this.onAndroidBackPress);
         }
     }
@@ -98,8 +98,8 @@ class WebviewScreen extends Component {
     
 
     componentWillUnmount() {
-        if (Platform.OS === 'android') {
-            BackHandler.removeEventListener('hardwareBackPress');
+        if (Platform.OS == 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onAndroidBackPress);
         }
     }
 

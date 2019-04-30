@@ -4,7 +4,8 @@ import {
     popSocketCacheIntoHotelsArray,
     parseAndCacheHotelDataFromSocket,
     hasValidCoordinatesForMap,
-    applyHotelsSearchFilter
+    applyHotelsSearchFilter,
+    processFilteredHotels
 } from "../src/components/screens/utils"
 
 
@@ -164,6 +165,33 @@ test('applyHotelsSearchFilter',function() {
     // console.log(`Filtered1: ${printAny(res)}`)
 })
 
+
+test('processFilteredHotels',() => {
+    const {filtered, ids} = dummyFilterData2()
+    const {hotelsInfo,hotelsIndicesById} = dummyData1()
+    const photo1 = {url: "http://photo.la"};
+    const thumb1 = {url: "http://photo.la"};
+    hotelsInfo[0]['hotelPhoto'] = photo1;
+    hotelsInfo[0]['thumbnail'] = thumb1;
+
+    let filtered2 = filtered.concat()
+
+    // execute
+    const {newIdsMap,priceMin,priceMax} = processFilteredHotels(filtered2, hotelsInfo, hotelsIndicesById, 5000, 0)
+
+    // console.log(printAny({res,filtered,ids,hotelsInfo,hotelsIndicesById}))
+    // console.log(printAny({filtered,ids,hotelsInfo,hotelsIndicesById}))
+    // console.log(printAny(filtered))
+
+    expect(newIdsMap)               .toEqual(ids)
+    expect(newIdsMap)       .not    .toEqual(hotelsIndicesById)
+    expect({12:0})                  .toEqual(hotelsIndicesById)
+    expect(newIdsMap[12])   .not    .toEqual(0)
+    expect(newIdsMap[12])           .toEqual(1)
+    expect(filtered2[1].id)         .toEqual(12)
+    expect(priceMin)                .toEqual(11.07)
+    expect(priceMax)                .toEqual(90.89)
+})
 
 // ------------------------------------------------------------------------------
 

@@ -16,6 +16,7 @@ const offlinePacks = {
   araraquara: {
 		first: require('./offline-responses/araraquara.json'),
     all: require('./offline-responses/araraquara-all.json'),
+    socket: require('./offline-responses/araraquara-socket.json'),
   }
 }
 
@@ -82,7 +83,12 @@ export default function createOfflineRequester() {
 		markQuoteIdAsMarked: (...args) 	        => genPromise(args,'getUserHasPendingBooking'),
 		// socket
 		startSocketConnection: (onData,_this) => {
-			const arr = require('./offline-responses/fromSocket.json')
+      let arr = require('./offline-responses/fromSocket.json');
+      try {
+        const tmp = offlinePacks[autoHotelSearchPlace].socket;
+        if (tmp) arr = tmp;
+      } catch (e) {}
+
 			const delayPerRefresh = 10
 			const delay2 = 500
 			const delay3 = delay2+300
