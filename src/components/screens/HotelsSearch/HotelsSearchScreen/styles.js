@@ -1,4 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import {commonText} from '../../../../common.styles'
+
 const dimensionWindows = Dimensions.get('window');
 const { width } = dimensionWindows;
 
@@ -78,6 +80,14 @@ const styles = StyleSheet.create({
     containerHotels:{
         marginTop: 2,
         flex: 1,
+    },
+    backText: {
+        ...commonText,
+        color: 'black',
+        marginTop: 35,
+        marginLeft: 10,
+        fontSize: 14,
+        // backgroundColor: 'red',
     },
     
     switchButton: {

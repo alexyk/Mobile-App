@@ -19,7 +19,7 @@ export default class LTLoader extends PureComponent {
         
         display: (this.props.isLoading ? "flex" : 'none'),
         
-        backgroundColor: '#FFFD'
+        backgroundColor: '#FFFFFFE4'
       }
 
       const style = (

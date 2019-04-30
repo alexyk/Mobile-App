@@ -5,7 +5,7 @@ import FontAwesome, { Icons } from "react-native-fontawesome";
 import Image from "react-native-remote-svg";
 import CardView from "react-native-cardview";
 import PropTypes from "prop-types";
-import { imgHost } from "../../../config";
+import { imgHost, DEFAULT_HOTEL_PNG } from "../../../config";
 import _ from "lodash";
 import FastImage from "react-native-fast-image";
 import { RoomsXMLCurrency } from "../../../services/utilities/roomsXMLCurrency";
@@ -16,6 +16,7 @@ import styles from "./styles";
 import lang from "../../../language";
 import { isNative } from "../../../version";
 import { gotoWebview } from "../../screens/utils";
+import { log } from "../../../config-debug";
 
 class HotelItemView extends Component {
   static propTypes = {
@@ -91,24 +92,6 @@ class HotelItemView extends Component {
     return indents;
   };
 
-  // ratingTitle = (count) => {
-  //     if (count <= 1){
-  //         return 'Poor'
-  //     }
-  //     else if (count > 1 && count <= 2){
-  //         return 'Fair'
-  //     }
-  //     else if (count > 2 && count <= 3){
-  //         return 'Good'
-  //     }
-  //     else if (count > 3 && count <= 4){
-  //         return 'Very Good'
-  //     }
-  //     else if (count > 4 && count <= 5){
-  //         return 'Excellent'
-  //     }
-  // }
-
   renderPrice() {
     const { exchangeRates, currency, item, currencySign } = this.props;
 
@@ -163,6 +146,41 @@ class HotelItemView extends Component {
 
     return content;
   }
+  
+  renderThumbnail(urlThumbnail) {
+  	if (urlThumbnail != null && urlThumbnail != "") {
+  		return (
+				<FastImage
+					style={{ flex: 1, borderRadius: 5 }}
+					source={{
+						uri: urlThumbnail,
+						priority: FastImage.priority.high
+					}}
+					resizeMode={FastImage.resizeMode.cover}
+				/>
+			)
+  	} else {
+  		return null;
+  	}
+  }
+  
+  renderHeart(isEnabled) {
+	  const result = (
+			<TouchableOpacity style={styles.favoritesButton}>
+				<Image
+					source={require("../../../assets/png/heart.png")}
+					style={styles.favoriteIcon}
+					resizeMode="contain"
+				/>
+			</TouchableOpacity>
+  	)
+  	
+  	if (isEnabled) {
+	  	return result
+  	} else {
+  		return null;
+  	}
+  }
 
   render() {
     const item = this.props.item;
@@ -175,9 +193,12 @@ class HotelItemView extends Component {
       item.hotelPhoto != undefined && item.hotelPhoto != null
         ? _.isString(item.hotelPhoto)
           ? imgHost + item.hotelPhoto
-          : imgHost + item.hotelPhoto.url
+          : ( item.hotelPhoto.url == ''
+              ? (imgHost) + item.hotelPhoto.url
+              : DEFAULT_HOTEL_PNG
+          )
         : "";
-    let stars = item.star;
+    let {id,name,star:stars} = item;
 
     return (
       <TouchableOpacity onPress={this.onPress}>
@@ -188,23 +209,8 @@ class HotelItemView extends Component {
           cornerRadius={0}
         >
           <View style={styles.popularHotelsImage}>
-            {urlThumbnail != null && urlThumbnail != "" && (
-              <FastImage
-                style={{ flex: 1 }}
-                source={{
-                  uri: urlThumbnail,
-                  priority: FastImage.priority.high
-                }}
-                resizeMode={FastImage.resizeMode.cover}
-              />
-            )}
-            <TouchableOpacity style={styles.favoritesButton}>
-              <Image
-                source={require("../../../assets/png/heart.png")}
-                style={styles.favoriteIcon}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
+            { this.renderThumbnail(urlThumbnail) }            
+            { this.renderHeart(false) }
           </View>
 
           <View style={styles.cardContent}>
@@ -217,8 +223,6 @@ class HotelItemView extends Component {
             </Text>
 
             <View style={styles.aboutPlaceView}>
-              {/* <Text style={styles.placeReviewText}>{this.ratingTitle(stars)}</Text> */}
-              <Text style={styles.placeReviewNumber}> {stars}/5 </Text>
               <View style={styles.ratingIconsWrapper}>
                 {this.renderStars(stars)}
               </View>

@@ -1,0 +1,102 @@
+{
+  "content": [
+    {
+      "generalDescription": "The hotel offers a very pleasant and relaxing stay. WS0209",
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2869065200855559-82378.png"
+      },
+      "star": 5,
+      "name": "Hotel Marinela Sofia (Formerly Kempinski Hotel Zografski Sofia)",
+      "id": 13233
+    },
+    {
+      "generalDescription": "A good product offering a wealth of facilities for a pleasant and varied stay. lh0507",
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-448437348905415-87829.png"
+      },
+      "star": 4,
+      "name": "Ramada Sofia (Formerly Sofia Princess)",
+      "id": 14551
+    },
+    {
+      "generalDescription": "This hotel is conveniently located near Sofia's main International Airport and offers its modern, quality product at extremely good value.",
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2903721453159265-253865.png"
+      },
+      "star": 4,
+      "name": "Metropolitan",
+      "id": 30474
+    },
+    {
+      "generalDescription": "The newly refurbished lobby bar at BEST WESTERN PLUS City Hotel is an ideal place for you and your guests to hold a private business meeting or just relax and enjoy the huge HD TV screen. Our professional bartenders can prepare any drinks of your choice, ",
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2885977378300359-171355.png"
+      },
+      "star": 4,
+      "name": "Best Western Premier Collection City Hotel (Formerly Best Western Plus Sofia)",
+      "id": 26310
+    },
+    {
+      "generalDescription": "Ideally located in the centre of Sofia.",
+      "hotelPhoto": {
+        "url": "RXLImages/7/SOF-95hotel_Guest_Room_1.jpg"
+      },
+      "star": 4,
+      "name": "Best Western Plus Bristol",
+      "id": 71248
+    },
+    {
+      "generalDescription": "null",
+      "hotelPhoto": {
+        "url": "RXLImages/6/BAP2bed.jpg"
+      },
+      "star": 4,
+      "name": "Best Western Premier Sofia Airport",
+      "id": 57089
+    },
+    {
+      "generalDescription": "This hotel offers an enjoyable experience in a top quality product just a short drive from the city centre. WS0908",
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2884779511873686-84817.png"
+      },
+      "star": 4,
+      "name": "Vega",
+      "id": 13826
+    },
+    {
+      "generalDescription": "This newly opened 4* designed hotel offers spacious rooms and the hotel has a great location between the airport and the city centre making this hotel ideal for business or leisure guests.",
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2924532433585116-15519550.png"
+      },
+      "star": 4,
+      "name": "Novotel Sofia",
+      "id": 54547
+    },
+    {
+      "generalDescription": "Excellent location and good quality product. WS04/08",
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2880114654873347-87006.png"
+      },
+      "star": 4,
+      "name": "Central",
+      "id": 14361
+    },
+    {
+      "generalDescription": "Les Fleurs is a little design jewel located in the heart of Sofia's main shopping district. This lovely boutique property offers something a little bit different in comparison to the large hotels in the same area.",
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2903021425666770-16504512.png"
+      },
+      "star": 4,
+      "name": "Les Fleurs",
+      "id": 54812
+    }
+  ],
+  "last": false,
+  "totalElements": 86,
+  "totalPages": 9,
+  "sort": null,
+  "first": true,
+  "numberOfElements": 10,
+  "size": 10,
+  "number": 0
+}

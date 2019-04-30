@@ -1,0 +1,62 @@
+[
+  {
+    "quoteId": "353682931-316",
+    "roomsResults": [
+      {
+        "name": "Twin Standard",
+        "price": 25.23,
+        "mealType": "Room only"
+      }
+    ]
+  },
+  {
+    "quoteId": "353682931-317",
+    "roomsResults": [
+      {
+        "name": "Twin Superior",
+        "price": 34.43,
+        "mealType": "Room only"
+      }
+    ]
+  },
+  {
+    "quoteId": "353682931-318",
+    "roomsResults": [
+      {
+        "name": "Twin Standard",
+        "price": 27.93,
+        "mealType": "Breakfast"
+      }
+    ]
+  },
+  {
+    "quoteId": "353682931-319",
+    "roomsResults": [
+      {
+        "name": "Twin Superior",
+        "price": 41.24,
+        "mealType": "Breakfast"
+      }
+    ]
+  },
+  {
+    "quoteId": "353682931-320",
+    "roomsResults": [
+      {
+        "name": "Twin Standard",
+        "price": 30.93,
+        "mealType": "Breakfast"
+      }
+    ]
+  },
+  {
+    "quoteId": "353682931-321",
+    "roomsResults": [
+      {
+        "name": "Twin Superior",
+        "price": 45.85,
+        "mealType": "Breakfast"
+      }
+    ]
+  }
+]

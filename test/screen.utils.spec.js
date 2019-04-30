@@ -4,6 +4,7 @@ import {
     popSocketCacheIntoHotelsArray,
     parseAndCacheHotelDataFromSocket,
     hasValidCoordinatesForMap,
+    applyHotelsSearchFilter
 } from "../src/components/screens/utils"
 
 
@@ -60,9 +61,9 @@ test('updateHotelsFromSocketCache', () => {
 
     expect(r.hotelsInfoFresh instanceof Array)          .toBeTruthy()
     expect(r.hotelsInfoFresh.length)                    .toBe(1)
-    expect(r.hotelsInfoForMapFresh instanceof Array)    .toBeTruthy()
+    expect(r.hotelsInfoForMapFresh instanceof Array)  .toBeTruthy()
 
-    expect(r.hotelsInfoForMapFresh.length)              .toBe(1)
+    expect(r.hotelsInfoForMapFresh.length)            .toBe(1)
 
     let item1 = r.hotelsInfoFresh[0];
     expect(item1.price)             .toBe(23.9)
@@ -108,28 +109,68 @@ test('updateHotelsFromFilters', function() {
     expect(item1.lat)                   .toBeDefined()
     expect(item1.lon)                   .toBeDefined()
     expect(item1.thumbnail)             .toBeDefined()
-    expect(item1.hotelPhoto)            .toBeDefined()
+    expect(item1.hotelPhoto)            .toBeUndefined()
+})
+
+test('applyHotelsSearchFilter',function() {
+    let {filtered:hotels, ids} = dummyFilterData2()
+    expect(hotels.length)      .toEqual(4)
+
+    // console.log(`ids: ${printAny(ids)}`)
+    // console.log(`Hotels: ${printAny(hotels)}`)
+
+    // let filter1 = {orderBy: 'rank,desc'}
+    let filter2 = {orderBy: 'priceForSort,asc'}
+    let filter3 = {orderBy: 'priceForSort,desc'}
+    let filter4 = {showUnAvailable: true}
+    let filter5 = {showUnAvailable: false}
+    let filter6 = {selectedRating: [false,false,true,false,false]}
+    let filter7 = {priceRange: [10,30]}
+
+    let res;
+    // rank
+    // res = applyHotelsSearchFilter(hotels,filter1)
+
+    // low->high price
+    res = applyHotelsSearchFilter(hotels,filter2)
+    expect(res[0].price < res[1].price && res[1].price < res[2].price)
+
+    res = applyHotelsSearchFilter(hotels,filter3)
+    expect(res[0].price > res[1].price && res[1].price > res[2].price)
+
+    // un-available
+    res = applyHotelsSearchFilter(hotels,filter4)
+    // expect(res.length)      .toEqual(1)
+    expect(res.length)      .toEqual(4)
+
+    // available
+    res = applyHotelsSearchFilter(hotels,filter5)
+    expect(res.length)      .toEqual(4)
+    
+    // selected rating (stars)
+    res = applyHotelsSearchFilter(hotels,filter6)
+    expect(res.length)      .toEqual(2)
+    
+    // price range
+    res = applyHotelsSearchFilter(hotels,filter7)
+    expect(res.length)      .toEqual(2)
+    
+
+    // combined
+    res = applyHotelsSearchFilter(hotels,Object.assign(Object.assign({},filter5),filter2))
+    expect(res.length)      .toEqual(4)
+    expect(res[0].price < res[1].price && res[1].price < res[2].price)
+
+    // console.log(`Filtered1: ${printAny(res)}`)
 })
 
 
 // ------------------------------------------------------------------------------
-// TODO: Finish this - instead of object it prints normal Object.toString()
-// function printAny(item) {
-//     if (item instanceof Array) {
-//         item.forEach((element) => printAny(element))
-//         return `[${item.join(', ')}]`
-//     } else if (item instanceof Object) {
-//         return printAny(item);
-//     } else {
-//         return item.toString();
-//     }
-// }
-
 
 function printAny(obj,indent=2) {
     const b = (obj instanceof Array ? '[]' : '{}')
     let out = (`${b[0]}\n`.padStart(indent > 2 ? 2 : 0, ' '));
-    let keys = Object.keys(obj)
+    let keys = (typeof(obj)=='object' ? Object.keys(obj) : [])
     
     for (let i=0; i<keys.length; i++) {
         const key = keys[i];
@@ -157,17 +198,28 @@ function dummyHotelsLoaded1() {
     return [staticData1]
 }
 function dummyFilterData1() {
-    let item1 = {id:12, name: "Filtered Item 1", latitude:44.880235, longitude:15.987798, price: 23.9, thumbnail: {url: "http://example.io/filter1"}};
-    let item2 = {id:297, latitude:44.880235, longitude:15.987798, price:23.89, name: "Filtered Item 2", thumbnail: {url: "http://filter.io/snthoesnthu"}};
+    let item1 = {id:12, name: "Filtered Item 1", latitude:44.880235, longitude:15.987798, price: 23.9, thumbnail: {url: "http://example.io/filter1"}, star:2};
+    let item2 = {id:297, latitude:44.880235, longitude:15.987798, price:11.07, name: "Filtered Item 2", thumbnail: {url: "http://filter.io/snthoesnthu"},star:3};
     return {
         filtered: [item1,item2],
         ids: {12:0}
     }
 }
+function dummyFilterData2() {
+    let {filtered,ids} = dummyFilterData1()
+    let fresh = filtered.concat()
+    fresh[0].name = 'Hotel Charlston',
+    fresh[1].name = 'Hello There Inn',
+    fresh.unshift({name:'Vreb-a-lo Hostel', price:90.89,id:15, star:3})
+    fresh.push({name:'Full',id:9})
+    ids = {15:0,12:1,297:2,9:3}
+
+    return { filtered:fresh, ids }
+}
 function dummyData1() {
     let staticData1 = {id:12, name: "Ala bala", hotelPhoto: {url: "http://example.io"}};
     let socketData1 = {id:12, lat:44.880235, lon:15.987798, price: 23.9, thumbnail: {url: "http://example.io/7777777"}};
-    let socketData2 = {id:297, price:23.89, name: "Hello There", thumbnail: {url: "http://lala.io/snthoesnthu"}};
+    let socketData2 = {id:297, price:11.07, name: "Hello There", thumbnail: {url: "http://lala.io/snthoesnthu"}};
     let socketData3 = {id:9, price:3.04, lat: 56.3443, lon: 78.09, name: "Same Here", thumbnail: {url: "http://lio.so/kajshd"}};
 
     let hotelsInfo = [staticData1]

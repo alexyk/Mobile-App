@@ -33,11 +33,13 @@ export let Config = {
 export let HOTELS_STATIC_CONNECTION_TIMEOUT = 10;
 export let HOTELS_SOCKET_CONNECTION_TIMEOUT = 15;
 export let HOTELS_SOCKET_CONNECTION_UPDATE_TICK = 1;
+export const DEFAULT_HOTEL_PNG = "https://static.locktrip.com/listings/images/listing_thumbnail_1529077862408_default.png";
 
 // CONFIGS 
 const LT_PROD       = "PRODUCTION";
 const LT_PROD2      = "PRODUCTION2";
 const LT_STAGING    = "STAGING";
+const LT_STAGING2   = "STAGING2";
 const LT_DEV        = "DEV";
 const LT_DEV2       = "DEV2";
 const LT_LOCAL      = "LOCAL";
@@ -45,7 +47,7 @@ const LT_LOCAL      = "LOCAL";
 // ----------------------------
 //       CHOOSE CONFIG
 // ----------------------------
-export const LT_CFG = LT_STAGING;
+export const LT_CFG = LT_PROD;
 
 
 switch (LT_CFG) {
@@ -75,6 +77,18 @@ switch (LT_CFG) {
         apiHost = 'https://staging.locktrip.com/api/';
         imgHost = 'https://static.locktrip.com/';
         basePath = 'https://staging.locktrip.com/';
+        socketHostPrice="wss://exchanger-stage.locktrip.com/websocket";
+        socketHost = 'wss://staging.locktrip.com/socket';
+        xDeviceVersion = "49365f68-42e1-11e8-842f-0ed5f89f718b";
+        domainPrefix = 'staging';
+        PUBLIC_URL = 'https://staging.locktrip.com/';
+        break;
+        break;
+
+    case LT_STAGING2:
+        apiHost = 'https://staging.locktrip.com/api/';
+        imgHost = 'https://static.locktrip.com/';
+        basePath = 'http://localhost:3000/';
         socketHostPrice="wss://exchanger-stage.locktrip.com/websocket";
         socketHost = 'wss://staging.locktrip.com/socket';
         xDeviceVersion = "49365f68-42e1-11e8-842f-0ed5f89f718b";

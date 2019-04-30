@@ -11,6 +11,8 @@ configs = {
     'prod2'   => "const LT_CFG = LT_PROD2;",
     'staging' => "const LT_CFG = LT_STAGING;",
     'stage'   => "const LT_CFG = LT_STAGING;",
+    'staging2'=> "const LT_CFG = LT_STAGING2;",
+    'stage2'  => "const LT_CFG = LT_STAGING2;",
     'dev'     => "const LT_CFG = LT_DEV;",
     'dev2'    => "const LT_CFG = LT_DEV2;",
     'local'   => "const LT_CFG = LT_LOCAL;",

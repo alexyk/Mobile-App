@@ -32,9 +32,17 @@ const styles = StyleSheet.create({
     title: {
         ...commonText,
         color: 'black',
-        marginTop: 5,
+        marginTop: 25,
         marginLeft: 20,
         fontSize: 20
+        // backgroundColor: 'red',
+    },
+    backText: {
+        ...commonText,
+        color: 'black',
+        marginTop: 35,
+        marginLeft: 10,
+        fontSize: 14
         // backgroundColor: 'red',
     },
     webView: {

@@ -1,0 +1,20 @@
+{
+  "id": "lockchain",
+  "name": "LockTrip",
+  "symbol": "LOC",
+  "rank": "289",
+  "price_usd": "0.7799156594",
+  "price_btc": "0.00014643",
+  "24h_volume_usd": "106306.809751",
+  "market_cap_usd": "11661426.0",
+  "available_supply": "14952163.0",
+  "total_supply": "18585933.0",
+  "max_supply": null,
+  "percent_change_1h": "0.09",
+  "percent_change_24h": "-2.41",
+  "percent_change_7d": "-8.55",
+  "last_updated": "1555792083",
+  "price_eur": "0.6935361005",
+  "24h_volume_eur": "94532.7990372",
+  "market_cap_eur": "10369865.0"
+}

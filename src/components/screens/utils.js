@@ -1,5 +1,6 @@
 import moment from "moment";
-import { basePath } from "../../config";
+import { basePath, DEFAULT_HOTEL_PNG } from "../../config";
+import { log } from "../../config-debug";
 import _ from "lodash";
 
 export const DISPLAY_MODE_NONE = "mode_none";
@@ -22,6 +23,7 @@ export function createHotelSearchInitialState(params) {
   let initialState = {
     isHotel: true,
     regionId: "",
+    error: null,
 
     hotelsInfo: [],
     hotelsInfoForMap: [],
@@ -62,6 +64,7 @@ export function createHotelSearchInitialState(params) {
     selectedRating: [false, false, false, false, false],
     orderBy: "rank,desc",
     priceRange: [1, 5000],
+    priceRangeSelected: [1, 5000],
 
     editable: false,
 
@@ -92,6 +95,50 @@ export function createHotelSearchInitialState(params) {
   return initialState;
 }
 
+export function mergeAllHotelData(filtered, socketMap) {
+  let result = filtered;
+  try {
+    result.forEach(item => parseHotelDataForMap(item, socketMap))
+  } catch (e) {log('error','error in merging', {e})}
+  return result;
+}
+
+const useLongCoordinates = true;  // used in parse functions (long is latutude/longitude and short is lat/lon)
+function parseHotelDataForMap(data,socketMap) {
+  if (typeof(data.latitude) == 'string') {
+    if (useLongCoordinates) {
+      data.latitude = parseFloat(data.latitude)
+      data.longitude = parseFloat(data.longitude)
+    } else {
+      data.lat = parseFloat(data.latitude)
+      data.lon = parseFloat(data.longitude)
+      delete data.latitude
+      delete data.longitude
+    }
+  }
+
+  const cached = socketMap[data.id];
+  if (cached) {
+    //log('cached', `Updating from cache ${data.id}`,{data,cached},true)
+    Object.assign(data, cached);
+  }
+
+  if (data.hotelData == null) {
+    data.hotelPhoto = {url:''}
+  }
+  if (data.thumbnail == null) {
+    data.thumbnail = {url:''}
+    if (  typeof(data.hotelPhoto)=='string' ) {
+      data.thumbnail = {url:data.hotelPhoto}
+      data.hotelPhoto = data.thumbnail
+    }
+  } else if (typeof(data.thumbnail)=='string') {
+    data.thumbnail = {url:data.thumbnail}
+  }
+  
+  return data
+}
+
 /**
  * Parse current hotelData and return it as initial coordinates
  * @param {Object} hotelData
@@ -120,26 +167,46 @@ export function parseAndCacheHotelDataFromSocket(
         : hotelData
   );
 
-  const lat = (hotelData.latitude != null ? hotelData.latitude : hotelData.lat);
-  const lon = (hotelData.longitude != null ? hotelData.longitude : hotelData.lon);
-  
-  const parsedInfo = {
+  let lat = (hotelData.latitude != null ? hotelData.latitude : hotelData.lat);
+  let lon = (hotelData.longitude != null ? hotelData.longitude : hotelData.lon);
+  lat = parseFloat(lat != null ? lat : (current.lat ? current.lat : current.latitude))
+  lon = parseFloat(lon != null ? lon : (current.lon ? current.lon : current.longitude))
+
+  let parsedInfo = {
     id: hotelData.id,
     name: hotelData.name,
     price: parseFloat(
       !isNaN(hotelData.price) ? hotelData.price : current.price
     ),
-    lat: parseFloat(lat != null ? lat : current.lat),
-    lon: parseFloat(lon != null ? lon : current.lon),
-    hotelPhoto:
-      current.hotelPhoto && current.hotelPhoto.url
-        ? current.hotelPhoto
-        : hotelData.hotelPhoto,
+    star: (hotelData.star != null 
+    	? hotelData.star 
+    	: (hotelData.stars != null
+	    		? hotelData.stars
+  	  		: (current.star != null ? current.star : current.stars)
+  	  	)
+    ),
+    hotelPhoto: (hotelData.hotelPhoto ? hotelData.hotelPhoto : current.hotelPhoto),
     thumbnail:
       hotelData.thumbnail && hotelData.thumbnail.url
         ? hotelData.thumbnail
         : current.thumbnail
   };
+
+  if (!parsedInfo.hotelPhoto || parsedInfo.hotelPhoto.url == '') {
+    parsedInfo.hotelPhoto = parsedInfo.thumbnail;
+  }
+
+  if (useLongCoordinates) {
+    parsedInfo.latitude = lat;
+    parsedInfo.longitude = lon;
+  } else {
+    parsedInfo.lat = lat;
+    parsedInfo.long = lon;
+  }
+
+  if (hotelData.hotelPhoto) {
+    parsedInfo.hotelPhoto = (hotelData.hotelPhoto.url ? hotelData.hotelPhoto : {url: hotelData.hotelPhoto})
+  }
   
   if (parsedInfo.latitude != null) {
     parsedInfo.latitude = parseFloat(parsedInfo.latitude)
@@ -149,22 +216,47 @@ export function parseAndCacheHotelDataFromSocket(
   hotelsSocketCacheMap[hotelData.id] = parsedInfo;
 
   const result = {
-    initialLat: parsedInfo.lat,
-    initialLon: parsedInfo.lon
+    initialLat: lat,
+    initialLon: lon
   };
 
   return result;
 }
 
-export function hasValidCoordinatesForMap(state, isInitital = false) {
-  if (!state) return false;
-
-  if (isInitital) {
-    return state.initialLat != null && state.initialLon != null;
-  } else {
-    return state.lat != null && state.lon != null;
-  }
+function isNumber(value) {
+  return (typeof(value) == 'number')
 }
+
+export function hasValidCoordinatesForMap(data, isInitial = false) {
+  //log('utils', `hasValidCoordinatesForMap(), data: ${data} isInitital: ${isInitial}, useLongCoordinates: ${useLongCoordinates}`,{data,useLongCoordinates})
+  if (data == null) return false;
+  
+  let lat,lon;
+  try {
+    if (isInitial) {
+      lat = data.initialLat;
+      lon = data.initialLon;
+    } else {
+      if (useLongCoordinates) {
+        lat = data.latitude;
+        lon = data.longitude;
+      } else {
+        lat = data.lat;
+        lon = data.lon;
+      }
+    }
+  }
+  catch (e) {
+    log('error-coordinates',e)
+  }
+
+  //log('utils', `hasValidCoordinatesForMap(), lat/lon: ${lat}/${lon}`,{lat,lon})
+  const result = (lat != null && lon != null && isNumber(lat) && isNumber(lon));
+  //log('utils', `hasValidCoordinatesForMap(), result: ${result}, isInitial: ${isInitial}`,{data,result,lat,lon})
+  
+  return result;
+}
+
 
 /**
  * (1) Gets previous hotels list
@@ -206,7 +298,7 @@ export function updateHotelsFromSocketCache(
         //console.tron.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
 
         refreshedData = _.merge({}, socketData, staticData);
-        delete socketHotelsCacheMap[id];
+        //delete socketHotelsCacheMap[id];
 
         hotelsInfoFresh[index] = refreshedData;
       }
@@ -267,14 +359,86 @@ export function updateHotelsFromFilters(hotelsFromFilters, oldHotels, oldIdsById
   return result
 }
 
+export function applyHotelsSearchFilter(data, filter) {
+  console.time('*** utils::applyHotelsSearchFilter()')
 
-export function generateFilterInitialData(state, props) {
+  const doFilter = function(data,type,value, showUnAvailable) {
+    const tmp = (typeof(value) == 'string' ? value.split(',') : [value])
+    const value1 = tmp[0]
+    const value2 = (tmp.length == 2 ? tmp[1] : null)
+    let result = data;
+    
+    switch (type) {
+
+      case 'orderBy':
+        if (value1 == 'priceForSort') {
+            if (value2 == 'asc') {
+              result.sort((a,b) => (a.price > b.price))
+            } else {
+              result.sort((a,b) => (a.price < b.price))
+            }
+				} else {
+            //log('TODO',`Not implemented filter: '${value1}':'${value2}'   //   TYPE: '${type}'`,null,true)
+        }
+        break;
+
+      case 'nameFilter':
+        const nameFilter = value1.toLowerCase();
+        result = data.filter((item) => item.name.toLowerCase().indexOf(nameFilter) > -1)
+        break;
+
+      case 'priceRange':
+        const v1 = parseFloat(value[0])
+        const v2 = parseFloat(value[1])
+        result = data.filter((item) => ((v1 <= item.price && item.price <= v2) || (item.price == null && showUnAvailable)) )
+        //log('utils',`Filter priceRange, ${value}`, {value,data,result,v1,v2},true)
+        break;
+
+      case 'selectedRating':
+      	let hasStarToFilter = false;
+      	value.map((item,index) => ( hasStarToFilter = (item ?  true : hasStarToFilter) ))
+				if (hasStarToFilter) {
+					result = data.filter((item) => value[item.star-1])
+				}
+      	break
+      	
+      default:
+        //log('TODO',`Not implemented filter: '${value1}':'${value2}'`)   //   TYPE: '${type}'`,null,true)
+        break
+
+    }
+      
+    //log('utils',`Filter Applied '${type}', value: '${value}' | in: ${data.length} out: ${result.length}`, {value,data,result},true)
+
+    return result
+  }
+  
+  let filtered = data.concat() // make a shallow copy
+  for (let prop in filter) {
+    if (prop == 'showUnAvailable') {
+      // priceRange used for this one
+      continue;
+    }
+  	const value = filter[prop];
+    filtered = doFilter(filtered, prop, value, filter.showUnAvailable);
+  }
+  
+  //log('utils',`applyHotelsSearchFilter(): ${filtered.length} / ${data.length}`, {filter,data,result:filtered},true)
+  
+  console.timeEnd('*** utils::applyHotelsSearchFilter()')
+  return filtered
+}
+
+export function generateFilterInitialData(showUnAvailable=false, state) {
+  const priceRange = state.priceRange;
+  
   return {
-    showUnAvailable: false,
-    nameFilter: "",
-    selectedRating: "",
-    orderBy: "",
-    priceRange: [0, 500]
+    showUnAvailable,
+    nameFilter: state.nameFilter,
+    selectedRating: state.selectedRating,
+    orderBy: state.orderBy,
+    priceRange,
+    priceRangeSelected: null
   };
 }
 
@@ -316,8 +480,8 @@ export function generateHotelFilterString(page, state) {
   const sort = state.orderBy;
   const pagination = `&page=${page}&sort=${sort}`;
 
-  let filters =
-    `&filters=${encodeURI(JSON.stringify(filtersObj))}` + pagination; //eslint-disable-line
+  let filters = `&filters=${encodeURI(JSON.stringify(filtersObj))}` 
+                + (page > -1 ? pagination : ''); //eslint-disable-line
 
   return filters;
 }

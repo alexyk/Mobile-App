@@ -1,3 +1,30 @@
+/**
+ * Hotels search results are loaded like this
+ * 
+ * 
+ * 1) onStaticData
+ *    This is the initial load of static hotel data (name,description,image)
+ *    Shown in footer: "N hotels" (see also renderFooter)
+ * 2) onDataFromSocket
+ *    Loading prices from socket and updating hotel search
+ *    Shown in footer: "N available" (renderFooter)
+ * 
+ * 3) onDoneSocket
+ *    All prices loaded
+ * 
+ * 4) onFilteredData
+ *    Filtering results - removing hotels unavailable. Currently this flow differs from Web-App as
+ *    it is using getInfoForMap thus loading all results (not page by page as does the Web-App)
+ * 
+ * Extra 1) onUpdateHotelsInfo
+ *          Called on any update of hotelsInfo & hotelsInfoForMap (these are holding data for now but refactoring for Redux is ongoing)
+ *          See also: fetchFilteredResults(), listUpdateDataSource
+ * 
+ * Extra 2) Refactoring into redux
+ *          Redux actions to replace setState used with onUpdateHotelsInfo.
+ *          This is in progress - more info is to come later
+ * 
+ */
 import React, { Component } from "react";
 import { SafeAreaView, WebView } from "react-native";
 import { connect } from "react-redux";
@@ -27,6 +54,7 @@ import LTLoader from "../../../molecules/LTLoader";
 import DateAndGuestPicker from "../../../organisms/DateAndGuestPicker";
 import HotelItemView from "../../../organisms/HotelItemView";
 import requester from "../../../../initDependencies";
+import BackButton from '../../../atoms/BackButton';
 
 import UUIDGenerator from "react-native-uuid-generator";
 import _ from "lodash";
@@ -45,9 +73,11 @@ import {
   generateSearchString,
   generateFilterInitialData,
   generateHotelFilterString,
+  applyHotelsSearchFilter,
   updateHotelsFromFilters,
   updateHotelIdsMap,
   updateHotelsFromSocketCache,
+  mergeAllHotelData,
   parseAndCacheHotelDataFromSocket,
   DISPLAY_MODE_NONE,
   DISPLAY_MODE_SEARCHING,
@@ -59,7 +89,8 @@ import {
 import stomp from "stomp-websocket-js";
 import { isNative } from "../../../../version";
 import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
-import { isOnline } from '../../../../config-debug'
+import { setSearch/*, setSearchFiltered*/ } from '../../../../redux/action/hotels'
+import { isOnline, log } from '../../../../config-debug'
 
 const { width, height } = Dimensions.get("window");
 
@@ -86,21 +117,26 @@ class HotelsSearchScreen extends Component {
 
     this.pageLimit = this.PAGE_LIMIT;
     this.isFirstLoad = true;
+    this.isFirstFilter = true;
     this.isSocketDown = true;
     this.validSocketPrices = 0;
     this.staticDataReceived = false;
     this.lastSocketUpdateTime = 0;
+    this.hotelsAll = [];              // cache for using as filter source
     this.hotelsIndicesByIdMap = null; // see getStaticHotelsData() for populating this one
     this.hotelsSocketCacheMap = {}; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
     this.hotelsSocketCacheCount = 0; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
-    this.socketPriceMin = 5000;
-    this.socketPriceMax = 0;
+    this.priceMin = 5000;
+    this.priceMax = 0;
 
     this.listViewHelpers = {}; // startFetch & abortFetch (see UltimateListView docs - react-native-ultimate-listview)
     this.webViewRef = null;
 
     this.socketTimeoutId = -1;
     this.staticTimeoutId = -1;
+    
+    this.filtersCallback = null;
+    this.isWebviewHotelDetail = false
 
     // Bind functions to this,
     // thus optimizing performance - by using bind(this) instead of "=> function".
@@ -143,7 +179,7 @@ class HotelsSearchScreen extends Component {
   }
 
   startSocketDataConnectionTimeOut() {
-    console.tron.logImportant(`Starting Socket connection timeout, ${isOnline?'online':'offline'}`, {ala:'bala'})
+    //log({name:'SOCKET',preview:`Starting Socket connection timeout, ${isOnline?'online':'offline'}`,important:true})
     if (!isOnline) return;
 
     const _this = this;
@@ -151,7 +187,7 @@ class HotelsSearchScreen extends Component {
       if (_this.validSocketPrices == 0) {
         _this.setState({ isSocketTimeout: true });
       }
-      console.tron.logImportant(`Socket connection timeout DONE, valid socket prices: ${_this.validSocketPrices}`)
+      //log('SOCKET',`Socket connection timeout DONE, valid socket prices: ${_this.validSocketPrices}`,null,true)
     };
     this.setState({ isSocketTimeout: false });
 
@@ -219,18 +255,18 @@ class HotelsSearchScreen extends Component {
   // TODO: Inspect this flow - and create a component to implement it
   async startSocketConnection() {
     this.isSocketDown = false;
-    
+
     if (isOnline) {
-		this.uuid = await UUIDGenerator.getRandomUUID();
+      this.uuid = await UUIDGenerator.getRandomUUID();
 
-		// common code
-		WebsocketClient.startGrouping();
+      // common code
+      WebsocketClient.startGrouping();
 
-		if (Platform.OS === "ios") {
-		  this.stompiOSConnect();
-		} else if (Platform.OS === "android") {
-		  this.stompAndroidConnect();
-		}
+      if (Platform.OS === "ios") {
+        this.stompiOSConnect();
+      } else if (Platform.OS === "android") {
+        this.stompAndroidConnect();
+      }
     } else {
     	requester.startSocketConnection(this.onDataFromSocket, this)
     }
@@ -323,10 +359,13 @@ class HotelsSearchScreen extends Component {
   onDataFromSocket(data) {
     this.initResultViews();
 
+    //log('socket-data',`Cache socket hotel data`, {data})
+    
     const { body } = data;
-   
+    
     // try {
-    const parsedData = JSON.parse(body);
+      const parsedData = JSON.parse(body);
+    // log('SOCKET',`[onDataFromSocket] ${Object.keys(parsedData).join(', ')}`,{data,parsedData})
 
     /*             
             console.debug("#hotel-search# [HotelsSearchScreen] stomp - onDataFromSocket ---", 
@@ -353,22 +392,14 @@ class HotelsSearchScreen extends Component {
     } else {
       let hotelData = parsedData;
 
-      if (hotelData.price != null) {
-        if (this.socketPriceMax < hotelData.price) {
-          this.socketPriceMax = hotelData.price;
-        }
-        if (this.socketPriceMin > hotelData.price) {
-          this.socketPriceMin = hotelData.price;
-        }
-      }
-
       // TODO: @@debug - remove
       // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);
 	  // console.tron.log(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);      
 
-      //TODO: @@debug remove
       let index = this.hotelsIndicesByIdMap[hotelData.id];
-      if (index && index < 7 && index > 0) {
+
+      //TODO: @@debug remove
+      /*if (index && index < 7 && index > 0) {
         console.log(
           `#hotel-search# [HotelsSearchScreen] onDataFromSocket, index: ${index} id:${
             hotelData.id
@@ -377,7 +408,7 @@ class HotelsSearchScreen extends Component {
           }`,
           "font-weight: bold"
         );
-      }
+      }*/
 
       this.setState(
         // change state function
@@ -443,13 +474,21 @@ class HotelsSearchScreen extends Component {
     this.setState((prevState) => ({
         ...this.onUpdateHotelsInfo(prevState),
         pricesFromSocket: data.totalElements,
-        priceRange: [this.priceMin, this.priceMax],
       }),
       () => {
         // this.listSetPageLimit(this.state.totalHotels)
-	    console.tron.log('onDoneSocket', {data,state:this.state,props:this.props});
+        //log({name:'SOCKET',preview:`onDoneSocket`,important:true,value:{data,state:this.state,props:this.props}})
         this.setState({ isDoneSocket: true, isLoading: false });
-        // this.updateFilter(generateFilterInitialData());
+
+        // get first filtered results from server - showing unavailable as well
+        this.updateFilter(generateFilterInitialData(true, this.state),false)
+        // then with UI filtering remove unavailable
+        this.filtersCallback =  () => {
+          this.props.setIsApplyingFilter(true);
+          this.updateFilter(generateFilterInitialData(false, this.state), true)
+          const priceRange = [this.priceMin,this.priceMax];
+          this.setState({priceRange,priceRangeSelected: priceRange})
+        }
       }
     );
   };
@@ -498,8 +537,7 @@ class HotelsSearchScreen extends Component {
 
         this.setState({
           isLoading: true,
-          // webViewUrl: initialState.webViewUrl,
-          webViewUrl: 'https://abv.bg',
+          webViewUrl: initialState.webViewUrl,
           displayMode: DISPLAY_MODE_HOTEL_DETAILS,
         });
       } else {
@@ -551,7 +589,7 @@ class HotelsSearchScreen extends Component {
     let extraData = {};
 
     if (isSocket) {
-      console.tron.log('Refresh Hotels from socket', {socketMap:this.hotelsSocketCacheMap,hotels:this.state.hotelsInfo});
+      //console.tron.log('Refresh Hotels from socket', {socketMap:this.hotelsSocketCacheMap,hotels:this.state.hotelsInfo});
       
       const {
         hotelsInfoFresh,hotelsInfoForMapFresh
@@ -573,12 +611,18 @@ class HotelsSearchScreen extends Component {
       this.validSocketPrices = filteredHotelsCount;
       extraData = {
         totalHotels: filteredHotelsCount,
-        hotelsLoadedInList: filteredHotelsCount,
+        hotelsInfoForMap: hotelsFromFilters,
         pricesFromSocket: filteredHotelsCount
       }
     }
 
     this.listUpdateDataSource(hotelsFresh);
+
+    // if (this.props.isApplyingFilter) {
+    //   this.props.setSearchFiltered(hotelsFresh)
+    // } else {
+    //   this.props.setSearch(hotelsFresh)
+    // }
 
     result = {
       hotelsInfo: hotelsFresh,
@@ -586,6 +630,8 @@ class HotelsSearchScreen extends Component {
       initialCordinates: coordinates,
       ...extraData
     };
+
+
 
     return result;
   }
@@ -619,28 +665,79 @@ class HotelsSearchScreen extends Component {
   }
 
   onFilteredData(res) {
+    const _this = this;
+
     if (res.success) {
       res.body.then((data) => {
         // not used so far
         // const isCacheExpired = data.isCacheExpired;
-
-        
         const count = data.content.length;
+        const hotelsAll = data.content;
+
+        log('filtered-hotels',`${count} filtered hotels, before parsing`, {hotelsAll})
+
+        // parse data
+        mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap)
+
+        log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
+
+        if (this.isFirstFilter) {
+          // caching to:
+            // an immediately available var
+          this.hotelsAll = hotelsAll;
+            // Redux
+          this.props.setSearch(hotelsAll);
+        }
+
+        // pagination of list component (renderResultsAsList)
         if (this.PAGE_LIMIT > count) {
           this.listSetPageLimit(count);
         } else {
           this.listSetPageLimit(this.PAGE_LIMIT);
         }
-
-        this.setState((prevState) => {
-          const newState = this.onUpdateHotelsInfo(prevState, false, data.content)
-          return newState;
-        }, () => {
-          this.props.setIsApplyingFilter(false);      
+        
+        // calculate min &max price
+        hotelsAll.map(item => {
+          if (item.price != null) {
+            if (_this.priceMax < item.price) {
+              _this.priceMax = item.price;
+            }
+            if (_this.priceMin > item.price) {
+              _this.priceMin = item.price;
+            }
+          }
+          return null
         })
+
+        // update state with new hotels
+        this.setState(
+          // state update
+          (prevState) => {
+            const newState = this.onUpdateHotelsInfo(prevState, false, hotelsAll)
+            newState.totalHotels = count;
+            return newState;
+          },
+          // callback after state update
+          () => {
+            if (_this.filtersCallback) {
+              const func = () => {
+                _this.filtersCallback()
+                _this.filtersCallback = null;
+                _this.props.setIsApplyingFilter(false);
+              }
+              setTimeout(func, 300)
+            }
+            if (_this.isFirstFilter) {
+              _this.isFirstFilter = false;
+            }      
+          }
+        )
       });
     } else {
       // //console.log('Search expired');
+      this.props.setIsApplyingFilter(false)
+      this.setState({error:lang.TEXT.SEARCH_HOTEL_FILTER_ERROR.replace('%1',res.message)})
+      console.error('[HotelsSearchScreen] Filter error',{res})
     }
   }
 
@@ -655,6 +752,8 @@ class HotelsSearchScreen extends Component {
         let hotels = data.content;
         // add index
         // hotels = hotels.map((item,index) => {item.index = index; return item;})
+
+        log('static-hotels',`${hotels.length} static hotels`, {hotels})
 
         if (_this.isFirstLoad) {
           _this.isFirstLoad = false;
@@ -708,11 +807,13 @@ class HotelsSearchScreen extends Component {
             const hotelsInfoFresh = prevState.hotelsInfo.concat(newHotels);
             // console.warn(`%c### next hotels length: ${freshList.length}`, 'font-weight: bold');
 
-            const hotelsLoadedInList = hotelsInfoFresh.length;
+            const hotelsInfoForMap = hotelsInfoFresh;
 
             // if (_this.pageLimit < data.totalElements) {
             //   _this.listSetPageLimit(data.totalElements);
             // }
+
+            //this.props.setSearch(hotelsInfoFresh);
 
             // update hotels data, setState(hotelsInfo)
             return {
@@ -720,13 +821,13 @@ class HotelsSearchScreen extends Component {
                 prevState.displayMode == DISPLAY_MODE_SEARCHING
                   ? DISPLAY_MODE_RESULTS_AS_LIST
                   : prevState.displayMode,
-              hotelsLoadedInList,
+              hotelsInfoForMap,
               hotelsInfo: hotelsInfoFresh,
               totalHotels: data.totalElements
             };
           },
           function() {
-            if (_this.listViewRef) console.log(`[HotelsScreenSearch] onStaticData - setState calback, rows=${_this.listViewRef.getRows().length}`);
+            //if (_this.listViewRef) console.log(`[HotelsScreenSearch] onStaticData - setState calback, rows=${_this.listViewRef.getRows().length}`);
 
             _this.listStartFetch(hotels, _this.pageLimit);
           }
@@ -751,18 +852,20 @@ class HotelsSearchScreen extends Component {
 
   listUpdateDataSource(data) {
     //console.tron.log(`[HotelsSearchScreen] listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {state:this.state, props:this.props});
+  	console.time('*** HotelsSearchScreen::listUpdateDataSource()')
     this.listViewRef.updateDataSource(data)
+  	console.timeEnd('*** HotelsSearchScreen::listUpdateDataSource()')
   }
 
   listSetPageLimit(value) {
-    console.tron.log(`[HotelsSearchScreen] listSetPageLimit, value: ${value}`);    
+    //log('hotel-search',`[ listSetPageLimit ] value: ${value}`);
     this.pageLimit = value;
   }
 
   initResultViews() {
     if (
       this.state.displayMode == DISPLAY_MODE_SEARCHING &&
-      this.state.hotelsLoadedInList > 0
+      this.state.hotelsInfoForMap > 0
     ) {
       this.setState({
         displayMode: DISPLAY_MODE_RESULTS_AS_LIST
@@ -776,7 +879,7 @@ class HotelsSearchScreen extends Component {
       `#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`
     );*/
 
-    const isAllHotelsLoaded = (this.state.totalHotels == this.state.hotelsLoadedInList);
+    const isAllHotelsLoaded = (this.state.totalHotels == this.state.hotelsInfoForMap);
     if (this.state.isFilterResult && isAllHotelsLoaded) {
       // TODO: Figure this out - how to load results after isDoneSocket
       // (1) For WebApp after isDoneSocket results are shown page by page
@@ -964,10 +1067,13 @@ class HotelsSearchScreen extends Component {
     });
   };
 
+  /**
+   * TODO: Check if this can be removed
+   */
   saveState() {
     //console.log('#hotel-search# 5/6 HotelSearchScreen saveState END');
 
-    this.setState(function(prevState, propsUpdated) {
+    /*this.setState(function(prevState, propsUpdated) {
       // TODO: Previous State was cached separately
       //       this was done in a non-react way, saving previousState
       //       as a static object. If needed - include it
@@ -989,7 +1095,7 @@ class HotelsSearchScreen extends Component {
                 prevState.childrenBool = this.state.childrenBool;
  */
 
-      return {
+      /*return {
         //filters
         showUnAvailable: false,
         nameFilter: "",
@@ -998,7 +1104,7 @@ class HotelsSearchScreen extends Component {
         priceRange: [1, 5000],
         isNewSearch: false
       };
-    });
+    });*/
 
     if (this.state.isHotel) {
       this.searchString = generateSearchString(this.state, this.props);
@@ -1006,10 +1112,12 @@ class HotelsSearchScreen extends Component {
   }
 
   gotoFilter = () => {
-    // console.tron.log('[HotelsSearchScreen] gotoFilter', {props:this.props, state: this.state, refs:this.refs, th:this})
+    console.time('*** HotelsSearchScreen::gotoFilter()')
+
+    // log('HotelsSearchScreen','gotoFilter', {props:this.props, state: this.state})
 
     if (this.state.isLoading || this.props.isApplyingFilter) {
-      console.log('[HotelsSearch] gotoFilter::toast', {state:this.state, props:this.props, refs:this.refs})
+      //log('[HotelsSearch] gotoFilter::toast', {state:this.state, props:this.props})
       this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTER_NA, 3000);
     } else 
     {
@@ -1020,17 +1128,18 @@ class HotelsSearchScreen extends Component {
             updateFilter: this.updateFilter,
             selectedRating: this.state.selectedRating,
             showUnAvailable: this.state.showUnAvailable,
-            hotelName: this.state.nameFilter,
-            priceRange: [this.socketPriceMin, this.socketPriceMax]
+            nameFilter: this.state.nameFilter,
+            orderBy: this.state.orderBy,
+            priceRange: this.state.priceRange,
+            priceRangeSelected: this.state.priceRangeSelected
           });
         }
       }
     }
+    console.timeEnd('*** HotelsSearchScreen::gotoFilter()')
   };
 
-  updateFilter = data => {
-    console.log("[HotelsSearchScreen] updateFilter", { data });
-
+  updateFilter = (data, fromUI=false) => {    
     // TODO: Fix this direct method call
     // if (this.listViewRef != undefined && this.listViewRef != null) {
     // this.listViewRef.initListView();
@@ -1040,34 +1149,62 @@ class HotelsSearchScreen extends Component {
     // if (this.mapView != undefined && this.mapView != null) {
     // this.mapView.initMapView();
     // }
+    
+    console.time('*** HotelsSearchScreen::updateFilter()')
+    const filterParams = {
+      isFilterResult: true,
+      showUnAvailable: data.showUnAvailable,
+      nameFilter: data.nameFilter,
+      selectedRating: data.selectedRating,
+      orderBy: data.orderBy,
+    }
 
     // set isLoading in Redux
     this.props.setIsApplyingFilter(true);
+    this.setState({
+      error: null,
+      ...filterParams
+    })
 
-    this.priceMin = data.priceRange[0];
-    this.priceMax = data.priceRange[1];
 
-    this.setState(
-      // change state (object in this case)
-      {
-        isFilterResult: true,
-        showUnAvailable: data.showUnAvailable,
-        nameFilter: data.hotelName,
-        selectedRating: data.selectedRating,
-        orderBy: data.priceSort,
-        priceRange: data.priceRange,
-        // hotelsInfo: [],
-        // hotelsInfoForMap: [],
-      },
-      // callback (after change state above)
-      function() {
-        // this.applyFilters();
-        const search = generateSearchString(this.state, this.props);
-        const filters = generateHotelFilterString(0, this.state);
-        ////console.log("search --- filters", search, filters);
-        this.fetchFilteredResults(search, filters);
-      }
-    );
+    if (fromUI) {
+      filterParams.priceRange = data.priceRange
+
+      const hotelsAll = this.hotelsAll;
+      const filtered = applyHotelsSearchFilter(hotelsAll, filterParams);
+      const count = filtered.length;
+      //this.props.setSearchFiltered(filtered)
+      
+      //log('HOTEL_SEARCH',`Filtered from UI: ${filtered.length} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams})
+      
+      this.listUpdateDataSource(filtered)
+      this.setState({
+        hotelsInfo: filtered,
+        hotelsInfoForMap: filtered,
+        priceRangeSelected: data.priceRange,
+        totalHotels: count
+      })
+
+      this.props.setIsApplyingFilter(false)
+    } else {
+      filterParams.priceRange = (data.priceRange[0] > data.priceRange[1]
+          ? [0,50000]
+          : [data.priceRange[0], data.priceRange[1]]
+      )
+
+      this.setState(
+        // change state (object in this case)
+        filterParams,
+        // callback (after change state above)
+        function() {
+          const search = generateSearchString(this.state, this.props);
+          const filters = generateHotelFilterString(-1, this.state);
+          ////console.log("search --- filters", search, filters);
+          this.fetchFilteredResults(search, filters);
+        }
+      );
+    }
+    console.timeEnd('*** HotelsSearchScreen::updateFilter()')
   };
 
   fetchFilteredResults = (strSearch, strFilters) => {
@@ -1097,8 +1234,10 @@ class HotelsSearchScreen extends Component {
   };
 
   renderBackButtonAndSearchField() {
+    const dynamicStyle = (this.isWebviewHotelDetail ? {height: 0} : null)
+
     return (
-      <View style={styles.searchAndPickerwarp}>
+      <View style={[styles.searchAndPickerwarp, dynamicStyle]}>
         <View style={styles.searchAreaView}>
           <SearchBar
             autoCorrect={false}
@@ -1120,9 +1259,14 @@ class HotelsSearchScreen extends Component {
       <View
         key={'calendarAndFilters'}
         style={[
-          this.state.isNewSearch
-            ? { height: 190, width: "100%" }
-            : { height: 70, width: "100%" },
+            (this.isWebviewHotelDetail
+              ? { height: 0, width: 0 }
+              : (
+                this.state.isNewSearch
+                  ? { height: 190, width: "100%" }
+                  : { height: 70, width: "100%" }
+              )
+            ),
           { borderBottomWidth: 0 }
         ]}
       >
@@ -1206,6 +1350,8 @@ class HotelsSearchScreen extends Component {
   }
 
   renderFooter = () => {
+    if (this.isWebviewHotelDetail) return null;
+
     // options to set
     const isShowAllSockets = false;
     const isShowAllHotels = false;
@@ -1226,14 +1372,14 @@ class HotelsSearchScreen extends Component {
     // format hotels count information
     const hotelsLoadedCount = (
       isShowAllHotels
-        ? `${this.state.hotelsLoadedInList}/${this.state.totalHotels}`
+        ? `${this.state.hotelsInfoForMap}/${this.state.totalHotels}`
         : `${this.state.totalHotels}`
     )
 
     // common text
     const fontSize = 13;
-    const leftWidth = "70%"
-    const rightWidth = "30%"
+    const leftWidth = "50%"
+    const rightWidth = "50%"
 
     // create visual text components
     const leftText = (
@@ -1251,9 +1397,11 @@ class HotelsSearchScreen extends Component {
       >
         {
           isFiltered
-            ?
+            ?            
               this.props.isApplyingFilter
-                ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTER_IN_PROGRESS
+                ? this.isFirstFilter
+                  ? lang.TEXT.SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS
+                  : lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
                 : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1",this.state.totalHotels)
             :
               this.state.pricesFromSocketValid > 0
@@ -1321,8 +1469,11 @@ class HotelsSearchScreen extends Component {
 
   renderListItem = (item, index) => {
     this.renderItemTimes++;
-    // console.log(`    #hotel-search# [HotelsSearchScreen] renderListItem id: ${item.id}, index: ${index}, renderItemTimes: ${this.renderItemTimes}`)
 
+    if (item.name.indexOf('Bon Vo') > -1) {
+      //log('render-item',`    #hotel-search# [HotelsSearchScreen] renderListItem id: ${item.id}, index: ${index}, renderItemTimes: ${this.renderItemTimes}`,{item})
+    }
+    
     return (
       <HotelItemView
         item={item}
@@ -1366,19 +1517,31 @@ class HotelsSearchScreen extends Component {
   }
 
   renderResultsAsMap() {
-    // console.log(`Render map with ${this.state.hotelsInfo.length} hotels`);
-    const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
-    const height = (isMap ? '100%' : '0%')
     let result = null;
+
+    const data = this.state.hotelsInfoForMap;
+    //log('HOTELS-MAP',`Render map with ${data ? data.length : 'n/a'} hotels`, {data,display:this.state.displayMode});
+    
+    const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
+    let scale = (this.isMap ? 1.0 : 0.0);
+    const transform = [{scaleX: scale},{scaleY: scale}]
+    const height = (isMap ? '100%' : '0%')
+    let style = {transform};
+    
+    // TODO: Quick fix for Android - reach a better solution and remove it 
+    if (Platform.OS == 'android' && !isMap) {
+      return null;
+    }
+    if (Platform.OS == 'ios') style = {height};
 
     //@@@debug
     // console.log(`[HotelsSearchScreen] Map hotels ${this.state.hotelsInfoForMap.length}/${this.state.hotelsInfo.length}`);
-    this.state.hotelsInfoForMap.map((item, index) => {
+    /*this.state.hotelsInfoForMap.map((item, index) => {
       // if (item.lon)
-      // console.log(`    Hotel ${index} lat:${item.lat} lon:${item.lon}`);
+      // console.log(`    Hotel ${index} lat:${item.latitude} lon:${item.longitude}`);
 
       return item
-    })
+    })*/
 
     if (hasValidCoordinatesForMap(this.state, true)) {
       result = (
@@ -1393,10 +1556,11 @@ class HotelsSearchScreen extends Component {
           initialLat={this.state.initialLat}
           initialLon={this.state.initialLon}
           daysDifference={this.state.daysDifference}
-          hotelsInfo={this.state.hotelsInfoForMap}
-          gotoHotelDetailsPage={this.gotoHotelDetailsPageByMap}
+          hotelsInfo={data}
+          gotoHotelDetailsPage={this.gotoHotelDetailsPageByList}
           isVisible={isMap}
-          style={{ height, borderRadius: 10, marginHorizontal: 5, borderColor: '#FFF3', borderWidth: 3 }}
+          // style={{ height, borderRadius: 10, marginHorizontal: 5, borderColor: '#FFF3', borderWidth: 3 }}
+          style={ style }
         />
       );
     }
@@ -1405,17 +1569,19 @@ class HotelsSearchScreen extends Component {
   }
 
   renderMapButton() {
-    if (hasValidCoordinatesForMap(this.state, true)) {
-      // if (this.state.allElements) {
-      const isMap = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
-      const isList = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST;
-      const isShowingResults = isMap || isList;
-      const hasValidCoordinates = hasValidCoordinatesForMap(this.state, true);
+    const hasValidCoordinates = hasValidCoordinatesForMap(this.state, true);
 
+    if (hasValidCoordinates) {
+      // if (this.state.allElements) {
+      const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
+      const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
+      const isDetails = (this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS);
+      const isShowingResults = (isMap || isList);
+      
       // console.log(`---- coordinates: ${hasValidCoordinates}, ${this.state.initialLat}/${this.state.initialLon}`);
 
-      return (
-        (isShowingResults || hasValidCoordinates) && (
+      if ( (isShowingResults || hasValidCoordinates) && !isDetails ) {
+        return (
           <TouchableOpacity
             key={'mapButton'}
             onPress={this.onToggleMapOrListResultsView}
@@ -1426,7 +1592,10 @@ class HotelsSearchScreen extends Component {
             </FontAwesome>
           </TouchableOpacity>
         )
-      );
+      }
+    } else {
+      console.warn (`No valid coordinates to render map`, {hasValidCoordinates,initialLat: this.state.initialLat, initialLon: this.state.initialLon})
+      return null;
     }
   }
 
@@ -1460,41 +1629,39 @@ class HotelsSearchScreen extends Component {
 
   onWebViewLoadEnd() {
     console.log("[HotelsSearchScreen] Webview loaded");
-    this.setState({ isLoading: false });
+    const func = () => this.setState({ isLoading: false });
+    setTimeout(func, 700)
   }
 
   onWebViewNavigationState(navState) {
-    console.log("[HotelsSearchScreen] Webview nav state");
+    // console.log("[HotelsSearchScreen] Webview nav state");
+    console.log('WEB-VIEW',`onWebViewNavigationState(): ${this.state.webViewUrl}`, {url:this.state.webViewUrl})
+    // log('WEB-VIEW',`onWebViewNavigationState(): ${this.state.webViewUrl}`, {url:this.state.webViewUrl})
   }
 
   renderHotelDetailsAsWebview() {
-    const isWebviewHotelDetail = (
-      this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS
-      && !isNative.hotelItem
-      )
-      let result = false;
+    let result = false;
       
-      // console.tron.logImportant(`Webview: ${isWebviewHotelDetail}`)
-
-    // debugger;
-    if (isWebviewHotelDetail) {
+    // console.tron.logImportant(`Webview: ${this.isWebviewHotelDetail}`)
+    // log('WEB-VIEW',`Loading: ${this.state.webViewUrl}`, {url:this.state.webViewUrl})
+    
+    if (this.isWebviewHotelDetail) {
       result = (
-        <WebView
-          ref={ref => {
-            this.webViewRef = ref;
-          }}
-          onWebviewNavigationStateChange={navState =>
-            this.onWebViewNavigationState(navState)
-          }
-          onLoadStart={() => this.onWebViewLoadStart}
-          onLoadEnd={() => this.onWebViewLoadEnd()}
-          source={{ uri: this.state.webViewUrl }}
-          style={{flex: 1}}
-        />
+        <View style={{width: "100%", height: "100%"}}>
+          <WebView
+            ref={ref => {
+              this.webViewRef = ref;
+            }}
+            onWebviewNavigationStateChange={navState =>
+              this.onWebViewNavigationState(navState)
+            }
+            onLoadStart={() => this.onWebViewLoadStart}
+            onLoadEnd={() => this.onWebViewLoadEnd()}
+            source={{ uri: this.state.webViewUrl }}
+          />
+        </View>
       );
     }
-    
-
     return result;
   }
 
@@ -1526,6 +1693,46 @@ class HotelsSearchScreen extends Component {
     return result;
   }
 
+  renderDebug() {
+    if (!__DEV__) return null;
+
+    if (this.webViewRef == null) {
+      // console.warn('[WebView::renderDebug] this.webViewRef.ref is not set - not showing debug button')
+      return null;
+    }
+
+    const onPress = () => {
+      this.webViewRef.reload()
+    }
+
+    return (
+      <TouchableOpacity onPress={onPress}>
+        <View style={{left:20, top:3, backgroundColor: '#777A', width: 130}}>
+          <Text style={{textAlign: 'center'}}>{"RELOAD WEBVIEW"}</Text>
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
+  renderWebViewBack() {
+    if (this.isWebviewHotelDetail) {
+      return (
+        <View style={{
+            height: 60,
+            flexDirection: 'row',
+            justifyContent: 'flex-start',
+            alignItems: 'center',
+            marginBottom: 10
+        }}>
+          <BackButton onPress={this.onBackButtonPress} />
+          <Text style={styles.backText}>{"Back to results"}</Text>
+        </View>
+      )
+    } else {
+      return null;
+    }
+  }
+
   render() {
     // TODO: @@debug - remove this
     // this.renderTimes++;
@@ -1534,9 +1741,15 @@ class HotelsSearchScreen extends Component {
 
     // console.log(`### [HotelsSearchScreen] {all:this.state.allElements});
 
+    this.isWebviewHotelDetail = (
+      this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS
+      && !isNative.hotelItem
+    )
+
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.container}>
+          {this.renderWebViewBack()}
           {this.renderBackButtonAndSearchField()}
           {this.renderCalendarAndFilters()}
 
@@ -1552,6 +1765,8 @@ class HotelsSearchScreen extends Component {
 
           {this.renderFooter()}
           {this.renderToast() }
+
+          {this.renderDebug()}
         </View>
 
         {/* <ProgressDialog
@@ -1569,11 +1784,15 @@ class HotelsSearchScreen extends Component {
 const mapStateToProps = state => {
   return {
     currency: state.currency.currency,
-    isApplyingFilter: state.userInterface.isApplyingFilter
+    isApplyingFilter: state.userInterface.isApplyingFilter,
+    searchResults: state.hotels.searchResults,
+    //searchResultsFiltered: state.hotels.searchResultsFiltered,
   };
 };
 const mapDispatchToProps = dispatch => ({
   setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
+  setSearch: bindActionCreators(setSearch, dispatch),
+  //setSearchFiltered: bindActionCreators(setSearchFiltered, dispatch),
 })
 
 

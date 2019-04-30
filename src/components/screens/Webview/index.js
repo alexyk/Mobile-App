@@ -7,7 +7,7 @@
  */
 
 import { 
-    BackHandler, Platform, View, WebView, Text, SafeAreaView
+    BackHandler, Platform, View, WebView, Text, SafeAreaView, TouchableOpacity
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -263,17 +263,37 @@ class WebviewScreen extends Component {
         return false;
     }
 
+    renderDebug() {
+        if (!__DEV__) {
+            return null;
+        }
+        if (this.webViewRef.ref == null) {
+            console.warn('[WebView::renderDebug] this.webViewRef.ref is not set - not showing debug button')
+            return null;
+        }
+
+        return (
+            <TouchableOpacity onPress={this.onDebugPress}>
+                <View style={{left:20, top:3, backgroundColor: '#777A', width: 130, borderRadius: 5}}>
+                    <Text style={{textAlign: 'center'}}>{"RELOAD WEBVIEW"}</Text>
+                </View>
+            </TouchableOpacity>
+        )
+    }
+
     render() {
         const patchPostMessageJsCode = '(' + String(this.patchPostMessageFunction) + ')();';
+
+        //console.log(`[WebView] Loading '${this.state.webViewUrl}'`)
 
         return (
             <SafeAreaView style={styles.safeArea}>
                 <View style={styles.container}>
                     <View style={styles.backButtonContainer}>
                         <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
-                        <Text style={styles.title}>{this.state.title}</Text>
-                        <BackButton onPress={this.onDebugPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
-                        <Text style={styles.title}>{"Debug"}</Text>
+                        {/* <Text style={styles.title}>{this.state.title}</Text> */}
+                        <Text style={styles.backText}>{'Modify search'}</Text>
+                        {this.renderDebug()}
                     </View>
 
                     <View style={styles.webviewContainer}>
@@ -291,12 +311,12 @@ class WebviewScreen extends Component {
                     </View>
 
                     <ProgressDialog
-                    visible={this.state.showProgress}
-                    title="Loading"
-                    message={this.state.message ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
-                    animationType="slide"
-                    activityIndicatorSize="large"
-                    activityIndicatorColor="black"/>
+                        visible={this.state.showProgress}
+                        title="Loading"
+                        message={this.state.message ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
+                        animationType="slide"
+                        activityIndicatorSize="large"
+                        activityIndicatorColor="black"/>
                 </View>
             </SafeAreaView>
         );

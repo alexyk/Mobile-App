@@ -1,0 +1,341 @@
+[
+	{
+	  "id": 8958,
+	  "name": "Best Western Expo Hotel",
+	  "price": 51.15,
+	  "lat": 42.648117,
+	  "lon": 23.396464,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2879475844192542-65584.png"
+	  }
+	},
+	{
+	  "id": 9638,
+	  "name": "Brod",
+	  "price": 37.04,
+	  "lat": 42.650005682179,
+	  "lon": 23.335421523493,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2880347881797170-68257.png"
+	  }
+	},
+	{
+	  "id": 10084,
+	  "name": "Sofia Hotel Balkan (Formerly Sheraton Sofia Balkan)",
+	  "price": 65.97,
+	  "lat": 42.697011,
+	  "lon": 23.322309,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2844907577722831-69993.png"
+	  }
+	},
+	{
+	  "id": 10236,
+	  "name": "Sveta Sofia",
+	  "price": 49.85,
+	  "lat": 42.699809335832,
+	  "lon": 23.318842913674,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2869204454848939-70595.png"
+	  }
+	},
+	{
+	  "id": 10434,
+	  "name": "Hotel Forum",
+	  "price": 32.53,
+	  "lat": 42.684332,
+	  "lon": 23.297284,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2902563743792483-71334.png"
+	  }
+	},
+	{
+	  "id": 11599,
+	  "name": "Park Moska",
+	  "price": 57.16,
+	  "lat": 42.673500776287,
+	  "lon": 23.348658568123,
+	  "thumbnail": {
+		"url": "RXLImages/7/SOF-PAR1hotel_Guest_Room_2.jpg"
+	  }
+	},
+	{
+	  "id": 13112,
+	  "name": "Lion",
+	  "price": 43.14,
+	  "lat": 42.704393,
+	  "lon": 23.32387,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2868132840748998-81870.png"
+	  }
+	},
+	{
+	  "id": 13233,
+	  "name": "Hotel Marinela Sofia (Formerly Kempinski Hotel Zografski Sofia)",
+	  "price": 58.26,
+	  "lat": 42.672319486805,
+	  "lon": 23.318996429444,
+	  "hotelPhoto": {
+		"url": "hotels/images/img-2-2869066182398566-82378.png"
+	  },
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2869064216766518-82378.png"
+	  }
+	},
+	{
+	  "id": 13698,
+	  "name": "Holiday Inn",
+	  "price": 65.37,
+	  "lat": 42.625264,
+	  "lon": 23.375491,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2885965744043694-84280.png"
+	  }
+	},
+	{
+	  "id": 13899,
+	  "name": "Maison Sofia Hotel (Formerly Park Inn By Radisson)",
+	  "price": 57.16,
+	  "lat": 42.666247194141,
+	  "lon": 23.327563364418,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2879474431063681-85126.png"
+	  }
+	},
+	{
+	  "id": 14203,
+	  "name": "Downtown",
+	  "price": 57.16,
+	  "lat": 42.686917444229,
+	  "lon": 23.324813121304,
+	  "thumbnail": {
+		"url": "RXLImages/7/SOF-DOWhotel_Meeting_Room_1.jpg"
+	  }
+	},
+	{
+	  "id": 22841,
+	  "name": "Renaissance Hotel",
+	  "price": 37.84,
+	  "lat": 42.697214,
+	  "lon": 23.31478,
+	  "thumbnail": {
+		"url": "RXLImages/7/SOF-9Mhotel_Lobby_2.jpg"
+	  }
+	},
+	{
+	  "id": 24277,
+	  "name": "Accord Hotel",
+	  "price": 32.43,
+	  "lat": 42.705003899401,
+	  "lon": 23.355318893254,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2879476961808555-153842.png"
+	  }
+	},
+	{
+	  "id": 24278,
+	  "name": "Vitosha Park Hotel",
+	  "price": 32.33,
+	  "lat": 42.656837,
+	  "lon": 23.352993,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2900328012053570-153845.png"
+	  }
+	},
+	{
+	  "id": 24280,
+	  "name": "Lozenetz Hotel",
+	  "price": 48.15,
+	  "lat": 42.678287,
+	  "lon": 23.326047813492,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2879468878375409-153864.png"
+	  }
+	},
+	{
+	  "id": 26299,
+	  "name": "Best Western Hotel Europe",
+	  "price": 49.85,
+	  "lat": 42.676539084183,
+	  "lon": 23.360588550926,
+	  "thumbnail": {
+		"url": "RXLImages/7/SOF-EURhotel_Swimming_Pool_1.jpg"
+	  }
+	},
+	{
+	  "id": 26310,
+	  "name": "Best Western Premier Collection City Hotel (Formerly Best Western Plus Sofia)",
+	  "price": 55.56,
+	  "lat": 42.699073,
+	  "lon": 23.332391,
+	  "hotelPhoto": {
+		"url": "hotels/images/img-2-2885977378300359-171355.png"
+	  },
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2885977378300359-171355.png"
+	  }
+	},
+	{
+	  "id": 26313,
+	  "name": "Legends",
+	  "price": 48.55,
+	  "lat": 42.663546,
+	  "lon": 23.317051,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2885978546609964-171365.png"
+	  }
+	},
+	{
+	  "id": 26314,
+	  "name": "Gloria Palace",
+	  "price": 36.04,
+	  "lat": 42.700729,
+	  "lon": 23.322679,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2885978114537188-171368.png"
+	  }
+	},
+	{
+	  "id": 26316,
+	  "name": "Central Park",
+	  "price": 70.37,
+	  "lat": 42.685739966988,
+	  "lon": 23.317129611969,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2885976467468825-171375.png"
+	  }
+	},
+	{
+	  "id": 26322,
+	  "name": "Hill",
+	  "price": 48.35,
+	  "lat": 42.672526,
+	  "lon": 23.320176,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2889761065749583-171397.png"
+	  }
+	},
+	{
+	  "id": 26323,
+	  "name": "Arte",
+	  "price": 70.17,
+	  "lat": 42.697956,
+	  "lon": 23.32494,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2891555587506831-171400.png"
+	  }
+	},
+	{
+	  "id": 26324,
+	  "name": "Silver House",
+	  "price": 35.74,
+	  "lat": 42.658599,
+	  "lon": 23.336213,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2891682488831699-171404.png"
+	  }
+	},
+	{
+	  "id": 30457,
+	  "name": "Hotel Montecito (Formerly Gorubliansko Hanche)",
+	  "price": 35.34,
+	  "lat": 42.638463,
+	  "lon": 23.413281,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2903518575198536-253573.png"
+	  }
+	},
+	{
+	  "id": 30474,
+	  "name": "Metropolitan",
+	  "price": 54.35,
+	  "lat": 42.657064,
+	  "lon": 23.383096,
+	  "hotelPhoto": {
+		"url": "hotels/images/img-2-2903721453159265-253865.png"
+	  },
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2903721453159265-253865.png"
+	  }
+	},
+	{
+	  "id": 32392,
+	  "name": "Gloria Palace Diplomat Hotel (Formerly Holiday Village)",
+	  "price": 30.73,
+	  "lat": 42.671722,
+	  "lon": 23.248717209995,
+	  "thumbnail": {
+		"url": "RXLImages/7/SOF-HOL1hotel_Exterior_2.jpg"
+	  }
+	},
+	{
+	  "id": 34978,
+	  "name": "Budapest",
+	  "price": 50.65,
+	  "lat": 42.707516,
+	  "lon": 23.326618,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2911699493310454-1292940.png"
+	  }
+	},
+	{
+	  "id": 34979,
+	  "name": "Maxim",
+	  "price": 46.45,
+	  "lat": 42.705840614623,
+	  "lon": 23.324075192213,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2895204923496539-1292943.png"
+	  }
+	},
+	{
+	  "id": 41866,
+	  "name": "City Avenue",
+	  "price": 41.14,
+	  "lat": 42.704412602091,
+	  "lon": 23.309356570244,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2869277220116110-41866.png"
+	  }
+	},
+	{
+	  "id": 45629,
+	  "name": "Festa",
+	  "price": 48.55,
+	  "lat": 42.659877,
+	  "lon": 23.286481,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2881266040270605-10727707.png"
+	  }
+	},
+	{
+	  "id": 51432,
+	  "name": "Bon Voyage Hotel Alexander",
+	  "price": 25.23,
+	  "lat": 42.72611405936,
+	  "lon": 23.263673186302,
+	  "thumbnail": {
+		"url": "RXLImages/7/SOF-9Uhotel_Guest_Room_1.jpg"
+	  }
+	},
+	{
+	  "id": 56152,
+	  "name": "Ibis Sofia Airport",
+	  "price": 39.94,
+	  "lat": 42.687104,
+	  "lon": 23.397165,
+	  "thumbnail": {
+		"url": "hotels/images/img-2-2927983992912142-23219078.png"
+	  }
+	},
+	{
+	  "id": 66845,
+	  "name": "Suite Hotel Sofia",
+	  "price": 69.67,
+	  "lat": 42.653527,
+	  "lon": 23.346526,
+	  "thumbnail": {
+		"url": "RXLImages/7/SOF-97hotel_Guest_Room_10.jpg"
+	  }
+	}
+]

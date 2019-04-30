@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-// import { bindActionCreators } from 'redux';
+import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, SafeAreaView} from 'react-native';
 import Image from 'react-native-remote-svg';
@@ -8,8 +8,10 @@ import PropTypes from 'prop-types';
 import CheckBox from 'react-native-checkbox';
 import RNPickerSelect from 'react-native-picker-select';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
-// import LTLoader from '../../../molecules/LTLoader';
-// import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
+import LTLoader from '../../../molecules/LTLoader';
+import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
+import { log } from '../../../../config-debug'
+
 
 class HotelFilters extends Component {
   static propTypes = {
@@ -28,20 +30,22 @@ class HotelFilters extends Component {
 
     const { params } = this.props.navigation.state;
 
+		//log('HOTELS-FILTER',`See filter params, priceRange: ${params.priceRange}`, params)
+		
     this.state = {
       isHotelSelected: true,
       selectedRating: 4,
       showUnAvailable: false,
-      hotelName: '',
+      nameFilter: params.nameFilter,
       count: {
         beds: 2,
         bedrooms: 0,
         bathrooms: 0
       },
       rooms : [{ adults: 2, children: [] }],
-      priceSort: 'rank,desc',//'priceForSort,asc',
+      orderBy: params.orderBy,
       selectedRating: [false,false,false,false,false],
-      priceRange: params.priceRange,
+      priceRange: params.priceRangeSelected,
       priceItems: [
         {
           label: 'Rank',
@@ -59,7 +63,7 @@ class HotelFilters extends Component {
     }
     this.state.selectedRating = params.selectedRating
     this.state.showUnAvailable = params.showUnAvailable
-    this.state.hotelName = params.hotelName
+    this.state.nameFilter = params.nameFilter
     //this.state.count = params.count
 
     this.priceMin = params.priceRange[0];
@@ -142,9 +146,15 @@ class HotelFilters extends Component {
   }
 
   onFilter = () => {
-    // this.props.setIsApplyingFilter(true);
-    this.props.navigation.state.params.updateFilter(this.state);
+    this.props.setIsApplyingFilter(true);
     this.props.navigation.goBack();
+    
+    const func = this.props.navigation.state.params.updateFilter;
+    const state = this.state;
+    setTimeout(
+    	() => func(state, true),
+    	300
+    )
   }
 
   renderBackButton() {
@@ -180,10 +190,10 @@ class HotelFilters extends Component {
           <Text style={styles.pricingText}>Name</Text>
         </View>
         <TextInput
-          value={this.state.hotelName}
+          value={this.state.nameFilter}
           ref={(i) => { this.input = i; }}
           underlineColorAndroid={'transparent'}
-          onChangeText={(text) => this.setState({hotelName: text})}
+          onChangeText={(text) => this.setState({nameFilter: text})}
           style={{flex:1, height: 40, margin: 15, borderColor: 'grey', borderWidth: 1, borderRadius: 5, paddingLeft: 5}}
         />
       </View>
@@ -216,10 +226,10 @@ class HotelFilters extends Component {
             <RNPickerSelect
                 items={this.state.priceItems}
                 onValueChange={(value) => {
-                    this.setState({priceSort: value})
+                    this.setState({orderBy: value})
                 }}
-                value={this.state.priceSort}
-                style={{ ...pickerSelectStyles }}
+                value={this.state.orderBy}
+                style={pickerSelectStyles}
             />
         </View>
       </View>
@@ -353,9 +363,9 @@ class HotelFilters extends Component {
             </TouchableOpacity>
           </View> */}
         
-        {/* <LTLoader isLoading={this.props.isApplyingFilter} 
+        <LTLoader isLoading={this.props.isApplyingFilter} 
           style={{height:'80%', marginTop:'20%'}}
-        /> */}
+        />
           
         </View>
       </SafeAreaView>
@@ -422,6 +432,16 @@ const pickerSelectStyles = StyleSheet.create({
     alignSelf: 'flex-end',
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
+  },
+  inputAndroid: {
+    height: 50,
+    width: 120,
+    //fontSize: 16,
+    // color: 'black',
+    alignSelf: 'flex-end',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-start',
+    //backgroundColor: 'red'
   }
 });
 
@@ -435,7 +455,7 @@ let mapStateToProps = (state) => {
 }
 
 const mapDispatchToProps = dispatch => ({
-  // setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
+  setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(HotelFilters);

@@ -78,9 +78,11 @@ export default styles = StyleSheet.create({
     fontFamily: 'FuturaStd-Light'
   },
   filterComponentHorizontalContainer: {
+    width: '100%',
     flexDirection: 'row', 
     alignItems: 'center',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    // backgroundColor: 'red'
   },
   separator: {
     width: "100%",
@@ -155,6 +157,7 @@ export default styles = StyleSheet.create({
   pricingText: {
     fontSize: 18,
     fontFamily: 'FuturaStd-Medium',
+    width:"50%"
   },
   set: {
     alignSelf: 'stretch',

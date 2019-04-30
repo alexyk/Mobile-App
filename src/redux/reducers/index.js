@@ -7,6 +7,7 @@ import locAmounts from './locAmounts'
 import exchangeRates from './exchangeRates';
 import locPriceUpdateTimer from './locPriceUpdateTimer'
 import userInterface from './userInterface'
+import hotels from './hotels'
 
 function nav(state, action) {
     const nextState = RootNavigator.router.getStateForAction(action, state);
@@ -21,7 +22,8 @@ const appReducers = combineReducers({
     locAmounts,
     exchangeRates,
     locPriceUpdateTimer,
-    userInterface
+    userInterface,
+    hotels
 });
 
 export default appReducers;

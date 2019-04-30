@@ -1,0 +1,102 @@
+{
+  "content": [
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />A stay at Novotel Paris Centre Tour Eiffel places you in the heart of Paris, walking distance from Statue of Liberty - Paris and Beaugrenelle. This 4-star hotel is close to Eiffel Tower and Arc de Triomphe.</p><p><b>Rooms",
+      "name": "Novotel Paris Centre Tour Eiffel",
+      "id": 2815,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2863671546166018-37686.png"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />Located in Paris (Gare Montparnasse - Porte de Versailles), Aparthotel Adagio Paris Centre Tour Eiffel is minutes from Beaugrenelle and Statue of Liberty - Paris. This 4-star residence is close to Eiffel Tower and Arc de ",
+      "name": "Aparthotel Adagio Paris Centre Tour Eiffel",
+      "id": 11790,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2893487729851101-76594.png"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />A stay at Hyatt Regency Paris Etoile places you in the heart of Paris, minutes from Palais des Congres de Paris and close to Arc de Triomphe. This 4-star hotel is close to Eiffel Tower and Louvre Museum.</p><p><b>Rooms</b",
+      "name": "Hyatt Regency Paris Etoile",
+      "id": 2871,
+      "hotelPhoto": {
+        "url": "RXLImages/7/PAR-CONAhotel_Conference_facilities_1.jpg"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Hôtel Concorde Montparnasse, you'll be centrally located in Paris, steps from Place de Catalogne and minutes from Bobino. This 4-star hotel is close to Notre Dame Cathedral and Eiffel Tower.</p><p><b>Rooms<",
+      "name": "Hotel Concorde Montparnasse",
+      "id": 3506,
+      "hotelPhoto": {
+        "url": "RXLImages/7/PAR-BLE4hotel_Lobby_2.jpg"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Pullman Paris Montparnasse, you'll be centrally located in Paris, steps from Place de Catalogne and minutes from Bobino. This 4-star hotel is close to Notre Dame Cathedral and Louvre Museum.</p><p><b>Rooms<",
+      "name": "Pullman Paris Montparnasse",
+      "id": 2651,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2840088301137601-36987.png"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />A stay at Royal Garden Champs-Elysées places you in the heart of Paris, minutes from Lido and close to Arc de Triomphe. This 4-star hotel is close to Eiffel Tower and Louvre Museum.</p><p><b>Rooms</b> <br />Stay in one of",
+      "name": "Royal Garden Champs-Elysées",
+      "id": 3537,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2837511619774849-40785.png"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />Located in Bagnolet (Pere Lachaise - Menilmontant), Novotel Paris Est is close to Hospital Robert-Debre and Philharmonie de Paris.  This 4-star hotel is within close proximity of Grande halle de la Villette and Bercy Aren",
+      "name": "Novotel Paris Est",
+      "id": 48228,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2863837206868153-3532694.png"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />A stay at Park & Suites Prestige Paris Grande Bibliotheque places you in the heart of Paris, minutes from Paris Diderot University and close to Notre Dame Cathedral. This 4-star residence is within close proximity of Nati",
+      "name": "Appart'City Confort Paris Grande Bibliotheque",
+      "id": 31637,
+      "hotelPhoto": {
+        "url": "RXLImages/7/PAR-PARUhotel_Suite_2.jpg"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Mercure Paris Centre Tour Eiffel, you'll be centrally located in Paris, minutes from Pont de Bir-Hakeim and Eiffel Tower. This 4-star hotel is close to Arc de Triomphe and Louvre Museum.</p><p><b>Rooms</b> ",
+      "name": "Mercure Paris Centre Tour Eiffel",
+      "id": 2696,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2854081900257203-37173.png"
+      },
+      "star": 4
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Best Western Premier Le Swann, you'll be centrally located in Paris, convenient to Musee Nissim de Camondo and Arc de Triomphe. This 4-star hotel is close to Louvre Museum and Eiffel Tower.</p><p><b>Rooms</",
+      "name": "Best Western Premier Le Swann",
+      "id": 2791,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2859182546368661-37587.png"
+      },
+      "star": 4
+    }
+  ],
+  "last": false,
+  "totalPages": 112,
+  "totalElements": 1113,
+  "size": 10,
+  "number": 0,
+  "sort": null,
+  "numberOfElements": 10,
+  "first": true
+}
