@@ -74,6 +74,7 @@ import {
   generateFilterInitialData,
   generateHotelFilterString,
   applyHotelsSearchFilter,
+  processFilteredHotels,
   updateHotelsFromFilters,
   updateHotelIdsMap,
   updateHotelsFromSocketCache,
@@ -90,7 +91,7 @@ import stomp from "stomp-websocket-js";
 import { isNative } from "../../../../version";
 import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
 import { setSearch/*, setSearchFiltered*/ } from '../../../../redux/action/hotels'
-import { isOnline, log } from '../../../../config-debug'
+import { isOnline, log, webviewDebugEnabled } from '../../../../config-debug'
 
 const { width, height } = Dimensions.get("window");
 
@@ -674,12 +675,12 @@ class HotelsSearchScreen extends Component {
         const count = data.content.length;
         const hotelsAll = data.content;
 
-        log('filtered-hotels',`${count} filtered hotels, before parsing`, {hotelsAll})
+        // log('filtered-hotels',`${count} filtered hotels, before parsing`, {hotelsAll})
 
         // parse data
         mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap)
 
-        log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
+        // log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
 
         if (this.isFirstFilter) {
           // caching to:
@@ -696,25 +697,23 @@ class HotelsSearchScreen extends Component {
           this.listSetPageLimit(this.PAGE_LIMIT);
         }
         
-        // calculate min &max price
-        hotelsAll.map(item => {
-          if (item.price != null) {
-            if (_this.priceMax < item.price) {
-              _this.priceMax = item.price;
-            }
-            if (_this.priceMin > item.price) {
-              _this.priceMin = item.price;
-            }
-          }
-          return null
-        })
+        const {priceMin,priceMax,newIdsMap} = processFilteredHotels(hotelsAll, this.state.hotelsInfo, this.hotelsIndicesByIdMap, this.priceMin, this.priceMax)
+        this.priceMin = priceMin;
+        this.priceMax = priceMax;
+        this.hotelsIndicesByIdMap = newIdsMap;        
 
         // update state with new hotels
         this.setState(
           // state update
           (prevState) => {
-            const newState = this.onUpdateHotelsInfo(prevState, false, hotelsAll)
-            newState.totalHotels = count;
+            // const newState = this.onUpdateHotelsInfo(prevState, false, hotelsAll)
+            // newState.totalHotels = count;
+            this.listUpdateDataSource(hotelsAll);
+            const newState = {
+              hotelsInfo: hotelsAll,
+              hotelsInfoForMap: hotelsAll,
+              totalHotels: count
+            }
             return newState;
           },
           // callback after state update
@@ -823,7 +822,8 @@ class HotelsSearchScreen extends Component {
                   : prevState.displayMode,
               hotelsInfoForMap,
               hotelsInfo: hotelsInfoFresh,
-              totalHotels: data.totalElements
+              totalHotels: data.totalElements,
+              isLoading: false
             };
           },
           function() {
@@ -925,148 +925,6 @@ class HotelsSearchScreen extends Component {
     }
   }
 
-  onSearchHandler = value => {
-    this.setState({ search: value });
-    if (value === "") {
-      this.setState({ cities: [] });
-    } else {
-      requester.getRegionsBySearchParameter([`query=${value}`]).then(res => {
-        res.body.then(data => {
-          if (this.state.search != "") {
-            this.setState({ cities: data });
-          }
-        });
-      });
-    }
-  };
-
-  gotoGuests = () => {
-    this.props.navigation.navigate("GuestsScreen", {
-      guests: this.state.guests,
-      adults: this.state.adults,
-      children: this.state.children,
-      infants: this.state.infants,
-      updateData: this.updateData,
-      childrenBool: this.state.childrenBool
-    });
-  };
-
-  gotoSearch = () => {
-    this.setState(
-      { isFilterResult: false, displayMode: DISPLAY_MODE_SEARCHING },
-      () => {
-        this.saveState();
-        this.getStaticHotelsData();
-      }
-    );
-  };
-
-  gotoCancel = () => {
-    this.setState(
-      // TODO: Previous State was cached separately
-      //       this was done in a non-react way, saving previousState
-      //       as a static object. If needed - do it again instead of using prevState
-      //       as below it is supposed to use in react-ways.
-      // See: https://reactjs.org/docs/react-component.html#setstate
-      // change state function
-      function(prevState, updatedProps) {
-        let baseInfo = {};
-        baseInfo["adults"] = prevState.adults;
-        baseInfo["children"] = [];
-        for (let i = 0; i < prevState.children.children; i++) {
-          baseInfo["children"].push({ age: 0 });
-        }
-        let roomsData = [baseInfo];
-        let roomsDummyData = encodeURI(JSON.stringify(roomsData));
-
-        return {
-          search: prevState.search,
-          regionId: prevState.regionId,
-
-          checkInDate: prevState.checkInDate,
-          checkInDateFormated: prevState.checkInDateFormated,
-          checkOutDate: prevState.checkOutDate,
-          checkOutDateFormated: prevState.checkOutDateFormated,
-          daysDifference: prevState.daysDifference,
-
-          adults: prevState.adults,
-          children: prevState.children,
-          infants: prevState.infants,
-          guests: prevState.guests,
-          childrenBool: prevState.childrenBool,
-          roomsDummyData: roomsDummyData,
-
-          isNewSearch: false
-        };
-      }
-    );
-  };
-
-  handleAutocompleteSelect = (id, name) => {
-    // TODO: Previous State was cached separately
-    //       this was done in a non-react way, saving previousState
-    //       as a static object. If needed - do it again instead of using prevState
-    //       as below it is supposed to use in react-ways.
-    // See: https://reactjs.org/docs/react-component.html#setstate
-    this.setState(
-      // change state function
-      function(prevState, updatedProps) {
-        let stateUpdate = {
-          cities: [],
-          search: name,
-          regionId: id
-        };
-
-        if (prevState.regionId == id) {
-          stateUpdate.isNewSearch = true;
-        }
-      }
-    );
-  };
-
-  onDatesSelect = ({ startDate, endDate, startMoment, endMoment }) => {
-    const start = moment(startDate, "ddd, DD MMM");
-    const end = moment(endDate, "ddd, DD MMM");
-    this.setState({
-      daysDifference: moment.duration(end.diff(start)).asDays(),
-      checkInDate: startDate,
-      checkOutDate: endDate,
-      checkInDateFormated: startMoment.format("DD/MM/YYYY"),
-      checkOutDateFormated: endMoment.format("DD/MM/YYYY"),
-      isNewSearch: true
-    });
-  };
-
-  updateData = data => {
-    if (
-      this.state.adults === data.adults &&
-      this.state.children === data.children &&
-      this.state.infants === data.infants &&
-      this.state.childrenBool === data.childrenBool
-    ) {
-      return;
-    }
-
-    let baseInfo = {};
-    baseInfo["adults"] = data.adults;
-    baseInfo["children"] = [];
-    for (let i = 0; i < data.children; i++) {
-      baseInfo["children"].push({ age: 0 });
-    }
-    let roomsData = [baseInfo];
-    let roomsDummyData = encodeURI(JSON.stringify(roomsData));
-
-    this.setState({
-      adults: data.adults,
-      children: data.children,
-      infants: data.infants,
-      guests: data.adults + data.children + data.infants,
-      childrenBool: data.childrenBool,
-      roomsDummyData: roomsDummyData,
-      isNewSearch: true
-    });
-  };
-
   /**
    * TODO: Check if this can be removed
    */
@@ -1159,8 +1017,6 @@ class HotelsSearchScreen extends Component {
       orderBy: data.orderBy,
     }
 
-    // set isLoading in Redux
-    this.props.setIsApplyingFilter(true);
     this.setState({
       error: null,
       ...filterParams
@@ -1168,6 +1024,7 @@ class HotelsSearchScreen extends Component {
 
 
     if (fromUI) {
+      this.props.setIsApplyingFilter(true);
       filterParams.priceRange = data.priceRange
 
       const hotelsAll = this.hotelsAll;
@@ -1242,12 +1099,10 @@ class HotelsSearchScreen extends Component {
           <SearchBar
             autoCorrect={false}
             value={this.state.search}
-            onChangeText={this.onSearchHandler}
-            placeholder="Discover your next experience"
             placeholderTextColor="#bdbdbd"
             leftIcon="arrow-back"
             onLeftPress={this.onBackButtonPress}
-            editable={this.state.editable}
+            editable={false}
           />
         </View>
       </View>
@@ -1279,10 +1134,6 @@ class HotelsSearchScreen extends Component {
           children={this.state.children}
           infants={this.state.infants}
           guests={this.state.guests}
-          gotoGuests={this.gotoGuests}
-          gotoSearch={this.gotoSearch}
-          gotoCancel={this.gotoCancel}
-          onDatesSelect={this.onDatesSelect}
           gotoFilter={this.gotoFilter}
           disabled={!this.state.editable}
           showSearchButton={this.state.isNewSearch}
@@ -1694,7 +1545,10 @@ class HotelsSearchScreen extends Component {
   }
 
   renderDebug() {
-    if (!__DEV__) return null;
+    if (!__DEV__ || !webviewDebugEnabled) {
+      // webview debug is disabled in these cases
+      return null;
+    }
 
     if (this.webViewRef == null) {
       // console.warn('[WebView::renderDebug] this.webViewRef.ref is not set - not showing debug button')
@@ -1759,7 +1613,7 @@ class HotelsSearchScreen extends Component {
             {this.renderResultsAsList()}
             {/* {this.renderContent()} */}
   
-            <LTLoader isLoading={this.state.isLoading || this.props.isApplyingFilter} />
+            <LTLoader isLoading={this.state.isLoading} />
             {this.renderMapButton()}
           </View>
 

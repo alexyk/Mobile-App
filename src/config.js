@@ -33,7 +33,7 @@ export let Config = {
 export let HOTELS_STATIC_CONNECTION_TIMEOUT = 10;
 export let HOTELS_SOCKET_CONNECTION_TIMEOUT = 15;
 export let HOTELS_SOCKET_CONNECTION_UPDATE_TICK = 1;
-export const DEFAULT_HOTEL_PNG = "https://static.locktrip.com/listings/images/listing_thumbnail_1529077862408_default.png";
+export const DEFAULT_HOTEL_PNG = "listings/images/listing_thumbnail_1529077862408_default.png";
 
 // CONFIGS 
 const LT_PROD       = "PRODUCTION";

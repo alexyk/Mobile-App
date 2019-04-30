@@ -185,12 +185,14 @@ export function parseAndCacheHotelDataFromSocket(
   	  		: (current.star != null ? current.star : current.stars)
   	  	)
     ),
-    hotelPhoto: (hotelData.hotelPhoto ? hotelData.hotelPhoto : current.hotelPhoto),
     thumbnail:
-      hotelData.thumbnail && hotelData.thumbnail.url
-        ? hotelData.thumbnail
-        : current.thumbnail
+    hotelData.thumbnail && hotelData.thumbnail.url
+      ? hotelData.thumbnail
+      : current.thumbnail
   };
+
+  // if ()
+  // hotelPhoto: (hotelData.hotelPhoto ? hotelData.hotelPhoto : current.hotelPhoto),
 
   if (!parsedInfo.hotelPhoto || parsedInfo.hotelPhoto.url == '') {
     parsedInfo.hotelPhoto = parsedInfo.thumbnail;
@@ -427,6 +429,38 @@ export function applyHotelsSearchFilter(data, filter) {
   
   console.timeEnd('*** utils::applyHotelsSearchFilter()')
   return filtered
+}
+
+export function processFilteredHotels(filtered, hotelsOld, hotelsOldIdsMap, priceMinOld, priceMaxOld) {
+  let priceMin = priceMinOld;
+  let priceMax = priceMaxOld;
+  let newIdsMap = {}
+
+  // calculate min &max price
+  filtered.map((item,index) => {
+    // process images
+    const oldIndex = hotelsOldIdsMap[item.id];
+    if (oldIndex != null) {
+      filtered.hotelPhoto = hotelsOld[oldIndex].hotelPhoto;
+      filtered.thumbnail = hotelsOld[oldIndex].thumbnail;
+    }
+    newIdsMap[item.id] = index;
+
+    // process price
+    if (item.price != null) {
+      if (priceMax < item.price) {
+        priceMax = item.price;
+      }
+      if (priceMin > item.price) {
+        priceMin = item.price;
+      }
+    }
+    return null
+  })
+
+  return {
+    priceMin, priceMax, newIdsMap
+  }
 }
 
 export function generateFilterInitialData(showUnAvailable=false, state) {

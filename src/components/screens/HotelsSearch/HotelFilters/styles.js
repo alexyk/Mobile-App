@@ -143,6 +143,17 @@ export default styles = StyleSheet.create({
   activeRatingText: {
     color: '#fff'
   },
+  nameView: {
+    paddingLeft: 15,
+    paddingTop: 15,
+    paddingBottom: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    flex: 0.3,
+    // backgroundColor: 'red'
+    // borderTopWidth: 1,
+    // borderTopColor: '#c6c6c6'
+  },
   pricingView: {
     padding: 15,
     flexDirection: 'row',

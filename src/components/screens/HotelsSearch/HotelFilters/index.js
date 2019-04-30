@@ -186,7 +186,7 @@ class HotelFilters extends Component {
   renderFilterByName() {
     return (
       <View style={styles.filterComponentHorizontalContainer}>
-        <View style= {this.state.isHotelSelected ? styles.pricingView :styles.emptyPricingView}>
+        <View style= {this.state.isHotelSelected ? styles.nameView :styles.emptyPricingView}>
           <Text style={styles.pricingText}>Name</Text>
         </View>
         <TextInput
@@ -194,7 +194,7 @@ class HotelFilters extends Component {
           ref={(i) => { this.input = i; }}
           underlineColorAndroid={'transparent'}
           onChangeText={(text) => this.setState({nameFilter: text})}
-          style={{flex:1, height: 40, margin: 15, borderColor: 'grey', borderWidth: 1, borderRadius: 5, paddingLeft: 5}}
+          style={{flex:0.7, height: 40, margin: 15, borderColor: 'grey', borderWidth: 1, borderRadius: 5, paddingLeft: 5}}
         />
       </View>
     )

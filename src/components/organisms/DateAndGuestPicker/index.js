@@ -43,33 +43,36 @@ class DateAndGuestPicker extends Component {
             checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable
         } = this.props;
 
+        const isCalendarDisabled = (disabled || this.props.onDatesSelect == null);
+        const isGuestsDisabled = (disabled || this.props.gotoGuests == null);
+
         return (
             <View style={styles.container}>
                 <View style={styles.pickerRow}>
                     <View style={{flex:1}}>
                         <TouchableOpacity
-                            onPress={this.onCalendar}
+                            onPress={isCalendarDisabled ? null : this.onCalendar}
                             style={checkInDate && checkOutDate ? styles.datesPickerViewComplete : styles.datesPickerViewIncomplete}
-                            disabled={disabled}>
+                            disabled={isCalendarDisabled}>
                             <View style={styles.datePickerView}>
-                                <Text style={disabled ? styles.label_disabled : styles.label}>Check In</Text>
+                                <Text style={isCalendarDisabled ? styles.label_disabled : styles.label}>Check In</Text>
                                 <Text style={styles.value}>{ checkInDate || 'Select Date' }</Text>
                             </View>
 
                             <View style={styles.separator} />
 
                             <View style={styles.datePickerView}>
-                                <Text style={disabled ? styles.label_disabled : styles.label}>Check Out</Text>
+                                <Text style={isCalendarDisabled ? styles.label_disabled : styles.label}>Check Out</Text>
                                 <Text style={styles.value}>{ checkOutDate || '------' }</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity
-                        onPress={this.onGuests}
-                        disabled={disabled}>
+                        onPress={isGuestsDisabled ? null : this.onGuests}
+                        disabled={isGuestsDisabled}>
                         <View style={adults + children + infants ? styles.guestPickerViewComplete : styles.guestPickerViewIncomplete}>
-                            <Text style={disabled ? styles.label_disabled : styles.label}>Guests</Text>
+                            <Text style={isGuestsDisabled ? styles.label_disabled : styles.label}>Guests</Text>
                             <Text style={styles.value}>{ adults + children + infants || '-' }</Text>
                         </View>
                     </TouchableOpacity>
@@ -122,13 +125,13 @@ DateAndGuestPicker.propTypes = {
 DateAndGuestPicker.defaultProps = {
     checkInDate: '',
     checkOutDate: '',
-    onDatesSelect: ()=>{},
+    onDatesSelect: null,
     adults: 2,
     children: 0,
     infants: 0, 
     gotoSearch: ()=>{},
     gotoCancel: ()=>{},
-    gotoGuests: ()=>{},
+    gotoGuests: null,
     gotoFilter: ()=>{},
     showSearchButton: false,
     showCancelButton : false,

@@ -12,6 +12,7 @@ export const logConverterError                  = false;
 export const logConverterErrorToReactrotron     = false;
   // options
 export const reduxConsoleCollapsedLogging       = true;
+export const webviewDebugEnabled                = false;
 
   // other
 // Offline mode

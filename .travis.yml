@@ -97,7 +97,7 @@ jobs:
       install:
         - brew install ninja
         - wget https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
-        - unzip sdk-tools-darwin-4333796.zip
+        - unzip sdk-tools-darwin-4333796.zip &> /dev/null
         - mkdir ~/android
         - cd mv tools ~/android/
         - export ANDROID_HOME=~/android/

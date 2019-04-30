@@ -18,6 +18,7 @@ import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
+import { webviewDebugEnabled } from '../../../config-debug';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -264,9 +265,11 @@ class WebviewScreen extends Component {
     }
 
     renderDebug() {
-        if (!__DEV__) {
+        if (!__DEV__ || !webviewDebugEnabled) {
+            // webview debug disabled in these cases
             return null;
         }
+        
         if (this.webViewRef.ref == null) {
             console.warn('[WebView::renderDebug] this.webViewRef.ref is not set - not showing debug button')
             return null;
