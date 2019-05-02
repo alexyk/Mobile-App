@@ -5,7 +5,7 @@ import FontAwesome, { Icons } from "react-native-fontawesome";
 import Image from "react-native-remote-svg";
 import CardView from "react-native-cardview";
 import PropTypes from "prop-types";
-import { imgHost, DEFAULT_HOTEL_PNG } from "../../../config";
+import { imgHost, DEFAULT_HOTEL_PNG, showNoOnHotelItem } from "../../../config";
 import _ from "lodash";
 import FastImage from "react-native-fast-image";
 import { RoomsXMLCurrency } from "../../../services/utilities/roomsXMLCurrency";
@@ -165,6 +165,24 @@ class HotelItemView extends Component {
   	}
   }
   
+  renderIndex(isEnabled) {
+    const {no,id} = this.props.item;
+
+    // log('renderIndex',`id: ${id} no: ${no}`,{item:this.props.item});
+    
+	  const result = (
+			<View style={styles.index}>
+				<Text style={styles.indexText}>{no}</Text>
+			</View>
+  	)
+  	
+  	if (isEnabled) {
+	  	return result
+  	} else {
+  		return null;
+  	}
+  }
+
   renderHeart(isEnabled) {
 	  const result = (
 			<TouchableOpacity style={styles.favoritesButton}>
@@ -240,6 +258,7 @@ class HotelItemView extends Component {
             </View>
 
             {this.renderPrice()}
+            {this.renderIndex(showNoOnHotelItem)}
           </View>
         </CardView>
       </TouchableOpacity>

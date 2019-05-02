@@ -44,6 +44,7 @@ import FontAwesome, { Icons } from "react-native-fontawesome";
 import {
   imgHost,
   socketHost,
+  showBothMapAndListHotelSearch,
   HOTELS_SOCKET_CONNECTION_TIMEOUT,
   HOTELS_STATIC_CONNECTION_TIMEOUT,
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK
@@ -58,7 +59,6 @@ import BackButton from '../../../atoms/BackButton';
 
 import UUIDGenerator from "react-native-uuid-generator";
 import _ from "lodash";
-import moment from "moment";
 
 import { UltimateListView } from "react-native-ultimate-listview";
 import { DotIndicator } from "react-native-indicators";
@@ -99,13 +99,6 @@ const { width, height } = Dimensions.get("window");
 let stompiOSClient = undefined;
 let stompAndroidClient = undefined;
 
-//TODO: remove this @@debug START
-const debug = () => {
-  return require("moment")().format("hh:mm:ss");
-};
-// setInterval(()=>//console.log(`### [${debug()}] stompiOSClient/stompAndroidClient`,stompiOSClient,stompAndroidClient),300)
-//TODO: remove this @@debug END
-
 class HotelsSearchScreen extends Component {
   PAGE_LIMIT = 10;
 
@@ -118,6 +111,7 @@ class HotelsSearchScreen extends Component {
     this.state = createHotelSearchInitialState(params);
 
     this.pageLimit = this.PAGE_LIMIT;
+    this.isAllHotelsLoaded = false;
     this.isFirstLoad = true;
     this.isFirstFilter = true;
     this.isSocketDown = true;
@@ -174,21 +168,23 @@ class HotelsSearchScreen extends Component {
     // It was initially called from the constructor body (why? how is it possible to work)
     this.saveState();
   }
-
   
   componentWillMount() {
     if (Platform.OS == 'android') {
       BackHandler.addEventListener('hardwareBackPress', this.onBackButtonPress);
     }
   }
-  
 
   componentWillUnmount() {
+    clearTimeout(this.socketTimeoutId);
+    clearTimeout(this.staticTimeoutId);
+
+    this.isSocketDown = true;
+    this.stopSocketConnection();
+
     if (Platform.OS == 'android') {
       BackHandler.removeEventListener('hardwareBackPress', this.onBackButtonPress);
     }
-    this.isSocketDown = true;
-    this.stopSocketConnection();
   }
 
   startSocketDataConnectionTimeOut() {
@@ -477,8 +473,8 @@ class HotelsSearchScreen extends Component {
 //     		asArray.push(this.hotelsSocketCacheMap[i])
 //     	}
 //     }
-//     log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{orig:this.hotelsSocketCacheMap.orig,parsed:this.hotelsSocketCacheMap},true)
-//     log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{asArray},true)
+     log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{orig:this.hotelsSocketCacheMap.orig,parsed:this.hotelsSocketCacheMap},true)
+    //  log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{asArray},true)
 
     this.stopSocketConnection(false);
 
@@ -539,7 +535,8 @@ class HotelsSearchScreen extends Component {
   }
 
   gotoHotelDetailsPageByList = (item, state, extraParams) => {
-    //console.tron.logImportant('isNative',isNative)
+    console.tron.logImportant('isNative',isNative)
+
     if (isNative.hotelItem) {
       this.gotoHotelDetailsPageByMap(item)
     } else{
@@ -687,7 +684,11 @@ class HotelsSearchScreen extends Component {
     const _this = this;
 
     if (res.success) {
+      this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTERED_MSG, 5000);
+
       res.body.then((data) => {
+        this.isAllHotelsLoaded = true;
+
         // not used so far
         // const isCacheExpired = data.isCacheExpired;
         const count = data.content.length;
@@ -711,11 +712,7 @@ class HotelsSearchScreen extends Component {
         }
 
         // pagination of list component (renderResultsAsList)
-        if (this.PAGE_LIMIT > count) {
-          this.listSetPageLimit(count);
-        } else {
-          this.listSetPageLimit(this.PAGE_LIMIT);
-        }
+        this.listSetPageLimit(count, this.PAGE_LIMIT);
         
         // log('filtered-hotels',`before processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax})
         const {priceMin,priceMax,newIdsMap} = processFilteredHotels(hotelsAll, this.state.hotelsInfo, this.hotelsIndicesByIdMap, this.priceMin, this.priceMax)
@@ -750,7 +747,7 @@ class HotelsSearchScreen extends Component {
             }
             if (_this.isFirstFilter) {
               _this.isFirstFilter = false;
-            }      
+            }
           }
         )
       });
@@ -794,9 +791,13 @@ class HotelsSearchScreen extends Component {
             hotels.forEach(element => {
               if (_this.hotelsIndicesByIdMap[element.id] != null) {
                 //TODO: @@debug - remove
-                console.error(`%c${element.name.padEnd(45, ' ')}%c: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,"color: red; font-weight: bold","color: black; font-weight: normal");
+                //console.error(`%c${element.name.padEnd(45, ' ')}%c: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,"color: red; font-weight: bold","color: black; font-weight: normal");
+                // log('warn',`${element.name}: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,{element,ids:_this.hotelsIndicesByIdMap},true);
+                //log('warn',`Element already loaded: ${element.id}`,{element,ids:_this.hotelsIndicesByIdMap},true);
               } else {
+                element.no = newHotels.length + prevState.hotelsInfo.length + 1;
                 newHotels.push(element);
+                //log('info',`Added new static data: ${element.id}`,{element,ids:_this.hotelsIndicesByIdMap,newHotels},true);
                 //TODO: @@debug - remove
                 // console.log(`'%c${element.name.padEnd(45, ' ')}',%c id:  ${element.id} is NEW`,"color: green","color: black");
               }
@@ -859,9 +860,13 @@ class HotelsSearchScreen extends Component {
   	console.timeEnd('*** HotelsSearchScreen::listUpdateDataSource()')
   }
 
-  listSetPageLimit(value) {
+  listSetPageLimit(value, fallbackValue=this.PAGE_LIMIT) {
     //log('hotel-search',`[ listSetPageLimit ] value: ${value}`);
-    this.pageLimit = value;
+    if (value < fallbackValue) {
+      this.pageLimit = value;
+    } else {
+      this.pageLimit = fallbackValue;
+    }
   }
 
   initResultViews() {
@@ -881,15 +886,17 @@ class HotelsSearchScreen extends Component {
       `#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`
     );*/
 
-    // log('fetch',`res:${this.state.isFilterResult} && loaded:${isAllHotelsLoaded}`)
+    log('fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`)
 
-//    const isAllHotelsLoaded = (this.state.totalHotels == this.state.hotelsInfoForMap);
-    const isAllHotelsLoaded = (this.state.totalHotels == this.state.hotelsInfoForMap);
-    if (this.state.isFilterResult && isAllHotelsLoaded) {
+    if (this.isAllHotelsLoaded) {
       // TODO: Figure this out - how to load results after isDoneSocket
       // (1) For WebApp after isDoneSocket results are shown page by page
       // (2) For MobileApp I suggest it loads all results all the time
       //     After isDone Socket
+      //this.listSetPageLimit(this.state.totalHotels);
+        // not working:
+      // abortFetch()
+      // this.listUpdateDataSource(this.state.hotelsInfo)
       return;
     }
 
@@ -1037,9 +1044,16 @@ class HotelsSearchScreen extends Component {
       const count = filtered.length;
       //this.props.setSearchFiltered(filtered)
       
-      log('filter-fromUI',`Filtered from UI: ${filtered.length} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams})
+      // log('filter-fromUI',`Filtered from UI: ${filtered.length} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams})
       checkHotelData(filtered,'filter-fromUI')
+
+      // add no
+      filtered.forEach((item,index) => {
+        item.no = index + 1;
+        return item;
+      })
       
+      this.listSetPageLimit(this.state.totalHotels, this.PAGE_LIMIT);
       this.listUpdateDataSource(filtered)
       this.setState({
         hotelsInfo: filtered,
@@ -1175,12 +1189,12 @@ class HotelsSearchScreen extends Component {
           alignItems: "center"
         }}
       >
-        {/* <DotIndicator
+        <DotIndicator
           color="#d97b61"
           count={3}
           size={9}
           animationDuration={777}
-        /> */}
+        />
       </View>
     );
   };
@@ -1197,10 +1211,10 @@ class HotelsSearchScreen extends Component {
           ref="toast"
           style={{ backgroundColor: '#DA7B61' }}
           position='bottom'
-          positionValue={150}
+          positionValue={350}
           fadeInDuration={500}
           fadeOutDuration={500}
-          opacity={0.80}
+          opacity={0.90}
           textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
       />
     )
@@ -1344,11 +1358,10 @@ class HotelsSearchScreen extends Component {
 
   renderResultsAsList() {
     // console.log(`### [HotelsSearchScreen] renderResultsAsList len:${this.state.hotelsInfo.length}`)
-    const scale = (
-      this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST
-        ? 1.0
-        : 0.0
-    )
+    const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
+    const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
+    const scale = (isList ? 1.0 : 0.0)
+    const height = (showBothMapAndListHotelSearch && (isMap || isList) ? "50%" : null)
     const transform = [{scaleX: scale},{scaleY: scale}]
     // console.log(`#@# [HotelsSearchScreen] renderResultsAsList, display: ${this.state.displayMode}, ListScale: ${scale}, data: ${this.state.hotelsInfo}`)
 
@@ -1362,13 +1375,12 @@ class HotelsSearchScreen extends Component {
           return `${index} - ${item}`;
         }} // this is required when you are using FlatList
         refreshableMode={"basic"}
-        data={[]}
         numColumns={1} // to use grid layout, simply set gridColumn > 1
         item={this.renderListItem} // this takes three params (item, index, separator)
         paginationFetchingView={this.renderPaginationFetchingView}
         paginationWaitingView={this.renderPaginationWaitingView}
         // paginationAllLoadedView={this.renderPaginationAllLoadedView}
-        style={{ transform }}
+        style={{ transform, height }}
       />
     );
   }
@@ -1380,9 +1392,14 @@ class HotelsSearchScreen extends Component {
     //log('HOTELS-MAP',`Render map with ${data ? data.length : 'n/a'} hotels`, {data,display:this.state.displayMode});
     
     const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
+    const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
     let scale = (this.isMap ? 1.0 : 0.0);
+    let height = (isMap ? '100%' : '0%')
+    if (showBothMapAndListHotelSearch && (isMap || isList)) {
+      height = '50%';
+      scale = 1.0;
+    }
     const transform = [{scaleX: scale},{scaleY: scale}]
-    const height = (isMap ? '100%' : '0%')
     let style = {transform};
     
     // TODO: Quick fix for Android - reach a better solution and remove it 

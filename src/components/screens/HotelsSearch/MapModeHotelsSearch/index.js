@@ -232,7 +232,7 @@ class MapModeHotelsSearch extends Component {
         return result;
     }
 
-    renderSelectedMarker(data) {
+    renderSelectedMarkerWithCallout(data) {
         return (
             data != null && 
             (
@@ -247,7 +247,7 @@ class MapModeHotelsSearch extends Component {
                         longitude: data.lon == null ? parseFloat(data.longitude) : parseFloat(data.lon)
                     }}
                     tracksViewChanges = {true}
-                    onCalloutPress={() => {this.props.gotoHotelDetailsPage(data)}}
+                    onCalloutPress={() => {this.props.gotoHotelDetailsPage(data); log('here','pressing item',{data})}}
                 >
                     {
                         this.renderCallout(data)
@@ -277,7 +277,7 @@ class MapModeHotelsSearch extends Component {
                     onRegionChangeComplete={() => {if (hasSelectedMarkRendered) this.selected_mark.showCallout();}}
                 >
                     { this.renderMarkers()                          }
-                    { this.renderSelectedMarker(selectedMarkerData) }
+                    { this.renderSelectedMarkerWithCallout(selectedMarkerData) }
                     
                 </MapView>
             </View>

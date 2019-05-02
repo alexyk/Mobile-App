@@ -1,5 +1,5 @@
 import moment from "moment";
-import { basePath, DEFAULT_HOTEL_PNG } from "../../config";
+import { basePath } from "../../config";
 import { log } from "../../config-debug";
 import lodash from "lodash";
 
@@ -98,7 +98,11 @@ export function createHotelSearchInitialState(params) {
 export function mergeAllHotelData(filtered, socketMap) {
   let result = filtered;
   try {
-    result.forEach(item => parseHotelDataForMap(item, socketMap))
+    result.forEach((item,index) => {
+      item = parseHotelDataForMap(item, socketMap)
+      item.no = index + 1;
+      return item;
+    })
   } catch (e) {log('error','error in merging', {e})}
   return result;
 }
@@ -252,6 +256,7 @@ export function checkHotelData(data, type, index) {
 		};
 		
     switch (type) {
+
       case 'static':
         props = newObject(
         	commonData,
@@ -262,6 +267,7 @@ export function checkHotelData(data, type, index) {
         );
         result = validateObject(data, props);
         break;
+
       case 'socket-orig':
         props = newObject(
 					commonData,
@@ -280,6 +286,7 @@ export function checkHotelData(data, type, index) {
 				);
         result = validateObject(data, props);
         break;
+
       case 'socket-parsed':
         props = newObject(
 					commonData,
@@ -295,6 +302,7 @@ export function checkHotelData(data, type, index) {
 				)
         result = validateObject(data, props);
         break;
+
       case 'filter':
         props = newObject(
 					commonData,
@@ -312,11 +320,12 @@ export function checkHotelData(data, type, index) {
 				)
         result = validateObject(data, props);
         break;
+
     }
   }
 
   if (result.length > 0) {
-    log(`X-${type}`, `@${result}@, index: ${index}`,{invalid_types:result,data,type,props},true);
+    //log(`X-${type}`, `@${result}@, index: ${index}`,{invalid_types:result,data,type,props},true);
     console.warn(`[utils::checkHotelData] @${result}@, index: ${index}`,{result,data,type,props})
   }
 }
@@ -325,7 +334,6 @@ export function validateObject(sourceData, props, index=-1, path='') {
   let result = '';
   const space = '  ';
 
-	
 	if (sourceData == null) {
 		result = `<null_object>;` + space;
 	} else if (typeof(sourceData) != 'object') {
@@ -338,7 +346,6 @@ export function validateObject(sourceData, props, index=-1, path='') {
 				return result;
 			}
 	}
-	
 
   let data = Object.assign({}, sourceData) // create a copy to remove used props thus leave new only
   const na = '__n/a__';
@@ -415,7 +422,7 @@ export function hasValidCoordinatesForMap(data, isInitial = false) {
     }
   }
   catch (e) {
-    log('error-coordinates',e)
+    log('error-coordinates',`[utils::hasValidCoordinatesForMap] error in calculating coordinates`,e)
   }
 
   //log('utils', `hasValidCoordinatesForMap(), lat/lon: ${lat}/${lon}`,{lat,lon})
