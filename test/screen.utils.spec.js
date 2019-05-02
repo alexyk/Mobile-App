@@ -5,9 +5,9 @@ import {
     parseAndCacheHotelDataFromSocket,
     hasValidCoordinatesForMap,
     applyHotelsSearchFilter,
-    processFilteredHotels
+    processFilteredHotels,
+    validateObject
 } from "../src/components/screens/utils"
-
 
 test('hasValidCoordinatesForMap', () => {
     // initital coordinates check
@@ -18,7 +18,7 @@ test('hasValidCoordinatesForMap', () => {
     expect(res).toBeFalsy()
 
     // hotel coordinates check
-    const coord = {lat: 45.3, lon: 67.90}
+    const coord = {latitude: 45.3, longitude: 67.90}
     res = hasValidCoordinatesForMap(coord)
     expect(res).toBeTruthy()
     res = hasValidCoordinatesForMap(coord, true)
@@ -40,8 +40,8 @@ test('parseAndCacheHotelDataFromSocket', () => {
     expect(result.initialLon         )   .toEqual    (8.7)
     const item = socketCacheMap[hotelSocket1.id];
     expect(item.price                )   .toBe       (12.68)
-    expect(item.lon                  )   .toBe       (8.7)
-    expect(item.lat                  )   .toBe       (77.9)
+    expect(item.longitude            )   .toBe       (8.7)
+    expect(item.latitude             )   .toBe       (77.9)
     expect(item.name                 )   .toEqual    (undefined)
 })
 
@@ -62,7 +62,7 @@ test('updateHotelsFromSocketCache', () => {
 
     expect(r.hotelsInfoFresh instanceof Array)          .toBeTruthy()
     expect(r.hotelsInfoFresh.length)                    .toBe(1)
-    expect(r.hotelsInfoForMapFresh instanceof Array)  .toBeTruthy()
+    expect(r.hotelsInfoForMapFresh instanceof Array)    .toBeTruthy()
 
     expect(r.hotelsInfoForMapFresh.length)            .toBe(1)
 
@@ -73,15 +73,15 @@ test('updateHotelsFromSocketCache', () => {
     expect(item1.hotelPhoto)  .not  .toEqual(null)
 
     cacheIds = Object.keys(hotelsSocketCacheMap);
-    expect(cacheIds.length)         .toBe(2)
+    expect(cacheIds.length)         .toBe(3) // not deleting any more
 
     // ----------------------------- test 2 ----------------------------------
     // testing with EMPTY socket cache
     r = updateHotelsFromSocketCache(state, hotelsSocketCacheMap, hotelsIndicesById);
 
     item1 = r.hotelsInfoFresh[0];
-    expect(item1.price)             .toBe(undefined)
-    expect(item1.price)             .toBe(undefined)
+    expect(item1.price)             .toBeDefined()
+    expect(item1.price)             .toBeDefined()
 });
 
 test('updateHotelsFromFilters', function() {
@@ -89,10 +89,10 @@ test('updateHotelsFromFilters', function() {
     const old = dummyHotelsLoaded1()
     const {hotelsFromFilters, indicesById, socketCache} = updateHotelsFromFilters(filtered, old, ids);
 
-    // console.log(`Param-Filtered: ${printAny(filtered)}`)
-    // console.log(`Param-Old: ${printAny(old)}`)
-    // console.log(`Parsed: ${printAny(hotelsFromFilters)}`)
-    // console.log(`indicesById: ${printAny(indicesById)}`)
+    // log(`Param-Filtered`,filtered)
+    // log(`Param-Old`, old)
+    // log(`Parsed`,hotelsFromFilters)
+    // log(`indicesById`,indicesById)
 
     // to be defined
     expect(hotelsFromFilters)           .toBeDefined()
@@ -107,18 +107,18 @@ test('updateHotelsFromFilters', function() {
     // item1 properties check
     const item1 = hotelsFromFilters[0]
     expect(item1.name)                  .toBeDefined()
-    expect(item1.lat)                   .toBeDefined()
-    expect(item1.lon)                   .toBeDefined()
+    expect(item1.latitude)              .toBeDefined()
+    expect(item1.longitude)             .toBeDefined()
     expect(item1.thumbnail)             .toBeDefined()
-    expect(item1.hotelPhoto)            .toBeUndefined()
+    expect(item1.hotelPhoto)            .toBeDefined()
 })
 
 test('applyHotelsSearchFilter',function() {
     let {filtered:hotels, ids} = dummyFilterData2()
     expect(hotels.length)      .toEqual(4)
 
-    // console.log(`ids: ${printAny(ids)}`)
-    // console.log(`Hotels: ${printAny(hotels)}`)
+    // log(`ids:`,ids)
+    // log(`Hotels`,hotels)
 
     // let filter1 = {orderBy: 'rank,desc'}
     let filter2 = {orderBy: 'priceForSort,asc'}
@@ -129,7 +129,7 @@ test('applyHotelsSearchFilter',function() {
     let filter7 = {priceRange: [10,30]}
 
     let res;
-    // rank
+    //TODO: rank
     // res = applyHotelsSearchFilter(hotels,filter1)
 
     // low->high price
@@ -162,7 +162,7 @@ test('applyHotelsSearchFilter',function() {
     expect(res.length)      .toEqual(4)
     expect(res[0].price < res[1].price && res[1].price < res[2].price)
 
-    // console.log(`Filtered1: ${printAny(res)}`)
+    // log(`Filtered1`,res)
 })
 
 
@@ -179,9 +179,9 @@ test('processFilteredHotels',() => {
     // execute
     const {newIdsMap,priceMin,priceMax} = processFilteredHotels(filtered2, hotelsInfo, hotelsIndicesById, 5000, 0)
 
-    // console.log(printAny({res,filtered,ids,hotelsInfo,hotelsIndicesById}))
-    // console.log(printAny({filtered,ids,hotelsInfo,hotelsIndicesById}))
-    // console.log(printAny(filtered))
+    // log({res,filtered,ids,hotelsInfo,hotelsIndicesById})
+    // log({filtered,ids,hotelsInfo,hotelsIndicesById})
+    // log(filtered)
 
     expect(newIdsMap)               .toEqual(ids)
     expect(newIdsMap)       .not    .toEqual(hotelsIndicesById)
@@ -193,7 +193,77 @@ test('processFilteredHotels',() => {
     expect(priceMax)                .toEqual(90.89)
 })
 
+test('validateObject', () => {
+    const props = {hello:'string', la:'null,number', id:'number', price: 'number', photo: {url:'string'}}
+    let obj = {hello: 'there', id: 131, price: 3.45, la: null, photo: {url:'blue.png'}}
+
+    let res = validateObject(obj, props)
+    expect(res)     .toEqual('')
+
+    // check array
+    let obj2 = {hello: 'there2', id: 96, price: 78.4, photo: {url:'green.png'}, la:90}
+    res = validateObject([obj,obj2], props)
+    // log({res})
+
+        // change some props
+    Object.assign(obj, {photo: undefined,price:null})
+        // add new props
+    obj['descr'] = 'I am a new property'
+    obj['obj'] = {}
+
+    res = validateObject(obj, props)
+        // convert all EXPECTED ERRORS to @ each
+    res = res.replace("price:null;",'@')
+    res = res.replace("photo:<null_object>;",'@')
+        // convert all NEW PROPERTIES to @ each
+    res = res.replace("descr:new_string;",'@')
+    res = res.replace("obj:new_object;",'@')
+        // remove spaces
+    res = res.replace(/ /g,'')
+        // expect to have 2 conditions
+    expect(res)     .toEqual('@@@@')    
+})
+
+test('lodash vs Object.assign',() => {
+        // init
+    const lodash = require('lodash')
+    const objOrig = {hello: 'there', id: 131, price: 3.45, photo: {url:'blue.png'}}
+    const obj = Object.assign({},objOrig);
+    const objNA = {photo: undefined, na:7};
+    const objNA2 = {photo: '', na:789};
+
+        // test 1 - lodash.merge({}, ...)
+    const objL1 = lodash.merge( {}, obj, objNA);
+    const objL1_2 = lodash.merge( {}, obj, objNA2);
+    // const objA = Object.assign({},obj, {photo: undefined})
+    // log('lodash.merge({},...)',{obj, objL1, objL1_2})
+    const lodashAll = lodash.merge(
+    	{name: 'hello', nullDeletesMe: 'he ho'},
+    	{id: 23, name: 'second'},
+    	{descr: 'hey there'},
+    	{photo: 'less.jpg', nullDeletesMe: null, descr: undefined}
+//    , 	{id: undefined, descr: undefined},
+    )
+    log('merge 4 objects', {lodashAll})
+
+        // test 2 - lodash.merge(obj, ...)
+    const objL2 = lodash.merge( obj, objNA, objNA2);
+    //log('lodash.merge(obj,...)',{obj, objL2})
+    //log('Object.assign',)
+
+        // test
+
+})
+
 // ------------------------------------------------------------------------------
+
+function log(title,obj) {
+    if (typeof(title) == 'object' || obj == null) {
+        console.log(printAny(title))
+    } else {
+        console.log(`${title} ->`,printAny(obj))
+    }
+}
 
 function printAny(obj,indent=2) {
     const b = (obj instanceof Array ? '[]' : '{}')
@@ -203,10 +273,15 @@ function printAny(obj,indent=2) {
     for (let i=0; i<keys.length; i++) {
         const key = keys[i];
         const item = obj[key];
+        const type = typeof(item);
         if (item instanceof Object) {
             out += ''.padStart(indent+2, ' ') + key + ': ' + printAny(item, indent+4)
         } else {
-            out += ''.padStart(indent+2, ' ') + key + `: ${item},\n`
+            out += ''.padStart(indent+2, ' ') + key +
+                (type == 'string'
+                    ? `: '${item}',\n`
+                    : `: ${item},\n`
+                )
         }
 
     }
@@ -246,9 +321,9 @@ function dummyFilterData2() {
 }
 function dummyData1() {
     let staticData1 = {id:12, name: "Ala bala", hotelPhoto: {url: "http://example.io"}};
-    let socketData1 = {id:12, lat:44.880235, lon:15.987798, price: 23.9, thumbnail: {url: "http://example.io/7777777"}};
+    let socketData1 = {id:12, latitude:44.880235, longitude:15.987798, price: 23.9, thumbnail: {url: "http://example.io/7777777"}};
     let socketData2 = {id:297, price:11.07, name: "Hello There", thumbnail: {url: "http://lala.io/snthoesnthu"}};
-    let socketData3 = {id:9, price:3.04, lat: 56.3443, lon: 78.09, name: "Same Here", thumbnail: {url: "http://lio.so/kajshd"}};
+    let socketData3 = {id:9, price:3.04, latitude: 56.3443, lolongituden: 78.09, name: "Same Here", thumbnail: {url: "http://lio.so/kajshd"}};
 
     let hotelsInfo = [staticData1]
     let hotelsIndicesById = {12: 0}

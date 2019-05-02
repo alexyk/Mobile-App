@@ -131,7 +131,7 @@ class MapModeHotelsSearch extends Component {
     renderCallout = (hotel) => {
         //console.log("----------------- renderCallout", hotel);
 
-        if (hotel === undefined || hotel === null) {
+        if (hotel == null) {
             return null;
         }
         
@@ -232,18 +232,41 @@ class MapModeHotelsSearch extends Component {
         return result;
     }
 
-    render() {
-        let hotel = null;
-        if (this.state.selectedMarkerIndex != -1 && this.state.selectedMarkerIndex < this.state.hotelsInfo.length) {
-            hotel = this.state.hotelsInfo[this.state.selectedMarkerIndex];
-        }
+    renderSelectedMarker(data) {
+        return (
+            data != null && 
+            (
+                <Marker
+                    image={blue_marker}
+                    style={{zIndex: 1}}
+                    // image={red_marker}
+                    key={"selected_mark"}
+                    ref={(ref) => this.selected_mark = ref}
+                    coordinate={{
+                        latitude: data.lat == null ? parseFloat(data.latitude) : parseFloat(data.lat),
+                        longitude: data.lon == null ? parseFloat(data.longitude) : parseFloat(data.lon)
+                    }}
+                    tracksViewChanges = {true}
+                    onCalloutPress={() => {this.props.gotoHotelDetailsPage(data)}}
+                >
+                    {
+                        this.renderCallout(data)
+                    }
+                </Marker>
+            )
+        )
+    }
 
+    render() {
         const initialRegion = {
             latitude: this.state.initialLat,
             longitude: this.state.initialLon,
             latitudeDelta: 0.2,
             longitudeDelta: 0.2
         }
+        const hasSelectedMarkRendered = (this.selected_mark != null);
+        const hasValidSelectedIndex = (this.state.hotelsInfo[this.state.selectedMarkerIndex] != null);
+        let selectedMarkerData = (hasValidSelectedIndex ? this.state.hotelsInfo[this.state.selectedMarkerIndex] : null);
 
         return (
             <View style={this.props.style}>
@@ -251,32 +274,10 @@ class MapModeHotelsSearch extends Component {
                     ref={(ref) => this._map = ref}
                     initialRegion={initialRegion}
                     style={styles.map}
-                    onRegionChangeComplete={() => {if (this.selected_mark !== undefined && this.selected_mark !== null) this.selected_mark.showCallout();}}
+                    onRegionChangeComplete={() => {if (hasSelectedMarkRendered) this.selected_mark.showCallout();}}
                 >
-                { this.renderMarkers() }
-                {
-                    hotel !== null && 
-                        (
-                            <Marker
-                                image={blue_marker}
-                                style={{zIndex: 1}}
-                                // image={red_marker}
-                                key={"selected_mark"}
-                                ref={(ref) => this.selected_mark = ref}
-                                coordinate={{
-                                    latitude: hotel.lat == null ? parseFloat(hotel.latitude) : parseFloat(hotel.lat),
-                                    longitude: hotel.lon == null ? parseFloat(hotel.longitude) : parseFloat(hotel.lon)
-                                }}
-                                tracksViewChanges = {true}
-                                onCalloutPress={() => {this.props.gotoHotelDetailsPage(hotel)}}
-                            >
-                                {
-                                    this.renderCallout(hotel)
-                                }
-                            </Marker>
-                        )
-                       
-                }
+                    { this.renderMarkers()                          }
+                    { this.renderSelectedMarker(selectedMarkerData) }
                     
                 </MapView>
             </View>

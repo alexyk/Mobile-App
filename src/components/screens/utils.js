@@ -1,7 +1,7 @@
 import moment from "moment";
 import { basePath, DEFAULT_HOTEL_PNG } from "../../config";
 import { log } from "../../config-debug";
-import _ from "lodash";
+import lodash from "lodash";
 
 export const DISPLAY_MODE_NONE = "mode_none";
 export const DISPLAY_MODE_SEARCHING = "mode_searching";
@@ -171,32 +171,32 @@ export function parseAndCacheHotelDataFromSocket(
   let lon = (hotelData.longitude != null ? hotelData.longitude : hotelData.lon);
   lat = parseFloat(lat != null ? lat : (current.lat ? current.lat : current.latitude))
   lon = parseFloat(lon != null ? lon : (current.lon ? current.lon : current.longitude))
-
+  
+  // parse props
+  const {id, name, price, star, stars, thumbnail} = hotelData;
   let parsedInfo = {
-    id: hotelData.id,
-    name: hotelData.name,
-    price: parseFloat(
-      !isNaN(hotelData.price) ? hotelData.price : current.price
-    ),
-    star: (hotelData.star != null 
-    	? hotelData.star 
-    	: (hotelData.stars != null
-	    		? hotelData.stars
+    id,
+    name,
+    price: parseFloat(!isNaN(price) ? price : current.price),
+    star: (star != null 
+    	? star 
+    	: (stars != null
+	    		? stars
   	  		: (current.star != null ? current.star : current.stars)
   	  	)
     ),
     thumbnail:
-    hotelData.thumbnail && hotelData.thumbnail.url
-      ? hotelData.thumbnail
-      : current.thumbnail
+      thumbnail && thumbnail.url
+        ? thumbnail
+        : current.thumbnail
   };
 
-  // if ()
-  // hotelPhoto: (hotelData.hotelPhoto ? hotelData.hotelPhoto : current.hotelPhoto),
-
-  if (!parsedInfo.hotelPhoto || parsedInfo.hotelPhoto.url == '') {
-    parsedInfo.hotelPhoto = parsedInfo.thumbnail;
-  }
+  // if (!parsedInfo.hotelPhoto || parsedInfo.hotelPhoto.url == '') {
+  //   parsedInfo.hotelPhoto = parsedInfo.thumbnail;
+  // }
+  // if (hotelData.hotelPhoto) {
+  //   parsedInfo.hotelPhoto = (hotelData.hotelPhoto.url ? hotelData.hotelPhoto : {url: hotelData.hotelPhoto})
+  // }
 
   if (useLongCoordinates) {
     parsedInfo.latitude = lat;
@@ -206,16 +206,18 @@ export function parseAndCacheHotelDataFromSocket(
     parsedInfo.long = lon;
   }
 
-  if (hotelData.hotelPhoto) {
-    parsedInfo.hotelPhoto = (hotelData.hotelPhoto.url ? hotelData.hotelPhoto : {url: hotelData.hotelPhoto})
-  }
-  
   if (parsedInfo.latitude != null) {
     parsedInfo.latitude = parseFloat(parsedInfo.latitude)
     parsedInfo.longitude = parseFloat(parsedInfo.longitude)
   }
 
   hotelsSocketCacheMap[hotelData.id] = parsedInfo;
+  checkHotelData(parsedInfo,'socket-parsed',index)
+
+  //@@@debug
+  if (!hotelsSocketCacheMap['orig']) hotelsSocketCacheMap['orig'] = {}
+  hotelsSocketCacheMap.orig[id] = hotelData;
+  //@@@debug
 
   const result = {
     initialLat: lat,
@@ -227,6 +229,170 @@ export function parseAndCacheHotelDataFromSocket(
 
 function isNumber(value) {
   return (typeof(value) == 'number')
+}
+
+function newObject(source, extra) {
+	return lodash.merge({}, source, extra)
+}
+
+export function checkHotelData(data, type, index) {
+  if (!__DEV__) return;
+  
+	const isArray = (data instanceof Array);
+  let result = '';
+	let props;
+
+  if (isArray) {
+    data.map((item,index) => checkHotelData(item,type,index))
+  } else {
+		let commonData = {
+			id:'number',
+			name:'string',
+			star:'number',
+		};
+		
+    switch (type) {
+      case 'static':
+        props = newObject(
+        	commonData,
+   				{
+						generalDescription:'string',
+   					hotelPhoto:{url:'string'}
+   				}
+        );
+        result = validateObject(data, props);
+        break;
+      case 'socket-orig':
+        props = newObject(
+					commonData,
+					{
+						price:'number',
+						// dynamic
+						externalId:'number,null',
+						longitude:'null,string',
+						latitude:'null,string',
+						thumbnail:'object,null',
+						star:'string,null',
+						stars:'number,null',
+						lon:'string,null',
+						lat:'string,null',
+					}
+				);
+        result = validateObject(data, props);
+        break;
+      case 'socket-parsed':
+        props = newObject(
+					commonData,
+					{
+						price:'number',
+						thumbnail:'string',
+						// dynamic
+						longitude:'number,null',
+						latitude:'number,null',
+						externalId:'string,null',
+						thumbnail:'object,string,null',
+					}
+				)
+        result = validateObject(data, props);
+        break;
+      case 'filter':
+        props = newObject(
+					commonData,
+					{
+						star:'number',
+						price:'number',
+						priceForSort:'number',
+						// dynamic
+						generalDescription: 'string,null',
+						longitude:'string,null',
+						latitude:'string,null',
+						hotelPhoto: 'string,null',
+						price: 'number,null'
+					}
+				)
+        result = validateObject(data, props);
+        break;
+    }
+  }
+
+  if (result.length > 0) {
+    log(`X-${type}`, `@${result}@, index: ${index}`,{invalid_types:result,data,type,props},true);
+    console.warn(`[utils::checkHotelData] @${result}@, index: ${index}`,{result,data,type,props})
+  }
+}
+
+export function validateObject(sourceData, props, index=-1, path='') {
+  let result = '';
+  const space = '  ';
+
+	
+	if (sourceData == null) {
+		result = `<null_object>;` + space;
+	} else if (typeof(sourceData) != 'object') {
+		result = `<not_an_object>_${typeof(sourceData)};` + space;
+	}
+	if (result.length > 0) {
+		if (path.length > 0) {
+				return `${path}:${result}`;
+			} else {
+				return result;
+			}
+	}
+	
+
+  let data = Object.assign({}, sourceData) // create a copy to remove used props thus leave new only
+  const na = '__n/a__';
+
+	if (path.length > 0) path += '.';
+	
+  for (let n in props) {
+    const item = (data.hasOwnProperty(n) ? data[n] : na);
+    let type1 = props[n];
+    let type2 = (item !== null ? typeof(item) : 'null');
+    let doDelete = true
+
+		if (typeof(type1) == 'string' && type1.indexOf(',') > 0) {
+			const types = type1.split(',')
+			if (types.indexOf(type2) > -1) {
+				// nothing to do
+			} else {
+				result += `${path}${n}:not_in_[${type1}]_${type2};` + space;
+			}
+    } else if (type1 == 'any') {
+    	// nothing to do
+    } else if ( item == na ) {
+      result += `${path}${n}:na_${type2};` + space;
+      doDelete = false;
+    } else if (typeof(type1) == 'object') {      
+      result += validateObject(item, type1, -1, `${n}`);
+    } else if (type2 == 'string' && item.length == 0) {
+      result += `${path}${n}:empty_str;` + space;
+    } else if (type2 == 'number') {
+      if (isNaN(item)) result += `${path}${n}:NaN;` + space;
+    } else if (type1 != type2) {
+      result += `${path}${n}:${type2};` + space;
+    }
+    
+    if (doDelete) {
+    	// filtering out checked prop
+    	delete data[n];
+    }
+  }
+  
+  // checking for new fields in data that are not defined in props
+  for (let n in data) {
+    const type2 = typeof(data[n]);
+    result += `${n}:new_${type2};` + space;  	
+	}
+
+  if (result.length > 0) {
+    // remove last space
+    result = result.substr(0,result.length - space.length)
+	  //log('debug-in',`result: ${result} path: '${path}'  indx: ${index}, props: ${Object.keys(props)}`,{data:sourceData,props,path,index,result})
+  }
+
+
+  return result;
 }
 
 export function hasValidCoordinatesForMap(data, isInitial = false) {
@@ -299,7 +465,7 @@ export function updateHotelsFromSocketCache(
         //TODO: @@debug
         //console.tron.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
 
-        refreshedData = _.merge({}, socketData, staticData);
+        refreshedData = lodash.merge({}, socketData, staticData);
         //delete socketHotelsCacheMap[id];
 
         hotelsInfoFresh[index] = refreshedData;

@@ -190,15 +190,24 @@ class HotelItemView extends Component {
     // console.log(`[HotelItemView] hotel item ${item.id}`, item, this.props)
     // console.log(`[HotelItemView] id:${item.id} isDone:${this.props.isDoneSocket} index:${item.index} price:${item.price} name:${item.name}`)
     const photo = item.hotelPhoto;
+    const thumb = item.thumbnail;
     let urlThumbnail =
       photo != null
         ? _.isString(photo)
-          ? imgHost + photo
-          : ( photo.url != ''
-              ? imgHost + photo.url
-              : imgHost + DEFAULT_HOTEL_PNG
-          )
-        : imgHost + DEFAULT_HOTEL_PNG;
+          ? photo
+          : photo.url != ''
+              ? photo.url
+              : thumb != null && thumb != ''
+              	? _.isString(thumb)
+              			? thumb 
+              			: thumb.url && thumb.url != '' ? thumb.url : ''
+                : ''
+        : ''
+    if (urlThumbnail == '') {
+    	urlThumbnail = DEFAULT_HOTEL_PNG
+    }
+    urlThumbnail = imgHost + urlThumbnail
+    
     let {name, star:stars} = item;
 
     return (

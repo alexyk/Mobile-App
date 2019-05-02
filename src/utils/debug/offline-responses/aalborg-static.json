@@ -1,0 +1,84 @@
+{
+  "content": [
+    {
+      "generalDescription": "This hotel is an excellent base from which to explore the town. The hotel is the oldest in Aalborg and as such is a very well-preserved historical building, it also has a large renovated gym and leisure centre complete with sauna, jacuzzi and massage faci",
+      "star": 3,
+      "hotelPhoto": {
+        "url": "RXLImages/7/AAL-HELhotel_Bedroom_1.jpg"
+      },
+      "name": "Helnan Phoenix",
+      "id": 10760
+    },
+    {
+      "generalDescription": "A modern, well maintained hotel with a high standard of service which would particularly suit groups. (07/05 LC)",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2894183801099207-71619.png"
+      },
+      "name": "Hvide Hus",
+      "id": 10507
+    },
+    {
+      "generalDescription": "A pleasant property located in the heart of Aalborg.",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2858217466043574-76850.png"
+      },
+      "name": "First Aalborg",
+      "id": 11861
+    },
+    {
+      "generalDescription": "This fine hotel also offers full leisure facilities, giving guests an excellent opportunity to relax. One of the best hotels in the city and an ideal base from which to explore the city.",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "RXLImages/7/AAL-QUAhotel_Meeting_Room_1.jpg"
+      },
+      "name": "Best Western Hotel Scheelsmind",
+      "id": 13662
+    },
+    {
+      "generalDescription": "This is a modern and quite elegant hotel in a typical Scandic location. (06/07 KM)",
+      "star": 3,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2875460079100172-88663.png"
+      },
+      "name": "Scandic",
+      "id": 14766
+    },
+    {
+      "generalDescription": "This hotel is located in the city centre of Aalborg and was established in 1979. The Hotel has a bar and a fitness centre/gym. All 188 rooms are equipped with minibar, hairdryer, safe, trouser press, ironing set and air conditioning.",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "RXLImages/1030/CAF886500_0.jpg"
+      },
+      "name": "Radisson Blu Limfjord",
+      "id": 72395
+    },
+    {
+      "generalDescription": "If you stay at the BEST WESTERN Prinsen Hotel you cannot get any closer to the center of Aalborg. The hotel is situated just opposite the railway station and the bus terminal as well as within walking distance from the Aalborg Kongres & Kultur Center, Aal",
+      "star": 3,
+      "hotelPhoto": {
+        "url": "RXLImages/7/AAL-BEShotel_Lobby_1.jpg"
+      },
+      "name": "Prinsen Hotel Aalborg",
+      "id": 53725
+    },
+    {
+      "generalDescription": "This is a good, clean and well maintained hotel, located perfectly for the Congress Centre and the Station. This hotel is totally non-smoking in all rooms.",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2868932671270488-80566.png"
+      },
+      "name": "Scandic Aalborg City (Formerly First Hotel Europa)",
+      "id": 12769
+    }
+  ],
+  "last": true,
+  "totalElements": 8,
+  "totalPages": 1,
+  "first": true,
+  "sort": null,
+  "numberOfElements": 8,
+  "size": 10,
+  "number": 0
+}

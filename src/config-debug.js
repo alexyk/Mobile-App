@@ -119,7 +119,7 @@ export function log(tag, description, data, isImportant = false) {
       params = tag;
     }
     doParsing = false;
-  } else if (tag.length >= 20 || (tag && !description)) {
+  } else if (tag.length >= 25 || (tag && !description)) {
     params.name = 'LOG'
     params.preview = tag;
     doParsing = false
@@ -136,6 +136,11 @@ export function log(tag, description, data, isImportant = false) {
     if (data)         params.value      = data;
     if (isImportant)  params.important  = true;
   }
+
+  if (params['value'] == null) {
+    params['value'] = {}
+  }
+  params.value['_preview'] = params.preview;
 
   console.tron.display(params)
 }

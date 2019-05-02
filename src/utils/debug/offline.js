@@ -9,6 +9,11 @@ const offlinePacks = {
     first: require('./offline-responses/paris-static.json'),
     all: require('./offline-responses/paris-all.json'),
   },
+  paris2: {
+    first: require('./offline-responses/paris2-static.json'),
+    socket: require('./offline-responses/paris2-socket.json'),
+    all: require('./offline-responses/paris2-filtered.json'),
+  },
   newYork: {
 		first: require('./offline-responses/sofia-static.json'), //TODO: Add NY static
     all: require('./offline-responses/newYork-all.json'),
@@ -17,7 +22,17 @@ const offlinePacks = {
 		first: require('./offline-responses/araraquara.json'),
     all: require('./offline-responses/araraquara-all.json'),
     socket: require('./offline-responses/araraquara-socket.json'),
-  }
+  },
+  aalborg: {
+		first: require('./offline-responses/aalborg-static.json'),
+    all: require('./offline-responses/aalborg-filtered.json'),
+    socket: require('./offline-responses/aalborg-socket.json'),
+  },
+  tokyo: {
+		first: require('./offline-responses/tokyo-static.json'),
+    all: require('./offline-responses/tokyo-filtered.json'),
+    socket: require('./offline-responses/tokyo-socket.json'),
+  },
 }
 
 export default function createOfflineRequester() {

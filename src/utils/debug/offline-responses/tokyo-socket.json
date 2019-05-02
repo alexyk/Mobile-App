@@ -1,0 +1,2919 @@
+[
+	{
+		"id": 9142,
+		"name": "Hotel Sunlite Shinjuku",
+		"price": 135.54,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-SUN3hotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.694338,
+		"longitude": 139.707063
+	},
+	{
+		"id": 9353,
+		"name": "New Otani Tokyo",
+		"price": 444.34,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-NEW4hotel_Exterior_2.jpg"
+		},
+		"latitude": 35.681059,
+		"longitude": 139.734072
+	},
+	{
+		"id": 9681,
+		"name": "the b tokyo roppongi",
+		"price": 132.53,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-THEAhotel_Guest_Room_8.jpg"
+		},
+		"latitude": 35.663634,
+		"longitude": 139.733745
+	},
+	{
+		"id": 9961,
+		"name": "Grand Prince Hotel Takanawa",
+		"price": 291.19,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-NEW2hotel_Exterior_1.jpg"
+		},
+		"latitude": 35.631661,
+		"longitude": 139.734615
+	},
+	{
+		"id": 10071,
+		"name": "Mitsui Garden Hotel Shiodome Italia-gai",
+		"price": 155.26,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-MIT4hotel_Lobby_2.jpg"
+		},
+		"latitude": 35.660178,
+		"longitude": 139.756908
+	},
+	{
+		"id": 10073,
+		"name": "Sotetsu Fresa Inn Tokyo-Kamata",
+		"price": 102.2,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-MIT2hotel_Restaurant_1.jpg"
+		},
+		"latitude": 35.56216,
+		"longitude": 139.718267
+	},
+	{
+		"id": 10226,
+		"name": "Hotel Hokke Club Asakusa",
+		"price": 102.8,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-CHI3hotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.706878,
+		"longitude": 139.794373
+	},
+	{
+		"id": 10227,
+		"name": "Hotel Grand Fresa Akasaka",
+		"price": 119.32,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-CHI2hotel_Exterior_1.jpg"
+		},
+		"latitude": 35.671106,
+		"longitude": 139.735476
+	},
+	{
+		"id": 10247,
+		"name": "APA Hotel Tokyo Itabashi Ekimae",
+		"price": 96.4,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-APAhotel_Lobby_1.jpg"
+		},
+		"latitude": 35.744802,
+		"longitude": 139.71938
+	},
+	{
+		"id": 10262,
+		"name": "Asakusa View Hotel",
+		"price": 261.16,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-ASAhotel_Restaurant_1.jpg"
+		},
+		"latitude": 35.715448,
+		"longitude": 139.791953
+	},
+	{
+		"id": 10264,
+		"name": "Hotel Asia Center of Japan",
+		"price": 89.79,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-ASIhotel_Meeting_Room_1.jpg"
+		},
+		"latitude": 35.67073,
+		"longitude": 139.72792
+	},
+	{
+		"id": 10281,
+		"name": "Sheraton Miyako Hotel Tokyo",
+		"price": 197.9,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2880390240639023-70772.png"
+		},
+		"latitude": 35.639183,
+		"longitude": 139.730414
+	},
+	{
+		"id": 10333,
+		"name": "RIHGA Royal Hotel Tokyo",
+		"price": 233.83,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-RIHhotel_Lobby_1.jpg"
+		},
+		"latitude": 35.710373,
+		"longitude": 139.722512
+	},
+	{
+		"id": 10386,
+		"name": "InterContinental ANA Tokyo",
+		"price": 204.2,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-ANA1hotel_Restaurant_1.jpg"
+		},
+		"latitude": 35.668068,
+		"longitude": 139.740929
+	},
+	{
+		"id": 10438,
+		"name": "Narita Tobu Hotel Airport",
+		"price": 153.25,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2838705967365078-71361.png"
+		},
+		"latitude": 35.779721,
+		"longitude": 140.381064
+	},
+	{
+		"id": 10451,
+		"name": "Pearl Hotel Ryogoku",
+		"price": 96,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-RYOhotel_Exterior_2.jpg"
+		},
+		"latitude": 35.696414,
+		"longitude": 139.791413
+	},
+	{
+		"id": 10605,
+		"name": "Hotel Grand Palace",
+		"price": 272.27,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2837738420954667-72003.png"
+		},
+		"latitude": 35.697288,
+		"longitude": 139.750438
+	},
+	{
+		"id": 10648,
+		"name": "Marunouchi Hotel",
+		"price": 306.41,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2904925084454381-72159.png"
+		},
+		"latitude": 35.68347,
+		"longitude": 139.766648
+	},
+	{
+		"id": 10681,
+		"name": "Grand Nikko Tokyo Daiba",
+		"price": 287.59,
+		"star": 5,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2857628272593802-72282.png"
+		},
+		"latitude": 35.625236,
+		"longitude": 139.771794
+	},
+	{
+		"id": 10829,
+		"name": "Mitsui Garden Hotel Ginza Premier",
+		"price": 227.63,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-MIT1hotel_Other_2.jpg"
+		},
+		"latitude": 35.667111,
+		"longitude": 139.763165
+	},
+	{
+		"id": 10947,
+		"name": "Hotel Jal City Haneda Tokyo",
+		"price": 105.81,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-JAL2hotel_Exterior_1.jpg"
+		},
+		"latitude": 35.551695,
+		"longitude": 139.747947
+	},
+	{
+		"id": 10967,
+		"name": "Crowne Plaza ANA Narita",
+		"price": 189.69,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2854513513583059-73402.png"
+		},
+		"latitude": 35.78716,
+		"longitude": 140.37031
+	},
+	{
+		"id": 11337,
+		"name": "Keikyu Ex Inn Shinagawa-Ekimae Hotel (Formerly Pacific Tokyo)",
+		"price": 133.03,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-LEMhotel_Lobby_1.jpg"
+		},
+		"latitude": 35.629601,
+		"longitude": 139.73609
+	},
+	{
+		"id": 11349,
+		"name": "Hotel East 21 Tokyo",
+		"price": 153.75,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-EAShotel_Exterior_1.jpg"
+		},
+		"latitude": 35.674198,
+		"longitude": 139.814505
+	},
+	{
+		"id": 11385,
+		"name": "Hotel Metropolitan Tokyo Ikebukuro",
+		"price": 161.16,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-CROhotel_Exterior_1.jpg"
+		},
+		"latitude": 35.728351,
+		"longitude": 139.707974
+	},
+	{
+		"id": 11459,
+		"name": "Tokyo Bay Ariake Washington Hotel",
+		"price": 143.14,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-TOK8hotel_Bar_Lounge_1.jpg"
+		},
+		"latitude": 35.63252,
+		"longitude": 139.79359
+	},
+	{
+		"id": 11466,
+		"name": "Cerulean Tower Tokyu Hotel",
+		"price": 384.78,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-CERhotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.65677,
+		"longitude": 139.69961
+	},
+	{
+		"id": 11469,
+		"name": "Hyatt Regency Tokyo",
+		"price": 269.07,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2888334429848861-75358.png"
+		},
+		"latitude": 35.690882,
+		"longitude": 139.690934
+	},
+	{
+		"id": 11564,
+		"name": "New Otani Inn Tokyo",
+		"price": 260.86,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-NEW3hotel_Restaurant_1.jpg"
+		},
+		"latitude": 35.62094,
+		"longitude": 139.729161
+	},
+	{
+		"id": 11695,
+		"name": "Via Inn Asakusa",
+		"price": 100.9,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2834481040433852-76251.png"
+		},
+		"latitude": 35.715121,
+		"longitude": 139.798298
+	},
+	{
+		"id": 11700,
+		"name": "Mandarin Oriental Tokyo",
+		"price": 1041.34,
+		"star": 5,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-MAN1hotel_Bathroom_1.jpg"
+		},
+		"latitude": 35.687044,
+		"longitude": 139.773054
+	},
+	{
+		"id": 11812,
+		"name": "Takanawa Tobu Hotel",
+		"price": 141.64,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-TAK2hotel_Exterior_1.jpg"
+		},
+		"latitude": 35.629237,
+		"longitude": 139.732939
+	},
+	{
+		"id": 11821,
+		"name": "Imperial Hotel",
+		"price": 480.48,
+		"star": 5,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2854514779310296-76703.png"
+		},
+		"latitude": 35.672385,
+		"longitude": 139.758905
+	},
+	{
+		"id": 11827,
+		"name": "InterContinental Tokyo Bay",
+		"price": 282.38,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-INThotel_Lobby_1.jpg"
+		},
+		"latitude": 35.653067,
+		"longitude": 139.762185
+	},
+	{
+		"id": 11874,
+		"name": "International Garden Hotel Narita",
+		"price": 215.52,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/NRT-INThotel_Guest_Room_4.jpg"
+		},
+		"latitude": 35.782715,
+		"longitude": 140.332662
+	},
+	{
+		"id": 12067,
+		"name": "Haneda Excel Hotel Tokyu",
+		"price": 216.72,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2902227399478014-77695.png"
+		},
+		"latitude": 35.55312,
+		"longitude": 139.78662
+	},
+	{
+		"id": 12073,
+		"name": "Hotel Monterey Akasaka",
+		"price": 124.62,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-MON3hotel_Lobby_3.jpg"
+		},
+		"latitude": 35.675527,
+		"longitude": 139.732711
+	},
+	{
+		"id": 12074,
+		"name": "Hotel Monterey Hanzomon",
+		"price": 125.43,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-MON2hotel_Guest_Room_3.jpg"
+		},
+		"latitude": 35.68676,
+		"longitude": 139.742009
+	},
+	{
+		"id": 12079,
+		"name": "Mystays Gotanda Station",
+		"price": 110.51,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-TOK3hotel_Lobby_1.jpg"
+		},
+		"latitude": 35.626433,
+		"longitude": 139.722794
+	},
+	{
+		"id": 12144,
+		"name": "Akasaka Excel Hotel Tokyu",
+		"price": 178.18,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2894021954101992-78004.png"
+		},
+		"latitude": 35.67727,
+		"longitude": 139.73718
+	},
+	{
+		"id": 12147,
+		"name": "Hotel Route-Inn Tokyo Asagaya",
+		"price": 110.51,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-AMIhotel_Other_1.jpg"
+		},
+		"latitude": 35.699974,
+		"longitude": 139.63343
+	},
+	{
+		"id": 12168,
+		"name": "Royal Park Hotel",
+		"price": 193.19,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2867453286105967-78100.png"
+		},
+		"latitude": 35.682365,
+		"longitude": 139.786764
+	},
+	{
+		"id": 12260,
+		"name": "Akasaka Yoko Hotel",
+		"price": 76.98,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-AKA2hotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.669382,
+		"longitude": 139.733092
+	},
+	{
+		"id": 12350,
+		"name": "Hilton Tokyo Odaiba",
+		"price": 284.18,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2886388804229620-78831.png"
+		},
+		"latitude": 35.62692,
+		"longitude": 139.77081
+	},
+	{
+		"id": 12492,
+		"name": "Courtyard by Marriott Tokyo Ginza",
+		"price": 285.89,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-GINhotel_Restaurant_10.jpg"
+		},
+		"latitude": 35.66824,
+		"longitude": 139.76475
+	},
+	{
+		"id": 12992,
+		"name": "Daiichi Hotel Ryogoku",
+		"price": 182.08,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-DAI4hotel_Other_2.jpg"
+		},
+		"latitude": 35.698167,
+		"longitude": 139.797079
+	},
+	{
+		"id": 13083,
+		"name": "Celestine Hotel",
+		"price": 197.9,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2893792157639338-81765.png"
+		},
+		"latitude": 35.651011,
+		"longitude": 139.748816
+	},
+	{
+		"id": 13240,
+		"name": "Tokyo Prince Hotel",
+		"price": 207.11,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2847213277229245-82405.png"
+		},
+		"latitude": 35.658967,
+		"longitude": 139.748098
+	},
+	{
+		"id": 13243,
+		"name": "the b tokyo akasaka",
+		"price": 119.12,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2892125582805270-82414.png"
+		},
+		"latitude": 35.671464,
+		"longitude": 139.733023
+	},
+	{
+		"id": 13445,
+		"name": "Hotel Nikko Narita",
+		"price": 171.57,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2857602091551358-83269.png"
+		},
+		"latitude": 35.784114,
+		"longitude": 140.379625
+	},
+	{
+		"id": 13561,
+		"name": "Hilton Tokyo",
+		"price": 391.59,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-HILhotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.692658,
+		"longitude": 139.691017
+	},
+	{
+		"id": 13587,
+		"name": "HOTEL MYSTAYS Ueno East",
+		"price": 104.2,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-CHI4hotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.712545,
+		"longitude": 139.782062
+	},
+	{
+		"id": 13668,
+		"name": "Akihabara Washington Hotel",
+		"price": 125.53,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-AKIhotel_Bedroom_2.jpg"
+		},
+		"latitude": 35.697374,
+		"longitude": 139.773789
+	},
+	{
+		"id": 13745,
+		"name": "Park Hotel Tokyo",
+		"price": 257.86,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2896233515647580-84484.png"
+		},
+		"latitude": 35.66319,
+		"longitude": 139.759539
+	},
+	{
+		"id": 14067,
+		"name": "Hotel Chinzanso Tokyo",
+		"price": 377.88,
+		"star": 5,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2854673540517448-85788.png"
+		},
+		"latitude": 35.71278,
+		"longitude": 139.72666
+	},
+	{
+		"id": 14096,
+		"name": "APA Hotel Nishiazabu",
+		"price": 90.29,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-APA1hotel_Exterior_3.jpg"
+		},
+		"latitude": 35.657063,
+		"longitude": 139.723582
+	},
+	{
+		"id": 14277,
+		"name": "Keio Plaza Hotel Tokyo",
+		"price": 317.02,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2839552810306873-86666.png"
+		},
+		"latitude": 35.689546,
+		"longitude": 139.694381
+	},
+	{
+		"id": 14337,
+		"name": "Hotel Sunroute Asakusa",
+		"price": 106.51,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-SUN5hotel_Guest_Room_3.jpg"
+		},
+		"latitude": 35.710715,
+		"longitude": 139.792017
+	},
+	{
+		"id": 14448,
+		"name": "Tokyo Grand Hotel",
+		"price": 104.2,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-TOK7hotel_Restaurant_1.jpg"
+		},
+		"latitude": 35.652727,
+		"longitude": 139.751154
+	},
+	{
+		"id": 14449,
+		"name": "The Prince Park Tower Tokyo",
+		"price": 455.46,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2893799084404121-87397.png"
+		},
+		"latitude": 35.655264,
+		"longitude": 139.747021
+	},
+	{
+		"id": 14450,
+		"name": "Tokyo Dome Hotel",
+		"price": 203.8,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2896820817790524-87400.png"
+		},
+		"latitude": 35.703487,
+		"longitude": 139.753136
+	},
+	{
+		"id": 14468,
+		"name": "Park Hyatt Tokyo",
+		"price": 693.09,
+		"star": 5,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-PARhotel_Exterior_3.jpg"
+		},
+		"latitude": 35.685557,
+		"longitude": 139.690604
+	},
+	{
+		"id": 14604,
+		"name": "The Westin Tokyo",
+		"price": 288.39,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2857618867665169-88042.png"
+		},
+		"latitude": 35.641507,
+		"longitude": 139.715367
+	},
+	{
+		"id": 14722,
+		"name": "Hotel Gracery Ginza",
+		"price": 150.55,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-GIN5hotel_Restaurant_2.jpg"
+		},
+		"latitude": 35.668828,
+		"longitude": 139.763677
+	},
+	{
+		"id": 14723,
+		"name": "Ginza Nikko Hotel Tokyo",
+		"price": 377.58,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-GIN3hotel_Exterior_1.jpg"
+		},
+		"latitude": 35.669049,
+		"longitude": 139.759929
+	},
+	{
+		"id": 15864,
+		"name": "Shinagawa Prince Hotel",
+		"price": 195.5,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2863219984638283-90308.png"
+		},
+		"latitude": 35.627929,
+		"longitude": 139.735747
+	},
+	{
+		"id": 15871,
+		"name": "Sunshine City Prince Hotel",
+		"price": 117.42,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2896788201537286-90335.png"
+		},
+		"latitude": 35.729459,
+		"longitude": 139.71945
+	},
+	{
+		"id": 15879,
+		"name": "The Strings by InterContinental Tokyo",
+		"price": 254.85,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-STRhotel_Ballroom_1.jpg"
+		},
+		"latitude": 35.62791,
+		"longitude": 139.740704
+	},
+	{
+		"id": 16068,
+		"name": "Marroad International Hotel Narita",
+		"price": 175.18,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/NRT-MARhotel_Recreational_Facilities_1.jpg"
+		},
+		"latitude": 35.779323,
+		"longitude": 140.372735
+	},
+	{
+		"id": 16115,
+		"name": "Hotel Vista Kamata Tokyo",
+		"price": 84.48,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-YAMhotel_Exterior_1.jpg"
+		},
+		"latitude": 35.559797,
+		"longitude": 139.7138
+	},
+	{
+		"id": 16136,
+		"name": "Mercure Hotel Ginza Tokyo",
+		"price": 226.13,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-MERhotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.672894,
+		"longitude": 139.768549
+	},
+	{
+		"id": 16151,
+		"name": "Shibuya Excel Hotel Tokyu",
+		"price": 295.19,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2896597636879711-91457.png"
+		},
+		"latitude": 35.657975,
+		"longitude": 139.698303
+	},
+	{
+		"id": 16153,
+		"name": "Shinjuku New City Hotel",
+		"price": 136.04,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-SHI4hotel_Other_1.jpg"
+		},
+		"latitude": 35.688595,
+		"longitude": 139.688576
+	},
+	{
+		"id": 16154,
+		"name": "Shinjuku Washington Hotel Main & Annex",
+		"price": 135.74,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-SHI3hotel_Restaurant_1.jpg"
+		},
+		"latitude": 35.68718,
+		"longitude": 139.69296
+	},
+	{
+		"id": 16155,
+		"name": "Shibuya Tokyu REI Hotel",
+		"price": 177.78,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2902226054716039-91469.png"
+		},
+		"latitude": 35.660227,
+		"longitude": 139.701961
+	},
+	{
+		"id": 16156,
+		"name": "Shiba Park Hotel",
+		"price": 190.39,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2845408745281495-91472.png"
+		},
+		"latitude": 35.658785,
+		"longitude": 139.751957
+	},
+	{
+		"id": 16209,
+		"name": "The Prince Sakura Tower Tokyo, Autograph Collection",
+		"price": 362.16,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-TAK3hotel_Guest_Room_4.jpg"
+		},
+		"latitude": 35.630943,
+		"longitude": 139.73533
+	},
+	{
+		"id": 26076,
+		"name": "Conrad Tokyo",
+		"price": 475.37,
+		"star": 5,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2881914597570883-170169.png"
+		},
+		"latitude": 35.66341,
+		"longitude": 139.76136
+	},
+	{
+		"id": 28689,
+		"name": "Lungwood",
+		"price": 94.69,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-LUNhotel_Bedroom_1.jpg"
+		},
+		"latitude": 35.727985,
+		"longitude": 139.772962
+	},
+	{
+		"id": 28691,
+		"name": "Shinjuku Prince Hotel",
+		"price": 217.32,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2893798063974173-188890.png"
+		},
+		"latitude": 35.694482,
+		"longitude": 139.700131
+	},
+	{
+		"id": 28692,
+		"name": "The Peninsula Tokyo",
+		"price": 724.52,
+		"star": 5,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-PENhotel_Bar_Lounge_2.jpg"
+		},
+		"latitude": 35.674758,
+		"longitude": 139.760446
+	},
+	{
+		"id": 28694,
+		"name": "Four Seasons Hotel Tokyo at Marunouchi",
+		"price": 841.64,
+		"star": 5,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-FOU2hotel_Guest_Room_3.jpg"
+		},
+		"latitude": 35.67799,
+		"longitude": 139.76743
+	},
+	{
+		"id": 28697,
+		"name": "Tokyo Marriott Hotel",
+		"price": 241.24,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-LAFhotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.621882,
+		"longitude": 139.736668
+	},
+	{
+		"id": 28698,
+		"name": "Citadines Central Shinjuku Tokyo",
+		"price": 203.9,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-BEShotel_Guest_Room_9.jpg"
+		},
+		"latitude": 35.694408,
+		"longitude": 139.704279
+	},
+	{
+		"id": 30265,
+		"name": "The Capitol Hotel Tokyu",
+		"price": 510.21,
+		"star": 5,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-CAPhotel_Guest_Room_5.jpg"
+		},
+		"latitude": 35.674095,
+		"longitude": 139.740965
+	},
+	{
+		"id": 33251,
+		"name": "Citadines Shinjuku Tokyo",
+		"price": 228.33,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2911713822800400-1222689.png"
+		},
+		"latitude": 35.691021,
+		"longitude": 139.713113
+	},
+	{
+		"id": 33255,
+		"name": "ROYAL PARK HOTEL THE SHIODOME , Tokyo",
+		"price": 228.23,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-ROY7hotel_Restaurant_1.jpg"
+		},
+		"latitude": 35.664108,
+		"longitude": 139.760445
+	},
+	{
+		"id": 33256,
+		"name": "Hotel Villa Fontaine Tokyo-Shiodome",
+		"price": 109.01,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/N8/14/20/0/CAN814200_4.jpg"
+		},
+		"latitude": 35.6619,
+		"longitude": 139.759527
+	},
+	{
+		"id": 33257,
+		"name": "Hotel Villa Fontaine Tokyo-Roppongi",
+		"price": 147.25,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/N8/13/60/0/CAN813600_1.jpg"
+		},
+		"latitude": 35.664438,
+		"longitude": 139.739256
+	},
+	{
+		"id": 33258,
+		"name": "Hotel Metropolitan Tokyo Marunouchi",
+		"price": 342.94,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-OTENhotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.683837,
+		"longitude": 139.768457
+	},
+	{
+		"id": 33262,
+		"name": "Daiwa Roynet Hotel Tokyo Osaki",
+		"price": 126.23,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1047/12/60/88/126088-HAB-1.jpg"
+		},
+		"latitude": 35.618245,
+		"longitude": 139.726654
+	},
+	{
+		"id": 33263,
+		"name": "Shangri-La Hotel, Tokyo",
+		"price": 766.27,
+		"star": 5,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2913464398843167-1222959.png"
+		},
+		"latitude": 35.68267,
+		"longitude": 139.769463
+	},
+	{
+		"id": 33265,
+		"name": "Daiichi Hotel Tokyo",
+		"price": 267.97,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/1013/12/25/08/2/122508216.jpg"
+		},
+		"latitude": 35.668636,
+		"longitude": 139.757339
+	},
+	{
+		"id": 33266,
+		"name": "Daiichi Hotel Annex",
+		"price": 187.99,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1013/hotel1225084-Guestroom.jpg"
+		},
+		"latitude": 35.66939,
+		"longitude": 139.75835
+	},
+	{
+		"id": 33267,
+		"name": "Listel Shinjuku Hotel Tokyo",
+		"price": 146.95,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-LIShotel_Exterior_1.jpg"
+		},
+		"latitude": 35.692873,
+		"longitude": 139.71138
+	},
+	{
+		"id": 36707,
+		"name": "Hotel Keihan Asakusa",
+		"price": 196.1,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-KEI3hotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.714968,
+		"longitude": 139.79275
+	},
+	{
+		"id": 36712,
+		"name": "Apa Hotel Keiseinarita-ekimae",
+		"price": 100.5,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/NRT-APAhotel_Guest_Room_3.jpg"
+		},
+		"latitude": 35.77672,
+		"longitude": 140.31694
+	},
+	{
+		"id": 36715,
+		"name": "Hotel Grand City",
+		"price": 112.71,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-GRA1hotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.731279,
+		"longitude": 139.716301
+	},
+	{
+		"id": 36716,
+		"name": "Ginza Capital Hotel Annex",
+		"price": 136.14,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-GIN7hotel_Guest_Room_3.jpg"
+		},
+		"latitude": 35.66956,
+		"longitude": 139.77447
+	},
+	{
+		"id": 36718,
+		"name": "Hotel Villa Fontaine Tokyo-Shinjuku",
+		"price": 218.62,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-VIL1hotel_Guest_Room_7.jpg"
+		},
+		"latitude": 35.697468,
+		"longitude": 139.702362
+	},
+	{
+		"id": 36732,
+		"name": "the b tokyo ochanomizu",
+		"price": 125.12,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-THEEhotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.695684,
+		"longitude": 139.766514
+	},
+	{
+		"id": 36737,
+		"name": "Hotel Niwa Tokyo",
+		"price": 206.41,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-GREhotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.700622,
+		"longitude": 139.75666
+	},
+	{
+		"id": 39152,
+		"name": "Hotel Sunroute Ariake",
+		"price": 131.63,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-ELS4hotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.632202,
+		"longitude": 139.78952
+	},
+	{
+		"id": 39153,
+		"name": "Hotel Trusty Tokyo Bayside",
+		"price": 167.87,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-TRUhotel_Bar_Lounge_1.jpg"
+		},
+		"latitude": 35.628876,
+		"longitude": 139.787256
+	},
+	{
+		"id": 39155,
+		"name": "Remm Akihabara",
+		"price": 157.46,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2916906033561761-1877560.png"
+		},
+		"latitude": 35.697761,
+		"longitude": 139.773678
+	},
+	{
+		"id": 39160,
+		"name": "Daiichi Hotel Seafort",
+		"price": 186.29,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2894459380463870-1877643.png"
+		},
+		"latitude": 35.62333,
+		"longitude": 139.75024
+	},
+	{
+		"id": 39164,
+		"name": "Hotel Sunroute Shinagawa Seaside",
+		"price": 115.62,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-OTEWhotel_Exterior_2.jpg"
+		},
+		"latitude": 35.609181,
+		"longitude": 139.748802
+	},
+	{
+		"id": 39165,
+		"name": "Toshi Center Hotel",
+		"price": 178.38,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-9Hhotel_Guest_Room_5.jpg"
+		},
+		"latitude": 35.681133,
+		"longitude": 139.738595
+	},
+	{
+		"id": 39168,
+		"name": "Hotel Gracery Tamachi",
+		"price": 120.02,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-9Ihotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.643709,
+		"longitude": 139.750885
+	},
+	{
+		"id": 39172,
+		"name": "Nishi Shinjuku Hotel",
+		"price": 124.32,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1013/hotel1227515-guestroom001.jpg"
+		},
+		"latitude": 35.694982,
+		"longitude": 139.697315
+	},
+	{
+		"id": 39174,
+		"name": "Hotel Route-Inn Tokyo Toyocho",
+		"price": 130.43,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-OTEZhotel_Exterior_1.jpg"
+		},
+		"latitude": 35.667823,
+		"longitude": 139.816852
+	},
+	{
+		"id": 43659,
+		"name": "Ginza Grand Hotel",
+		"price": 132.43,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2907796666879707-3157749.png"
+		},
+		"latitude": 35.668209,
+		"longitude": 139.76021
+	},
+	{
+		"id": 43667,
+		"name": "Hotel Villa Fontaine Tokyo-Nihombashi Hakozaki",
+		"price": 87.79,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-VIL3hotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.680429,
+		"longitude": 139.786027
+	},
+	{
+		"id": 43668,
+		"name": "Hotel Villa Fontaine Tokyo-Otemachi",
+		"price": 125.73,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/N8/13/80/0/CAN813800_3.jpg"
+		},
+		"latitude": 35.690547,
+		"longitude": 139.766899
+	},
+	{
+		"id": 43670,
+		"name": "Hotel Villa Fontaine Tokyo-Kudanshita",
+		"price": 121.22,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/N8/14/10/0/CAN814100_0.jpg"
+		},
+		"latitude": 35.697775,
+		"longitude": 139.754542
+	},
+	{
+		"id": 43671,
+		"name": "Sun Members Tokyo Shinjuku",
+		"price": 178.48,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-SUNChotel_Exterior_5.jpg"
+		},
+		"latitude": 35.686272,
+		"longitude": 139.692117
+	},
+	{
+		"id": 43676,
+		"name": "HUNDRED STAY Tokyo Shinjuku",
+		"price": 277.58,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/1033/47/88/45/KPBBisGO_34af86750e29d7017e09918f7c912cec.jpg"
+		},
+		"latitude": 35.702286,
+		"longitude": 139.69529
+	},
+	{
+		"id": 43677,
+		"name": "Hotel Villa Fontaine Tokyo-Ueno Okachimachi",
+		"price": 97.5,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-VIL2hotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.705309,
+		"longitude": 139.781886
+	},
+	{
+		"id": 43678,
+		"name": "Akasaka Granbell Hotel",
+		"price": 148.55,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1047/14/91/65/149165-GEN-3.jpg"
+		},
+		"latitude": 35.675588,
+		"longitude": 139.737112
+	},
+	{
+		"id": 44485,
+		"name": "Hotel Villa Fontaine Tokyo-Nihombashi Mitsukoshimae",
+		"price": 97.3,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/N8/14/00/0/CAN814000_3.jpg"
+		},
+		"latitude": 35.686132,
+		"longitude": 139.777424
+	},
+	{
+		"id": 44488,
+		"name": "Hotel Villa Fontaine Tokyo-Jimbocho",
+		"price": 111.81,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/N8/14/40/0/CAN814400_2.jpg"
+		},
+		"latitude": 35.69703,
+		"longitude": 139.758481
+	},
+	{
+		"id": 44489,
+		"name": "Hotel Villa Fontaine Tokyo-Hatchobori",
+		"price": 115.52,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/N8/14/70/0/CAN814700_2.jpg"
+		},
+		"latitude": 35.67794,
+		"longitude": 139.777772
+	},
+	{
+		"id": 44490,
+		"name": "Hotel Villa Fontaine Tokyo-Kayabacho",
+		"price": 87.59,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/O2/71/40/0/CAO271400_1.jpg"
+		},
+		"latitude": 35.678347,
+		"longitude": 139.782628
+	},
+	{
+		"id": 44491,
+		"name": "Hotel Villa Fontaine Tokyo-Hamamatsucho",
+		"price": 108.51,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/O2/72/00/0/CAO272000_1.jpg"
+		},
+		"latitude": 35.65206,
+		"longitude": 139.754814
+	},
+	{
+		"id": 47965,
+		"name": "Sardonyx Ueno",
+		"price": 129.83,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-SARhotel_Guest_Room_1.jpg"
+		},
+		"latitude": 35.708703,
+		"longitude": 139.776064
+	},
+	{
+		"id": 49871,
+		"name": "APA Hotel Keikyukamata-Ekimae",
+		"price": 84.08,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-OHFhotel_Other_1.jpg"
+		},
+		"latitude": 35.560795,
+		"longitude": 139.721947
+	},
+	{
+		"id": 49876,
+		"name": "Tokyo Garden Palace",
+		"price": 105.31,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-GAR1hotel_Lobby_2.jpg"
+		},
+		"latitude": 35.703473,
+		"longitude": 139.753162
+	},
+	{
+		"id": 52210,
+		"name": "Watson Meguro Hotel",
+		"price": 110.91,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/30/00/84/300084_120511130312215.jpg"
+		},
+		"latitude": 35.634164,
+		"longitude": 139.714678
+	},
+	{
+		"id": 52217,
+		"name": "Hotel Wing International Ikebukuro",
+		"price": 157.86,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/63/39/75/nQmKhJIk_4289ace1a229521e4f8be963e1596823.jpg"
+		},
+		"latitude": 35.732293,
+		"longitude": 139.71869
+	},
+	{
+		"id": 52224,
+		"name": "Kichijoji Daiichi Hotel",
+		"price": 225.53,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/33/47/17/3078411_31_b.jpg"
+		},
+		"latitude": 35.706086,
+		"longitude": 139.578579
+	},
+	{
+		"id": 52230,
+		"name": "Dormy Inn Tokyo-Hatchobori Natural Hot Spring",
+		"price": 140.04,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/14/46/79/8/qNZfyt2U_016fa6303acd35658c903b15eb2bf4c5.jpg"
+		},
+		"latitude": 35.674436,
+		"longitude": 139.780728
+	},
+	{
+		"id": 52232,
+		"name": "Hotel Villa Fontaine Tokyo-Tamachi",
+		"price": 105.61,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/39/30/45/GzZiZLhQ_146e0f4593801d595f2b2725f5719e83.jpg"
+		},
+		"latitude": 35.642818,
+		"longitude": 139.744881
+	},
+	{
+		"id": 52233,
+		"name": "Grand Park Hotel Panex Tokyo",
+		"price": 82.38,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-9Uhotel_Exterior_3.jpg"
+		},
+		"latitude": 35.563352,
+		"longitude": 139.717726
+	},
+	{
+		"id": 52236,
+		"name": "E Hotel Higashi Shinjuku",
+		"price": 119.62,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-92hotel_Guest_Room_3.jpg"
+		},
+		"latitude": 35.697745,
+		"longitude": 139.707143
+	},
+	{
+		"id": 52243,
+		"name": "Harumi Grand Hotel",
+		"price": 236.74,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/34/75/07/3620020_46_b.jpg"
+		},
+		"latitude": 35.65474,
+		"longitude": 139.779527
+	},
+	{
+		"id": 52245,
+		"name": "Hotel Wing International Shinjuku",
+		"price": 125.53,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/63/39/95/MV2VBFIQ_63418f900ffab8dd370007bf26397551.jpg"
+		},
+		"latitude": 35.69528,
+		"longitude": 139.700935
+	},
+	{
+		"id": 52246,
+		"name": "Sakura Hotel Ikebukuro",
+		"price": 86.59,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/32/74/93/2958933_34_b.jpg"
+		},
+		"latitude": 35.733604,
+		"longitude": 139.708801
+	},
+	{
+		"id": 52250,
+		"name": "Hotel Claska Meguro",
+		"price": 247.65,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/1136/39/95/74/399574_13102614000017125820.jpg"
+		},
+		"latitude": 35.628579,
+		"longitude": 139.694423
+	},
+	{
+		"id": 52255,
+		"name": "Candeo Hotels Uenokoen",
+		"price": 391.09,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-96hotel_Guest_Room_2.jpg"
+		},
+		"latitude": 35.721688,
+		"longitude": 139.779613
+	},
+	{
+		"id": 53223,
+		"name": "Hotel Mystays Ochanomizu Tokyo",
+		"price": 104.9,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/16/53/14/165314_16072810460045015448.jpg"
+		},
+		"latitude": 35.697324,
+		"longitude": 139.768307
+	},
+	{
+		"id": 53225,
+		"name": "Dormy Inn EXPRESS Meguro Aobadai Hot Spring",
+		"price": 165.67,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/35/63/84/2532399_58_b.jpg"
+		},
+		"latitude": 35.649228,
+		"longitude": 139.692153
+	},
+	{
+		"id": 53226,
+		"name": "Hotel Avanshell Akasaka",
+		"price": 197.7,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.67168,
+		"longitude": 139.73783
+	},
+	{
+		"id": 54579,
+		"name": "The Gate Hotel Asakusa Kaminarimon By Hulic",
+		"price": 221.42,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-HEG1hotel_Exterior_2.jpg"
+		},
+		"latitude": 35.710867,
+		"longitude": 139.795291
+	},
+	{
+		"id": 55053,
+		"name": "Hotel Resol Ikebukuro",
+		"price": 129.03,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-REShotel_Spa_1.jpg"
+		},
+		"latitude": 35.72713,
+		"longitude": 139.716124
+	},
+	{
+		"id": 56306,
+		"name": "Andaz Tokyo Toranomon Hills - a concept by Hyatt",
+		"price": 592.19,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-9Dhotel_Suite_1.jpg"
+		},
+		"latitude": 35.66723,
+		"longitude": 139.7497
+	},
+	{
+		"id": 57017,
+		"name": "Solaria Nishitetsu Ginza",
+		"price": 267.27,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/W5/31/70/0/CAW531700_4.jpg"
+		},
+		"latitude": 35.670794,
+		"longitude": 139.767195
+	},
+	{
+		"id": 59150,
+		"name": "Hotel Unizo Tokyo Ginza-Itchome",
+		"price": 144.84,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.674114,
+		"longitude": 139.769052
+	},
+	{
+		"id": 59151,
+		"name": "APA Hotel Keisei Ueno-Ekimae",
+		"price": 127.23,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/56/31/74/13094145_65_b.jpg"
+		},
+		"latitude": 35.711408,
+		"longitude": 139.773004
+	},
+	{
+		"id": 59152,
+		"name": "Hotel Axas Nihonbashi",
+		"price": 210.21,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.68024,
+		"longitude": 139.786322
+	},
+	{
+		"id": 59153,
+		"name": "APA HOTEL TKP NIPPORI-EKIMAE",
+		"price": 105.1,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/63/50/89/abf3c7e6_b.jpg"
+		},
+		"latitude": 35.727056,
+		"longitude": 139.772844
+	},
+	{
+		"id": 59154,
+		"name": "APA Hotel Shinagawa Sengakuji-Ekimae",
+		"price": 101.4,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/54/50/73/b8706447_b.jpg"
+		},
+		"latitude": 35.638039,
+		"longitude": 139.739392
+	},
+	{
+		"id": 59155,
+		"name": "Hotel Jal City Haneda Tokyo West Wing",
+		"price": 135.34,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/62/10/85/b9d88610_b.jpg"
+		},
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 59156,
+		"name": "Hotel Sunroute Ginza",
+		"price": 130.63,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.673543,
+		"longitude": 139.769806
+	},
+	{
+		"id": 59157,
+		"name": "APA Hotel Sugamo Ekimae",
+		"price": 91.39,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/57/26/04/98e4b787_b.jpg"
+		},
+		"latitude": 35.734588,
+		"longitude": 139.737718
+	},
+	{
+		"id": 59170,
+		"name": "APA HOTEL<OCHANOMIZU-EKIKITA>",
+		"price": 100,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/61/33/67/2c281471_b.jpg"
+		},
+		"latitude": 35.702955,
+		"longitude": 139.767129
+	},
+	{
+		"id": 59172,
+		"name": "Hotel Unizo Tokyo Ginza-Nanachome",
+		"price": 243.94,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.66821,
+		"longitude": 139.763025
+	},
+	{
+		"id": 59173,
+		"name": "Mitsui Garden Hotel Kyobashi",
+		"price": 297.4,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/59/30/12/c5a9be18_b.jpg"
+		},
+		"latitude": 35.678392,
+		"longitude": 139.770846
+	},
+	{
+		"id": 59175,
+		"name": "Ochanomizu Hotel Juraku",
+		"price": 183.28,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.698453,
+		"longitude": 139.767803
+	},
+	{
+		"id": 59176,
+		"name": "APA Hotel Ueno-Ekimae",
+		"price": 124.32,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/55/61/39/06d2c1a8_b.jpg"
+		},
+		"latitude": 35.71594,
+		"longitude": 139.780467
+	},
+	{
+		"id": 59185,
+		"name": "Apa Hotel Machida Eki-Higashi",
+		"price": 111.11,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.542103,
+		"longitude": 139.450547
+	},
+	{
+		"id": 59186,
+		"name": "APA Hotel Okachimachieki-Kita S",
+		"price": 124.42,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/54/55/15/12291685_30_b.jpg"
+		},
+		"latitude": 35.709438,
+		"longitude": 139.776216
+	},
+	{
+		"id": 59188,
+		"name": "Apa Hotel Sagamihara Hashimoto-Ekimae",
+		"price": 118.62,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.596999,
+		"longitude": 139.345618
+	},
+	{
+		"id": 59190,
+		"name": "Richmond Hotel Premier Asakusa International",
+		"price": 160.26,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/55/83/19/7be42e6b_b.jpg"
+		},
+		"latitude": 35.714094,
+		"longitude": 139.793821
+	},
+	{
+		"id": 59191,
+		"name": "Hotel Mystays Tachikawa",
+		"price": 168.27,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.695223,
+		"longitude": 139.418783
+	},
+	{
+		"id": 59192,
+		"name": "Dormy Inn Premium Tokyo Kodenmacho",
+		"price": 145.75,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.690345,
+		"longitude": 139.778097
+	},
+	{
+		"id": 59193,
+		"name": "Tokyu Stay Ginza",
+		"price": 189.99,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/55/57/34/4b683c73_b.jpg"
+		},
+		"latitude": 35.670321,
+		"longitude": 139.767338
+	},
+	{
+		"id": 59194,
+		"name": "Remm Roppongi",
+		"price": 176.48,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2902233397498018-131153401.png"
+		},
+		"latitude": 35.663933,
+		"longitude": 139.731287
+	},
+	{
+		"id": 59195,
+		"name": "Meitetsu Inn Hamamatsucho",
+		"price": 111.91,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.657941,
+		"longitude": 139.755642
+	},
+	{
+		"id": 59205,
+		"name": "APA Hotel Kamataeki-Higashi",
+		"price": 92.19,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/64/43/25/80c6f18b_b.jpg"
+		},
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 59207,
+		"name": "The Prince Gallery Tokyo Kioicho A Luxury Collection Hotel",
+		"price": 611.11,
+		"star": 5,
+		"thumbnail": {
+			"url": "RXLImages/1130/23/26/30/938e3cb6_b.jpg"
+		},
+		"latitude": 35.680232,
+		"longitude": 139.737411
+	},
+	{
+		"id": 59209,
+		"name": "APA HOTEL ROPPONGI-EKIMAE",
+		"price": 142.54,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/55/67/63/12727422_59_b.jpg"
+		},
+		"latitude": 35.662356,
+		"longitude": 139.732303
+	},
+	{
+		"id": 59272,
+		"name": "A.i Hotel Nihonbashi",
+		"price": 93.99,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.689646,
+		"longitude": 139.781663
+	},
+	{
+		"id": 59279,
+		"name": "Daiwa Roynet Hotel Ginza",
+		"price": 230.33,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/53/69/53/fe9b98e3_b.jpg"
+		},
+		"latitude": 35.673366,
+		"longitude": 139.769085
+	},
+	{
+		"id": 59282,
+		"name": "Hotel Allamanda Aoyama Tokyo",
+		"price": 383.48,
+		"star": 4,
+		"thumbnail": null,
+		"latitude": 35.671192,
+		"longitude": 139.71765
+	},
+	{
+		"id": 59283,
+		"name": "APA HOTEL Shintomicho-EkiKita",
+		"price": 99.9,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/62/26/40/e738bfbc_b.jpg"
+		},
+		"latitude": 35.673046,
+		"longitude": 139.774295
+	},
+	{
+		"id": 59284,
+		"name": "Sotetsu Fresa Inn Ginza - Nanachome",
+		"price": 117.62,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.668142,
+		"longitude": 139.763223
+	},
+	{
+		"id": 59285,
+		"name": "Hotel Mystays Premier Akasaka",
+		"price": 119.92,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.670224,
+		"longitude": 139.73844
+	},
+	{
+		"id": 61322,
+		"name": "Ascott Marunouchi Tokyo",
+		"price": 401.9,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/1030/CB/B4/86/80/0/CBB486800_10.jpg"
+		},
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 61323,
+		"name": "Best Western Tokyo Nishikasai Grande",
+		"price": 178.48,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/67/36/91/b3e8ad53_b.jpg"
+		},
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 61324,
+		"name": "APA HOTEL IIDABASHI-EKIMAE",
+		"price": 101,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/64/40/32/87b4ddac_b.jpg"
+		},
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 61325,
+		"name": "APA Hotel Higashi Shinjuku Kabukicho-Higashi",
+		"price": 143.94,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/65/38/74/5ac60791_b.jpg"
+		},
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 63512,
+		"name": "Sotetsu Fresa Inn Hamamatsucho Daimon",
+		"price": 102.1,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/11/50/06/8/DDIMhvls_71982d2238c4dc4e2cd6a642ad2d1048.jpg"
+		},
+		"latitude": 35.659597,
+		"longitude": 139.754357
+	},
+	{
+		"id": 63517,
+		"name": "Shinjuku Granbell Hotel",
+		"price": 212.31,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/1130/45/21/72/86574ca6_b.jpg"
+		},
+		"latitude": 35.696655,
+		"longitude": 139.705471
+	},
+	{
+		"id": 68220,
+		"name": "Red Roof Inn Kamata/Haneda Tok",
+		"price": 71.17,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 68984,
+		"name": "Apa Hotel Asakusa Tawaramachi Ekimae",
+		"price": 135.34,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/69/48/78/a5955f2c_b.jpg"
+		},
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 68989,
+		"name": "Takanawa Hanakohro",
+		"price": 639.74,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2884367977618653-207360491.png"
+		},
+		"latitude": null,
+		"longitude": null
+	},
+	{
+		"id": 69649,
+		"name": "Royal Park Hotel THE Haneda",
+		"price": 187.39,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/W5/32/30/0/CAW532300_0.jpg"
+		},
+		"latitude": 35.546843,
+		"longitude": 139.767704
+	},
+	{
+		"id": 69650,
+		"name": "Hotel Coco Grand Ueno Shinobazu",
+		"price": 175.58,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/39/55/45/0cba4080_b.jpg"
+		},
+		"latitude": 35.709425,
+		"longitude": 139.771518
+	},
+	{
+		"id": 69656,
+		"name": "APA Hotel Shinjuku Gyoemmae",
+		"price": 141.94,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/46/12/63/8353858_119_b.jpg"
+		},
+		"latitude": 35.68891,
+		"longitude": 139.70891
+	},
+	{
+		"id": 69657,
+		"name": "APA Hotel Higashi-Nihombashi-Ekimae",
+		"price": 82.88,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/46/13/26/21f19d38_b.jpg"
+		},
+		"latitude": 35.69276,
+		"longitude": 139.78488
+	},
+	{
+		"id": 69672,
+		"name": "Hotel Ryumeikan Tokyo",
+		"price": 191.39,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/32/78/24/2978783_21_b.jpg"
+		},
+		"latitude": 35.683071,
+		"longitude": 139.771083
+	},
+	{
+		"id": 69726,
+		"name": "APA Hotel Higashi Shinjuku Ekimae",
+		"price": 127.03,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/41/96/82/fd79ee9c_b.jpg"
+		},
+		"latitude": 35.69819,
+		"longitude": 139.70742
+	},
+	{
+		"id": 69728,
+		"name": "Hotel Park Side",
+		"price": 130.33,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/36/03/72/3914650_10_b.jpg"
+		},
+		"latitude": 35.709173,
+		"longitude": 139.770846
+	},
+	{
+		"id": 69730,
+		"name": "APA Hotel Roppongi Itchome Ekimae",
+		"price": 110.31,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/40/31/91/0c8eae70_b.jpg"
+		},
+		"latitude": 35.66635,
+		"longitude": 139.73776
+	},
+	{
+		"id": 69731,
+		"name": "Dormy Inn Akihabara Hot Spring",
+		"price": 127.63,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/11/43/74/8/DXSktLEC_31a9be4d5960a620776a779a9cec7a77.jpg"
+		},
+		"latitude": 35.702654,
+		"longitude": 139.773272
+	},
+	{
+		"id": 69738,
+		"name": "APA Hotel Kanda-Eki-Higashi",
+		"price": 92.39,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/40/63/09/4993838_64_b.jpg"
+		},
+		"latitude": 35.692053,
+		"longitude": 139.775123
+	},
+	{
+		"id": 69739,
+		"name": "APA Hotel Shibuya-Dogenzaka-Ue",
+		"price": 127.53,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/41/96/95/5426529_83_b.jpg"
+		},
+		"latitude": 35.656198,
+		"longitude": 139.695006
+	},
+	{
+		"id": 69785,
+		"name": "Roppongi Hotel S",
+		"price": 201.1,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/43/39/46/5abc17d7_b.jpg"
+		},
+		"latitude": 35.660354,
+		"longitude": 139.724536
+	},
+	{
+		"id": 69786,
+		"name": "APA Hotel Ginza-Kyobashi",
+		"price": 99.5,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/43/76/12/1342bdaa_b.jpg"
+		},
+		"latitude": 35.675138,
+		"longitude": 139.770516
+	},
+	{
+		"id": 69788,
+		"name": "Tokyu Stay Gotanda",
+		"price": 129.83,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/18/17/4191205_38_b.jpg"
+		},
+		"latitude": 35.627016,
+		"longitude": 139.724861
+	},
+	{
+		"id": 69789,
+		"name": "Tokyu Stay Shibuya Shin-minamiguchi",
+		"price": 182.48,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/17/84/4191215_62_b.jpg"
+		},
+		"latitude": 35.654826,
+		"longitude": 139.705121
+	},
+	{
+		"id": 69790,
+		"name": "Tokyu Stay Kamata",
+		"price": 131.53,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/19/24/4191190_22_b.jpg"
+		},
+		"latitude": 35.56077,
+		"longitude": 139.721545
+	},
+	{
+		"id": 69791,
+		"name": "Tokyu Stay Nishi-Shinjuku",
+		"price": 189.09,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/19/03/4191168_60_b.jpg"
+		},
+		"latitude": 35.691046,
+		"longitude": 139.686733
+	},
+	{
+		"id": 69792,
+		"name": "Tokyu Stay Ikebukuro",
+		"price": 161.16,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/18/76/4191173_34_b.jpg"
+		},
+		"latitude": 35.732338,
+		"longitude": 139.707244
+	},
+	{
+		"id": 69794,
+		"name": "Hotel Graphy Nezu",
+		"price": 122.62,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/43/20/96/afecc533_b.jpg"
+		},
+		"latitude": 35.717252,
+		"longitude": 139.768665
+	},
+	{
+		"id": 69795,
+		"name": "Hotel Lumiere Nishikasai",
+		"price": 206.01,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/28/91/74/289174_17042607590052633657.jpg"
+		},
+		"latitude": 35.662346,
+		"longitude": 139.861374
+	},
+	{
+		"id": 69797,
+		"name": "APA Hotel Shimbashi Toranomon",
+		"price": 118.62,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/44/98/64/9d6bfc6e_b.jpg"
+		},
+		"latitude": 35.666833,
+		"longitude": 139.753209
+	},
+	{
+		"id": 69809,
+		"name": "Sotetsu Fresa Inn Tokyo-Tamachi",
+		"price": 105.31,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/42/28/06/5540260_10_b.jpg"
+		},
+		"latitude": 35.642719,
+		"longitude": 139.747839
+	},
+	{
+		"id": 69821,
+		"name": "Sotetsu Fresa Inn Nihombashi-Kayabacho",
+		"price": 133.13,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/42/28/08/5540266_53_b.jpg"
+		},
+		"latitude": 35.680777,
+		"longitude": 139.779946
+	},
+	{
+		"id": 69822,
+		"name": "Super Hotel Shinagawa Shinbanba",
+		"price": 100.1,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/76/78/11/767811_14110417400023181863.jpg"
+		},
+		"latitude": 35.61745,
+		"longitude": 139.744288
+	},
+	{
+		"id": 69823,
+		"name": "Shibuya Granbell hotel",
+		"price": 179.68,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/45/76/01/06e9f4d9_b.jpg"
+		},
+		"latitude": 35.656265,
+		"longitude": 139.701658
+	},
+	{
+		"id": 69825,
+		"name": "APA Hotel Ikebukuro-Eki-Kitaguchi",
+		"price": 108.21,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/51/90/4291178_19_b.jpg"
+		},
+		"latitude": 35.733712,
+		"longitude": 139.711363
+	},
+	{
+		"id": 69826,
+		"name": "APA Hotel Mita-Ekimae",
+		"price": 83.88,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/41/97/33/5421504_35_b.jpg"
+		},
+		"latitude": 35.648408,
+		"longitude": 139.750143
+	},
+	{
+		"id": 69828,
+		"name": "Keio Presso Inn Akasaka",
+		"price": 142.94,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/88/60/37/886037_15080709240033831777.jpg"
+		},
+		"latitude": 35.671299,
+		"longitude": 139.736811
+	},
+	{
+		"id": 69829,
+		"name": "APA Hotel Higashi-Shinjuku-Kabukicho",
+		"price": 118.52,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/47/61/50/fe867dda_b.jpg"
+		},
+		"latitude": 35.698036,
+		"longitude": 139.704316
+	},
+	{
+		"id": 69832,
+		"name": "APA Hotel Tokyo-Shiomi-Ekimae",
+		"price": 92.19,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/35/95/39/3896399_12_b.jpg"
+		},
+		"latitude": 35.657702,
+		"longitude": 139.819114
+	},
+	{
+		"id": 69833,
+		"name": "Apa Hotel Tokyo-Ojima",
+		"price": 76.78,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/35/95/21/613e7497_b.jpg"
+		},
+		"latitude": 35.689005,
+		"longitude": 139.821359
+	},
+	{
+		"id": 69834,
+		"name": "Sakura Fleur Aoyama",
+		"price": 125.33,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/36/67/79/41c8c438_b.jpg"
+		},
+		"latitude": 35.659516,
+		"longitude": 139.705801
+	},
+	{
+		"id": 69853,
+		"name": "Apa Hotel Tokyo Kiba",
+		"price": 75.98,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/35/95/19/fe155238_b.jpg"
+		},
+		"latitude": 35.66718,
+		"longitude": 139.810658
+	},
+	{
+		"id": 69854,
+		"name": "Richmond Hotel Narita",
+		"price": 126.63,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/17/86/35/178635_15071011180032024201.jpg"
+		},
+		"latitude": 35.777043,
+		"longitude": 140.317896
+	},
+	{
+		"id": 69855,
+		"name": "Hotel Continental",
+		"price": 157.16,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2865728433094818-69855.png"
+		},
+		"latitude": 35.67242,
+		"longitude": 139.481652
+	},
+	{
+		"id": 69856,
+		"name": "APA Hotel Akihabara-ekimae",
+		"price": 116.12,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/41/77/92/5377359_27_b.jpg"
+		},
+		"latitude": 35.698277,
+		"longitude": 139.776464
+	},
+	{
+		"id": 69858,
+		"name": "APA Hotel Kamataeki-Nishi",
+		"price": 77.38,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/56/04/15/784b0459_b.jpg"
+		},
+		"latitude": 35.563463,
+		"longitude": 139.711224
+	},
+	{
+		"id": 69860,
+		"name": "Keio Presso Inn Ikebukuro",
+		"price": 161.16,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/47/78/22/477822_15080709510033834276.jpg"
+		},
+		"latitude": 35.727838,
+		"longitude": 139.715657
+	},
+	{
+		"id": 69861,
+		"name": "Hotel Mystays Haneda",
+		"price": 87.09,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/12/44/28/8/VgGt5E9B_b2ed5c6d36a218267364761bb12da0ff.jpg"
+		},
+		"latitude": 35.551014,
+		"longitude": 139.749089
+	},
+	{
+		"id": 69862,
+		"name": "Dormy Inn Ueno Okachimachi",
+		"price": 159.06,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/6/DOR2bed.jpg"
+		},
+		"latitude": 35.709033,
+		"longitude": 139.776142
+	},
+	{
+		"id": 69863,
+		"name": "Richmond Hotel Asakusa",
+		"price": 150.45,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/29/45/29/294529_16033013380041171338.jpg"
+		},
+		"latitude": 35.714273,
+		"longitude": 139.794253
+	},
+	{
+		"id": 69864,
+		"name": "APA Hotel Shintomicho-Ekimae",
+		"price": 83.78,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/43/56/27/cae511db_b.jpg"
+		},
+		"latitude": 35.671634,
+		"longitude": 139.773817
+	},
+	{
+		"id": 69894,
+		"name": "Dormy Inn Express Asakusa Hot Spring",
+		"price": 141.44,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/11/43/71/8/szHWGqZY_f1a08763ac96946e5d6c07f01c7c32f4.jpg"
+		},
+		"latitude": 35.711909,
+		"longitude": 139.798849
+	},
+	{
+		"id": 69896,
+		"name": "Nishitetsu Inn Shinjuku",
+		"price": 172.37,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/11/46/02/8/eyd5ulGf_7ee801cd29db1faa495649ade001f36d.jpg"
+		},
+		"latitude": 35.694201,
+		"longitude": 139.694305
+	},
+	{
+		"id": 69898,
+		"name": "Ryokan Asakusa Shigetsu",
+		"price": 309.91,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/39/20/47/9075cede_b.jpg"
+		},
+		"latitude": 35.712397,
+		"longitude": 139.795943
+	},
+	{
+		"id": 69906,
+		"name": "APA Hotel Tokyo-Kudanshita",
+		"price": 83.18,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/40/09/55/4866015_57_b.jpg"
+		},
+		"latitude": 35.69828,
+		"longitude": 139.749591
+	},
+	{
+		"id": 69907,
+		"name": "Sotetsu Fresa Inn Nihombashi-Ningyocho",
+		"price": 106.11,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/42/13/15/5483877_36_b.jpg"
+		},
+		"latitude": 35.683285,
+		"longitude": 139.782418
+	},
+	{
+		"id": 69948,
+		"name": "Daiwa Roynet Hotel Tokyo Akabane",
+		"price": 104.9,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/43/04/4280798_30_b.jpg"
+		},
+		"latitude": 35.777559,
+		"longitude": 139.722485
+	},
+	{
+		"id": 69951,
+		"name": "APA Hotel Kodemmacho-Ekimae",
+		"price": 84.68,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/40/09/34/4866022_61_b.jpg"
+		},
+		"latitude": 35.69112,
+		"longitude": 139.780569
+	},
+	{
+		"id": 69952,
+		"name": "APA Hotel Asakusabashi-Ekikita",
+		"price": 110.11,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/50/95/44/10492611_105_b.jpg"
+		},
+		"latitude": 35.700078,
+		"longitude": 139.787797
+	},
+	{
+		"id": 69956,
+		"name": "Tokyo Green Palace",
+		"price": 106.41,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/26/62/64/1894907_31_b.jpg"
+		},
+		"latitude": 35.686787,
+		"longitude": 139.737696
+	},
+	{
+		"id": 69959,
+		"name": "APA Hotel Hanzomon Hirakawacho",
+		"price": 93.29,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/45/68/36/8108018_31_b.jpg"
+		},
+		"latitude": 35.682923,
+		"longitude": 139.739978
+	},
+	{
+		"id": 69962,
+		"name": "Tokyu Stay Shinjuku",
+		"price": 188.39,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/48/59/12/9681860_29_b.jpg"
+		},
+		"latitude": 35.69083,
+		"longitude": 139.706213
+	},
+	{
+		"id": 69963,
+		"name": "Tokyu Stay Nihombashi",
+		"price": 110.51,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/17/99/4191676_40_b.jpg"
+		},
+		"latitude": 35.690033,
+		"longitude": 139.77485
+	},
+	{
+		"id": 69972,
+		"name": "Tokyu Stay Tsukiji",
+		"price": 143.14,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/17/91/4192100_22_b.jpg"
+		},
+		"latitude": 35.665764,
+		"longitude": 139.770853
+	},
+	{
+		"id": 69973,
+		"name": "APA Hotel Asakusa-Kuramae",
+		"price": 99.7,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/85/10/4352160_142_b.jpg"
+		},
+		"latitude": 35.705683,
+		"longitude": 139.794347
+	},
+	{
+		"id": 69974,
+		"name": "APA Hotel Shimbashi-Onarimon",
+		"price": 90.29,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/84/94/4352156_53_b.jpg"
+		},
+		"latitude": 35.66133,
+		"longitude": 139.75537
+	},
+	{
+		"id": 69975,
+		"name": "APA Hotel Ningyocho-Eki-Kita",
+		"price": 67.87,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/85/00/4352155_44_b.jpg"
+		},
+		"latitude": 35.688263,
+		"longitude": 139.781613
+	},
+	{
+		"id": 69976,
+		"name": "APA Hotel Tsukiji-Eki-Minami",
+		"price": 83.88,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/37/83/58/4352154_21_b.jpg"
+		},
+		"latitude": 35.666072,
+		"longitude": 139.774986
+	},
+	{
+		"id": 69978,
+		"name": "Futakotamagawa Excel Hotel Tokyu",
+		"price": 183.98,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/78/22/63/782263_16032908310041132000.jpg"
+		},
+		"latitude": 35.610389,
+		"longitude": 139.629895
+	},
+	{
+		"id": 69979,
+		"name": "Ochanomizu St.hills Hotel",
+		"price": 108.11,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1136/39/02/65/390265_14061615230019867839.jpg"
+		},
+		"latitude": 35.703207,
+		"longitude": 139.766449
+	},
+	{
+		"id": 69981,
+		"name": "SHIBUYA HOTEL EN",
+		"price": 131.43,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/41/82/61/5394352_88_b.jpg"
+		},
+		"latitude": 35.65983,
+		"longitude": 139.69542
+	},
+	{
+		"id": 70000,
+		"name": "Pearl Hotel Yaesu",
+		"price": 137.74,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/11/58/60/8/6nyZXq4R_436be94918fc45fb0b409932d103e6cb.jpg"
+		},
+		"latitude": 35.683757,
+		"longitude": 139.772105
+	},
+	{
+		"id": 70001,
+		"name": "Hotel Gracery Shinjuku",
+		"price": 175.98,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/1030/CA/W0/23/20/0/CAW023200_2.jpg"
+		},
+		"latitude": 35.695251,
+		"longitude": 139.7023
+	},
+	{
+		"id": 70004,
+		"name": "APA Hotel Kanda-Jimbocho-Ekihigashi",
+		"price": 102,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/47/93/70/9361090_84_b.jpg"
+		},
+		"latitude": 35.694579,
+		"longitude": 139.76218
+	},
+	{
+		"id": 70005,
+		"name": "Grand Prince Hotel New Takanawa",
+		"price": 221.72,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2841824720760629-53947321.png"
+		},
+		"latitude": 35.630032,
+		"longitude": 139.733486
+	},
+	{
+		"id": 70031,
+		"name": "APA Hotel Hatchyobori - Eki - Minami",
+		"price": 101.9,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/36/74/96/4095771_46_b.jpg"
+		},
+		"latitude": 35.673141,
+		"longitude": 139.775375
+	},
+	{
+		"id": 70032,
+		"name": "APA Hotel Ginza-Takaracho",
+		"price": 99.9,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/44/30/00/6785368_20_b.jpg"
+		},
+		"latitude": 35.674348,
+		"longitude": 139.771726
+	},
+	{
+		"id": 70033,
+		"name": "APA Hotel Shinjuku Kabukicho Tower",
+		"price": 174.67,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/53/30/33/11598047_50_b.jpg"
+		},
+		"latitude": 35.695893,
+		"longitude": 139.701291
+	},
+	{
+		"id": 70036,
+		"name": "Hotel Coco Grand Kitasenju",
+		"price": 148.65,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/42/26/20/5538724_22_b.jpg"
+		},
+		"latitude": 35.751239,
+		"longitude": 139.803042
+	},
+	{
+		"id": 70038,
+		"name": "Shibuya Creston Hotel",
+		"price": 136.34,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1130/36/62/63/4047539_29_b.jpg"
+		},
+		"latitude": 35.663244,
+		"longitude": 139.694673
+	},
+	{
+		"id": 71975,
+		"name": "Ginza Creston",
+		"price": 258.76,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1013/hotel1227613-room1.jpg"
+		},
+		"latitude": 35.666724,
+		"longitude": 139.778535
+	},
+	{
+		"id": 71979,
+		"name": "New Ueno Hotel",
+		"price": 123.42,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1013/hotel1296214-photo-not-available-small.jpg"
+		},
+		"latitude": 35.712762,
+		"longitude": 139.777561
+	},
+	{
+		"id": 74531,
+		"name": "The Tokyo Station Hotel",
+		"price": 1130.93,
+		"star": 4,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-99hotel_Business_centre_1.jpg"
+		},
+		"latitude": 35.68211,
+		"longitude": 139.76585
+	},
+	{
+		"id": 74860,
+		"name": "Grand Hyatt Tokyo",
+		"price": 398.8,
+		"star": 5,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-GRA2hotel_Suite_1.jpg"
+		},
+		"latitude": 35.659371,
+		"longitude": 139.729184
+	},
+	{
+		"id": 74867,
+		"name": "The Ritz-Carlton, Tokyo",
+		"price": 767.27,
+		"star": 5,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-RIThotel_Swimming_Pool_1.jpg"
+		},
+		"latitude": 35.66678,
+		"longitude": 139.73126
+	},
+	{
+		"id": 76134,
+		"name": "Tokyu Stay Suidobashi",
+		"price": 131.13,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.700813,
+		"longitude": 139.756486
+	},
+	{
+		"id": 76137,
+		"name": "KKR Hotel Tokyo",
+		"price": 252.75,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.690502,
+		"longitude": 139.76049
+	},
+	{
+		"id": 76138,
+		"name": "Tokyu Stay Yotsuya",
+		"price": 228.63,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.686461,
+		"longitude": 139.72677
+	},
+	{
+		"id": 76158,
+		"name": "Smile Hotel Nihombashi-Mitsukoshimae",
+		"price": 86.19,
+		"star": 3,
+		"thumbnail": null,
+		"latitude": 35.686213,
+		"longitude": 139.776055
+	},
+	{
+		"id": 76194,
+		"name": "Chisun Inn Kamata",
+		"price": 95.4,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/1033/14/48/48/8/SIjVeYUU_1d4b304eff9c9a7fdf2f4472fe5e97bf.jpg"
+		},
+		"latitude": 35.560519,
+		"longitude": 139.721501
+	},
+	{
+		"id": 85942,
+		"name": "Ueno Hotel",
+		"price": 116.72,
+		"star": 3,
+		"thumbnail": {
+			"url": "RXLImages/7/TYO-9Khotel_Other_1.jpg"
+		},
+		"latitude": 35.716092,
+		"longitude": 139.780543
+	},
+	{
+		"id": 85948,
+		"name": "Meguro Gajoen",
+		"price": 598.7,
+		"star": 4,
+		"thumbnail": null,
+		"latitude": 35.632002,
+		"longitude": 139.713527
+	}
+]

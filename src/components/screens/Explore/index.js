@@ -17,7 +17,7 @@ import RNPickerSelect from 'react-native-picker-select';//eslint-disable-line
 import SearchBar from '../../molecules/SearchBar';
 import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
-import { autoHotelSearch } from '../../../config-debug';
+import { autoHotelSearch, autoHotelSearchPlace, isOnline, log } from '../../../config-debug';
 import requester from '../../../initDependencies';
 import styles from './styles';
 import lang from '../../../language';
@@ -138,10 +138,12 @@ class Explore extends Component {
     async componentDidMount() {
         console.disableYellowBox = true;
 
+        // enable automatic search
         if (__DEV__ && autoHotelSearch) {
-            // enable automatic search
-            setTimeout(() => this.handlePopularCities(15664, 'Sofia, Bulgaria',100))
-            setTimeout(() => this.gotoSearch(),200)
+            setTimeout(() => {this.onSearchHandler(autoHotelSearchPlace)}, 100)
+            if (!isOnline) {
+                setTimeout(() => this.gotoSearch(), 300)
+            }
         }
     }
 
@@ -222,7 +224,22 @@ class Explore extends Component {
             requester.getRegionsBySearchParameter([`query=${value}`]).then(res => {
                 res.body.then(data => {
                     if (this.state.search != '') {
-                        this.setState({ cities: data });
+                        this.setState(
+                            { cities: data },
+                            () => {
+                                // enable automatic search
+                                if (__DEV__ && autoHotelSearch) {
+                                    setTimeout(() => {
+                                            const {id, query} = data[0];
+                                            //log('citites','citites',{data,id,query})
+                                            this.handlePopularCities(id, query);
+                                            setTimeout(() => this.gotoSearch(), 100)
+                                        },
+                                        500
+                                    )
+                                }
+                            }  
+                        );                        
                     }
                 });
             });

@@ -85,7 +85,8 @@ import {
   DISPLAY_MODE_RESULTS_AS_LIST,
   DISPLAY_MODE_RESULTS_AS_MAP,
   DISPLAY_MODE_HOTEL_DETAILS,
-  hasValidCoordinatesForMap
+  hasValidCoordinatesForMap,
+  checkHotelData
 } from "../../utils";
 import stomp from "stomp-websocket-js";
 import { isNative } from "../../../../version";
@@ -403,24 +404,15 @@ class HotelsSearchScreen extends Component {
       }
     } else {
       let hotelData = parsedData;
-
-      // TODO: @@debug - remove
-      // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);
-	  // console.tron.log(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, id:${hotelData.id} name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${hotelData.price}`);      
-
       let index = this.hotelsIndicesByIdMap[hotelData.id];
+      checkHotelData(hotelData,'socket-orig')
 
       //TODO: @@debug remove
-      /*if (index && index < 7 && index > 0) {
-        console.log(
-          `#hotel-search# [HotelsSearchScreen] onDataFromSocket, index: ${index} id:${
-            hotelData.id
-          } name:${hotelData.name}, pic:${hotelData.hotelPhoto}, price:${
-            hotelData.price
-          }`,
-          "font-weight: bold"
-        );
-      }*/
+      const {id,hotelPhoto,thumbnail} = hotelData;
+      //log('socket',`[${index}] id:${id} hotelPhoto: ${hotelPhoto}' `, {hotelData})
+      // log('socket',`[${index}] id:${id} thumbnail: ${thumbnail}' `, {hotelData})
+      //TODO: @@debug remove
+
 
       this.setState(
         // change state function
@@ -477,7 +469,16 @@ class HotelsSearchScreen extends Component {
 
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
-    // log('onDoneSocket','socket cache',{fromSocket:this.hotelsSocketCacheMap})
+    
+    //TODO: @@@debug remove
+//     let asArray = []
+//     for (let i in this.hotelsSocketCacheMap) {
+//     	if (! isNaN(i)) {
+//     		asArray.push(this.hotelsSocketCacheMap[i])
+//     	}
+//     }
+//     log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{orig:this.hotelsSocketCacheMap.orig,parsed:this.hotelsSocketCacheMap},true)
+//     log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{asArray},true)
 
     this.stopSocketConnection(false);
 
@@ -508,6 +509,7 @@ class HotelsSearchScreen extends Component {
 
   onBackButtonPress = () => {
     switch (this.state.displayMode) {
+    
       case DISPLAY_MODE_HOTEL_DETAILS:
         this.setState({ displayMode: DISPLAY_MODE_RESULTS_AS_LIST, isLoading: false });
         break;
@@ -691,7 +693,9 @@ class HotelsSearchScreen extends Component {
         const count = data.content.length;
         const hotelsAll = data.content;
 
-        // log('filtered-hotels',`${count} filtered hotels, before parsing`, {hotelsAll})
+        checkHotelData(hotelsAll,'filter')
+
+        log('filtered-hotels',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
 
         // parse data
         mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap)
@@ -767,10 +771,9 @@ class HotelsSearchScreen extends Component {
 
       res.body.then(function(data) {
         let hotels = data.content;
-        // add index
-        // hotels = hotels.map((item,index) => {item.index = index; return item;})
-
-        // log('static-hotels',`${hotels.length} static hotels`, {hotels})
+        
+        log('static-hotels',`+${hotels.length} of ${_this.state.totalHotels} static hotels`, {hotels}, true)
+        checkHotelData(hotels,'static')
 
         if (_this.isFirstLoad) {
           _this.isFirstLoad = false;
@@ -783,34 +786,15 @@ class HotelsSearchScreen extends Component {
           hotels = hotelsInfoFresh;
         }
 
-        //TODO: @@debug
-        /** console.log START *
-                // console.log("#hotel-search# [HotelsSearchScreen]  STATIC DATA", data);
-                console.log("#hotel-search# [HotelsSearchScreen] STATIC DATA " +
-                    `first: ${data.first}, last: ${data.last}, number: ${data.number},`+
-                    ` totalElements: ${data.totalElements}, totalPages: ${data.totalPages},` +
-                    ` pageLimit for list: ${_this.pageLimit}`
-                );
-                console.log('#hotel-search# [HotelsSearchScreen] STATIC DATA, Hotels:');
-                for (let i=0; i<hotels.length; i++) {
-                    let item = hotels[i];
-                    debugHotelData(item, _this.state.hotelsInfo, i, '.. STATIC DATA ..')
-                }
-                /* console.log END */
-
         _this.setState(
           prevState => {
-            //TODO: @@debug - remove/comment - log state of hotels
-            // console.warn(`%c### prevState hotels length: ${prevState.hotelsInfo.length}`, 'font-weight:bold');
-            // console.log(`### hotels old/fresh`, {old:prevState.hotelsInfo, new: hotels});
-
             // filter repeating hotels out
             let newHotels = [];
 
             hotels.forEach(element => {
               if (_this.hotelsIndicesByIdMap[element.id] != null) {
                 //TODO: @@debug - remove
-                // console.log(`%c${element.name.padEnd(45, ' ')}%c: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,"color: red; font-weight: bold","color: black; font-weight: normal");
+                console.error(`%c${element.name.padEnd(45, ' ')}%c: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,"color: red; font-weight: bold","color: black; font-weight: normal");
               } else {
                 newHotels.push(element);
                 //TODO: @@debug - remove
@@ -899,6 +883,7 @@ class HotelsSearchScreen extends Component {
 
     // log('fetch',`res:${this.state.isFilterResult} && loaded:${isAllHotelsLoaded}`)
 
+//    const isAllHotelsLoaded = (this.state.totalHotels == this.state.hotelsInfoForMap);
     const isAllHotelsLoaded = (this.state.totalHotels == this.state.hotelsInfoForMap);
     if (this.state.isFilterResult && isAllHotelsLoaded) {
       // TODO: Figure this out - how to load results after isDoneSocket
@@ -923,10 +908,8 @@ class HotelsSearchScreen extends Component {
 
         if (this.state.isFilterResult) {
           //console.log("### onFetch 2.1");
-          const strSearch = this.generateSearchString(this.state, this.props);
-          const strFilters = generateHotelFilterString(
-            this.listViewRef.getPage()
-          );
+          const strSearch = generateSearchString(this.state, this.props);
+          const strFilters = generateHotelFilterString(this.listViewRef.getPage(), this.state);
           requester
             .getLastSearchHotelResultsByFilter(strSearch, strFilters)
             .then(this.onStaticData);
@@ -1054,7 +1037,8 @@ class HotelsSearchScreen extends Component {
       const count = filtered.length;
       //this.props.setSearchFiltered(filtered)
       
-      //log('HOTEL_SEARCH',`Filtered from UI: ${filtered.length} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams})
+      log('filter-fromUI',`Filtered from UI: ${filtered.length} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams})
+      checkHotelData(filtered,'filter-fromUI')
       
       this.listUpdateDataSource(filtered)
       this.setState({

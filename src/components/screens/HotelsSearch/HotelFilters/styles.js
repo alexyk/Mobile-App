@@ -148,7 +148,8 @@ export default styles = StyleSheet.create({
     paddingTop: 15,
     paddingBottom: 15,
     flexDirection: 'row',
-    justifyContent: 'space-between'
+    justifyContent: 'space-between',
+    flex: 0.3,
     // backgroundColor: 'red'
     // borderTopWidth: 1,
     // borderTopColor: '#c6c6c6'
