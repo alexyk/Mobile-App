@@ -95,7 +95,9 @@ jobs:
         - java -version
         - ls -l
       install:
-        - brew install ninja
+        - wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-mac.zip
+        - unzip ninja-mac.zip
+        - mv ninja /usr/local/bin
         - wget https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
         - unzip sdk-tools-darwin-4333796.zip &> /dev/null
         - mkdir ~/android
@@ -104,6 +106,7 @@ jobs:
         - export PATH=$PATH:$ANDROID_HOME/tools/bin
         - yes | sdkmanager --licenses
         - sdkmanager "ndk-bundle"
+        - sdkmanager "platforms;android-28"
         - eval "$(ssh-agent -s)"
         - chmod 600 ./deploy_key
         - ssh-add ./deploy_key
