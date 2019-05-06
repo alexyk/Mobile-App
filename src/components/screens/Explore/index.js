@@ -159,7 +159,7 @@ class Explore extends Component {
             this.setCountriesInfo();
         }
 
-        if (__DEV__ && autoHotelSearch) {
+        if (__DEV__ && autoHotelSearch && this.searchBarRef) {
             this.searchBarRef.focus()
         }
     }

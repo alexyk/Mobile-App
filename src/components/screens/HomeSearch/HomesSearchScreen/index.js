@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { StyleSheet, Text,  TouchableOpacity, View, Dimensions } from 'react-native';
+import { StyleSheet, Text,  TouchableOpacity, View } from 'react-native';
 
 import Image from 'react-native-remote-svg';
 import { DotIndicator } from 'react-native-indicators';
@@ -20,7 +20,6 @@ import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
 import styles from './styles';
 
-const { width, height } = Dimensions.get('window')
 
 class HomesSearchScreen extends Component {
     isFilterResult = false;
@@ -130,9 +129,9 @@ class HomesSearchScreen extends Component {
     }
 
     getHomes() {
-        if (this.listView != undefined && this.listView != null) {
+        /*if (this.listView != undefined && this.listView != null) {
             this.listView.initListView();
-        }
+        }*/
         let searchTerms = [];
         searchTerms.push(`countryId=${this.state.countryId}`);
         searchTerms.push(`startDate=${this.state.checkInDateFormated}`);
@@ -159,7 +158,7 @@ class HomesSearchScreen extends Component {
                         // listings: data.filteredListings.content,
                         totalPages: data.filteredListings.totalPages
                     }, () => {
-                        this.listView.onFirstLoad(data.filteredListings.content, false);
+                        this.listView.updateDataSource(data.filteredListings.content);
                     });
                 }
                 else {
@@ -169,7 +168,7 @@ class HomesSearchScreen extends Component {
                         cities: data.cities,
                         propertyTypes: data.types
                     }, () => {
-                        this.listView.onFirstLoad(data.filteredListings.content, false);
+                        this.listView.updateDataSource(data.filteredListings.content);
                     });
                 }
             });
@@ -345,9 +344,9 @@ class HomesSearchScreen extends Component {
         
         this.isFilterResult = true;
         
-        if (this.listView != undefined && this.listView != null) {
-            this.listView.initListView();
-        }
+        // if (this.listView != undefined && this.listView != null) {
+        //     this.listView.initListView();
+        // }
         
         this.setState({
             cities: data.cities,
@@ -479,14 +478,18 @@ class HomesSearchScreen extends Component {
         )
     }
 
-    renderPaginationFetchingView = () => (
+    renderPaginationFetchingView = () => {
+        return <View/>;
+        /*return (
         <View style={{width, height:height - 160, justifyContent: 'center', alignItems: 'center'}}>
             <Image style={{width:50, height:50}} source={require('../../../../assets/loader.gif')}/>
         </View>
-    )
+        )*/
+    }
     
     renderPaginationWaitingView = () => {
-        return (
+        return <View/>;
+        /*return (
             <View style={
                 {
                     flex: 0,
@@ -499,7 +502,7 @@ class HomesSearchScreen extends Component {
             }>
                 <DotIndicator color='#d97b61' count={3} size={9} animationDuration={777}/>
             </View>
-        )
+        )*/
     }
 
     renderPaginationAllLoadedView = () => {
@@ -521,6 +524,7 @@ class HomesSearchScreen extends Component {
                     </TouchableOpacity>
                     <View style={styles.pickerWrapHomes}>
                         <RNPickerSelect
+                            disabled={true}
                             items={this.state.countries}
                             placeholder={{
                                 label: 'Choose a location',
@@ -559,10 +563,8 @@ class HomesSearchScreen extends Component {
                     children={this.state.children}
                     infants={this.state.infants}
                     guests={this.state.guests}
-                    gotoGuests={this.gotoGuests}
                     gotoSearch={this.gotoSearch}
                     gotoCancel={this.gotoCancel}
-                    onDatesSelect={this.onDatesSelect}
                     gotoFilter={this.gotoFilter}
                     showSearchButton={this.state.isNewSearch}
                     showCancelButton={this.state.isNewSearch}
