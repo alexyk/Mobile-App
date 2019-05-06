@@ -95,10 +95,10 @@ jobs:
         - java -version
         - ls -l
       install:
-        - wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-mac.zip
-        - unzip ninja-mac.zip
+        - wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-mac.zip  &> /dev/null
+        - unzip ninja-mac.zip  &> /dev/null
         - mv ninja /usr/local/bin
-        - wget https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
+        - wget https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip &> /dev/null
         - unzip sdk-tools-darwin-4333796.zip &> /dev/null
         - mkdir ~/android
         - mv tools ~/android/
@@ -110,7 +110,7 @@ jobs:
         - eval "$(ssh-agent -s)"
         - chmod 600 ./deploy_key
         - ssh-add ./deploy_key
-        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2"
+        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2" " &> /dev/null
         - nvm install 8.14.1
         - npm install
       script:
