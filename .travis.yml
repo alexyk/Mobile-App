@@ -99,7 +99,7 @@ jobs:
         - wget https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip
         - unzip sdk-tools-darwin-4333796.zip &> /dev/null
         - mkdir ~/android
-        - cd mv tools ~/android/
+        - mv tools ~/android/
         - export ANDROID_HOME=~/android/
         - export PATH=$PATH:$ANDROID_HOME/tools/bin
         - yes | sdkmanager --licenses
