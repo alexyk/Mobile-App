@@ -28,6 +28,7 @@ else
 fi
 
 # build
+echo "Bulding a $cfg version"
 cd android
 [ "$cfg" == "debug" ] \
 	&& ./gradlew assembleDebug \

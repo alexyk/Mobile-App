@@ -1,10 +1,24 @@
 import React, {PureComponent} from "react"
-import { View } from 'react-native'
+import { View, Text } from 'react-native'
 import Image from "react-native-remote-svg";
+import {commonText} from '../../../common.styles'
 
 export default class LTLoader extends PureComponent {
   constructor(props) {
     super(props);
+  }
+
+  renderMessage() {
+    const {message} = this.props;
+    if (message) {
+      return (
+        <Text style={{...commonText, position:'absolute', top:"70%", width:"100%", textAlign:'center', fontSize:19}}>
+          {message}
+        </Text>
+      )
+    } else {
+      return null;
+    }
   }
 
   render() {
@@ -19,7 +33,7 @@ export default class LTLoader extends PureComponent {
         
         display: (this.props.isLoading ? "flex" : 'none'),
         
-        backgroundColor: '#FFFFFFE4'
+        backgroundColor: '#FFFFFFF8'
       }
 
       const style = (
@@ -37,6 +51,7 @@ export default class LTLoader extends PureComponent {
             style={{ width: 50, height: 50 }}
             source={require("../../../assets/loader.gif")}
           />
+	  { this.renderMessage() }
         </View>
       );
     } else {

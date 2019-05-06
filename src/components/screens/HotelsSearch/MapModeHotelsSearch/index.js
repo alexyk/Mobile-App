@@ -28,6 +28,8 @@ class MapModeHotelsSearch extends Component {
             hotelsInfo: props.hotelsInfo,
             selectedMarkerIndex: -1
         }
+        
+        this.onRegionChangeComplete = this.onRegionChangeComplete.bind(this)
     }
 
     componentDidUpdate(prevProps) {
@@ -256,6 +258,14 @@ class MapModeHotelsSearch extends Component {
             )
         )
     }
+    
+    onRegionChangeComplete(region) {
+        const hasSelectedMarkRendered = (this.selected_mark != null);
+		if (hasSelectedMarkRendered) {
+			this.selected_mark.showCallout();
+		}
+		log('map-view', `Region change`, {region})
+    }
 
     render() {
         const initialRegion = {
@@ -264,7 +274,6 @@ class MapModeHotelsSearch extends Component {
             latitudeDelta: 0.2,
             longitudeDelta: 0.2
         }
-        const hasSelectedMarkRendered = (this.selected_mark != null);
         const hasValidSelectedIndex = (this.state.hotelsInfo[this.state.selectedMarkerIndex] != null);
         let selectedMarkerData = (hasValidSelectedIndex ? this.state.hotelsInfo[this.state.selectedMarkerIndex] : null);
 
@@ -274,7 +283,7 @@ class MapModeHotelsSearch extends Component {
                     ref={(ref) => this._map = ref}
                     initialRegion={initialRegion}
                     style={styles.map}
-                    onRegionChangeComplete={() => {if (hasSelectedMarkRendered) this.selected_mark.showCallout();}}
+                    onRegionChangeComplete={this.onRegionChangeComplete}
                 >
                     { this.renderMarkers()                          }
                     { this.renderSelectedMarkerWithCallout(selectedMarkerData) }

@@ -194,7 +194,7 @@ class HotelFilters extends Component {
           ref={(i) => { this.input = i; }}
           underlineColorAndroid={'transparent'}
           onChangeText={(text) => this.setState({nameFilter: text})}
-          style={{flex:0.7, height: 40, margin: 15, borderColor: 'grey', borderWidth: 1, borderRadius: 5, paddingLeft: 5}}
+          style={styles.nameTextInput}
         />
       </View>
     )

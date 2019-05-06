@@ -149,10 +149,19 @@ export default styles = StyleSheet.create({
     paddingBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
-    flex: 0.3,
+    flex: 0.4,
     // backgroundColor: 'red'
     // borderTopWidth: 1,
     // borderTopColor: '#c6c6c6'
+  },
+  nameTextInput: {
+  	flex:0.6,
+  	height: 40,
+  	margin: 15,
+  	borderColor: 'grey',
+  	borderWidth: 1,
+  	borderRadius: 5,
+  	paddingLeft: 5
   },
   pricingView: {
     padding: 15,

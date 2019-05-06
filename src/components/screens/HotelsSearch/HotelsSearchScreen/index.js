@@ -826,7 +826,6 @@ class HotelsSearchScreen extends Component {
               hotelsInfoForMap,
               hotelsInfo: hotelsInfoFresh,
               totalHotels: data.totalElements,
-              isLoading: false
             };
           },
           function() {
@@ -1636,7 +1635,7 @@ class HotelsSearchScreen extends Component {
             {this.renderResultsAsList()}
             {/* {this.renderContent()} */}
   
-            <LTLoader isLoading={this.state.isLoading} />
+            <LTLoader isLoading={this.state.isLoading} message={`Loading matches for your search ...`} />
             {this.renderMapButton()}
           </View>
 
