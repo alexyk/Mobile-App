@@ -473,7 +473,7 @@ class HotelsSearchScreen extends Component {
 //     		asArray.push(this.hotelsSocketCacheMap[i])
 //     	}
 //     }
-     log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{orig:this.hotelsSocketCacheMap.orig,parsed:this.hotelsSocketCacheMap},true)
+    //log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{orig:this.hotelsSocketCacheMap.orig,parsed:this.hotelsSocketCacheMap},true)
     //  log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{asArray},true)
 
     this.stopSocketConnection(false);
@@ -494,10 +494,14 @@ class HotelsSearchScreen extends Component {
         this.updateFilter(generateFilterInitialData(true, this.state),false)
         // then with UI filtering remove unavailable
         this.filtersCallback =  () => {
-          this.props.setIsApplyingFilter(true);
-          this.updateFilter(generateFilterInitialData(false, this.state), true)
-          const priceRange = [this.priceMin,this.priceMax];
-          this.setState({priceRange,priceRangeSelected: priceRange})
+          if (this && this.listViewRef) {
+            this.props.setIsApplyingFilter(true);
+            this.updateFilter(generateFilterInitialData(false, this.state), true)
+            const priceRange = [this.priceMin,this.priceMax];
+            this.setState({priceRange,priceRangeSelected: priceRange})
+          } else {
+            console.warn('[HotelsSearchScreen::filtersCallback] this.listViewRef seems null - is screen unmounted?')
+          }
         }
       }
     );
@@ -507,12 +511,17 @@ class HotelsSearchScreen extends Component {
     switch (this.state.displayMode) {
     
       case DISPLAY_MODE_HOTEL_DETAILS:
-        this.setState({ displayMode: DISPLAY_MODE_RESULTS_AS_LIST, isLoading: false });
+        this.setState({
+          displayMode: DISPLAY_MODE_RESULTS_AS_LIST,
+          isLoading: false,
+          selectedHotelData: null
+        });
         break;
 
       default:
         this.props.navigation.goBack();
         break;
+
     }
 
     if (Platform.OS == 'android') {
@@ -554,6 +563,7 @@ class HotelsSearchScreen extends Component {
         this.setState({
           isLoading: true,
           webViewUrl: initialState.webViewUrl,
+          selectedHotelData: item,
           displayMode: DISPLAY_MODE_HOTEL_DETAILS,
         });
       } else {
@@ -696,7 +706,7 @@ class HotelsSearchScreen extends Component {
 
         checkHotelData(hotelsAll,'filter')
 
-        log('filtered-hotels',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
+        //log('filtered-hotels',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
 
         // parse data
         mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap)
@@ -769,7 +779,7 @@ class HotelsSearchScreen extends Component {
       res.body.then(function(data) {
         let hotels = data.content;
         
-        log('static-hotels',`+${hotels.length} of ${_this.state.totalHotels} static hotels`, {hotels}, true)
+        //log('static-hotels',`+${hotels.length} of ${_this.state.totalHotels} static hotels`, {hotels}, true)
         checkHotelData(hotels,'static')
 
         if (_this.isFirstLoad) {
@@ -885,7 +895,7 @@ class HotelsSearchScreen extends Component {
       `#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`
     );*/
 
-    log('fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`)
+    //log('fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`)
 
     if (this.isAllHotelsLoaded) {
       // TODO: Figure this out - how to load results after isDoneSocket
@@ -1177,6 +1187,11 @@ class HotelsSearchScreen extends Component {
   );
 
   renderPaginationWaitingView = () => {
+
+    if (this.isAllHotelsLoaded) {
+      return null;
+    }
+
     return (
       <View
         style={{
@@ -1376,9 +1391,9 @@ class HotelsSearchScreen extends Component {
         refreshableMode={"basic"}
         numColumns={1} // to use grid layout, simply set gridColumn > 1
         item={this.renderListItem} // this takes three params (item, index, separator)
-        paginationFetchingView={this.renderPaginationFetchingView}
+        // paginationFetchingView={this.renderPaginationFetchingView}
         paginationWaitingView={this.renderPaginationWaitingView}
-        // paginationAllLoadedView={this.renderPaginationAllLoadedView}
+        paginationAllLoadedView={this.renderPaginationAllLoadedView}
         style={{ transform, height }}
       />
     );
@@ -1617,10 +1632,18 @@ class HotelsSearchScreen extends Component {
 
     // console.log(`### [HotelsSearchScreen] {all:this.state.allElements});
 
-    this.isWebviewHotelDetail = (
-      this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS
-      && !isNative.hotelItem
-    )
+    const isHotelDetails = this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS;
+    const isMap = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
+    const isList = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST;
+    const isFiltering = this.props.isApplyingFilter;
+
+    this.isWebviewHotelDetail = (isHotelDetails && !isNative.hotelItem)
+
+    const message = (isList || isMap)
+      ? `Loading matches for your search ...`
+      : isHotelDetails
+        ? `Loading hotel details ...`
+        : isFiltering ? `Applying filters ...` : ``
 
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -1635,7 +1658,7 @@ class HotelsSearchScreen extends Component {
             {this.renderResultsAsList()}
             {/* {this.renderContent()} */}
   
-            <LTLoader isLoading={this.state.isLoading} message={`Loading matches for your search ...`} />
+            <LTLoader isLoading={this.state.isLoading} message={message} />
             {this.renderMapButton()}
           </View>
 

@@ -36,6 +36,7 @@ export function createHotelSearchInitialState(params) {
     initialLat: null,
     initialLon: null,
     isDoneSocket: false,
+    selectedHotelData: null,
 
     isSocketTimeout: false,
     isStaticTimeout: false,
@@ -325,7 +326,7 @@ export function checkHotelData(data, type, index) {
   }
 
   if (result.length > 0) {
-    //log(`X-${type}`, `@${result}@, index: ${index}`,{invalid_types:result,data,type,props},true);
+    log(`X-${type}`, `@${result}@, index: ${index}`,{invalid_types:result,data,type,props},true);
     console.warn(`[utils::checkHotelData] @${result}@, index: ${index}`,{result,data,type,props})
   }
 }
