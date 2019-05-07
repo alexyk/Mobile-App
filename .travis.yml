@@ -104,9 +104,9 @@ jobs:
         - mv tools ~/android/
         - export ANDROID_HOME=~/android/
         - export PATH=$PATH:$ANDROID_HOME/tools/bin
-        - yes | sdkmanager --licenses
-        - sdkmanager "ndk-bundle"
-        - sdkmanager "platforms;android-28"
+        - yes | sdkmanager --licenses  &> /dev/null
+        - sdkmanager "ndk-bundle"  &> /dev/null
+        - sdkmanager "platforms;android-28"  &> /dev/null
         - eval "$(ssh-agent -s)"
         - chmod 600 ./deploy_key
         - ssh-add ./deploy_key
