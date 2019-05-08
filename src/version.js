@@ -5,10 +5,13 @@ const exploreIsNative = true;   // false: webview version, true: native search v
 const hotelitemIsNative = false;// this line is updated by scripts/select_config.rb
 const travisVersion='';         // this line is updated by scripts/select_config.rb
 const branchName='';            // this line is updated by scripts/select_config.rb
-const compilationTime = "";     // this line is updated by scripts/select_config.rb
+const compilationTime = '2019-05-08 17:16:27 EEST';
 
 let ui = '';
-ui += `${exploreIsNative ? 'NX' : 'wvX'}`;
+ui += `\n${exploreIsNative
+    ? hotelitemIsNative ? 'native-HotelsSearch-2' : 'native-HotelsSearch-1'
+    : 'webview-HotelsSearch'
+}`;
 
 let tmpDebug = `${productVersion}`
 if (travisVersion.length > 0)   tmpDebug += ` - ${travisVersion}`
