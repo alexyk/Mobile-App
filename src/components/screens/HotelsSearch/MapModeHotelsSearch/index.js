@@ -13,6 +13,7 @@ import FastImage from 'react-native-fast-image'
 import { RoomsXMLCurrency } from '../../../../services/utilities/roomsXMLCurrency';
 import { CurrencyConverter } from '../../../../services/utilities/currencyConverter'
 import LocPrice from '../../../atoms/LocPrice'
+import {calculateCoordinatesGridPosition} from '../../../screens/utils'
 
 class MapModeHotelsSearch extends Component {
     _markers = [];
@@ -26,10 +27,14 @@ class MapModeHotelsSearch extends Component {
             initialLat: (isValid) ? parseFloat(props.initialLat) : 42.698334,
             initialLon: (isValid) ? parseFloat(props.initialLon) : 23.319941,
             hotelsInfo: props.hotelsInfo,
-            selectedMarkerIndex: -1
+            selectedMarkerIndex: -1,
+            selectedRegion: {},
+            previousLatDelta: null,
+            renderedMarkers: null
         }
         
         this.onRegionChangeComplete = this.onRegionChangeComplete.bind(this)
+        //this.allMarkers = []
     }
 
     componentDidUpdate(prevProps) {
@@ -195,43 +200,16 @@ class MapModeHotelsSearch extends Component {
     }
 
     renderMarkers() {
-        const _this = this;
+        if (!this.props.isMap) {
+            return null;
+        }
         
-        const result = this.state.hotelsInfo.map((marker, index) => {
-            if (marker.latitude != null) {
-                const latitude = parseFloat(marker.latitude);
-                const longitude = parseFloat(marker.longitude);
+        //this.allMarkers = [];
+        log('render', `renderMarkers`)
+        
 
-                // fix for iOS - JSON value null of NSNULL cannot be converted to CLLLocationDergees
-                if (isNaN(longitude) || isNaN(latitude)) {
-                    return null;
-                }
-                
-                //TODO: @@debug remove
-                {/* console.log(`[MapModeHotelsSearch] Map Marker ${index}:  ${longitude}/${latitude} name='${marker.name}' lat=${marker.lat}/${marker.latitude} lon=${marker.lon}/${marker.longitude}, `) */}
-                {/* console.tron.log(`[MapModeHotelsSearch] Map Marker ${index}:  lon=${longitude}/lat=${latitude} name='${marker.name}'`) */}
-
-                return (
-                    <Marker
-                        image={_this.state.selectedMarkerIndex === index ? blue_marker : red_marker}
-                        style={_this.state.selectedMarkerIndex === index ? {zIndex: 1} : null}
-                        // image={red_marker}
-                        key={index}
-                        ref={(ref) => _this._markers[index] = ref}
-                        coordinate={{latitude, longitude}}
-                        onPress={(e) => _this.onPressMarker(e, index)}
-                        // onCalloutPress={() => {_this.props.onClickHotelOnMap(marker)}} //eslint-disable-line
-                    >
-                        {/* {_this.state.selectedMarkerIndex === i && _this.{{render}}Callout(marker)} */}
-                    </Marker>
-                )
-            } else {
-                return null;
-            }
-        })
-
-        //log('map-msettingarkers',{result,hotelsInfo:this.state.hotelsInfo})
-        return result;
+        //log('map-msettingarkers',{all:this.allMarkers})
+        return this.state.renderedMarkers;
     }
 
     renderSelectedMarkerWithCallout(data) {
@@ -258,13 +236,106 @@ class MapModeHotelsSearch extends Component {
             )
         )
     }
+
+    prepareMarkers(region) {
+        const _this = this;
+        let optimisationMap = {};
+        const {latitude:regionLat, latitudeDelta: regionLatDelta, longitude: regionLon, longitudeDelta: regionLonDelta} = (region);
+        let divisor = 20;
+        let latStep = (regionLatDelta != null ? regionLatDelta / divisor : -1);
+        let lonStep = (regionLonDelta != null ? regionLonDelta / divisor : -1);
+        
+        const result = this.state.hotelsInfo.map((marker, index) => {
+            if (marker.latitude != null) {
+                const latitude = parseFloat(marker.latitude);
+                const longitude = parseFloat(marker.longitude);
+                let isSkipRender = false;
+
+                /*this.allMarkers.push({lat:latitude, lon:longitude});
+                if (index==this.state.hotelsInfo.length-1) {
+                    this.allMarkers.push({regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep})
+                }*/
+
+
+                // if region is not set or the map is too zoomed in
+                if (regionLatDelta != null && this.props.optimiseMarkers &&  regionLatDelta > 0.03) {
+                    //TODO: Calculate optimisation data
+
+                    let result = calculateCoordinatesGridPosition(latitude, longitude, regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep);
+                    if (result != null) {
+                        let {latIndex,lonIndex} = result
+                        let name = `${latIndex}_${lonIndex}`;
+                        // log('hello2-1',`skipping hotel ${index+1}, lat:${latitude.toFixed(4)}, lon:${longitude.toFixed(4)}, ${optimisationMap[name]}`)
+                        if (optimisationMap[name] != null) {
+                            isSkipRender = true;
+                        } else {
+                            optimisationMap[name] = true;
+                        }
+                    } else {
+                        //log('hello2-2',`skipping hotel ${index+1}, lat:${latitude.toFixed(4)}, lon:${longitude.toFixed(4)}`);
+                        //log('hello2-2',`skipping hotel ${index+1}, lat:${latitude.toFixed(4)}, lon:${longitude.toFixed(4)}, regionLat:${regionLat.toFixed(4)}/${regionLatDelta.toFixed(4)}, regionLon:${regionLon.toFixed(4)}/${regionLonDelta.toFixed(4)}`);
+                        isSkipRender = true;
+                    }
+                }
+
+                // isNaN -> fix for iOS - JSON value null of NSNULL cannot be converted to CLLLocationDergees
+                // isSkipRender -> optimise overlaping markers
+                if (isNaN(longitude) || isNaN(latitude) || isSkipRender) {
+                    return null;
+                }
+                
+                //TODO: @@debug remove
+                {/* console.log(`[MapModeHotelsSearch] Map Marker ${index}:  ${longitude}/${latitude} name='${marker.name}' lat=${marker.lat}/${marker.latitude} lon=${marker.lon}/${marker.longitude}, `) */}
+                {/* console.tron.log(`[MapModeHotelsSearch] Map Marker ${index}:  lon=${longitude}/lat=${latitude} name='${marker.name}'`) */}
+
+                return (
+                    <Marker
+                        image={_this.state.selectedMarkerIndex === index ? blue_marker : red_marker}
+                        style={_this.state.selectedMarkerIndex === index ? {zIndex: 1} : null}
+                        // image={red_marker}
+                        key={index}
+                        ref={(ref) => _this._markers[index] = ref}
+                        coordinate={{latitude, longitude}}
+                        onPress={(e) => _this.onPressMarker(e, index)}
+                        // onCalloutPress={() => {_this.props.onClickHotelOnMap(marker)}} //eslint-disable-line
+                    >
+                        {/* {_this.state.selectedMarkerIndex === i && _this.{{render}}Callout(marker)} */}
+                    </Marker>
+                )
+            } else {
+                return null;
+            }
+        })
+
+        return result
+    }
     
     onRegionChangeComplete(region) {
         const hasSelectedMarkRendered = (this.selected_mark != null);
 		if (hasSelectedMarkRendered) {
 			this.selected_mark.showCallout();
 		}
-		log('map-view', `Region change`, {region})
+        log('map-view', `Region change latDelta:${region.latitudeDelta} lonDelta:${region.longitudeDelta}`, {region});
+
+        let previousLatDelta = this.state.previousLatDelta;
+        const currentLatDelta = region.latitudeDelta;
+        let isRefreshMarkers = false;
+        if (previousLatDelta) {
+            if ( Math.abs(previousLatDelta - currentLatDelta) > 0.01 ) {
+                previousLatDelta = currentLatDelta;
+                isRefreshMarkers = true;
+            }
+        } else {
+            previousLatDelta = currentLatDelta;
+            isRefreshMarkers = true;
+        }
+
+        if (isRefreshMarkers) {
+            const renderedMarkers = this.prepareMarkers(region);
+            this.setState({selectedRegion: region, renderedMarkers, previousLatDelta});
+        } else {
+            this.setState({selectedRegion: region, previousLatDelta});
+        }
     }
 
     render() {

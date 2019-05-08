@@ -45,7 +45,7 @@ compilation_time = {
   "name" => "compile-time",
   "file" => 'src/version.js',
   "regex" => /const compilationTime.*/,
-  "target" => "const compilationTime = '#{Time.now.strftime("%Y-%m-%d %H:%M:%S")}';"
+  "target" => "const compilationTime = '#{Time.now.strftime("%Y-%m-%d %H:%M:%S %Z")}';"
 }
 # all automatically executed
 changes_auto = [compilation_time]; # CURRENTLY ENABLED by default

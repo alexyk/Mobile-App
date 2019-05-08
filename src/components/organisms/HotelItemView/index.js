@@ -5,7 +5,7 @@ import FontAwesome, { Icons } from "react-native-fontawesome";
 import Image from "react-native-remote-svg";
 import CardView from "react-native-cardview";
 import PropTypes from "prop-types";
-import { imgHost, DEFAULT_HOTEL_PNG, showNoOnHotelItem } from "../../../config";
+import { imgHost, DEFAULT_HOTEL_PNG, showNumberOnHotelItem } from "../../../config";
 import _ from "lodash";
 import FastImage from "react-native-fast-image";
 import { RoomsXMLCurrency } from "../../../services/utilities/roomsXMLCurrency";
@@ -258,7 +258,7 @@ class HotelItemView extends Component {
             </View>
 
             {this.renderPrice()}
-            {this.renderIndex(showNoOnHotelItem)}
+            {this.renderIndex(showNumberOnHotelItem)}
           </View>
         </CardView>
       </TouchableOpacity>

@@ -45,6 +45,7 @@ import {
   imgHost,
   socketHost,
   showBothMapAndListHotelSearch,
+  showSimpleFooterHotelSearch,
   HOTELS_SOCKET_CONNECTION_TIMEOUT,
   HOTELS_STATIC_CONNECTION_TIMEOUT,
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK
@@ -133,6 +134,7 @@ class HotelsSearchScreen extends Component {
     
     this.filtersCallback = null;
     this.isWebviewHotelDetail = false
+    this.state.optimiseMapMarkers = true
 
     // Bind functions to this,
     // thus optimizing performance - by using bind(this) instead of "=> function".
@@ -488,6 +490,8 @@ class HotelsSearchScreen extends Component {
       () => {
         // this.listSetPageLimit(this.state.totalHotels)
         //log({name:'SOCKET',preview:`onDoneSocket`,important:true,value:{data,state:this.state,props:this.props}})
+        this.isAllHotelsLoaded = false;
+        this.props.setIsApplyingFilter(true);
         this.setState({ isDoneSocket: true, isLoading: false });
 
         // get first filtered results from server - showing unavailable as well
@@ -495,7 +499,6 @@ class HotelsSearchScreen extends Component {
         // then with UI filtering remove unavailable
         this.filtersCallback =  () => {
           if (this && this.listViewRef) {
-            this.props.setIsApplyingFilter(true);
             this.updateFilter(generateFilterInitialData(false, this.state), true)
             const priceRange = [this.priceMin,this.priceMax];
             this.setState({priceRange,priceRangeSelected: priceRange})
@@ -697,8 +700,6 @@ class HotelsSearchScreen extends Component {
       this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTERED_MSG, 5000);
 
       res.body.then((data) => {
-        this.isAllHotelsLoaded = true;
-
         // not used so far
         // const isCacheExpired = data.isCacheExpired;
         const count = data.content.length;
@@ -1072,6 +1073,9 @@ class HotelsSearchScreen extends Component {
       })
 
       this.props.setIsApplyingFilter(false)
+      if (!this.isAllHotelsLoaded) {
+        this.isAllHotelsLoaded = true;
+      }
     } else {
       filterParams.priceRange = (data.priceRange[0] > data.priceRange[1]
           ? [0,50000]
@@ -1242,6 +1246,7 @@ class HotelsSearchScreen extends Component {
     const isShowAllHotels = false;
     const isFilterStatusEnabled = true;
     const isFiltered = (this.state.isFilterResult && isFilterStatusEnabled);
+    const isFiltering = (this.props.isApplyingFilter);
 
     const { commonText } = require("../../../../common.styles");
 
@@ -1263,94 +1268,134 @@ class HotelsSearchScreen extends Component {
 
     // common text
     const fontSize = 13;
-    const leftWidth = "50%"
-    const rightWidth = "50%"
+    let rightText, leftText, simpleText;    
 
-    // create visual text components
-    const leftText = (
-      <Text
-        style={{
-          ...commonText,
-          fontSize,
-          fontWeight: "normal",
-          textAlign: (isFiltered  ? "center" : "left"),
-          color: isSocketRedColor ? "red" : "black",
-          paddingLeft: 5,
-          width: (isFiltered ? "100%" : leftWidth),
-          // backgroundColor: '#0F02'
-        }}
-      >
-        {
-          isFiltered
-            ?            
-              this.props.isApplyingFilter
-                ? this.isFirstFilter
-                  ? lang.TEXT.SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS
-                  : lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
-                : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1",this.state.totalHotels)
-            :
-              this.state.pricesFromSocketValid > 0
-                ? // show prices loaded
-                  lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES.replace("$$1",socketPricesCount)
-                : // loading or timeout message
-                this.state.isSocketTimeout
-                  ? lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES_TIMEOUT
-                  : lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES_LOADING}
-      </Text>
-    );
-    const rightText = (
-      <Text
-        style={{
-          ...commonText,
-          fontSize,
-          fontWeight: "normal",
-          textAlign: "right",
-          width: isFiltered ? 0 : rightWidth,
-          color: this.state.isStaticTimeout ? "red" : "black",
-          paddingRight: 5,
-          marginTop: 10
-        }}
-      >
-        {
-          isFiltered
-            ? ''
-            :
-              this.state.totalHotels > 0 || this.state.isFilterResult
-                ? // show loaded hotels
-                  this.state.isStaticTimeout
-                    ? lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT
-                    : lang.TEXT.SEARCH_HOTEL_RESULTS_FOUND.replace("$$1",hotelsLoadedCount)
-                : // loading or timeout message
-                  this.state.isStaticTimeout
-                    ? lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT
-                    : lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_LOADING}
-      </Text>
-    );
+    if (!__DEV__ || showSimpleFooterHotelSearch) {
+      // TODO: Finish implementation of - simple version - one text
 
-    return (
-      <View
-        style={{
-          // width: "95%",
-          height: 30,
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          alignItems: "flex-end",
-          borderBottomWidth: 0.5,
-          // borderWidth: 0.5,
-          borderColor: "#777",
-          paddingBottom: 5,
-          paddingHorizontal: 5,
-          borderRadius: 10,
-          // backgroundColor: '#DDD3',
-          marginTop: 10,
-          marginHorizontal: 10,
-        }}
-      >
-        {leftText}
-        {rightText}
-      </View>
-    );
-  };
+      const isRed = (isSocketRedColor || this.state.isStaticTimeout); 
+      const textContent = (isFiltering
+        ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
+        : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1",hotelsLoadedCount)
+      )
+      simpleText = (
+        <Text
+          style={{
+            ...commonText,
+            fontSize,
+            fontWeight: "normal",
+            textAlign: "center",
+            color: 'black',//isSocketRedColor ? "red" : "black",
+            paddingLeft: 5,
+            width: "100%",
+            // backgroundColor: '#0F02'
+          }}
+        >
+          {textContent}
+        </Text>
+      );
+    } else {
+      // other version - left and right text fields
+      const leftWidth = "50%"
+      const rightWidth = "50%"
+
+      // create visual text components
+      leftText = (
+        <Text
+          style={{
+            ...commonText,
+            fontSize,
+            fontWeight: "normal",
+            textAlign: (isFiltered  ? "center" : "left"),
+            color: isSocketRedColor ? "red" : "black",
+            paddingLeft: 5,
+            width: (isFiltered ? "100%" : leftWidth),
+            // backgroundColor: '#0F02'
+          }}
+        >
+          {
+            isFiltered
+              ?            
+                this.props.isApplyingFilter
+                  ? this.isFirstFilter
+                    ? lang.TEXT.SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS
+                    : lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
+                  : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1",this.state.totalHotels)
+              :
+                this.state.pricesFromSocketValid > 0
+                  ? // show prices loaded
+                    lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES.replace("$$1",socketPricesCount)
+                  : // loading or timeout message
+                  this.state.isSocketTimeout
+                    ? lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES_TIMEOUT
+                    : lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES_LOADING}
+        </Text>
+      );
+      rightText = (
+        <Text
+          style={{
+            ...commonText,
+            fontSize,
+            fontWeight: "normal",
+            textAlign: "right",
+            width: isFiltered ? 0 : rightWidth,
+            color: this.state.isStaticTimeout ? "red" : "black",
+            paddingRight: 5,
+            marginTop: 10
+          }}
+        >
+          {
+            isFiltered
+              ? ''
+              :
+                this.state.totalHotels > 0 || this.state.isFilterResult
+                  ? // show loaded hotels
+                    this.state.isStaticTimeout
+                      ? lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT
+                      : lang.TEXT.SEARCH_HOTEL_RESULTS_FOUND.replace("$$1",hotelsLoadedCount)
+                  : // loading or timeout message
+                    this.state.isStaticTimeout
+                      ? lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT
+                      : lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_LOADING}
+        </Text>
+      );
+
+    }
+
+
+    if (this.isAllHotelsLoaded || !showSimpleFooterHotelSearch) {
+      return (
+        <View
+          style={{
+            // width: "95%",
+            height: 30,
+            flexDirection: "row",
+            justifyContent: "space-evenly",
+            alignItems: "flex-end",
+            borderBottomWidth: 0.5,
+            // borderWidth: 0.5,
+            borderColor: "#777",
+            paddingBottom: 5,
+            paddingHorizontal: 5,
+            borderRadius: 10,
+            // backgroundColor: '#DDD3',
+            marginTop: 10,
+            marginHorizontal: 10,
+          }}
+        >
+
+          {  simpleText 
+              ? simpleText
+              : [leftText, rightText]
+          }
+          {/* { !simpleText ? leftText   : null }
+          { !simpleText ? rightText  : null } */}
+        </View>
+      );
+    } else {
+      return null;
+    }
+  }
 
   renderListItem = (item, index) => {
     this.renderItemTimes++;
@@ -1440,6 +1485,8 @@ class HotelsSearchScreen extends Component {
               this.mapView = ref.getWrappedInstance();
             }
           }}
+          isMap={isMap}
+          optimiseMarkers={this.state.optimiseMapMarkers}
           isFilterResult={this.state.isFilterResult}
           initialLat={this.state.initialLat}
           initialLon={this.state.initialLon}
@@ -1458,9 +1505,9 @@ class HotelsSearchScreen extends Component {
 
   renderMapButton() {
     const hasValidCoordinates = hasValidCoordinatesForMap(this.state, true);
+    const isLoading = (this.state.isLoading);
 
-    if (hasValidCoordinates) {
-      // if (this.state.allElements) {
+    if (hasValidCoordinates && !isLoading) {
       const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
       const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
       const isDetails = (this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS);
@@ -1468,7 +1515,7 @@ class HotelsSearchScreen extends Component {
       
       // console.log(`---- coordinates: ${hasValidCoordinates}, ${this.state.initialLat}/${this.state.initialLon}`);
 
-      if ( (isShowingResults || hasValidCoordinates) && !isDetails ) {
+      if ( (isShowingResults || hasValidCoordinates) && !isDetails && !isLoading ) {
         return (
           <TouchableOpacity
             key={'mapButton'}
@@ -1605,6 +1652,25 @@ class HotelsSearchScreen extends Component {
     )
   }
 
+  renderDebug2() {
+    if (!__DEV__) {
+      return null;
+    }
+
+    const onPress = () => {
+      log('hello',`isOpt: ${this.state.optimiseMapMarkers}`,{isOpt:this.state.optimiseMapMarkers})
+      this.setState(prev => ({optimiseMapMarkers:!prev.optimiseMapMarkers}));
+    }
+
+    return (
+      <TouchableOpacity onPress={onPress}>
+        <View style={{left:200, bottom:5, backgroundColor: '#777A', width: 100, borderRadius: 5, padding: 2}}>
+          <Text style={{textAlign: 'center', fontSize:11}}>{this.state.optimiseMapMarkers ? "OPTIMISED" : "ALL MARKERS"}</Text>
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
   renderWebViewBack() {
     if (this.isWebviewHotelDetail) {
       return (
@@ -1636,14 +1702,27 @@ class HotelsSearchScreen extends Component {
     const isMap = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
     const isList = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST;
     const isFiltering = this.props.isApplyingFilter;
+    const isLoading = this.state.isLoading;
 
     this.isWebviewHotelDetail = (isHotelDetails && !isNative.hotelItem)
+    const totalText = ''/*(
+      this.state.totalHotels > 0
+        ? `of maximum ${this.state.totalHotels}`
+        : ''
+    )*/
+    const propertiesText = (
+      (this.state.pricesFromSocketValid > 0)
+        ? `\n\n${this.state.pricesFromSocketValid} found ${totalText}`
+        : ""
+    )
 
-    const message = (isList || isMap)
-      ? `Loading matches for your search ...`
+    const message = ((isList || isMap)
+      ? `Loading matches for your search ...${propertiesText}`
       : isHotelDetails
-        ? `Loading hotel details ...`
-        : isFiltering ? `Applying filters ...` : ``
+         ? `Loading hotel details ...`
+         : ''
+    )
+    // log('LTLoader/HotelSearch',`isLoading: ${this.state.isLoading} isApplyingFilter: ${this.props.isApplyingFilter} isList: ${isList} isMap: ${isMap}`,{props:this.props, state:this.state})
 
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -1658,7 +1737,7 @@ class HotelsSearchScreen extends Component {
             {this.renderResultsAsList()}
             {/* {this.renderContent()} */}
   
-            <LTLoader isLoading={this.state.isLoading} message={message} />
+            <LTLoader isLoading={isLoading} message={message} />
             {this.renderMapButton()}
           </View>
 
@@ -1666,6 +1745,7 @@ class HotelsSearchScreen extends Component {
           {this.renderToast() }
 
           {this.renderDebug()}
+          {this.renderDebug2()}
         </View>
 
         {/* <ProgressDialog

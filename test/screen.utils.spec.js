@@ -6,7 +6,8 @@ import {
     hasValidCoordinatesForMap,
     applyHotelsSearchFilter,
     processFilteredHotels,
-    validateObject
+    validateObject,
+    calculateCoordinatesGridPosition
 } from "../src/components/screens/utils"
 
 test('hasValidCoordinatesForMap', () => {
@@ -254,6 +255,62 @@ test('lodash vs Object.assign',() => {
         // test
 
 })
+
+test('calculateCoordinatesGridPosition - simple', () => {
+    let regionLat = 40,
+        regionLatDelta = 43,
+        regionLon = 20,
+        regionLonDelta = 24,
+        latStep = 1.1,
+        lonStep = 1.1;
+    const items = [{lat: 41, lon: 22}, {lat: -10, lon: 68}, {lat: -120, lon: -13}, {lat: 27, lon: -60}];
+    items.forEach((item,index) => {
+        let result = calculateCoordinatesGridPosition(item.lat, item.lon, regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep);
+        //log(`calc item ${index}`, {item, result, regionLat, regionLon, regionLonDelta, regionLatDelta})
+        switch (index) {
+            case 0:
+                expect(result.latIndex).toEqual(1);
+                expect(result.lonIndex).toEqual(6);
+                break;
+
+            default:
+                expect(result).toEqual(null);
+                break
+        }
+    })
+})
+
+test('calculateCoordinatesGridPosition - complex', () => {
+    let {params, items} = require('./data/map.sofia.json');
+    let {regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep} = params;
+
+    console.log(`regionLat: ${regionLat} / ${regionLatDelta} regionLon: ${regionLon} / ${regionLonDelta}`)
+
+    items.forEach((item,index) => {
+        let {lat,lon} = item;
+        let result = calculateCoordinatesGridPosition(lat, lon, regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep);
+        // log(`calc item ${index}`, {item, result, regionLat, regionLon, regionLonDelta, regionLatDelta})
+        if (!result) {
+            const inLat = (regionLat <= lat && regionLatDelta > lat);
+            const inLon = (regionLon <= lon && regionLonDelta > lon);
+            //if (inLon && inLat) 
+            console.log(`[Skipping ${index}] in-lat:'${inLat}' in-lon:'${inLon}' lat: ${lat.toFixed(4)} lon: ${lon.toFixed(4)}`)
+        } else {
+            console.log(`          [SUCCESS ${index}] lat: ${lat.toFixed(4)} lon: ${lon.toFixed(4)}`)
+        }
+        switch (index) {
+            case 0:
+                //expect(result.latIndex).toEqual(1);
+                //expect(result.lonIndex).toEqual(6);
+                break;
+
+            default:
+                //expect(result).toEqual(null);
+                break
+        }
+    })
+})
+
 
 // ------------------------------------------------------------------------------
 

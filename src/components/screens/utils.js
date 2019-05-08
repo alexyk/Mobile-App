@@ -841,3 +841,48 @@ export function debugHotelData(hotelData, hotelsInfo, index, funcName) {
       }',`
   );
 }
+
+/**
+ * Used for optimising Map Marker rendering
+ */
+export function calculateCoordinatesGridPosition(lat, lon, regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep) {
+  let regionStartLat = regionLat - regionLatDelta,
+      regionEndLat   = regionLat + regionLatDelta,
+      regionStartLon = regionLon - regionLonDelta,
+      regionEndLon   = regionLon + regionLonDelta;
+  
+  // console.log(`regionLat: ${regionStartLat} / ${regionEndLat} regionLon: ${regionStartLon} / ${regionEndLon}`)
+
+  // quick return if not in range
+  if (lat < regionStartLat || lat > regionEndLat || lon < regionStartLon || lon > regionEndLon) {
+    return null;
+  }
+
+  let result = null;
+  let latIndex = 0;
+  let lonIndex = 0;
+  let currentLat = regionStartLat,
+      currentLon = regionStartLon;
+
+  while (currentLat <= regionEndLat) {
+    currentLon = regionStartLon;
+    while (currentLon <= regionEndLon) {
+      if (currentLat >= lat && currentLat < lat + latStep
+          && currentLon >= lon && currentLon < lon + lonStep)
+      {
+        result = {
+          latIndex,
+          lonIndex
+        }
+        break;
+      } else {
+        currentLon += lonStep;
+        lonIndex++;
+      }
+    }
+    currentLat += latStep;
+    latIndex++;
+  }
+
+  return result;
+}
