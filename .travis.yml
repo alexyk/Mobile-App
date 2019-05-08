@@ -19,7 +19,7 @@ jobs:
         - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER && echo $tmp)
         - dir2=$dir1/logs_ios
         - core_sim_log=$HOME/Library/Logs/CoreSimulator/CoreSimulator.log
-        - msg=$(cat .git/COMMIT_EDITMSG)
+        - msg=$(git log --pretty="format:%s" -1)
       before_install:
         - echo -n "Starting " > info.txt
         - date >> info.txt
@@ -81,7 +81,7 @@ jobs:
         - app_ios_staging=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.apk" && tmp=${tmp//\//-} && echo $tmp)
         - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER && echo $tmp)
         - dir2=$dir1/logs_android
-        - msg=$(cat .git/COMMIT_EDITMSG)
+        - msg=$(git log --pretty="format:%s" -1)
       android:
         components:
           - build-tools-27.0.3
@@ -110,7 +110,7 @@ jobs:
         - eval "$(ssh-agent -s)"
         - chmod 600 ./deploy_key
         - ssh-add ./deploy_key
-        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2" " &> /dev/null
+        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2" &> /dev/null
         - nvm install 8.14.1
         - npm install
       script:
