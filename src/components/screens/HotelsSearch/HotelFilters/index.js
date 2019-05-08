@@ -3,7 +3,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import {View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, SafeAreaView} from 'react-native';
 import Image from 'react-native-remote-svg';
-import styles, {orderbyPickerSelectStyles} from './styles';
+import styles, {orderbyPickerSelectStyles,priceMultiSliderStyle} from './styles';
 import PropTypes from 'prop-types';
 import CheckBox from 'react-native-checkbox';
 import RNPickerSelect from 'react-native-picker-select';
@@ -29,8 +29,7 @@ class HotelFilters extends Component {
     super(props);
 
     const { params } = this.props.navigation.state;
-
-		//log('HOTELS-FILTER',`See filter params, priceRange: ${params.priceRange}`, params)
+    //log('HOTELS-FILTER',`See filter params, priceRange: ${params.priceRange}`, params)
 		
     this.state = {
       isHotelSelected: true,
@@ -45,7 +44,6 @@ class HotelFilters extends Component {
       rooms : [{ adults: 2, children: [] }],
       orderBy: params.orderBy,
       selectedRating: [false,false,false,false,false],
-      priceRange: params.priceRangeSelected,
       priceItems: [
         {
           label: 'Rank',
@@ -61,13 +59,33 @@ class HotelFilters extends Component {
         }
       ]
     }
+    this.preparePriceValues(params)
     this.state.selectedRating = params.selectedRating
     this.state.showUnAvailable = params.showUnAvailable
     this.state.nameFilter = params.nameFilter
     //this.state.count = params.count
+    
+    this.onPriceValuesChange = this.onPriceValuesChange.bind(this);
+  }
 
-    this.priceMin = params.priceRange[0];
-    this.priceMax = params.priceRange[1];
+  preparePriceValues(params) {
+    let {0:min, 1:max} = params.priceRange;
+    if (min>max) {max = min, min = 0}
+    let {0:price1, 1:price2} = params.priceRangeSelected;
+    price1 = Math.round(price1)
+    price2 = Math.round(price2)
+    if (price1>price2) {price1 = min, price2 = max}
+    this.optionsArray = [];
+    min = Math.round(min)
+    max = Math.trunc(max) + 1
+    for (let n=min; n<max; n++) {
+      this.optionsArray.push(n)
+    }
+    this.optionsArray.push(max)
+    
+    this.priceMin = min;
+    this.priceMax = max;
+    this.state.priceRange = [price1, price2];
   }
 
   componentWillReceiveProps(nextProps) {
@@ -90,6 +108,10 @@ class HotelFilters extends Component {
     this.setState({
       items,
     });
+  }
+
+  onPriceValuesChange({0:min,1:max}) {
+    //log('multi-slider',`onPriceValuesChange   min:${min}/${typeof(min)} max:${max}/${typeof(max)}`, {min,max})
   }
 
   multiSliderValuesChange = (values) => {
@@ -278,6 +300,7 @@ class HotelFilters extends Component {
   }
 
   renderFilterPricing() {
+    const {0:min,1:max} = [this.state.priceRange[0], this.state.priceRange[1]]
     return (
       <View>
         <View style= {this.state.isHotelSelected ? styles.pricingView :styles.emptyPricingView}>
@@ -296,13 +319,14 @@ class HotelFilters extends Component {
             <Text>{this.props.currencySign} {this.state.priceRange[1]}</Text>
           </View>
           <MultiSlider
-            isMarkersSeparated = {true}
             selectedStyle = {{backgroundColor: '#cc8068',}}
             unselectedStyle = {{backgroundColor: 'silver',}}
-            values = {[this.state.priceRange[0], this.state.priceRange[1]]}
-            min = {this.priceMin}
-            max = {this.priceMax}
-            step = {1}
+            values = {[min,max]}
+            optionsArray = {this.optionsArray}
+            markerStyle={priceMultiSliderStyle.markerStyle}
+            pressedMarkerStyle={priceMultiSliderStyle.pressedMarkerStyle}
+            touchDimensions={{height: 70,width: 70,borderRadius: 15,slipDisplacement: 200}}
+            onValuesChange={this.onPriceValuesChange}
             onValuesChangeFinish={this.multiSliderValuesChange}
           />
           {/* <View style={{width: '80%', flexDirection: 'row', justifyContent: 'space-between'}}>

@@ -1,4 +1,4 @@
-import {StyleSheet, Dimensions} from 'react-native';
+import {StyleSheet, Dimensions, Platform} from 'react-native';
 const { width } = Dimensions.get('screen');
 const dimensionWindows = Dimensions.get('window');
 
@@ -315,3 +315,45 @@ export const orderbyPickerSelectStyles = StyleSheet.create({
 //     backgroundColor: 'red'
   }
 });
+
+export const priceMultiSliderStyle = StyleSheet.create({
+  markerStyle: {
+    ...Platform.select({
+      ios: {
+        height: 30,
+        width: 30,
+        borderRadius: 30,
+        borderWidth: 1,
+        borderColor: '#DDDDDD',
+        backgroundColor: '#FFFFFF',
+        shadowColor: '#000000',
+        shadowOffset: {
+          width: 0,
+          height: 3,
+        },
+        shadowRadius: 1,
+        shadowOpacity: 0.2,
+      },
+      android: {
+        height: 30,
+        width: 30,
+        borderRadius: 30,
+        backgroundColor: '#FFF',
+        borderColor: '#555',
+        borderWidth: 2,
+        // elevation: 5
+      },
+    }),
+  },
+  pressedMarkerStyle: {
+    ...Platform.select({
+      ios: {},
+      android: {
+        height: 33,
+        width: 33,
+        borderRadius: 33,
+        // elevation: 5
+      },
+    }),
+  }
+})
