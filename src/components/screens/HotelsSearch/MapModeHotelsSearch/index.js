@@ -38,41 +38,15 @@ class MapModeHotelsSearch extends Component {
         //this.allMarkers = []
     }
 
-    componentDidUpdate(prevProps) {
-        // if (this.props.currency != prevProps.currency || this.props.locRate != prevProps.locRate) {
-        let newState  = {};
-        let isChanged = false;
-
-        if (this.props.isFilterResult !== prevProps.isFilterResult) {
-            newState = {...newState, isFilterResult: this.props.isFilterResult};
-            isChanged = true;
-        }
-
-        if (this.props.initialLat !== prevProps.initialLat || this.props.initialLon !== prevProps.initialLon) {
-            //newState = {...newState, initialLat: this.props.initialLat, initialLon: this.props.initialLon};
-            //console.log("123123123 change")
-            this.state.initialLat = this.props.initialLat;
-            this.state.initialLon = this.props.initialLon;
-            if (this._map != null) {
-                this._map.animateToRegion({
-                    latitude: this.state.initialLat,
-                    longitude: this.state.initialLon,
-                    latitudeDelta: 0.25,
-                    longitudeDelta: 0.25
-                }, 0);
-            }
-            //isChanged = true;
-        }
-
-        if (this.props.hotelsInfo !== prevProps.hotelsInfo) {
-            newState = {...newState, hotelsInfo: this.props.hotelsInfo};
-            isChanged = true;
-        }
-
-        if (isChanged) {
-            //console.log("--------------------", newState);
-            this.setState(newState);
-        }
+    componentDidMount() {
+        /*if (this._map != null) {
+            this._map.animateToRegion({
+                latitude: this.state.initialLat,
+                longitude: this.state.initialLon,
+                latitudeDelta: 0.25,
+                longitudeDelta: 0.25
+            }, 0);
+        }*/
     }
 
     initMapView = () => {
@@ -345,6 +319,9 @@ class MapModeHotelsSearch extends Component {
         // update position and zoom level
         newState.initialLat = latitude;
         newState.initialLon = longitude;
+        if (this.props.updateCoords) {
+            this.props.updateCoords({initialLat:latitude, initialLon:longitude})
+        }
 
         this.setState(newState);
     }
@@ -356,6 +333,9 @@ class MapModeHotelsSearch extends Component {
             latitudeDelta: 0.2,
             longitudeDelta: 0.2
         }
+
+        //log('init-coord',`lat: ${this.state.initialLat} lon: ${this.state.initialLon}`)
+
         const hasValidSelectedIndex = (this.state.hotelsInfo[this.state.selectedMarkerIndex] != null);
         let selectedMarkerData = (hasValidSelectedIndex ? this.state.hotelsInfo[this.state.selectedMarkerIndex] : null);
 

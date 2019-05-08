@@ -141,6 +141,7 @@ class HotelsSearchScreen extends Component {
     this.gotoHotelDetailsPageByMap = this.gotoHotelDetailsPageByMap.bind(this);
     this.saveState = this.saveState.bind(this);
     this.unsubscribe = this.stopSocketConnection.bind(this);
+    this.updateCoords = this.updateCoords.bind(this);
     this.renderListItem = this.renderListItem.bind(this);
     this.renderFooter = this.renderFooter.bind(this);
     this.onDataFromSocket = this.onDataFromSocket.bind(this);
@@ -1017,6 +1018,13 @@ class HotelsSearchScreen extends Component {
     console.timeEnd('*** HotelsSearchScreen::gotoFilter()')
   };
 
+  updateCoords(coords) {
+    this.setState({
+      initialLat: coords.initialLat,
+      initialLon: coords.initialLon
+    })
+  }
+
   updateFilter = (data, fromUI=false) => {    
     // TODO: Fix this direct method call
     // if (this.listViewRef != undefined && this.listViewRef != null) {
@@ -1363,7 +1371,7 @@ class HotelsSearchScreen extends Component {
     }
 
 
-    if (this.isAllHotelsLoaded || !showSimpleFooterHotelSearch) {
+    if (this.isAllHotelsLoaded || !showSimpleFooterHotelSearch || isFiltering) {
       return (
         <View
           style={{
@@ -1494,10 +1502,13 @@ class HotelsSearchScreen extends Component {
           hotelsInfo={data}
           gotoHotelDetailsPage={this.gotoHotelDetailsPageByList}
           isVisible={isMap}
+          updateCoords={this.updateCoords}
           // style={{ height, borderRadius: 10, marginHorizontal: 5, borderColor: '#FFF3', borderWidth: 3 }}
           style={ style }
         />
       );
+    } else {
+      // log('map', `NO VALID COORDS`)
     }
 
     return result;
