@@ -27,6 +27,7 @@ class MapModeHotelsSearch extends Component {
             initialLat: (isValid) ? parseFloat(props.initialLat) : 42.698334,
             initialLon: (isValid) ? parseFloat(props.initialLon) : 23.319941,
             hotelsInfo: props.hotelsInfo,
+            prevHotelsInfo: null,
             selectedMarkerIndex: -1,
             selectedRegion: {},
             previousLatDelta: null,
@@ -202,14 +203,15 @@ class MapModeHotelsSearch extends Component {
     renderMarkers() {
         if (!this.props.isMap) {
             return null;
-        }
-        
+        }        
         //this.allMarkers = [];
-        log('render', `renderMarkers`)
-        
+        let renderedMarkers = this.state.renderedMarkers;
+        if (this.state.prevHotelsInfo != this.state.hotelsInfo) {
+            renderedMarkers = this.prepareMarkers(this.state.selectedRegion);
+        }
 
         //log('map-msettingarkers',{all:this.allMarkers})
-        return this.state.renderedMarkers;
+        return renderedMarkers;
     }
 
     renderSelectedMarkerWithCallout(data) {
@@ -314,11 +316,13 @@ class MapModeHotelsSearch extends Component {
         const hasSelectedMarkRendered = (this.selected_mark != null);
 		if (hasSelectedMarkRendered) {
 			this.selected_mark.showCallout();
-		}
-        log('map-view', `Region change latDelta:${region.latitudeDelta} lonDelta:${region.longitudeDelta}`, {region});
+        }
+        const {latitude, longitude, latitudeDelta, longitudeDelta} = region;
+
+        // log('map-view', `Region change latDelta:${latitudeDelta} lonDelta:${longitudeDelta}`, {region});
 
         let previousLatDelta = this.state.previousLatDelta;
-        const currentLatDelta = region.latitudeDelta;
+        const currentLatDelta = latitudeDelta;
         let isRefreshMarkers = false;
         if (previousLatDelta) {
             if ( Math.abs(previousLatDelta - currentLatDelta) > 0.01 ) {
@@ -330,12 +334,19 @@ class MapModeHotelsSearch extends Component {
             isRefreshMarkers = true;
         }
 
+        let newState;
         if (isRefreshMarkers) {
             const renderedMarkers = this.prepareMarkers(region);
-            this.setState({selectedRegion: region, renderedMarkers, previousLatDelta});
+            newState = {selectedRegion: region, renderedMarkers, previousLatDelta};
         } else {
-            this.setState({selectedRegion: region, previousLatDelta});
+            newState = {selectedRegion: region, previousLatDelta}
         }
+
+        // update position and zoom level
+        newState.initialLat = latitude;
+        newState.initialLon = longitude;
+
+        this.setState(newState);
     }
 
     render() {

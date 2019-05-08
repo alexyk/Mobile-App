@@ -1529,7 +1529,7 @@ class HotelsSearchScreen extends Component {
         )
       }
     } else {
-      console.warn (`No valid coordinates to render map`, {hasValidCoordinates,initialLat: this.state.initialLat, initialLon: this.state.initialLon})
+      //console.warn (`No valid coordinates to render map`, {hasValidCoordinates,initialLat: this.state.initialLat, initialLon: this.state.initialLon})
       return null;
     }
   }
