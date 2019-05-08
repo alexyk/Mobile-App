@@ -138,7 +138,7 @@ class HotelsSearchScreen extends Component {
 
     // Bind functions to this,
     // thus optimizing performance - by using bind(this) instead of "=> function".
-    this.gotoHotelDetailsPageByMap = this.gotoHotelDetailsPageByMap.bind(this);
+    this.gotoHotelDetailsPageNative = this.gotoHotelDetailsPageNative.bind(this);
     this.saveState = this.saveState.bind(this);
     this.unsubscribe = this.stopSocketConnection.bind(this);
     this.updateCoords = this.updateCoords.bind(this);
@@ -547,16 +547,19 @@ class HotelsSearchScreen extends Component {
     setTimeout(func, 300);
   }
 
-  gotoHotelDetailsPageByList = (item, state, extraParams) => {
-    console.tron.logImportant('isNative',isNative)
+  gotoHotelDetailsFromItemClick = (item, state, extraParams) => {
+    console.tron.logImportant('isNative',`isNative: ${isNative.hotelItem};`,{isNative})
 
     if (isNative.hotelItem) {
-      this.gotoHotelDetailsPageByMap(item)
+      // log('here', `gotoHotelDetailsPageNative`,{item})
+      this.gotoHotelDetailsPageNative(item)
     } else{
+      // log('here2', `goto Web-View`,{item})
       if (state && extraParams) {
         // webview inside
         let initialState = generateWebviewInitialState(extraParams, state);
 
+        log('item-click',`url: ${initialState.webViewUrl}`)
         /*console.log(`[HotelsSearchScreen] Loading hotel info`, {
           initialState,
           extraParams,
@@ -666,8 +669,8 @@ class HotelsSearchScreen extends Component {
     return result;
   }
 
-  gotoHotelDetailsPageByMap(item) {
-    //console.log("gotoHotelDetailsPageByMap", item);
+  gotoHotelDetailsPageNative(item) {
+    //console.log("gotoHotelDetailsPageNative", item);
 
     this.setState({ isLoading: true });
     requester.getHotelById(item.id, this.searchString.split("&")).then(res => {
@@ -1415,7 +1418,7 @@ class HotelsSearchScreen extends Component {
     return (
       <HotelItemView
         item={item}
-        gotoHotelDetailsPage={this.gotoHotelDetailsPageByList}
+        gotoHotelDetailsPage={this.gotoHotelDetailsFromItemClick}
         daysDifference={this.state.daysDifference}
         isDoneSocket={this.state.isDoneSocket}
         parent={this}
@@ -1500,8 +1503,9 @@ class HotelsSearchScreen extends Component {
           initialLon={this.state.initialLon}
           daysDifference={this.state.daysDifference}
           hotelsInfo={data}
-          gotoHotelDetailsPage={this.gotoHotelDetailsPageByList}
+          gotoHotelDetailsPage={this.gotoHotelDetailsFromItemClick}
           isVisible={isMap}
+          parentProps={{props:this.props,state:this.state}}
           updateCoords={this.updateCoords}
           // style={{ height, borderRadius: 10, marginHorizontal: 5, borderColor: '#FFF3', borderWidth: 3 }}
           style={ style }
