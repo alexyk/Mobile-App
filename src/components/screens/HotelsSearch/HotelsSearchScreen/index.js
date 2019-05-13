@@ -854,6 +854,7 @@ class HotelsSearchScreen extends Component {
       console.error(
         "[HotelsSearchScreen] Could not fetch Static Data for hotels"
       );
+      log('error',`Could not get hotels static data`,{res})
       this.listStartFetch([], 0);
     }
   }
@@ -1673,7 +1674,6 @@ class HotelsSearchScreen extends Component {
     }
 
     const onPress = () => {
-      log('hello',`isOpt: ${this.state.optimiseMapMarkers}`,{isOpt:this.state.optimiseMapMarkers})
       this.setState(prev => ({optimiseMapMarkers:!prev.optimiseMapMarkers}));
     }
 

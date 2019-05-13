@@ -2,7 +2,7 @@ import { apiHost, domainPrefix, xDeviceVersion } from './config';
 import { isOnline } from './config-debug';
 
 import { AsyncStorage } from 'react-native';
-import Requester from 'locktrip-service-layer';
+import Requester from 'locktrip-svc-layer';
 import requesterOffline from './utils/debug/offline'
 
 let config = {
