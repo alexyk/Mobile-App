@@ -70,7 +70,14 @@ class HotelFilters extends Component {
 
   preparePriceValues(params) {
     let {0:min, 1:max} = params.priceRange;
-    if (min>max) {max = min, min = 0}
+    if (min > max) {
+      max = min;
+      min = 0;
+    }
+    if (min == max) {
+      min = 0;
+      max = max+1;
+  }
     let {0:price1, 1:price2} = params.priceRangeSelected;
     price1 = Math.round(price1)
     price2 = Math.round(price2)
