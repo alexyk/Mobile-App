@@ -49,8 +49,8 @@ jobs:
       after_success:
         - ls -lahtO
         - ls -lh *zip
-        - scp -o "StrictHostKeyChecking no" $app_ios_prod "$var_799cfba7:$dir1"
-        - scp -o "StrictHostKeyChecking no" $app_ios_staging "$var_799cfba7:$dir1"
+        - scp -o "StrictHostKeyChecking no" $app_ios_prod "$var_799cfba7:$dir1" &> /dev/null
+        - scp -o "StrictHostKeyChecking no" $app_ios_staging "$var_799cfba7:$dir1" &> /dev/null
       after_script:
         - pwd
         - ls -lahtO
@@ -69,7 +69,7 @@ jobs:
         - "echo; echo >> info.txt"
         - "echo -n \"Ending at \" >> info.txt"
         - date >> info.txt
-        - df -hs >> info.txt
+        - df -h >> info.txt
         - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$dir1/info_ios.txt"
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
         - scp -o "StrictHostKeyChecking no" travis_$TRAVIS_JOB_NUMBER.log "$var_799cfba7:$dir2"
@@ -122,8 +122,8 @@ jobs:
         - scp -o "StrictHostKeyChecking no" anrdoid_staging.diff "$var_799cfba7:$dir2/"
       after_success:
         - ls -lh *apk
-        - scp -o "StrictHostKeyChecking no" $apk_prod "$var_799cfba7:$dir1"
-        - scp -o "StrictHostKeyChecking no" $apk_staging "$var_799cfba7:$dir1"
+        - scp -o "StrictHostKeyChecking no" $apk_prod "$var_799cfba7:$dir1" &> /dev/null
+        - scp -o "StrictHostKeyChecking no" $apk_staging "$var_799cfba7:$dir1" &> /dev/null
       after_script:
         - date
         - ls -lahtO
@@ -141,7 +141,7 @@ jobs:
         - "echo; echo >> info.txt"
         - "echo -n \"Ending at \" >> info.txt"
         - date >> info.txt
-        - df -hs >> info.txt
+        - df -h >> info.txt
         - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$dir1/info_android.txt"
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
         - scp -o "StrictHostKeyChecking no" travis_$TRAVIS_JOB_NUMBER.log "$var_799cfba7:$dir2"
