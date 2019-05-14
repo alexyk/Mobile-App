@@ -36,4 +36,4 @@ cd android
 
 # move
 [ -n "$product" ] \
-	&& mv android/app/build/outputs/apk/release/$apk $TRAVIS_BUILD_DIR/$product
+	&& mv app/build/outputs/apk/release/$apk $TRAVIS_BUILD_DIR/$product
