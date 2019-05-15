@@ -6,9 +6,9 @@ node_js:
 
 stages:
   - name: build ios
-    if: branch IN (master)
+    if: branch IN (master, staging, dev-x)
   - name: build android
-    if: branch IN (master, staging, dev, tools/travis-ci_android)
+    if: branch IN (master, staging, dev-x)
 
 jobs:
   include:
@@ -16,6 +16,7 @@ jobs:
       env:
         - app_ios_prod=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.zip" && tmp=${tmp//\//-} && echo $tmp)
         - app_ios_staging=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.zip" && tmp=${tmp//\//-} && echo $tmp)
+        - app_ios_dev=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_dev.zip" && tmp=${tmp//\//-} && echo $tmp)
         - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER && echo $tmp)
         - dir2=$dir1/logs_ios
         - core_sim_log=$HOME/Library/Logs/CoreSimulator/CoreSimulator.log
@@ -38,19 +39,23 @@ jobs:
         - pod install
         - cd ..
       script:
-        - ./scripts/select_config.rb native
+        - ./scripts/select_config.rb native1
         - ./scripts/build-ios.sh prod $var1 $app_ios_prod
         - git diff > ios_prod.diff
         - scp -o "StrictHostKeyChecking no" ios_prod.diff "$var_799cfba7:$dir2/"
         - ./scripts/build-ios.sh staging $var1 $app_ios_staging
         - git diff > ios_staging.diff
         - scp -o "StrictHostKeyChecking no" ios_staging.diff "$var_799cfba7:$dir2/"
+        - ./scripts/build-ios.sh dev $var1 $app_ios_dev
+        - git diff > ios_dev.diff
+        - scp -o "StrictHostKeyChecking no" ios_dev.diff "$var_799cfba7:$dir2/"
         - ls -laht
       after_success:
         - ls -lahtO
         - ls -lh *zip
         - scp -o "StrictHostKeyChecking no" $app_ios_prod "$var_799cfba7:$dir1" &> /dev/null
         - scp -o "StrictHostKeyChecking no" $app_ios_staging "$var_799cfba7:$dir1" &> /dev/null
+        - scp -o "StrictHostKeyChecking no" $app_ios_dev "$var_799cfba7:$dir1" &> /dev/null
       after_script:
         - pwd
         - ls -lahtO
@@ -79,6 +84,7 @@ jobs:
       env: 
         - apk_prod=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.apk" && tmp=${tmp//\//-} && echo $tmp)
         - apk_staging=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.apk" && tmp=${tmp//\//-} && echo $tmp)
+        - apk_dev=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_dev.apk" && tmp=${tmp//\//-} && echo $tmp)
         - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER && echo $tmp)
         - dir2=$dir1/logs_android
         - msg=$(git log --pretty="format:%s" -1)
@@ -120,10 +126,14 @@ jobs:
         - ./scripts/build-android.sh staging $apk_staging
         - git diff > anrdoid_staging.diff
         - scp -o "StrictHostKeyChecking no" anrdoid_staging.diff "$var_799cfba7:$dir2/"
+        - ./scripts/build-android.sh dev $apk_dev
+        - git diff > anrdoid_dev.diff
+        - scp -o "StrictHostKeyChecking no" anrdoid_dev.diff "$var_799cfba7:$dir2/"
       after_success:
         - ls -lh *apk
         - scp -o "StrictHostKeyChecking no" $apk_prod "$var_799cfba7:$dir1" &> /dev/null
         - scp -o "StrictHostKeyChecking no" $apk_staging "$var_799cfba7:$dir1" &> /dev/null
+        - scp -o "StrictHostKeyChecking no" $apk_dev "$var_799cfba7:$dir1" &> /dev/null
       after_script:
         - date
         - ls -lahtO
