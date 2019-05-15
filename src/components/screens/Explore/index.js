@@ -17,7 +17,7 @@ import RNPickerSelect from 'react-native-picker-select';//eslint-disable-line
 import SearchBar from '../../molecules/SearchBar';
 import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
-import { autoHotelSearch, autoHotelSearchPlace, isOnline, log } from '../../../config-debug';
+import { autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace, isOnline, log } from '../../../config-debug';
 import requester from '../../../initDependencies';
 import styles from './styles';
 import lang from '../../../language';
@@ -112,7 +112,7 @@ class Explore extends Component {
             email: email_value,
         });
 
-        if (__DEV__ && autoHotelSearch) {
+        if (__DEV__ && autoHotelSearchFocus) {
             this.searchBarRef.focus()
         }
 
@@ -159,7 +159,7 @@ class Explore extends Component {
             this.setCountriesInfo();
         }
 
-        if (__DEV__ && autoHotelSearch && this.searchBarRef) {
+        if (__DEV__ && autoHotelSearchFocus && this.searchBarRef) {
             this.searchBarRef.focus()
         }
     }

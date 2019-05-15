@@ -21,8 +21,9 @@ export const webviewDebugEnabled                = false;
                     if (forceOffline) isOffline = forceOffline;
 if (!__DEV__) isOffline = false;
 export const isOnline = (!isOffline);
-export const autoHotelSearch                    = true;
-export const autoHotelSearchPlace               = 'araraquara'
+export const autoHotelSearch                    = false;
+export const autoHotelSearchFocus               = true;
+export const autoHotelSearchPlace               = 'paris'
 
 
 // ---------------  function definitions  -----------------
