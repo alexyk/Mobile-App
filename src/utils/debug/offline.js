@@ -58,7 +58,7 @@ export default function createOfflineRequester() {
       case 'getUserInfo':                   return require('./offline-responses/userInfo.json')
       case 'getCountries':                  return require('./offline-responses/countries.json')
       case 'getCurrencyRates':              return require('./offline-responses/rates.json')
-      case 'getLocRateByCurrency':          return require('./offline-responses/coinmarketcap.json')['market_cap_eur']
+      case 'getLocRateByCurrency':          return require('./offline-responses/convert.json')
       case 'getRegionsBySearchParameter':   return jsonRegions
       case 'getStaticHotels':               return offlinePacks[autoHotelSearchPlace].first
       case 'getMapInfo':                    return offlinePacks[autoHotelSearchPlace].all
@@ -88,8 +88,8 @@ export default function createOfflineRequester() {
 		getCurrencyRates: (...args) 			      => genPromise(args,'getCurrencyRates'),
 		getLocRateByCurrency: (...args) 		    => genPromise(args,'getLocRateByCurrency'),
 		getRegionsBySearchParameter: (...args) 	=> genPromise(args,'getRegionsBySearchParameter'),
-		getStaticHotels: (...args) 				      => genPromise(args,'getStaticHotels'),
-		getMapInfo: (...args) 					        => genPromise(args,'getMapInfo', 0.5),
+		getStaticHotels: (...args) 				      => genPromise(args,'getStaticHotels',5),
+		getMapInfo: (...args) 					        => genPromise(args,'getMapInfo', 10),
 		getHotelById: (...args) 					      => genPromise(args,'getHotelById', 0.5),
 		getHotelRooms: (...args) 					      => genPromise(args,'getHotelRooms', 0.5),
 		getConfigVarByName: (...args) 					=> genPromise(args,'getConfigVarByName'),

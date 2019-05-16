@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
-import {View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, SafeAreaView} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView, TextInput, SafeAreaView} from 'react-native';
 import Image from 'react-native-remote-svg';
 import styles, {orderbyPickerSelectStyles,priceMultiSliderStyle} from './styles';
 import PropTypes from 'prop-types';
