@@ -1,6 +1,7 @@
 import moment from "moment";
 import lodash from "lodash";
-import { validateObject } from '../utils'
+import { validateObject, isObject, isNumber } from '../utils'
+import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config";
 import { log, checkHotelsDataWithTemplates } from "../../../config-debug";
 
 export const DISPLAY_MODE_NONE = "mode_none";
@@ -27,8 +28,10 @@ export function createHotelSearchInitialState(params) {
 
     hotelsInfo: [],
     hotelsInfoForMap: [],
+    optimiseMapMarkers: true,
     hotelsLoadedInList: 0,
     totalHotels: 0,
+    totalPages: 0,
     pricesFromSocketValid: 0,
     pricesFromSocket: 0,
     allElements: false,
@@ -254,15 +257,17 @@ export function applyHotelsSearchFilter(data, filter) {
 
       case 'nameFilter':
         const nameFilter = value1.toLowerCase();
-        log('doFilter',`items: ${data?data.length:'n/a'}`,{data})
-        result = data.filter(item => {
-          if (item && item.name && item) {
-            result = (item.name.toLowerCase().indexOf(nameFilter) > -1);
-          } else {
-            result = true;
-          }
-          return result;
-        })
+        if (nameFilter) {
+          //log('doFilter-name',`items: ${data?data.length:'n/a'}`,{data})
+          result = data.filter(item => {
+            if (item && item.name && item) {
+              result = (item.name.toLowerCase().indexOf(nameFilter) > -1);
+            } else {
+              result = true;
+            }
+            return result;
+          })
+        }
         break;
 
       case 'priceRange':
@@ -307,12 +312,23 @@ export function applyHotelsSearchFilter(data, filter) {
   return filtered
 }
 
-export function processStaticHotels(hotels) {
+/**
+ * Used while progressively loading first results after getting static data and socket prices
+ */
+export function hotelsTemporaryFilterAndSort(hotels) {
   // filter out items without price
   let result = hotels.filter(item => (!isNaN(item.price)))
   
   // sort by price, ascending
   result.sort((a,b) => (a.price > b.price))
+
+  // add index
+  if (showNumberOnHotelItem) {
+    result.forEach( (item,index) => {
+      item.no = (index + 1);
+      return item;
+    })
+  }
 
   return result;
 }
@@ -327,18 +343,7 @@ export function processFilteredHotels(filtered, hotelsOld, hotelsOldIdsMap, pric
   filtered.map((item,index) => {
     const {price, latitude, longitude} = item;
 
-    // process images
     // log('processing',`${index}, id:${item.id}, name:'${item.name}', price:${price}, min:${priceMin} max:${priceMax}`)
-
-    const oldIndex = hotelsOldIdsMap[item.id];
-    if (oldIndex != null && hotelsOld[oldIndex]) {
-      item.hotelPhoto = hotelsOld[oldIndex].hotelPhoto;
-      item.thumbnail = hotelsOld[oldIndex].thumbnail;
-    } else {
-      if (oldIndex != null) {
-        console.warn(`oldIndex not null but old hotel is null - oldIndex:${oldIndex}, id:${item.id} name:${item.name}`, {hotelsOldIdsMap,hotelsOld})
-      }
-    }
     newIdsMap[item.id] = index;
 
     if (minLat == -1) {
@@ -489,6 +494,69 @@ function parseHotelDataForMap(data,socketMap) {
 }
 
 /**
+ * @returns (Object) The result has the following properties: {hotelData:Object, initialCoord: {initialLat:Number,initialLon:Number}}
+ */
+export function combineHotelData(socketData, staticData) {
+  let hotelData = Object.assign({},socketData);
+  if (hotelData.lat) {
+    delete hotelData.lat;
+    delete hotelData.lon;
+  }
+
+  // parse images
+  const hasSocketPhoto = hasValidImageData(socketData,'hotelPhoto');
+  const hasSocketThumb = hasValidImageData(socketData,'thumbnail');
+  const hasStaticPhoto = hasValidImageData(staticData,'hotelPhoto');
+  const hasStaticThumb = hasValidImageData(staticData,'thumbnail');
+  if (!hasSocketPhoto) {
+    hotelData.hotelPhoto = (
+      hasStaticPhoto
+        ? staticData.hotelPhoto
+        : hasSocketThumb
+          ? socketData.thumbnail
+          : hasStaticThumb ? staticData.thumbnail : DEFAULT_HOTEL_PNG
+    );
+  }
+  if (!hasSocketThumb) {
+    hotelData.thumbnail = hotelData.hotelPhoto;
+  }
+
+  const {star,stars} = socketData;
+
+  hotelData.stars = ( star!=null ? star : stars)
+  if (hotelData.stars == null && staticData) {
+    const {star:s2,stars:s3} = staticData;
+    hotelData.stars = (s2!=null ? s2 : (s3!=null ? s3 : []));  
+  }
+  if (hotelData.stars == null) {
+    hotelData.stars = [];
+  } else {
+    hotelData.stars = Array(parseInt(hotelData.stars)).fill();
+  }
+  hotelData.star = hotelData.stars;
+  
+  // parse coordinates
+  let lat = (socketData.latitude != null ? socketData.latitude : socketData.lat);
+  let lon = (socketData.longitude != null ? socketData.longitude : socketData.lon);
+  lat = (lat != null ? parseFloat(lat) : null);
+  lon = (lon != null ? parseFloat(lon) : null);
+  hotelData.latitude = lat;
+  hotelData.longitude = lon;
+  let initialCoord = {
+    initialLat: lat,
+    initialLon: lon
+  };
+  if (!hasValidCoordinatesForMap(initialCoord, true)) {
+    initialCoord = null;
+  }
+
+  return {
+    hotelData,
+    initialCoord
+  };
+}
+
+/**
  * Parse current hotelData and return it as initial coordinates
  * @param {Object} hotelData
  * @param {Object} hotelsSocketCacheMap
@@ -515,6 +583,8 @@ export function parseAndCacheHotelDataFromSocket(
         ? hotelsInfo[index]
         : hotelData
   );
+
+  log('list-parse-socket',`${hotelData.name}, id:${hotelData.id}`, {hotelData,oldData,current,indexNotNull,index,hotelsSocketCacheMap,hotelsIndicesByIdMap});
 
   let lat = (hotelData.latitude != null ? hotelData.latitude : hotelData.lat);
   let lon = (hotelData.longitude != null ? hotelData.longitude : hotelData.lon);
@@ -543,9 +613,11 @@ export function parseAndCacheHotelDataFromSocket(
   // if (!parsedInfo.hotelPhoto || parsedInfo.hotelPhoto.url == '') {
   //   parsedInfo.hotelPhoto = parsedInfo.thumbnail;
   // }
-  // if (hotelData.hotelPhoto) {
-  //   parsedInfo.hotelPhoto = (hotelData.hotelPhoto.url ? hotelData.hotelPhoto : {url: hotelData.hotelPhoto})
-  // }
+  if (hotelData.hotelPhoto) {
+    parsedInfo.hotelPhoto = (hotelData.hotelPhoto.url ? hotelData.hotelPhoto : {url: hotelData.hotelPhoto})
+  } else {
+    parsedInfo.hotelPhoto = parsedInfo.thumbnail;
+  }
 
   if (useLongCoordinates) {
     parsedInfo.latitude = lat;
@@ -576,9 +648,14 @@ export function parseAndCacheHotelDataFromSocket(
   return result;
 }
 
-function isNumber(value) {
-  return (typeof(value) == 'number')
+/**
+ * Checks whether data is null, an empty string or an object with 
+ * a property url null or an empty string
+ */
+function hasValidImageData(data,type) {
+  return (! (!data || !data[type] || (isObject(data[type]) && !data[type].url)) )
 }
+
 
 function newObject(source, extra) {
 	return lodash.merge({}, source, extra)

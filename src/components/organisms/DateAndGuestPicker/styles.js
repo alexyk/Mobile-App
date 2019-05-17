@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import {getFontSize} from '../../../utils/designUtils'
 
 export default StyleSheet.create({
     container: {
@@ -72,19 +73,19 @@ export default StyleSheet.create({
     },
     label: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         color: '#000',
         top: 2
     },
     label_disabled: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         color: '#d9d9d9',
         top: 2
     },
     value: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#DA7B61'
     },
     optionsPickerViewIncomplete: {
@@ -124,7 +125,7 @@ export default StyleSheet.create({
     searchButtonText: {
         color: '#fff',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         padding: 14
     }
 });

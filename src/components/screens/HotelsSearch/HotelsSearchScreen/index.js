@@ -18,40 +18,6 @@
  *    Filtering results - removing hotels unavailable. Currently this flow differs from Web-App as
  *    it is using getInfoForMap thus loading all results (not page by page as does the Web-App)
  * 
- * Extra 1) onUpdateHotelsInfo
- *          Called on any update of hotelsInfo & hotelsInfoForMap (these are holding data for now but refactoring for Redux is ongoing)
- *          See also: fetchFilteredResults(), listUpdateDataSource
- * 
- * Extra 2) Refactoring into redux
- *          Redux actions to replace setState used with onUpdateHotelsInfo.
- *          This is in progress - more info is to come later
- * 
- *
- * 
- * ==== First (old) variant/plan - waiting for all results filtered  ====
- * ==== (using footer in complex mode - left and right text fields)  ====
- * 1) onStaticData
- *    This is the initial load of static hotel data (name,description,image)
- *    Shown in footer: "N hotels" (see also renderFooter)
- * 2) onDataFromSocket
- *    Loading prices from socket and updating hotel search
- *    Shown in footer: "N available" (renderFooter)
- * 
- * 3) onDoneSocket
- *    All prices loaded
- * 
- * 4) onFilteredData
- *    Filtering results - removing hotels unavailable. Currently this flow differs from Web-App as
- *    it is using getInfoForMap thus loading all results (not page by page as does the Web-App)
- * 
- * Extra 1) onUpdateHotelsInfo
- *          Called on any update of hotelsInfo & hotelsInfoForMap (these are holding data for now but refactoring for Redux is ongoing)
- *          See also: fetchFilteredResults(), listUpdateDataSource
- * 
- * Extra 2) Refactoring into redux
- *          Redux actions to replace setState used with onUpdateHotelsInfo.
- *          This is in progress - more info is to come later
- * 
  */
 import React, { Component } from "react";
 import { SafeAreaView, BackHandler } from "react-native";
@@ -71,13 +37,13 @@ import {
   showNumberOnHotelItem,
   HOTELS_SOCKET_CONNECTION_TIMEOUT,
   HOTELS_STATIC_CONNECTION_TIMEOUT,
-  HOTELS_SOCKET_CONNECTION_UPDATE_TICK
+  HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
+  HOTELS_MINIMUM_RESULTS
 } from "../../../../config";
 import { isOnline, log } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
-import _ from "lodash";
 
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
 import lang from "../../../../language";
@@ -90,12 +56,13 @@ import {
   generateHotelFilterString,
   applyHotelsSearchFilter,
   processFilteredHotels,
-  processStaticHotels,
+  hotelsTemporaryFilterAndSort,
   updateHotelsFromFilters,
   updateHotelIdsMap,
   updateHotelsFromSocketCache,
   mergeAllHotelData,
   parseAndCacheHotelDataFromSocket,
+  combineHotelData,
   DISPLAY_MODE_NONE,
   DISPLAY_MODE_SEARCHING,
   DISPLAY_MODE_RESULTS_AS_LIST,
@@ -124,8 +91,8 @@ import {
   renderFooter,
   renderPreloader,
   renderToast,
-  renderDebug,
-  renderDebug2
+  renderDebugWebview,
+  renderDebugMap
 } from './components'
 
 import stomp from "stomp-websocket-js";
@@ -139,7 +106,6 @@ let stompAndroidClient = undefined;
 class HotelsSearchScreen extends Component {
   PAGE_LIMIT = 10;
   INITIAL_PAGES = 5;
-  MINIMUM_RESULTS = 30;
 
   constructor(props) {
     super(props);
@@ -148,20 +114,23 @@ class HotelsSearchScreen extends Component {
 
     const { params } = this.props.navigation.state; //eslint-disable-line
     this.state = createHotelSearchInitialState(params);
-
+    
     this.pageLimit = this.PAGE_LIMIT;
     this.pagesLoaded = 0;
+    this.pagesCached = 0;
     this.isAllPagesDone = false;
     this.isMinimumResultLoaded = false;
     this.isAllHotelsLoaded = false;
     this.isFirstLoad = true;
     this.isFirstFilter = true;
     this.isSocketDown = true;
+    this.isUnmounted = true;
     this.validSocketPrices = 0;
     this.staticDataReceived = false;
     this.lastSocketUpdateTime = 0;
     this.hotelsAll = [];              // cache for using as filter source
     this.hotelsIndicesByIdMap = null; // see getStaticHotelsData() for populating this one
+    this.hotelsStaticCacheMap = {}; // cache for static data (requester.getStaticHotels) 
     this.hotelsSocketCacheMap = {}; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
     this.hotelsSocketCacheCount = 0; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
     this.priceMin = 5000;
@@ -175,7 +144,6 @@ class HotelsSearchScreen extends Component {
     
     this.filtersCallback = null;
     this.isWebviewHotelDetail = false
-    this.state.optimiseMapMarkers = true
 
     // Bind functions to this,
     // thus optimizing performance - by using bind(this) instead of "=> function".
@@ -189,7 +157,6 @@ class HotelsSearchScreen extends Component {
     this.onFilteredData = this.onFilteredData.bind(this);
     this.onFetchNewListViewData = this.onFetchNewListViewData.bind(this);
     this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(this);
-    this.onUpdateHotelsInfo = this.onUpdateHotelsInfo.bind(this);
 
     // render functions
     this.renderWebViewBack = renderWebViewBack.bind(this)
@@ -206,8 +173,8 @@ class HotelsSearchScreen extends Component {
     this.renderFooter = renderFooter.bind(this)
     this.renderPreloader = renderPreloader.bind(this)
     this.renderToast = renderToast.bind(this)
-    this.renderDebug = renderDebug.bind(this)
-    this.renderDebug2 = renderDebug2.bind(this)
+    this.renderDebugWebview = renderDebugWebview.bind(this)
+    this.renderDebugMap = renderDebugMap.bind(this)
 
 
     //TODO: @@debug - remove
@@ -219,6 +186,7 @@ class HotelsSearchScreen extends Component {
   componentDidMount() {
     console.log("#hotel-search# 3/6 HotelSearchScreen componentDidMount START");
 
+    this.isUnmounted = false;
     this.startStaticDataConnectionTimeOut();
     this.startSocketDataConnectionTimeOut();
 
@@ -238,10 +206,12 @@ class HotelsSearchScreen extends Component {
   }
 
   componentWillUnmount() {
+    this.isUnmounted = true;
+    this.isSocketDown = true;
+
     clearTimeout(this.socketTimeoutId);
     clearTimeout(this.staticTimeoutId);
 
-    this.isSocketDown = true;
     this.stopSocketConnection();
 
     if (Platform.OS == 'android') {
@@ -255,12 +225,14 @@ class HotelsSearchScreen extends Component {
 
     const _this = this;
     const funcSocketTimeout = function() {
-      if (_this.validSocketPrices == 0) {
+      if (_this.validSocketPrices == 0  && _this && !_this.isUnmounted) {
         _this.setState({ isSocketTimeout: true });
       }
       //log('SOCKET',`Socket connection timeout DONE, valid socket prices: ${_this.validSocketPrices}`,null,true)
     };
-    this.setState({ isSocketTimeout: false });
+    if (this && !this.isUnmounted) {
+      this.setState({ isSocketTimeout: false });
+    }
 
     if (this.socketTimeoutId > -1) {
       clearTimeout(this.socketTimeoutId);
@@ -275,13 +247,15 @@ class HotelsSearchScreen extends Component {
   startStaticDataConnectionTimeOut() {
     const _this = this;
     const funcStaticHotelsTimeout = function() {
-      if (!_this.staticDataReceived) {
+      if (!_this.staticDataReceived && _this && !_this.isUnmounted) {
         _this.setState({ isStaticTimeout: true });
       }
     };
 
     this.staticDataReceived = false;
-    this.setState({ isStaticTimeout: false });
+    if (this && !this.isUnmounted) {
+      this.setState({ isStaticTimeout: false });
+    }
 
     if (this.staticTimeoutId > -1) {
       clearTimeout(this.staticTimeoutId);
@@ -294,7 +268,7 @@ class HotelsSearchScreen extends Component {
   }
 
   getNextStaticPage(page=0) {
-    log('static-page',`${this.isAllPagesDone ? 'SKIPPING loading' : 'Loading'} page ${page}, all pages: ${this.isAllPagesDone}`);
+    // log('static-page',`${this.isAllPagesDone ? 'SKIPPING loading' : 'Loading'} page ${page}, all pages: ${this.isAllPagesDone}`);
 
     if (this.isAllPagesDone) {
       return
@@ -437,119 +411,121 @@ class HotelsSearchScreen extends Component {
   }
 
   onDataFromSocket(data) {
-    this.initResultViews();
-
     //log('socket-data',`Cache socket hotel data`, {data})
-    
+    if (!this || !this.listViewRef || this.isUnmounted) {
+      console.warn(`[HotelsSearchScreen::onDataFromSocket] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
+      return;
+    }
+
+    console.time('*** onDataFromSocket')
+
+
     const { body } = data;
     
-    // try {
+    try {
       const parsedData = JSON.parse(body);
-    // log('SOCKET',`[onDataFromSocket] ${Object.keys(parsedData).join(', ')}`,{data,parsedData})
 
-    /*             
-            console.debug("#hotel-search# [HotelsSearchScreen] stomp - onDataFromSocket ---", 
-                {body,data,parsedData,_th: this}
-            );
- */
-    // restart timeout (thus also clean red styling of footer)
-    if (this.state.isSocketTimeout) {
-      this.startSocketDataConnectionTimeOut();
-    }
-
-    if (parsedData.hasOwnProperty("allElements")) {
-      // TODO: @@debug - remove
-      // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
-
-      if (parsedData.allElements) {
-        this.setState({
-          allElements: true,
-          editable: true,
-          pricesFromSocketValid: this.validSocketPrices
-        });
-        this.onDoneSocket(parsedData);
+      // restart timeout (thus also clean red styling of footer)
+      if (this.state.isSocketTimeout) {
+        this.startSocketDataConnectionTimeOut();
       }
-    } else {
-      let hotelData = parsedData;
-      let index = this.hotelsIndicesByIdMap[hotelData.id];
-      checkHotelData(hotelData,'socket-orig')
 
-      //TODO: @@debug remove
-      const {id,hotelPhoto,thumbnail} = hotelData;
-      //log('socket',`[${index}] id:${id} hotelPhoto: ${hotelPhoto}' `, {hotelData})
-      // log('socket',`[${index}] id:${id} thumbnail: ${thumbnail}' `, {hotelData})
-      //TODO: @@debug remove
+      if (parsedData.hasOwnProperty("allElements")) {
+        // TODO: @@debug - remove
+        // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
 
-
-      this.setState(
-        // change state function
-        function(prevState, updatedProps) {
-          let result = prevState;
-
-          if (!this.socketDown) { // don't update if socket is not connected any more
-            if (hotelData.price && !isNaN(hotelData.price)) {
-              // update socket prices loaded in footer
-              this.validSocketPrices++;
-              const initialCoord = parseAndCacheHotelDataFromSocket(hotelData,this.hotelsSocketCacheMap,this.hotelsIndicesByIdMap,result.hotelsInfo,index);
-              if (prevState.initialLat == null && prevState.initialLon == null) {
-                Object.assign(result, initialCoord);
-              }
-
-              // At intervals of HOTELS_SOCKET_CONNECTION_UPDATE_TICK seconds
-              // refresh prices in footer and list prices loaded so far:
-              const currentTime = new Date().getTime();
-              const limitTime = this.lastSocketUpdateTime + HOTELS_SOCKET_CONNECTION_UPDATE_TICK * 1000;
-              if (!this.lastSocketUpdateTime || limitTime < currentTime) {
-                this.lastSocketUpdateTime = currentTime;
-                
-                // refresh footer (this.state.pricesFromSocketValid)
-                result.pricesFromSocketValid = this.validSocketPrices;
-                this.hotelsAll.push(hotelData)
-
-                // hide preloader
-                if (this.validSocketPrices >= this.MINIMUM_RESULTS) {
-                  this.isMinimumResultLoaded = true;
-                  result.isLoading = false;
-                }
-
-                // update hotels data, setState(hotelsInfo)/setRows
-                if (prevState.hotelsInfo.length > 0) {
-                  //Object.assign(result, this.onUpdateHotelsInfo(prevState));
-                  const {hotelsInfo:hotelsUpdated} = this.onUpdateHotelsInfo(prevState)
-                  const newAll  = processStaticHotels(this.hotelsAll)
-                  result.hotelsInfo = newAll;
-                  this.listUpdateDataSource(newAll);
-                }
-
-                log('refresh',`[old state] ${prevState.hotelsInfo.length} / ${prevState.hotelsInfoForMap.length} [new state] ${result.hotelsInfo.length} / ${result.hotelsInfoForMap.length}`)
-              }
-            }
-          }
-          return result;
-        },
-        // callback (after change state above)
-        function() {
-          // Checking if this is HotelsSearchScreen
-          // console.log(`#hotel-search# [HotelsSearchScreen::onDataFromSocket -> setState::callback] this instanceof isHotelSearchScreen: ${this instanceof HotelsSearchScreen}`);
-
-          if (
-            this.state.displayMode === DISPLAY_MODE_RESULTS_AS_MAP &&
-            this.mapView != null &&
-            this.state.hotelsInfo.length % 20 === 0
-          ) {
-            this.mapView.refresh(this.state.hotelsInfo);
-          }
+        if (parsedData.allElements) {
+          this.setState({
+            allElements: true,
+            editable: true,
+            pricesFromSocketValid: this.validSocketPrices
+          });
+          this.onDoneSocket(parsedData);
         }
-      );
+      } else {
+        const hotelData = parsedData;
+        const {id,price} = hotelData;
+        const staticHotelData = this.hotelsStaticCacheMap[id];
+
+        checkHotelData(hotelData,'socket-orig')
+    
+        if (price && !isNaN(price)) {
+          // update socket prices loaded in footer
+          this.validSocketPrices++;
+          //const initialCoord = parseAndCacheHotelDataFromSocket(hotelData,this.hotelsSocketCacheMap,this.hotelsIndicesByIdMap,result.hotelsInfo,index);
+       
+          let combinedHotelData = hotelData;
+          let initialCoord;
+          const {hotelData: combined, initialCoord: coord} = combineHotelData(hotelData,staticHotelData)
+          combinedHotelData = combined;
+          if (coord) {
+            initialCoord = coord;
+          }
+          this.hotelsAll.push(combinedHotelData)
+
+          let newState = {};
+          if (this.state.initialLat == null && this.state.initialLon == null && initialCoord) {
+            newState = {...initialCoord};
+          }
+    
+          // At intervals of HOTELS_SOCKET_CONNECTION_UPDATE_TICK seconds
+          // refresh prices in footer and list prices loaded so far:
+          const currentTime = new Date().getTime();
+          const limitTime = this.lastSocketUpdateTime + HOTELS_SOCKET_CONNECTION_UPDATE_TICK * 1000;
+          if (!this.lastSocketUpdateTime || limitTime < currentTime) {
+            this.lastSocketUpdateTime = currentTime;
+
+            // optimise execution with delaying some parts
+            const delayedFunc = () => {
+              newState = {...newState, ...this.onSocketUpdateTick()};
+              // log('state-update',`onDataFromSocket`,{newState,oldState:this.state,initialCoord})//, ${Object.keys(newState).map(key => `${key}:${newState[key]}`)}`, {newState, all:this.hotelsAll, socket:this.hotelsSocketCacheMap, static:this.hotelsStaticCacheMap})
+              this.setState(newState);
+            }
+            setTimeout(delayedFunc, 100)
+          }
+        } else {
+          // skip processing hotel data from socket without price
+        }
+      }
+    } catch (e) {
+      throw e
+      console.error(`ERROR in HotelsSearchScreen::onDataFromSocket: ${e.message}`, {e});
     }
-    // } catch (e) {
-    // console.error("ERROR on socket Message", {message, e});
-    // Error
-    // }
+
+    console.timeEnd('*** onDataFromSocket')
+  }
+
+
+  /**
+   * Executes on every HOTELS_SOCKET_CONNECTION_UPDATE_TICK seconds
+   * @returns (Object) The result contains any state updates that should happen
+   */
+  onSocketUpdateTick() {
+    console.time('*** onSocketUpdateTick')
+
+    const pricesFromSocketValid = this.validSocketPrices;
+    const hotelsToRender  = hotelsTemporaryFilterAndSort(this.hotelsAll)
+    let preloaderIsLoading = true;
+    if (hotelsToRender.length >= HOTELS_MINIMUM_RESULTS) {
+      this.isMinimumResultLoaded = true;
+      preloaderIsLoading = false;
+    }
+
+    this.listStartFetch(hotelsToRender, this.pageLimit);
+    //log('list-refresh-footer',`[old state] ${prevState.hotelsInfo.length} / ${prevState.hotelsInfoForMap.length} [new state] ${result.hotelsInfo.length} / ${result.hotelsInfoForMap.length}`)
+    
+    console.timeEnd('*** onSocketUpdateTick')
+
+    return {
+      isLoading: preloaderIsLoading,
+      hotelsInfoForMap: hotelsToRender,
+      pricesFromSocketValid
+    }
   }
 
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
+    log('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state})
     
     //TODO: @@@debug remove
 //     let asArray = []
@@ -567,7 +543,6 @@ class HotelsSearchScreen extends Component {
       // this.listSetPageLimit(data.totalElements);
     // }
     this.setState((prevState) => ({
-        ...this.onUpdateHotelsInfo(prevState),
         pricesFromSocket: data.totalElements,
       }),
       () => {
@@ -586,7 +561,7 @@ class HotelsSearchScreen extends Component {
             const priceRange = [this.priceMin,this.priceMax];
             this.setState({priceRange,priceRangeSelected: priceRange})
           } else {
-            console.warn('[HotelsSearchScreen::filtersCallback] this.listViewRef seems null - is screen unmounted?')
+            console.warn('[HotelsSearchScreen::filtersCallback] this.listViewRef seems null - is screen unmounted?',{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})
           }
         }
       }
@@ -624,9 +599,10 @@ class HotelsSearchScreen extends Component {
     // this.isFirstLoad = true;
     //console.log(`[HotelsSearchScreen] displayMode: ${this.state.displayMode}`)
 
-    // prevent button from staying semi-transparent
-    const func = () => this.setState({ displayMode });
-    setTimeout(func, 300);
+    // Change display mode with delay 
+    // to prevent button from staying semi-transparent
+    const func = () => {if (this) this.setState({ displayMode })};
+    setTimeout(func, 100);
   }
 
   gotoHotelDetailsFromItemClick = (item, state, extraParams) => {
@@ -689,69 +665,7 @@ class HotelsSearchScreen extends Component {
     }
   };
 
-  /**
-   * @hotelsFromServer used when isSocket is false
-   * This is called in several cases when hotelsInfo data is updated:
-   * (1) on socket data
-   * (2) on done socket
-   * (3) on filtered data - this is when isSocket is false and hotelsFromServer is populated
-   */
-  onUpdateHotelsInfo(prevState, isSocket = true, hotelsFromServer = null) {
-    let result = null;
-    let hotelsFresh = null;
-    let hotelsForMap = null;
-    let coordinates = null;
-    let extraData = {};
-
-    if (isSocket) {
-      //console.tron.log('Refresh Hotels from socket', {socketMap:this.hotelsSocketCacheMap,hotels:this.state.hotelsInfo});
-      
-      const {
-        hotelsInfoFresh,hotelsInfoForMapFresh
-      } = updateHotelsFromSocketCache(prevState,this.hotelsSocketCacheMap,this.hotelsIndicesByIdMap);
-      hotelsFresh = hotelsInfoFresh;
-      hotelsForMap = hotelsInfoForMapFresh;
-    } else {
-      const {
-        hotelsFromFilters, indicesById, socketCache, initialCordinates
-      } = updateHotelsFromFilters(hotelsFromServer, this.state.hotelsInfo, this.hotelsIndicesByIdMap);
-
-      hotelsFresh = hotelsFromFilters;
-      hotelsForMap = hotelsFromFilters;
-      coordinates = initialCordinates;
-      this.hotelsIndicesByIdMap = indicesById;
-      this.hotelsSocketCacheMap = socketCache;
-      const filteredHotelsCount = hotelsFromFilters.length;
-      this.hotelsSocketCacheCount = filteredHotelsCount;
-      this.validSocketPrices = filteredHotelsCount;
-      extraData = {
-        totalHotels: filteredHotelsCount,
-        hotelsInfoForMap: hotelsFromFilters,
-        pricesFromSocket: filteredHotelsCount
-      }
-
-      this.listUpdateDataSource(hotelsFresh);
-    }
-
-
-    // if (this.props.isApplyingFilter) {
-    //   this.props.setSearchFiltered(hotelsFresh)
-    // } else {
-    //   this.props.setSearch(hotelsFresh)
-    // }
-
-    result = {
-      hotelsInfo: hotelsFresh,
-      hotelsInfoForMap: hotelsForMap,
-      initialCordinates: coordinates,
-      ...extraData
-    };
-
-
-
-    return result;
-  }
-
+  
   gotoHotelDetailsPageNative(item) {
     //console.log("gotoHotelDetailsPageNative", item);
 
@@ -779,6 +693,7 @@ class HotelsSearchScreen extends Component {
         });
     });
   }
+
 
   onFilteredData(res) {
     const _this = this;
@@ -826,8 +741,6 @@ class HotelsSearchScreen extends Component {
         this.setState(
           // state update
           (prevState) => {
-            // const newState = this.onUpdateHotelsInfo(prevState, false, hotelsAll)
-            // newState.totalHotels = count;
             this.listUpdateDataSource(hotelsAll);
             const newState = {
               hotelsInfo: hotelsAll,
@@ -844,7 +757,7 @@ class HotelsSearchScreen extends Component {
                 _this.filtersCallback = null;
                 _this.props.setIsApplyingFilter(false);
               }
-              setTimeout(func, 300)
+              setTimeout(func, 100)
             }
             if (_this.isFirstFilter) {
               _this.isFirstFilter = false;
@@ -860,29 +773,51 @@ class HotelsSearchScreen extends Component {
     }
   }
 
-  onStaticData(res) {
-    if (this.isAllHotelsLoaded) {
-      // this prevents slow static data to overwrite prices data
-      // TODO: See if it's better to merge all data - static, socket, filtered - whenever it comes
-      console.warn(`[HotelsSearchScreen] Slow static hotels response - skipping`);
+  onStaticData(res) {  
+    if (!this || !this.listViewRef || this.isUnmounted) {
+      console.warn(`[HotelsSearchScreen::onStaticData] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
       return;
     }
 
     const _this = this;
     //console.log(` RESULT: ${res.success} `, {res})
-    this.pagesLoaded++;
-
+    
     if (res.success) {
       _this.staticDataReceived = true;
       
       res.body.then(function(data) {
+        
         if (data.last) {
           _this.isAllPagesDone = true;
         }
         let hotels = data.content;
+        hotels.map( (item) => {
+          _this.hotelsStaticCacheMap[item.id] = item;
+          if (_this.isAllHotelsLoaded) {
+            const index = _this.hotelsIndicesByIdMap[item.id];
+            const itemInList = _this.hotelsAll[index];
+            if (itemInList) {
+              itemInList.hotelPhoto = item.hotelPhoto;
+            }
+          }
+        });
+        _this.pagesCached++;
+
+        if (_this.isAllHotelsLoaded) {
+          // this prevents slow static data to overwrite prices data
+          //_this.listUpdateDataSource(_this.hotelsAll);
+          console.warn(`[HotelsSearchScreen] Skipping static data - page ${_this.pagesCached} (loaded: ${_this.pagesLoaded})`);
+          return;
+        }
+        _this.pagesLoaded++;
         
         //log('static-hotels',`+${hotels.length} of ${_this.state.totalHotels} static hotels`, {hotels}, true)
         checkHotelData(hotels,'static')
+
+        const newState = {
+          totalHotels: data.totalElements,
+          totalPages: data.totalPages,
+        };
 
         // start socket connection if first static load
         if (_this.isFirstLoad) {
@@ -890,78 +825,15 @@ class HotelsSearchScreen extends Component {
           if (_this.isSocketDown) {
             _this.startSocketConnection();
           }
-        } else { // avoid two calls on first load
-          const oldState = {hotelsInfo:hotels, hotelsInfoForMap:[]}
-          let {hotelsInfoFresh} = updateHotelsFromSocketCache(oldState, _this.hotelsSocketCacheMap, _this.hotelsIndicesByIdMap);
-          hotels = hotelsInfoFresh;
-        }
-        
-        // filter repeating hotels out - cache only new
-        let newHotels = [];
-        const prevState = _this.state;
-        log('static-hotels-1',`prevState:${prevState}`,{prevState})
-        hotels.forEach(element => {
-          if (_this.hotelsIndicesByIdMap[element.id] != null) {
-            //TODO: @@debug - remove
-            // console.warn(`%c${element.name.padEnd(45, ' ')}%c: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,"color: red; font-weight: bold","color: black; font-weight: normal");
-            console.warn(`Duplicate hotel - id found in map - %c${element.name}%c: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,"color: red; font-weight: bold","color: black; font-weight: normal");
-            // log('warn',`${element.name}: ${_this.hotelsIndicesByIdMap[element.id]}, id: ${element.id}`,{element,ids:_this.hotelsIndicesByIdMap},true);
-            //log('warn',`Element already loaded: ${element.id}`,{element,ids:_this.hotelsIndicesByIdMap},true);
-          } else {
-            element.no = newHotels.length + prevState.hotelsInfo.length + 1;
-            newHotels.push(element);
-            //log('info',`Added new static data: ${element.id}`,{element,ids:_this.hotelsIndicesByIdMap,newHotels},true);
-            //TODO: @@debug - remove
-            // console.log(`'%c${element.name.padEnd(45, ' ')}',%c id:  ${element.id} is NEW`,"color: green","color: black");
-          }
-        });
-
-        // Add to cache - to use later for getting hotels with prices only
-        // while populating list with at least 30 prices
-        _this.hotelsAll.push(newHotels);
-
-        // add the new hotels ids to the map {hotel-id: hotel-index-in-cache}
-        updateHotelIdsMap(_this.hotelsIndicesByIdMap, hotels);
-
-        // if first pages done - filter priceless hotels and show current results (in the function processStaticHotels)
-        const pagesDone = (_this.pagesLoaded >= _this.INITIAL_PAGES);
-        let hotelsInfoFresh = [];
-        log('static-hotels-2', `pagesDone: ${pagesDone}, hotels new:${hotelsInfoFresh.length} old:${prevState.hotelsInfo ? prevState.hotelsInfo.length : 'n/a'}`)
-        if (pagesDone) {
-          hotelsInfoFresh = processStaticHotels(_this.hotelsAll)
-          //log('pages-done', `hotels new:${hotelsInfoFresh.length} old:${this.state.hotelsInfo ? this.state.hotelsInfo.length : 'n/a'}`)
-          _this.isAllPagesDone = true;
+          newState.displayMode = DISPLAY_MODE_RESULTS_AS_LIST;
         } else {
-          _this.getNextStaticPage(_this.pagesLoaded);
-        }
-        
-        const hotelsInfoForMap = hotelsInfoFresh;
-        const isLoading = (pagesDone && _this.validSocketPrices >= _this.MINIMUM_RESULTS ? false : prevState.isLoading);
-        
-
-        // setting state - update cache with new hotels
-        _this.setState(
-          prevState => {
-            log('static-page/hotels', `hotels new:${hotelsInfoFresh.length} old:${prevState.hotelsInfo ? prevState.hotelsInfo.length : 'n/a'}, isLoading:${isLoading} page:${_this.pagesLoaded} isAllPagesDone:${_this.isAllPagesDone}`);
-
-            return {
-              displayMode:
-                prevState.displayMode == DISPLAY_MODE_SEARCHING
-                  ? DISPLAY_MODE_RESULTS_AS_LIST
-                  : prevState.displayMode,
-              hotelsInfoForMap,
-              hotelsInfo: hotelsInfoFresh,
-              totalHotels: data.totalElements,
-              isLoading
-            };
-          },
-          function() {
-            //if (_this.listViewRef) console.log(`[HotelsScreenSearch] onStaticData - setState calback, rows=${_this.listViewRef.getRows().length}`);
-
-            _this.listStartFetch(hotels, _this.pageLimit);
+          if (!_this.isAllPagesDone && _this.pagesLoaded < _this.INITIAL_PAGES) {
+            _this.getNextStaticPage(_this.pagesLoaded);
           }
-        );
-      });
+        }
+
+        _this.setState(newState);
+      }); // res.body.then
     } else {
       console.error(
         "[HotelsSearchScreen] Could not fetch Static Data for hotels"
@@ -976,12 +848,13 @@ class HotelsSearchScreen extends Component {
   }
 
   listStartFetch(dataArray, pageLimit) {
-    //console.tron.log(`[HotelsSearchScreen] listStartFetch, data: ${dataArray.length}, pageLimit: ${pageLimit}`);    
+    log('list-startFetch',`data: ${dataArray.length}, pageLimit: ${pageLimit}`,{dataArray,pageLimit,hotelsAll:this.hotelsAll,state:this.state});
+
     this.listViewHelpers.startFetch(dataArray, pageLimit)
   }
 
   listUpdateDataSource(data) {
-    log('refresh',`listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {
+    log('list-updateData',`listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {
       hotels: this.state.hotelsInfo,
       hotelsForMap: this.state.hotelsInfoForMap,
       props:this.props,
@@ -1001,46 +874,21 @@ class HotelsSearchScreen extends Component {
     }
   }
 
-  initResultViews() {
-    if (
-      this.state.displayMode == DISPLAY_MODE_SEARCHING &&
-      this.state.hotelsInfoForMap > 0
-    ) {
-      this.setState({
-        displayMode: DISPLAY_MODE_RESULTS_AS_LIST
-      });
-    }
-  }
-
   // onFetch (page = 1, startFetch, abortFetch) {
   onFetchNewListViewData(page = 1, startFetch, abortFetch) {
-    /*console.log(
-      `#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`
-    );*/
-
     //log('fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`)
 
     if (this.isAllHotelsLoaded) {
-      // TODO: Figure this out - how to load results after isDoneSocket
-      // (1) For WebApp after isDoneSocket results are shown page by page
-      // (2) For MobileApp I suggest it loads all results all the time
-      //     After isDone Socket
-      //this.listSetPageLimit(this.state.totalHotels);
-        // not working:
-      // abortFetch()
-      // this.listUpdateDataSource(this.state.hotelsInfo)
+      // no getting static hotels data after everything is loaded (sockets done + initial filter applied)
       return;
     }
 
-
-    // This is required to determinate whether the first loading list is all loaded.
-
+    // Save these methods to use later in list....() methods (for example listStartFetch)
     this.listViewHelpers = { startFetch, abortFetch };
-    
-    if (this.isFirstLoad && this.state.hotelsInfo.length == 0) {
-      // don't fetch if real first load (not refreshing)
-      // this.isFirstLoad = false;
-    } else {
+
+    /* if (this.isFirstLoad) {
+      // do nothing if first fetch
+    } else  */{
       try {
         //console.log("### onFetch 0");
         this.startStaticDataConnectionTimeOut();
@@ -1062,7 +910,7 @@ class HotelsSearchScreen extends Component {
         //console.log("### onFetch Error", err);
         //console.log("onFetch--=- error  ", err);
         this.listAbortFetch(); // manually stop the refresh or pagination if it encounters network error
-        //   //console.log(err)
+        console.log('Error in HotelsSearchScreen::onFetchNewListViewData', err)
       }
     }
   }
@@ -1112,19 +960,7 @@ class HotelsSearchScreen extends Component {
     })
   }
 
-  updateFilter = (data, fromUI=false) => {    
-    // TODO: Fix this direct method call
-    // if (this.listViewRef != undefined && this.listViewRef != null) {
-    // this.listViewRef.initListView();
-    // }
-
-    // TODO: Fix this direct method call
-    // if (this.mapView != undefined && this.mapView != null) {
-    // this.mapView.initMapView();
-    // }
-    // log('update-filter',`fromUI: ${fromUI}`, {fromUI,data})
-
-
+  updateFilter = (data, fromUI=false) => {
     console.time('*** HotelsSearchScreen::updateFilter()')
     const filterParams = {
       isFilterResult: true,
@@ -1154,9 +990,11 @@ class HotelsSearchScreen extends Component {
       checkHotelData(filtered,'filter-fromUI')
 
       // add no
+      this.hotelsIndicesByIdMap = {};
       if (showNumberOnHotelItem) {
         filtered.forEach((item,index) => {
           item.no = index + 1;
+          this.hotelsIndicesByIdMap[item.id] = index;
           return item;
         })
       }
@@ -1229,7 +1067,7 @@ class HotelsSearchScreen extends Component {
   onWebViewLoadEnd() {
     console.log("[HotelsSearchScreen] Webview loaded");
     const func = () => this.setState({ isLoading: false });
-    setTimeout(func, 700)
+    setTimeout(func, 500)
   }
 
   onWebViewNavigationState(navState) {
@@ -1289,8 +1127,8 @@ class HotelsSearchScreen extends Component {
           {this.renderFooter()}
           {this.renderToast() }
 
-          {this.renderDebug()}
-          {this.renderDebug2()}
+          {this.renderDebugWebview()}
+          {this.renderDebugMap()}
         </View>
 
         {/* <ProgressDialog

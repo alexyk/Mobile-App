@@ -5,14 +5,15 @@ import {
   Text,
   Platform,
   Dimensions,
-  WebView
+  WebView,
+  StyleSheet
 } from "react-native"
 
 import {
   showBothMapAndListHotelSearch,
   showSimpleFooterHotelSearch,
 } from '../../../../config'
-import { log, webviewDebugEnabled } from '../../../../config-debug'
+import { log, webviewDebugEnabled, hotelsSearchMapDebugEnabled } from '../../../../config-debug'
 
 import SearchBar from "../../../molecules/SearchBar";
 import LTLoader from "../../../molecules/LTLoader";
@@ -153,8 +154,9 @@ export function renderResultsAsList() {
   const transform = [{scaleX: scale},{scaleY: scale}]
   // console.log(`#@# [HotelsSearchScreen] renderResultsAsList, display: ${this.state.displayMode}, ListScale: ${scale}, data: ${this.state.hotelsInfo}`)
 
-  const currentListData = (this.listViewRef?this.listViewRef.getRows():[]);
-  log('@@render-list',`Rendering hotels result as list - ${currentListData.length} items`, {scale,height,transform,isList,isMap,currentListData},true)
+  //const currentListData = (this.listViewRef?this.listViewRef.getRows():[]);
+  //const page = (this.listViewRef?this.listViewRef.getPage():-1);
+  // log('@@render-list',`${currentListData.length} items, page: ${page} - rendering hotels result as list`, {scale,height,transform,isList,isMap,currentListData},true)
 
   return (
     <UltimateListView
@@ -168,7 +170,7 @@ export function renderResultsAsList() {
       refreshableMode={"basic"}
       numColumns={1} // to use grid layout, simply set gridColumn > 1
       item={this.renderListItem} // this takes three params (item, index, separator)
-      // paginationFetchingView={this.renderPaginationFetchingView}
+      paginationFetchingView={this.renderPaginationFetchingView}
       paginationWaitingView={this.renderPaginationWaitingView}
       paginationAllLoadedView={this.renderPaginationAllLoadedView}
       style={{ transform, height }}
@@ -178,10 +180,6 @@ export function renderResultsAsList() {
 
 export function renderListItem(item, index) {
   this.renderItemTimes++;
-
-  if (item.name.indexOf('Bon Vo') > -1) {
-    //log('render-item',`    #hotel-search# [HotelsSearchScreen] renderListItem id: ${item.id}, index: ${index}, renderItemTimes: ${this.renderItemTimes}`,{item})
-  }
   
   return (
     <HotelItemView
@@ -194,50 +192,41 @@ export function renderListItem(item, index) {
   );
 };
 
+function line(width=null) {
+  return <View style={{borderBottomWidth: 3, width: "100%", borderBottomColor: 'black'}} />
+}
+
 export function renderPaginationFetchingView() {
-  return (
-    <View
-      style={{
-        width,
-        height: height - 160,
-        justifyContent: "center",
-        alignItems: "center"
-      }}
-    >
-      <LTLoader />
-    </View>
-  );
+  if (this.isAllHotelsLoaded) {
+    return (
+      <View style={{flex:1, flexDirection:'column', alignItems:"center", justifyContent:"space-between"}}>
+        {line()}
+        <Text style={{...commonText}}>{`List End`}</Text>
+        {line()}
+      </View>
+    )
+  } else {
+    return <DotIndicator color="#d97b61" count={3} size={9} animationDuration={777} />;
+  }
 }
 
 export function renderPaginationWaitingView() {
-
-  if (this.isAllHotelsLoaded) {
-    return null;
-  }
-
-  return (
-    <View
-      style={{
-        flex: 0,
-        width,
-        height: 55,
-        flexDirection: "row",
-        justifyContent: "center",
-        alignItems: "center"
-      }}
-    >
-      <DotIndicator
-        color="#d97b61"
-        count={3}
-        size={9}
-        animationDuration={777}
-      />
-    </View>
-  );
+  /* if (this.isAllHotelsLoaded) {
+    return  null;
+  } else { */
+    return  <DotIndicator color="#d97b61" count={3} size={9} animationDuration={1200} />;
+  //}
 };
 
 export function renderPaginationAllLoadedView() {
-  return null;
+  return (
+    <View style={{flex:1, flexDirection:'column', alignItems:"center", justifyContent:"space-between"}}>
+        {line()}
+        <Text style={{...commonText}}>{`All Loaded`}</Text>
+        {line()}
+      </View>
+  )
+  // return null;
   // @@debug
   // return this.renderContentMessage('All Loaded View');
 };
@@ -246,33 +235,23 @@ export function renderResultsAsMap() {
   let result = null;
 
   const data = this.state.hotelsInfoForMap;
-  //log('HOTELS-MAP',`Render map with ${data ? data.length : 'n/a'} hotels`, {data,display:this.state.displayMode});
+  console.log('HOTELS-MAP',`Render map with ${data ? data.length : 'n/a'} hotels`, {data,display:this.state.displayMode});
   
   const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
   const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
-  let scale = (this.isMap ? 1.0 : 0.0);
   let height = (isMap ? '100%' : '0%')
   if (showBothMapAndListHotelSearch && (isMap || isList)) {
     height = '50%';
-    scale = 1.0;
   }
-  const transform = [{scaleX: scale},{scaleY: scale}]
-  let style = {transform};
+  let style;
   
   // TODO: Quick fix for Android - reach a better solution and remove it 
-  if (Platform.OS == 'android' && !isMap) {
-    return null;
+  if (Platform.OS == 'android') {
+    style =  {height};
   }
-  if (Platform.OS == 'ios') style = {height};
-
-  //@@@debug
-  // console.log(`[HotelsSearchScreen] Map hotels ${this.state.hotelsInfoForMap.length}/${this.state.hotelsInfo.length}`);
-  /*this.state.hotelsInfoForMap.map((item, index) => {
-    // if (item.lon)
-    // console.log(`    Hotel ${index} lat:${item.latitude} lon:${item.longitude}`);
-
-    return item
-  })*/
+  if (Platform.OS == 'ios') {
+    style = {height};
+  }
 
   if (hasValidCoordinatesForMap(this.state, true)) {
     result = (
@@ -311,6 +290,7 @@ export function renderMapButton() {
   const hasValidCoordinates = hasValidCoordinatesForMap(this.state, true);
   const isLoading = (this.state.isLoading);
 
+  //log('render-button',`isLoading:${isLoading}  hasValidCoordinates:${hasValidCoordinates}`,{state:this.state,})
   if (hasValidCoordinates && !isLoading) {
     const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
     const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
@@ -519,7 +499,7 @@ export function renderToast() {
 }
 
 
-export function renderDebug() {
+export function renderDebugWebview() {
   if (!__DEV__ || !webviewDebugEnabled) {
     // webview debug is disabled in these cases
     return null;
@@ -543,8 +523,8 @@ export function renderDebug() {
   )
 }
 
-export function renderDebug2() {
-  if (!__DEV__) {
+export function renderDebugMap() {
+  if (!__DEV__ || !hotelsSearchMapDebugEnabled) {
     return null;
   }
 

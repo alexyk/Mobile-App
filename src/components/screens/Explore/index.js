@@ -5,7 +5,8 @@ import {
     StyleSheet,
     Text, 
     TouchableOpacity,
-    View, SafeAreaView
+    View, SafeAreaView,
+    Keyboard
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -55,7 +56,6 @@ class Explore extends Component {
         this.onDatesSelect = this.onDatesSelect.bind(this);
         this.onSearchHandler = this.onSearchHandler.bind(this);
         this.onSearchEnterKey = this.onSearchEnterKey.bind(this);
-        this.showToast = this.showToast.bind(this);
 
         let roomsData = [{
             adults: 2,
@@ -184,10 +184,6 @@ class Explore extends Component {
         });
     }
 
-    showToast() {
-        this.refs.toast.show('This feature is not enabled yet in the current alpha version.', 1500);
-    }
-
     onChangeHandler(property) {
         return (value) => {
             this.setState({ [property]: value });
@@ -310,84 +306,89 @@ class Explore extends Component {
     }
 
     gotoSearch() {
-        console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`);
-        //Open new property screen that uses sock-js
-        if (isExploreSearchNative){
-            if (this.state.isHotel) {
-                //console.log("this.state.regionId.", this.state.regionId);
-                if (this.state.regionId === "" || this.state.regionId === 0) {
-                    this.refs.toast.show('Please input location to search hotels.', 2500);
-                    return;
+        const delayedFunction = () => {
+            console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`);
+            //Open new property screen that uses sock-js
+            if (isExploreSearchNative){
+                if (this.state.isHotel) {
+                    //console.log("this.state.regionId.", this.state.regionId);
+                    if (this.state.regionId === "" || this.state.regionId === 0) {
+                        this.refs.toast.show('Please input location to search hotels.', 2500);
+                        return;
+                    }
+                    this.props.navigation.navigate('HotelsSearchScreen', {
+                        isHotel: this.state.isHotel,
+                        searchedCity: this.state.search,
+                        regionId: this.state.regionId,
+                        checkInDate: this.state.checkInDate,
+                        checkOutDate: this.state.checkOutDate,
+                        guests: this.state.guests,
+                        adults: this.state.adults,
+                        children: this.state.children,
+                        infants: this.state.infants,
+                        childrenBool: this.state.childrenBool,
+                        checkOutDateFormated: this.state.checkOutDateFormated,
+                        checkInDateFormated: this.state.checkInDateFormated,
+                        roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
+                        daysDifference: this.state.daysDifference,
+                        token: this.state.token,
+                        email: this.state.email,
+                    });
                 }
-                this.props.navigation.navigate('HotelsSearchScreen', {
-                    isHotel: this.state.isHotel,
-                    searchedCity: this.state.search,
-                    regionId: this.state.regionId,
-                    checkInDate: this.state.checkInDate,
-                    checkOutDate: this.state.checkOutDate,
-                    guests: this.state.guests,
-                    adults: this.state.adults,
-                    children: this.state.children,
-                    infants: this.state.infants,
-                    childrenBool: this.state.childrenBool,
-                    checkOutDateFormated: this.state.checkOutDateFormated,
-                    checkInDateFormated: this.state.checkInDateFormated,
-                    roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
-                    daysDifference: this.state.daysDifference,
-                    token: this.state.token,
-                    email: this.state.email,
-                });
+                else {
+                    //console.log("this.state.value.", this.state.value);
+                    if (this.state.value === '' || this.state.value === 0) {
+                        this.refs.toast.show('Please select country to book home.', 2500);
+                        return;
+                    }
+                    this.props.navigation.navigate('HomesSearchScreen', {
+                        countryId: this.state.countryId,
+                        home: this.state.value,
+                        checkInDate: this.state.checkInDate,
+                        checkOutDate: this.state.checkOutDate,
+                        guests: this.state.guests,
+                        adults: this.state.adults,
+                        children: this.state.children,
+                        infants: this.state.infants,
+                        childrenBool: this.state.childrenBool,
+                        checkOutDateFormated: this.state.checkOutDateFormated,
+                        checkInDateFormated: this.state.checkInDateFormated,
+                        roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
+                        daysDifference: this.state.daysDifference
+                    });
+                }
             }
             else {
-                //console.log("this.state.value.", this.state.value);
-                if (this.state.value === '' || this.state.value === 0) {
+                if (this.state.isHotel && this.state.regionId == '') {
+                    //Empty location
+                    this.refs.toast.show('Please input location to search hotels.', 2500);
+                    this.setState({ search: '' });
+                }
+                else if (!this.state.isHotel && this.state.value === '') {
                     this.refs.toast.show('Please select country to book home.', 2500);
                     return;
                 }
-                this.props.navigation.navigate('HomesSearchScreen', {
-                    countryId: this.state.countryId,
-                    home: this.state.value,
-                    checkInDate: this.state.checkInDate,
-                    checkOutDate: this.state.checkOutDate,
-                    guests: this.state.guests,
-                    adults: this.state.adults,
-                    children: this.state.children,
-                    infants: this.state.infants,
-                    childrenBool: this.state.childrenBool,
-                    checkOutDateFormated: this.state.checkOutDateFormated,
-                    checkInDateFormated: this.state.checkInDateFormated,
-                    roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
-                    daysDifference: this.state.daysDifference
-                });
-            }
-        }
-        else {
-            if (this.state.isHotel && this.state.regionId == '') {
-                //Empty location
-                this.refs.toast.show('Please input location to search hotels.', 2500);
-                this.setState({ search: '' });
-            }
-            else if (!this.state.isHotel && this.state.value === '') {
-                this.refs.toast.show('Please select country to book home.', 2500);
-                return;
-            }
-            else {
-                const {props,state} = this;
-                const extraParams = {
-                    token: state.token,
-                    email: state.email,
-                    message: this.state.isHotel
-                        ? `Looking for hotels in\n"${state.search}"`
-                        : `Looking for homes in\n"${state.search}"`,
-                    title: this.state.isHotel
-                        ? lang.TEXT.SEARCH_HOTEL_RESULTS_TILE
-                        : lang.TEXT.SEARCH_HOME_RESULTS_TILE,
-                    isHotel: this.state.isHotel
-                    
+                else {
+                    const {props,state} = this;
+                    const extraParams = {
+                        token: state.token,
+                        email: state.email,
+                        message: this.state.isHotel
+                            ? `Looking for hotels in\n"${state.search}"`
+                            : `Looking for homes in\n"${state.search}"`,
+                        title: this.state.isHotel
+                            ? lang.TEXT.SEARCH_HOTEL_RESULTS_TILE
+                            : lang.TEXT.SEARCH_HOME_RESULTS_TILE,
+                        isHotel: this.state.isHotel
+                        
+                    }
+                    gotoWebview(state, props.navigation, extraParams);
                 }
-                gotoWebview(state, props.navigation, extraParams);
             }
         }
+
+        // leave execution time for animation and search button release
+        setTimeout(delayedFunction, 100);
     }
 
     handleAutocompleteSelect(id, name, callback=null) {
@@ -401,12 +402,15 @@ class Explore extends Component {
     }
 
     handlePopularCities(id, name) {
-        this.setState({
-            cities: [],
-            search: name,
-            regionId: id,
-            isHotel: true
-        });
+        this.setState(
+            () => ({
+                cities: [],
+                search: name,
+                regionId: id,
+                isHotel: true
+            }),
+            () => Keyboard.dismiss()
+        );
     }
 
     renderAutocomplete() {
@@ -667,20 +671,10 @@ class Explore extends Component {
                                 </TouchableOpacity>
                             </View>
 
-                            {/* <TouchableOpacity onPress={this.showToast}>
-                                <View style={styles.searchButtonView}>
-                                    <Text style={styles.searchButtonText}>Show All</Text>
-                                </View>
-                            </TouchableOpacity> */}
-
                             <View style={styles.bottomView}>
                                 <Image style={styles.bottomViewText} resizeMode='stretch'
                                     source={require('../../../assets/texthome.png')} />
-                                {/* <TouchableOpacity onPress={this.showToast} style={styles.getStartedButtonView}>
-                                    <View >
-                                        <Text style={styles.searchButtonText}>Get Started</Text>
-                                    </View>
-                                </TouchableOpacity> */}
+
                                 <Image style={styles.bottomViewBanner} resizeMode='stretch'
                                     source={require('../../../../src/assets/vector.png')} />
                             </View>

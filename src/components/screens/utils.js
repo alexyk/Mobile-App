@@ -181,3 +181,12 @@ export function getWebviewExtraData(state, extraData = {}) {
 export function gotoWebview(state, navigation, extraData = {}) {
   navigation.navigate("WebviewScreen", getWebviewExtraData(state, extraData));
 }
+
+
+export function isObject(value) {
+  return (typeof(value) == 'object')
+}
+
+export function isNumber(value) {
+  return (typeof(value) == 'number')
+}

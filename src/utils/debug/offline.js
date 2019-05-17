@@ -1,4 +1,5 @@
 import { autoHotelSearchPlace, log } from '../../config-debug'
+import { isObject } from '../../components/screens/utils'
 
 const offlinePacks = {
   sofia: {
@@ -41,7 +42,18 @@ export default function createOfflineRequester() {
 	const promiseRes = (data,title) => ({
     body:new Promise(
       function (success,reject) {
-        console.tron.display({name: 'API-OFFLINE', preview: title,value:data})
+        try {
+          const keys = Object.keys(data)
+          /* let keysStr = keys.map( key => `${key} ` ).join('')
+          if (keysStr.length > 70) {
+            keysStr = keysStr.substr(0,70) + ' ...'
+          }
+          const keysDetails = keys.map( key => `${key}:${isObject(data[key])?'{...}':data[key]} ` )
+          log('API-OFFLINE', `${title} -> ${keysStr.substr(0,80)}...`, {data,keysDetails} ) */
+          log('API-OFFLINE', title, {data})
+        } catch (e) {
+          log('API-OFFLINE',`ERROR in ${title}: ${e.message}`, {e}, true)
+        }
         // console.tron.display({title,value:data})
         success(data);
         //console.tron.display({title,preview:`Success::END`,value:data})
@@ -80,6 +92,7 @@ export default function createOfflineRequester() {
 		}
   );
   
+  const socketDelay = 100; // in milliseconds
 	const offlineRequester = {
 		// http calls
 		login: (...args) 				                => genPromise(args,'login', 0.1),
@@ -88,8 +101,8 @@ export default function createOfflineRequester() {
 		getCurrencyRates: (...args) 			      => genPromise(args,'getCurrencyRates'),
 		getLocRateByCurrency: (...args) 		    => genPromise(args,'getLocRateByCurrency'),
 		getRegionsBySearchParameter: (...args) 	=> genPromise(args,'getRegionsBySearchParameter'),
-		getStaticHotels: (...args) 				      => genPromise(args,'getStaticHotels',5),
-		getMapInfo: (...args) 					        => genPromise(args,'getMapInfo', 10),
+		getStaticHotels: (...args) 				      => genPromise(args,'getStaticHotels',2),
+		getMapInfo: (...args) 					        => genPromise(args,'getMapInfo', 15),
 		getHotelById: (...args) 					      => genPromise(args,'getHotelById', 0.5),
 		getHotelRooms: (...args) 					      => genPromise(args,'getHotelRooms', 0.5),
 		getConfigVarByName: (...args) 					=> genPromise(args,'getConfigVarByName'),
@@ -104,12 +117,14 @@ export default function createOfflineRequester() {
         if (tmp) arr = tmp;
       } catch (e) {}
 
-			const delayPerRefresh = 10
+			const delayPerRefresh = socketDelay
 			const delay2 = 500
 			const delay3 = delay2+300
-			//console.tron.log('arr',arr)
 			arr.map((item,index) => {
-				const func = () => onData.apply( _this, [ { body: JSON.stringify(item) } ] )
+				const func = () => {
+          onData.apply( _this, [ { body: JSON.stringify(item) } ] )
+          log('SOCKET-OFFLINE',`onData ${index}`,{item,index})
+        }
 				setTimeout(func, index*delayPerRefresh + delay2);
 
 				if (index+1 == arr.length) {
