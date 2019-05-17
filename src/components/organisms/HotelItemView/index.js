@@ -15,7 +15,6 @@ import LocPrice from "../../atoms/LocPrice";
 import styles from "./styles";
 import lang from "../../../language";
 import { isNative } from "../../../version";
-import { gotoWebview } from "../../screens/utils";
 import { log } from "../../../config-debug";
 
 class HotelItemView extends Component {
@@ -74,7 +73,10 @@ class HotelItemView extends Component {
     }
   };
 
-  renderStars = count => {
+  renderStars = stars => {
+    if (stars == null) return null;
+
+    const count = stars;
     const indents = [];
     for (let i = 0; i < count; i++) {
       indents.push(
@@ -112,6 +114,13 @@ class HotelItemView extends Component {
       price = (converted / days).toFixed(2);
     } else {
       isPriceReady = false;
+    }
+
+    if (!isPriceReady) {
+      const { props, state, isAllHotelsLoaded } = this.props.parent;
+      // if (isAllHotelsLoaded) {
+        // log('@@hotel-item', `Item not showing price, all: ${state.totalHotels}`, {props,state,item,currencySign,converted,days})
+      // }
     }
 
     if (isPriceReady) {
@@ -226,7 +235,7 @@ class HotelItemView extends Component {
     }
     urlThumbnail = imgHost + urlThumbnail
     
-    let {name, star:stars} = item;
+    let {name, stars} = item;
 
     return (
       <TouchableOpacity onPress={this.onPress}>

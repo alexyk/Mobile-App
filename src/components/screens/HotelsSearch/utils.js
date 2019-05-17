@@ -1,6 +1,6 @@
 import moment from "moment";
 import lodash from "lodash";
-import { validateObject, isObject, isNumber } from '../utils'
+import { validateObject, isObject, isNumber, isString, isArray } from '../utils'
 import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config";
 import { log, checkHotelsDataWithTemplates } from "../../../config-debug";
 
@@ -236,7 +236,7 @@ export function applyHotelsSearchFilter(data, filter) {
   console.time('*** utils::applyHotelsSearchFilter()')
 
   const doFilter = function(data,type,value, showUnAvailable) {
-    const tmp = (typeof(value) == 'string' ? value.split(',') : [value])
+    const tmp = (isString(value) ? value.split(',') : [value])
     const value1 = tmp[0]
     const value2 = (tmp.length == 2 ? tmp[1] : null)
     let result = data;
@@ -323,7 +323,7 @@ export function hotelsTemporaryFilterAndSort(hotels) {
   result.sort((a,b) => (a.price > b.price))
 
   // add index
-  if (showNumberOnHotelItem) {
+  if (__DEV__ && showNumberOnHotelItem) {
     result.forEach( (item,index) => {
       item.no = (index + 1);
       return item;
@@ -333,6 +333,11 @@ export function hotelsTemporaryFilterAndSort(hotels) {
   return result;
 }
 
+/**
+ * Gather statistical information from data
+ * priceMin, priceMax, newIdsMap,
+ * minLat, maxLat, minLon, maxLon
+ */
 export function processFilteredHotels(filtered, hotelsOld, hotelsOldIdsMap, priceMinOld, priceMaxOld) {
   let priceMin = priceMinOld;
   let priceMax = priceMaxOld;
@@ -445,58 +450,68 @@ export function generateHotelFilterString(page, state) {
   return filters;
 }
 
-export function mergeAllHotelData(filtered, socketMap) {
+/**
+ * Merging all data from getting static hotels (getStaticHotels), through socket messages
+ * and finally - filtered (getMapInfo)
+ * @param {Array} filtered 
+ * @param {Object} socketMap A map {id: hotelData, ...}
+ * @param {Object} staticMap A map {id: hotelData, ...}
+ */
+export function mergeAllHotelData(filtered, socketMap, staticMap) {
   let result = filtered;
   try {
     result.forEach((item,index) => {
-      item = parseHotelDataForMap(item, socketMap)
-      item.no = index + 1;
-      return item;
+      const socketData = (socketMap ? socketMap[item.id] : null);
+      const staticData = (staticMap ? staticMap[item.id] : null);
+      let mergedData = parseFilterHotelData(item, socketData, staticData)
+      mergedData.no = index + 1;
+      return mergedData;
     })
   } catch (e) {log('error','error in merging', {e})}
   return result;
 }
 
 const useLongCoordinates = true;  // used in parse functions (long is latitude/longitude and short is lat/lon)
-function parseHotelDataForMap(data,socketMap) {
-  if (typeof(data.latitude) == 'string') {
+function parseFilterHotelData(filterData,socketData,staticData) {
+  let hotelData = Object.assign(filterData);
+
+  if (isString(hotelData.latitude)) {
     if (useLongCoordinates) {
-      data.latitude = parseFloat(data.latitude)
-      data.longitude = parseFloat(data.longitude)
+      hotelData.latitude = parseFloat(hotelData.latitude)
+      hotelData.longitude = parseFloat(hotelData.longitude)
     } else {
-      data.lat = parseFloat(data.latitude)
-      data.lon = parseFloat(data.longitude)
-      delete data.latitude
-      delete data.longitude
+      hotelData.lat = parseFloat(hotelData.latitude)
+      hotelData.lon = parseFloat(hotelData.longitude)
+      delete hotelData.latitude
+      delete hotelData.longitude
     }
   }
 
-  const cached = socketMap[data.id];
-  if (cached) {
-    //log('cached', `Updating from cache ${data.id}`,{data,cached},true)
-    Object.assign(data, cached);
-  }
-
-  if (data.hotelData == null) {
-    data.hotelPhoto = {url:''}
-  }
-  if (data.thumbnail == null) {
-    data.thumbnail = {url:''}
-    if (  typeof(data.hotelPhoto)=='string' ) {
-      data.thumbnail = {url:data.hotelPhoto}
-      data.hotelPhoto = data.thumbnail
+  const hasPhoto = hasValidImageData(hotelData,'hotelPhoto');
+  const hasThumb = hasValidImageData(hotelData,'thumbnail');
+  const hasStaticPhoto = hasValidImageData(staticData,'hotelPhoto');
+  const hasSocketThumb = hasValidImageData(socketData,'thumbnail');
+  const patchedThumb = (hasSocketThumb ? socketData.thumbnail : null);
+  if (!hasPhoto) hotelData.hotelPhoto = (hasStaticPhoto ? staticData.hotelPhoto : patchedThumb);
+  if (!hasThumb) hotelData.thumbnail = patchedThumb;
+  if (hotelData.hotelPhoto == null && hotelData.thumbnail == null) {
+    hotelData.hotelPhoto = DEFAULT_HOTEL_PNG;
+    hotelData.thumbnail = DEFAULT_HOTEL_PNG;
+  } else {
+    if (hotelData.hotelPhoto == null) {
+      hotelData.hotelPhoto = hotelData.thumbnail;
+    } else {
+      hotelData.thumbnail = hotelData.hotelPhoto;
     }
-  } else if (typeof(data.thumbnail)=='string') {
-    data.thumbnail = {url:data.thumbnail}
   }
   
-  return data
+  return hotelData
 }
 
 /**
  * @returns (Object) The result has the following properties: {hotelData:Object, initialCoord: {initialLat:Number,initialLon:Number}}
  */
-export function combineHotelData(socketData, staticData) {
+export function parseSocketHotelData(socketData, staticData) {
   let hotelData = Object.assign({},socketData);
   if (hotelData.lat) {
     delete hotelData.lat;
@@ -523,17 +538,14 @@ export function combineHotelData(socketData, staticData) {
 
   const {star,stars} = socketData;
 
-  hotelData.stars = ( star!=null ? star : stars)
+  hotelData.stars = ( star!=null ? parseInt(star) : (isArray(stars) ? stars.length : stars) );
   if (hotelData.stars == null && staticData) {
     const {star:s2,stars:s3} = staticData;
-    hotelData.stars = (s2!=null ? s2 : (s3!=null ? s3 : []));  
+    hotelData.stars = (s2!=null ? parseInt(s2) : (s3!=null && isArray(s3) ? s3.length : 0));
   }
-  if (hotelData.stars == null) {
-    hotelData.stars = [];
-  } else {
-    hotelData.stars = Array(parseInt(hotelData.stars)).fill();
+  if (star) {
+    delete hotelData.star;
   }
-  hotelData.star = hotelData.stars;
   
   // parse coordinates
   let lat = (socketData.latitude != null ? socketData.latitude : socketData.lat);
@@ -576,7 +588,7 @@ export function parseAndCacheHotelDataFromSocket(
     index = hotelsIndicesByIdMap[hotelData.id];
   }
   const indexNotNull = index != null;
-  const current = (
+  const backupData = (
     oldData
       ? oldData
       : indexNotNull && hotelsInfo
@@ -584,53 +596,9 @@ export function parseAndCacheHotelDataFromSocket(
         : hotelData
   );
 
-  log('list-parse-socket',`${hotelData.name}, id:${hotelData.id}`, {hotelData,oldData,current,indexNotNull,index,hotelsSocketCacheMap,hotelsIndicesByIdMap});
-
-  let lat = (hotelData.latitude != null ? hotelData.latitude : hotelData.lat);
-  let lon = (hotelData.longitude != null ? hotelData.longitude : hotelData.lon);
-  lat = parseFloat(lat != null ? lat : (current.lat ? current.lat : current.latitude))
-  lon = parseFloat(lon != null ? lon : (current.lon ? current.lon : current.longitude))
+  log('list-parse-socket',`${hotelData.name}, id:${hotelData.id}`, {hotelData,oldData,current: backupData,indexNotNull,index,hotelsSocketCacheMap,hotelsIndicesByIdMap});
   
-  // parse props
-  const {id, name, price, star, stars, thumbnail} = hotelData;
-  let parsedInfo = {
-    id,
-    name,
-    price: parseFloat(!isNaN(price) ? price : current.price),
-    star: (star != null 
-    	? star 
-    	: (stars != null
-	    		? stars
-  	  		: (current.star != null ? current.star : current.stars)
-  	  	)
-    ),
-    thumbnail:
-      thumbnail && thumbnail.url
-        ? thumbnail
-        : current.thumbnail
-  };
-
-  // if (!parsedInfo.hotelPhoto || parsedInfo.hotelPhoto.url == '') {
-  //   parsedInfo.hotelPhoto = parsedInfo.thumbnail;
-  // }
-  if (hotelData.hotelPhoto) {
-    parsedInfo.hotelPhoto = (hotelData.hotelPhoto.url ? hotelData.hotelPhoto : {url: hotelData.hotelPhoto})
-  } else {
-    parsedInfo.hotelPhoto = parsedInfo.thumbnail;
-  }
-
-  if (useLongCoordinates) {
-    parsedInfo.latitude = lat;
-    parsedInfo.longitude = lon;
-  } else {
-    parsedInfo.lat = lat;
-    parsedInfo.long = lon;
-  }
-
-  if (parsedInfo.latitude != null) {
-    parsedInfo.latitude = parseFloat(parsedInfo.latitude)
-    parsedInfo.longitude = parseFloat(parsedInfo.longitude)
-  }
+  const parsedInfo = parseSocketHotelData_Alt(hotelData);
 
   hotelsSocketCacheMap[hotelData.id] = parsedInfo;
   checkHotelData(parsedInfo,'socket-parsed',index)
@@ -648,6 +616,49 @@ export function parseAndCacheHotelDataFromSocket(
   return result;
 }
 
+function parseSocketHotelData_Alt(socketData) {
+  let lat = (socketData.latitude != null ? socketData.latitude : socketData.lat);
+  let lon = (socketData.longitude != null ? socketData.longitude : socketData.lon);
+  lat = parseFloat(lat != null ? lat : (backupData.lat ? backupData.lat : backupData.latitude))
+  lon = parseFloat(lon != null ? lon : (backupData.lon ? backupData.lon : backupData.longitude))
+
+  const {id, name, price, star, stars, thumbnail} = socketData;
+  let parsedInfo = {
+    id,
+    name,
+    price: parseFloat(!isNaN(price) ? price : backupData.price),
+    star: (star || stars || backupData.star || backupData.stars),
+    thumbnail:
+      thumbnail && thumbnail.url
+        ? thumbnail
+        : backupData.thumbnail
+  };
+
+  // if (!parsedInfo.hotelPhoto || parsedInfo.hotelPhoto.url == '') {
+  //   parsedInfo.hotelPhoto = parsedInfo.thumbnail;
+  // }
+  if (socketData.hotelPhoto) {
+    parsedInfo.hotelPhoto = (socketData.hotelPhoto.url ? socketData.hotelPhoto : {url: socketData.hotelPhoto})
+  } else {
+    parsedInfo.hotelPhoto = parsedInfo.thumbnail;
+  }
+
+  if (useLongCoordinates) {
+    parsedInfo.latitude = lat;
+    parsedInfo.longitude = lon;
+  } else {
+    parsedInfo.lat = lat;
+    parsedInfo.long = lon;
+  }
+
+  if (parsedInfo.latitude != null) {
+    parsedInfo.latitude = parseFloat(parsedInfo.latitude)
+    parsedInfo.longitude = parseFloat(parsedInfo.longitude)
+  }
+
+  return parsedInfo;
+}
+
 /**
  * Checks whether data is null, an empty string or an object with 
  * a property url null or an empty string
@@ -657,19 +668,25 @@ function hasValidImageData(data,type) {
 }
 
 
-function newObject(source, extra) {
+function newObject(source, extra=null) {
 	return lodash.merge({}, source, extra)
 }
 
 export function checkHotelData(data, type, index) {
-  if (!__DEV__ || !checkHotelsDataWithTemplates) return;
+  if (!__DEV__ 
+        || checkHotelsDataWithTemplates == false
+        || ( isString(checkHotelsDataWithTemplates) && checkHotelsDataWithTemplates.indexOf(type) == -1 )
+      )
+  {
+    return;
+  }
   
-	const isArray = (data instanceof Array);
+	const isArrayInstance = (data instanceof Array);
   let result = '';
   let props;
   let failed = 0;
 
-  if (isArray) {
+  if (isArrayInstance) {
     data.map((item,index) => {
       const result = checkHotelData(item,type,index)
       if (!result || result.length > 0) {
@@ -680,7 +697,6 @@ export function checkHotelData(data, type, index) {
 		let commonData = {
 			id:'number',
 			name:'string',
-			star:'number',
 		};
 		
     switch (type) {
@@ -690,8 +706,9 @@ export function checkHotelData(data, type, index) {
         	commonData,
    				{
 						generalDescription:'string',
-   					hotelPhoto:{url:'string'}
-   				}
+   					hotelPhoto:{url:'string'},
+            star:'number',
+          }
         );
         result = validateObject(data, props);
         break;
@@ -719,13 +736,14 @@ export function checkHotelData(data, type, index) {
         props = newObject(
 					commonData,
 					{
-						price:'number',
-						thumbnail:'string',
-						// dynamic
+            price:'number',
+            stars: 'number',
+            // dynamic
+						externalId:'number',
 						longitude:'number,null',
 						latitude:'number,null',
-						externalId:'string,null',
-						thumbnail:'object,string,null',
+						hotelPhoto:'string,object',//[{url:'string'},'string'],
+						thumbnail:'object,string',
 					}
 				)
         result = validateObject(data, props);
@@ -743,17 +761,38 @@ export function checkHotelData(data, type, index) {
 						longitude:'string,null',
 						latitude:'string,null',
 						hotelPhoto: 'string,null',
+						// thumbnail: {url:'string'},
 						price: 'number,null'
 					}
 				)
         result = validateObject(data, props);
         break;
 
+        case 'filter-parsed':
+          props = newObject(
+            commonData,
+            {
+              no:'number',
+              price:'number',
+              priceForSort:'number',
+              // required
+              star:'number',
+              generalDescription: 'null,string',
+              longitude:'number,null',
+              latitude:'number,null',
+              hotelPhoto: 'string',
+              thumbnail: 'string',
+              // thumbnail: {url:'string'},
+              price: 'number,null'
+            }
+          )
+          result = validateObject(data, props);
+          break;
     }
   }
 
   if (result.length > 0) {
-    log(`X-${type}`, `@${result}@, index: ${index} failed: ${isArray ? failed : 'n/a'}, isArray: ${isArray}`,{invalid_types:result,data,type,props, isArray},true);
+    log(`X-${type}`, `@${result}@, index: ${index} failed: ${isArrayInstance ? failed : 'n/a'}, isArray: ${isArrayInstance}`,{invalid_types:result,data,type,props, isArrayInstance},true);
     //console.warn(`[utils::checkHotelData] @${result}@, index: ${index}`,{result,data,type,props})
   }
 }

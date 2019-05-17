@@ -5,7 +5,7 @@ import MapView, { Marker } from 'react-native-maps';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import styles from './styles';
 import { imgHost } from '../../../../config';
-import { log } from '../../../../config-debug';
+import { log, reactotronLoggingInReleaseForceEnabled } from '../../../../config-debug';
 import lang from '../../../../language';
 import red_marker from '../../../../assets/red_marker.png';
 import blue_marker from '../../../../assets/blue_marker.png';
@@ -28,6 +28,7 @@ class MapModeHotelsSearch extends Component {
             initialLat: (isValid) ? parseFloat(props.initialLat) : 42.698334,
             initialLon: (isValid) ? parseFloat(props.initialLon) : 23.319941,
             prevHotelsInfo: null,
+            prevSelectedMarkerIndex: -1,
             selectedMarkerIndex: -1,
             selectedData: null,
             selectedRegion: {
@@ -41,6 +42,10 @@ class MapModeHotelsSearch extends Component {
             markersMap: null,
             prevMarkersMap: null
         }
+
+        // this.prevSelectedMarkerIndex = -1;
+        // this.selectedMarkerIndex = -1;
+        // this.selectedData = null;
         
         this.regionChanging = false;
         this.regionQuick = this.state.selectedRegion;
@@ -58,6 +63,28 @@ class MapModeHotelsSearch extends Component {
             const {newList:renderedMarkers, map:markersMap} = this.prepareMarkers(this.state.selectedRegion);
             this.setState({renderedMarkers, markersMap});
         }
+    }
+
+    componentDidUpdate(oldProps, prevState) {
+        const newProps = this.props;
+        const {hotelsInfo:hotelsOld} = oldProps;
+        const {hotelsInfo:hotelsNew} = newProps;
+
+        // force markers re-rendering if hotelsInfo ref or length changed
+        if (hotelsOld !== hotelsNew 
+                || (hotelsOld && hotelsNew && hotelsOld.length != hotelsNew.length) 
+            )
+        {
+            if (__DEV__ || reactotronLoggingInReleaseForceEnabled) {
+                const oldLen = (hotelsOld ? hotelsOld.length : 'n/a')
+                const newLen = (hotelsNew ? hotelsNew.length : 'n/a')
+                const equal = (hotelsOld === hotelsNew) ? '===' : '!==';
+                log('map-props',`componentDidUpdate ${oldLen} ${equal} ${newLen}`, {newProps, oldProps, equal, oldLen, newLen}, true)
+            }
+            const {newList:renderedMarkers, map:markersMap} = this.prepareMarkers(prevState.selectedRegion);
+            this.setState({renderedMarkers,markersMap})
+        }
+
     }
     
     renderImageInCallout = (hotel) => {
@@ -112,6 +139,19 @@ class MapModeHotelsSearch extends Component {
         // }
     }
 
+    renderCalloutStars = ({stars}) => {
+        if (stars != null) {
+            const arr = Array(stars).fill();
+            return (
+                <Text style={styles.ratingsMap}>
+                    {arr.map(i => <FontAwesome key={"star_"+i}>{Icons.starO}</FontAwesome>)}
+                </Text>
+            )
+        } else {
+            return null;
+        }
+    }
+
     renderCallout = (hotel) => {
         if (hotel == null) {
             return null;
@@ -155,38 +195,62 @@ class MapModeHotelsSearch extends Component {
                                 </Text>
                             </View>
                     }
-                    <Text style={styles.ratingsMap}>
-                        {hotel.stars.map(i => <FontAwesome key={"star_"+i}>{Icons.starO}</FontAwesome>)}
-                    </Text>
+                    { this.renderCalloutStars(hotel) }
                 </View>
             </MapView.Callout>
         );
     }
 
-    onPressMarker = (e, index) => {
-        log("onPressMarker", `index: ${index}`, {index,e});
+    onPressMarker = (e, indexParam) => {
+        e.stopPropagation();
+
+        const {data,ref,index} = this._markers[indexParam];
+
+        log("onPressMarker", `thumb:${data.thumbnail} index:${index} id:${data.id}`, {index,e,data,props:this.props});
+
         if (this.state.selectedMarkerIndex != index) {
-            this.selectedMarker = this._markers[index];
-            if (this.selectedMarker){
-                this.selectedMarker.showCallout();
-                this.setState({
-                    selectedMarkerIndex: index,
-                    selectedData: this.props.hotelsInfo[index]
-                });
+            this.selectedMarker = ref;
+            if (this.selectedMarker) {
+                        // change selection
+                let renderedMarkers = this.state.renderedMarkers.map((item,index) => {
+                    if ( (index == this.state.selectedMarkerIndex) 
+                        || (index == this.state.prevSelectedMarkerIndex) )
+                    {
+                        // re-render previously selected or currently
+                        return this.renderSingleMarker(index,this._markers[index].data);
+                    } else {
+                        return item;
+                    }
+                })
+                this.setState((prev) => {
+                    return {
+                        prevSelectedMarkerIndex: prev.selectedMarkerIndex,
+                        selectedMarkerIndex: index,
+                        renderedMarkers,
+                        selectedData: data
+                }});
             }
         }
     }
 
-    onPressMap = () => {
+    onPressMap = (e) => {
+        e.stopPropagation();
+
         const index = this.state.selectedMarkerIndex;
-        if (index != -1) {
-            this._markers[index].hideCallout();
+        if (index != -1 && this._markers[index]) {
+            //this._markers[index].hideCallout();
             this.selectedMarker = null;
-            this.setState({selectedMarkerIndex: -1,selectedData: null});
+            this.setState(
+                (prev) => ({selectedMarkerIndex: -1,prevSelectedMarkerIndex: prev.selectedMarkerIndex, selectedData: null})
+            );
         }
     }
 
     renderMarkers() {
+        let renderedMarkers = this.state.renderedMarkers;
+
+        log('render-markers', `${renderedMarkers ? renderedMarkers.length : 0}`)
+
         const now = Date.now()
         console.time(`*** MapModeHotelsSearch::renderMarkers ${now}`)
 
@@ -195,7 +259,6 @@ class MapModeHotelsSearch extends Component {
             return null;
         }        
         //this.allMarkers = [];
-        let renderedMarkers = this.state.renderedMarkers;
 
         const prev = this.state.prevHotelsInfo;
         const current = this.props.hotelsInfo;
@@ -209,24 +272,42 @@ class MapModeHotelsSearch extends Component {
     
     onCalloutPress(item) {
         const data = this.state.selectedData;
-        const { props, state } = this.props.parentProps;
-        const extraParams = {
-            currency: this.props.currency,
-            baseUrl: `mobile/hotels/listings/${data.id}?`,
-            token: props.navigation.state.params.token,
-            email: props.navigation.state.params.email,
-            propertyName: data.name,
-            title: lang.TEXT.SEARCH_HOTEL_DETAILS_TILE,
-            isHotel: true
-        };
+        if (data) {
+            const { props, state } = this.props.parentProps;
+            const extraParams = {
+                currency: this.props.currency,
+                baseUrl: `mobile/hotels/listings/${data.id}?`,
+                token: props.navigation.state.params.token,
+                email: props.navigation.state.params.email,
+                propertyName: data.name,
+                title: lang.TEXT.SEARCH_HOTEL_DETAILS_TILE,
+                isHotel: true
+            };
 
-        log('callout',`callout data`,{item,data,extraParams,props,state})
+            log('callout',`callout data`,{item,data,extraParams,props,state})
 
-        const func = () => this.props.gotoHotelDetailsPage(item, state, extraParams);
-        this.hideCallout();
-        setTimeout(func,100)
+            const func = () => this.props.gotoHotelDetailsPage(item, state, extraParams);
+            setTimeout(func,100)
+        }
     }
 
+    renderSingleMarker(index,data) {
+        const {latitude, longitude} = data;
+        const coordinates = {latitude, longitude};
+        return (
+            <Marker
+                image={this.state.selectedMarkerIndex === index ? blue_marker : red_marker}
+                style={this.state.selectedMarkerIndex === index ? {zIndex: 1} : null}
+                key={`marker_${index}`}
+                ref={(ref) => this._markers[index] = {ref,data,index}}
+                coordinate={coordinates}
+                onPress={(e) => this.onPressMarker(e, index)}
+                onCalloutPress={item => this.onCalloutPress(item)}
+            >
+                {this.renderCallout(data)}
+            </Marker>
+        )
+    }
 
     /**
      * @returns (Object) {newList,map}
@@ -234,7 +315,6 @@ class MapModeHotelsSearch extends Component {
     prepareMarkers(region, isZoomOut=false, oldMap=null) {
         console.time('*** MapModeHotelsSearch::prepareMarkers')
         
-        const _this = this;
         let optimisationMap = {};
         const {latitude:regionLat, latitudeDelta: regionLatDelta, longitude: regionLon, longitudeDelta: regionLonDelta} = (region);
         let divisorH = 11;
@@ -244,21 +324,19 @@ class MapModeHotelsSearch extends Component {
         
         let map = {};
         let newList = [];
-        this.props.hotelsInfo.forEach((marker, index) => {
-            let {latitude, longitude, id} = marker;
+        this.props.hotelsInfo.forEach((data, index) => {
+            let {latitude, longitude, id} = data;
             if (latitude != null) {
-                latitude = parseFloat(latitude);
-                longitude = parseFloat(longitude);
                 let isSkipRender = false;
-
+    
                 /*
                 // debug
                 this.allMarkers.push({lat:latitude, lon:longitude});
                 if (index==this.props.hotelsInfo.length-1) {
                     this.allMarkers.push({regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep})
                 }*/
-
-
+    
+    
                 // if region is not set or the map is too zoomed in
                 let grid;
                 if (regionLatDelta != null && this.props.optimiseMarkers && regionLatDelta > 0.03) {
@@ -275,7 +353,7 @@ class MapModeHotelsSearch extends Component {
                         isSkipRender = true;
                     }
                 }
-
+    
                 // isNaN -> fix for iOS - JSON value null of NSNULL cannot be converted to CLLLocationDergees
                 // isSkipRender -> optimise overlaping markers
                 if (isNaN(longitude) || isNaN(latitude) || isSkipRender) {
@@ -283,28 +361,15 @@ class MapModeHotelsSearch extends Component {
                     return null;
                 }
                 
-                const current = (
-                    <Marker
-                        image={_this.state.selectedMarkerIndex === index ? blue_marker : red_marker}
-                        style={_this.state.selectedMarkerIndex === index ? {zIndex: 1} : null}
-                        // image={red_marker}
-                        key={index}
-                        ref={(ref) => _this._markers[index] = ref}
-                        coordinate={{latitude, longitude}}
-                        onPress={(e) => _this.onPressMarker(e, index)}
-                        onCalloutPress={item => this.onCalloutPress(item)}
-                    >
-                        {this.renderCallout(marker)}
-                    </Marker>
-                )
-
+                const rendered = this.renderSingleMarker(index, data);
+    
                 // do not add new markers on zoom out
                 if (! (isZoomOut && oldMap && !oldMap[id]) ) {
-                    map[id] = current;
-                    newList.push(current);
+                    map[id] = rendered;
+                    newList.push(rendered);
                 }
             } else {
-                console.log(`[Map] case 2 - null coord: ${latitude}/${longitude}`,{marker,index})
+                console.log(`[Map] case 2 - null coord: ${latitude}/${longitude}`,{data,index})
                 return null;
             }
         })
@@ -340,7 +405,7 @@ class MapModeHotelsSearch extends Component {
 
         const hasSelectedMarkRendered = (this.selectedMarker != null);
 		if (hasSelectedMarkRendered) {
-			this.selectedMarker.showCallout();
+			//this.selectedMarker.showCallout();
         }
         const {latitude, longitude, latitudeDelta, longitudeDelta} = region;
 

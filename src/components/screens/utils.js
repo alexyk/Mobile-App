@@ -183,10 +183,21 @@ export function gotoWebview(state, navigation, extraData = {}) {
 }
 
 
+export function isArray(value) {
+  return (value instanceof Array)
+}
+
+
 export function isObject(value) {
   return (typeof(value) == 'object')
 }
 
+
 export function isNumber(value) {
   return (typeof(value) == 'number')
+}
+
+
+export function isString(value) {
+  return (typeof(value) == 'string')
 }

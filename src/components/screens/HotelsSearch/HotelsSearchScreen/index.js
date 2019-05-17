@@ -61,8 +61,8 @@ import {
   updateHotelIdsMap,
   updateHotelsFromSocketCache,
   mergeAllHotelData,
+  parseSocketHotelData,
   parseAndCacheHotelDataFromSocket,
-  combineHotelData,
   DISPLAY_MODE_NONE,
   DISPLAY_MODE_SEARCHING,
   DISPLAY_MODE_RESULTS_AS_LIST,
@@ -132,7 +132,6 @@ class HotelsSearchScreen extends Component {
     this.hotelsIndicesByIdMap = null; // see getStaticHotelsData() for populating this one
     this.hotelsStaticCacheMap = {}; // cache for static data (requester.getStaticHotels) 
     this.hotelsSocketCacheMap = {}; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
-    this.hotelsSocketCacheCount = 0; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
     this.priceMin = 5000;
     this.priceMax = 0;
 
@@ -444,24 +443,23 @@ class HotelsSearchScreen extends Component {
         }
       } else {
         const hotelData = parsedData;
-        const {id,price} = hotelData;
+        const {id} = hotelData;
         const staticHotelData = this.hotelsStaticCacheMap[id];
-
+        
         checkHotelData(hotelData,'socket-orig')
-    
-        if (price && !isNaN(price)) {
+        let initialCoord;
+        const {hotelData: parsedHotelData, initialCoord: coord} = parseSocketHotelData(hotelData,staticHotelData);
+        let {price} = parsedHotelData;
+        if (coord) {
+          initialCoord = coord;
+        }
+        this.hotelsSocketCacheMap[id] = parsedHotelData;
+        checkHotelData(parsedHotelData,'socket-parsed')
+        
+        if (!isNaN(price)) {
           // update socket prices loaded in footer
           this.validSocketPrices++;
-          //const initialCoord = parseAndCacheHotelDataFromSocket(hotelData,this.hotelsSocketCacheMap,this.hotelsIndicesByIdMap,result.hotelsInfo,index);
-       
-          let combinedHotelData = hotelData;
-          let initialCoord;
-          const {hotelData: combined, initialCoord: coord} = combineHotelData(hotelData,staticHotelData)
-          combinedHotelData = combined;
-          if (coord) {
-            initialCoord = coord;
-          }
-          this.hotelsAll.push(combinedHotelData)
+          this.hotelsAll.push(parsedHotelData)
 
           let newState = {};
           if (this.state.initialLat == null && this.state.initialLon == null && initialCoord) {
@@ -485,6 +483,7 @@ class HotelsSearchScreen extends Component {
           }
         } else {
           // skip processing hotel data from socket without price
+          //console.log('skipping hotel data from socket without price', hotelData)
         }
       }
     } catch (e) {
@@ -525,7 +524,7 @@ class HotelsSearchScreen extends Component {
 
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
-    log('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state})
+    log('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
     
     //TODO: @@@debug remove
 //     let asArray = []
@@ -699,7 +698,7 @@ class HotelsSearchScreen extends Component {
     const _this = this;
 
     if (res.success) {
-      if (this.refs.toast) {
+      if (this.refs.toast && this.state.displayMode != DISPLAY_MODE_HOTEL_DETAILS) {
         this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTERED_MSG, 3000);
       }
 
@@ -708,13 +707,13 @@ class HotelsSearchScreen extends Component {
         // const isCacheExpired = data.isCacheExpired;
         const count = data.content.length;
         const hotelsAll = data.content;
-
         checkHotelData(hotelsAll,'filter')
 
         log('@@filter-on-server',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
 
         // parse data
-        mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap)
+        mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap)
+        checkHotelData(hotelsAll,'filter-parsed')
 
         // log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
 

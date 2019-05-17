@@ -79,6 +79,7 @@ export default function createOfflineRequester() {
       case 'getConfigVarByName':            return require('./offline-responses/payment-var.json')
       case 'createReservation':             return require('./offline-responses/booking1.json')
       case 'getUserHasPendingBooking':      return require('./offline-responses/booking1-pending.json')
+      case 'getListingsByFilter':           return {filteredListings:offlinePacks[autoHotelSearchPlace].first}
       default: {}
     }
   }
@@ -108,7 +109,9 @@ export default function createOfflineRequester() {
 		getConfigVarByName: (...args) 					=> genPromise(args,'getConfigVarByName'),
 		createReservation: (...args) 					  => genPromise(args,'createReservation'),
 		getUserHasPendingBooking: (...args) 	  => genPromise(args,'getUserHasPendingBooking'),
-		markQuoteIdAsMarked: (...args) 	        => genPromise(args,'getUserHasPendingBooking'),
+    markQuoteIdAsMarked: (...args) 	        => genPromise(args,'getUserHasPendingBooking'),
+    // homes
+    getListingsByFilter: (...args)          => genPromise(args,'getListingsByFilter', 0.2),
 		// socket
 		startSocketConnection: (onData,_this) => {
       let arr = require('./offline-responses/fromSocket.json');
