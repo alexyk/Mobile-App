@@ -30,7 +30,19 @@ export function validateObject(sourceData, props, index=-1, path='') {
     let type2 = (item !== null ? typeof(item) : 'null');
     let doDelete = true
 
-		if (typeof(type1) == 'string' && type1.indexOf(',') > 0) {
+		if (isArray(type1)) {
+      const types = type1;
+      if (types.indexOf(type2) > -1) {
+				// nothing to do
+			} else {
+        //TODO: Implement Array of types
+        /*let is
+        if (condition) {
+          
+        }*/
+				result += `${path}${n}:not_in_[${[type1.join(',')]}]_${type2};` + space;
+			}
+		} else if (typeof(type1) == 'string' && type1.indexOf(',') > 0) {
 			const types = type1.split(',')
 			if (types.indexOf(type2) > -1) {
 				// nothing to do

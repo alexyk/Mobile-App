@@ -294,10 +294,11 @@ class MapModeHotelsSearch extends Component {
     renderSingleMarker(index,data) {
         const {latitude, longitude} = data;
         const coordinates = {latitude, longitude};
+        const selectedIndex = this.state.selectedMarkerIndex;
         return (
             <Marker
-                image={this.state.selectedMarkerIndex === index ? blue_marker : red_marker}
-                style={this.state.selectedMarkerIndex === index ? {zIndex: 1} : null}
+                image={selectedIndex == index  ? blue_marker : red_marker}
+                style={selectedIndex == index ? {zIndex: 1} : null}
                 key={`marker_${index}`}
                 ref={(ref) => this._markers[index] = {ref,data,index}}
                 coordinate={coordinates}

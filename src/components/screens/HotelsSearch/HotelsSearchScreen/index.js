@@ -1066,7 +1066,7 @@ class HotelsSearchScreen extends Component {
   onWebViewLoadEnd() {
     console.log("[HotelsSearchScreen] Webview loaded");
     const func = () => this.setState({ isLoading: false });
-    setTimeout(func, 500)
+    setTimeout(func, 3000)
   }
 
   onWebViewNavigationState(navState) {

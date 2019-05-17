@@ -4,16 +4,19 @@
 // ALL MUST BE FALSE!!!      (unless you know what you are doing)
 export const reactotronLoggingInReleaseForceEnabled  = false;
 export const forceOffline                            = false;
-  // features
+  // reactotron
 export const reactotronReduxLoggingEnabled      = false;
+export const logConverterErrorToReactrotron     = false;
+  // console
 export const reduxConsoleLoggingEnabled         = false;
+export const reduxConsoleCollapsedLogging       = true;
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
-export const logConverterErrorToReactrotron     = false;
-  // options
-export const reduxConsoleCollapsedLogging       = true;
+export const consoleTimeCalculations            = false;
+  // other
 export const webviewDebugEnabled                = false;
-
+export const hotelsSearchMapDebugEnabled        = false;
+export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
   // other
 // Offline mode
 // Enabled if: (__DEV__ == true) and (isOffline == true)
@@ -65,11 +68,16 @@ function configureConsole() {
 
   // in case any forgotten console calls crash the build
   if (!console.time) {
-    console.time = () => {}
-    console.timeEnd = () => {}
-    console.group = () => {}
-    console.groupEnd = () => {}
-    console.groupCollapsed = () => {}
+    console.time = function() {}
+    console.timeEnd = function() {}
+    console.group = function() {}
+    console.groupEnd = function() {}
+    console.groupCollapsed = function() {}
+  } else {
+    if (!consoleTimeCalculations) {
+      console.time = function() {}
+      console.timeEnd = function() {}  
+    }
   }
 }
 
