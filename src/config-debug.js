@@ -1,3 +1,5 @@
+import { isObject } from './components/screens/utils';
+import lodash from 'lodash';
 
 // FORCE modes - possible in RELEASE
 // 
@@ -7,12 +9,13 @@ export const forceOffline                            = false;
   // reactotron
 export const reactotronReduxLoggingEnabled      = false;
 export const logConverterErrorToReactrotron     = false;
+export const showTypesInReactotronLog           = true;
   // console
 export const reduxConsoleLoggingEnabled         = false;
 export const reduxConsoleCollapsedLogging       = true;
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
-export const consoleTimeCalculations            = false;
+export const consoleTimeCalculations            = true;    // enable/disable "console.time" & "console.timeEnd" calls
   // other
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
@@ -151,7 +154,34 @@ export function log(tag, description, data, isImportant = false) {
   if (params['value'] == null) {
     params['value'] = {}
   }
+
   params.value['_preview'] = params.preview;
+  
+  // types parsing
+  if (params.value && showTypesInReactotronLog) {
+    let parseObjTypes;
+
+    parseObjTypes = function(o) {
+      let result = {};
+      for (let prop in o) {
+        let item = o[prop];
+        if (isObject(item)) {
+          let className = '';
+          try {
+            className = result.constructor.name;
+            if (!className) className = result.prototype.constructor.name;
+            if (className) className = ":" + className;
+          } catch (e) {}          
+          lodash.merge(result,{[`${prop}${className}`]:parseObjTypes(item)});
+        } else {
+          result[prop] = `${item} (${typeof(item)})`
+        }
+      }
+
+      return result;
+    }
+    params.value._valueWithTypes = parseObjTypes(params.value);
+  }
 
   console.tron.display(params)
 }
