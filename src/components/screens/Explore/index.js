@@ -18,7 +18,9 @@ import RNPickerSelect from 'react-native-picker-select';//eslint-disable-line
 import SearchBar from '../../molecules/SearchBar';
 import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
-import { autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace, isOnline, log } from '../../../config-debug';
+import { autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace,
+    isOnline, log, autoHomeSearch 
+} from '../../../config-debug';
 import requester from '../../../initDependencies';
 import styles from './styles';
 import lang from '../../../language';
@@ -309,7 +311,7 @@ class Explore extends Component {
         const delayedFunction = () => {
             console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`);
             //Open new property screen that uses sock-js
-            if (isExploreSearchNative){
+            if (isExploreSearchNative) {
                 if (this.state.isHotel) {
                     //console.log("this.state.regionId.", this.state.regionId);
                     if (this.state.regionId === "" || this.state.regionId === 0) {
@@ -466,6 +468,16 @@ class Explore extends Component {
     }
 
     renderHomeTopView() {
+        if (__DEV__ && autoHomeSearch) {
+            setTimeout(() =>
+                this.setState({
+                    countryId: 1,
+                    countryName: 'Fake Name',
+                    value: 100,
+                }, () => this.gotoSearch()),
+                100
+            );
+        }
         return (
             //Home
             <View style={styles.SearchAndPickerwarp}>

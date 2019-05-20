@@ -200,13 +200,14 @@ export function renderPaginationFetchingView() {
   if (this.isAllHotelsLoaded) {
     return (
       <View style={{flex:1, flexDirection:'column', alignItems:"center", justifyContent:"space-between"}}>
-        {line()}
+        {/* {line()} */}
         <Text style={{...commonText}}>{`List End`}</Text>
-        {line()}
+        {/* {line()} */}
       </View>
     )
   } else {
-    return <DotIndicator color="#d97b61" count={3} size={9} animationDuration={777} />;
+    return null;
+    //return <DotIndicator color="#d97b61" count={3} size={9} animationDuration={777} />;
   }
 }
 
@@ -221,9 +222,9 @@ export function renderPaginationWaitingView() {
 export function renderPaginationAllLoadedView() {
   return (
     <View style={{flex:1, flexDirection:'column', alignItems:"center", justifyContent:"space-between"}}>
-        {line()}
+        {/* {line()} */}
         <Text style={{...commonText}}>{`All Loaded`}</Text>
-        {line()}
+        {/* {line()} */}
       </View>
   )
   // return null;
@@ -478,8 +479,41 @@ export function renderFooter() {
 }
 
 
-export function renderPreloader(message) {
-  return <LTLoader isLoading={this.state.isLoading} message={message} />
+export function renderPreloader() {
+  const isHotelDetails = this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS;
+  const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
+  const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
+  const isLoading = this.state.isLoading;
+  const isServerFilter = (this.state.isFilterResult);
+  const isFiltering = (this.props.isApplyingFilter && isServerFilter);
+  const isFilteringServer = (isFiltering && isServerFilter);
+  const isFilteringFromUI = (isFiltering && !isServerFilter);
+
+  const opacity = (isFilteringFromUI ? null : '55');
+  const totalText = ''/*(
+    this.state.totalHotels > 0
+      ? `of maximum ${this.state.totalHotels}`
+      : ''
+  )*/
+  const propertiesText = (
+    (this.state.pricesFromSocketValid > 0)
+      ? `\n\n${this.state.pricesFromSocketValid} found ${totalText}`
+      : ""
+  )
+  const message = ((isList || isMap)
+    ? isFiltering
+        ? ``
+        : `Loading matches for your search ...${propertiesText}`
+    : isHotelDetails
+       ? `Loading hotel details ...`
+       : ''
+  );
+
+  return <LTLoader 
+    isLoading={ isLoading || isFiltering }
+    message={message}
+    opacity={opacity} 
+  />
   // return <LTLoader isLoading={false} message={message} />
 }
 

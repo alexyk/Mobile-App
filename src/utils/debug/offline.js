@@ -1,7 +1,16 @@
-import { autoHotelSearchPlace, log } from '../../config-debug'
+import { autoHotelSearchPlace, autoHomeSearchPlace, log } from '../../config-debug'
 import { isObject } from '../../components/screens/utils'
 
-const offlinePacks = {
+const offlinePacksHomes = {
+  'uk1': require('./offline-responses/homes-uk-1.json'),
+  'uk2': require('./offline-responses/homes-uk-2.json'),
+}
+const offlinePacksHotels = {
+  london: {
+		first: require('./offline-responses/london-static-0.json'),
+		socket: require('./offline-responses/london-socket.json'),
+    all: require('./offline-responses/london-filtered.json'),
+  },
   sofia: {
 		first: require('./offline-responses/sofia-static.json'),
     all: require('./offline-responses/sofia-all.json'),
@@ -72,14 +81,14 @@ export default function createOfflineRequester() {
       case 'getCurrencyRates':              return require('./offline-responses/rates.json')
       case 'getLocRateByCurrency':          return require('./offline-responses/convert.json')
       case 'getRegionsBySearchParameter':   return jsonRegions
-      case 'getStaticHotels':               return offlinePacks[autoHotelSearchPlace].first
-      case 'getMapInfo':                    return offlinePacks[autoHotelSearchPlace].all
+      case 'getStaticHotels':               return offlinePacksHotels[autoHotelSearchPlace].first
+      case 'getMapInfo':                    return offlinePacksHotels[autoHotelSearchPlace].all
       case 'getHotelById':                  return require('./offline-responses/hotel1.json')
       case 'getHotelRooms':                 return require('./offline-responses/rooms1.json')
       case 'getConfigVarByName':            return require('./offline-responses/payment-var.json')
       case 'createReservation':             return require('./offline-responses/booking1.json')
       case 'getUserHasPendingBooking':      return require('./offline-responses/booking1-pending.json')
-      case 'getListingsByFilter':           return {filteredListings:offlinePacks[autoHotelSearchPlace].first}
+      case 'getListingsByFilter':           return offlinePacksHomes[autoHomeSearchPlace]
       default: {}
     }
   }
@@ -93,7 +102,7 @@ export default function createOfflineRequester() {
 		}
   );
   
-  const socketDelay = 100; // in milliseconds
+  const socketDelay = 10; // in milliseconds
 	const offlineRequester = {
 		// http calls
 		login: (...args) 				                => genPromise(args,'login', 0.1),
@@ -111,7 +120,7 @@ export default function createOfflineRequester() {
 		getUserHasPendingBooking: (...args) 	  => genPromise(args,'getUserHasPendingBooking'),
     markQuoteIdAsMarked: (...args) 	        => genPromise(args,'getUserHasPendingBooking'),
     // homes
-    getListingsByFilter: (...args)          => genPromise(args,'getListingsByFilter', 0.2),
+    getListingsByFilter: (...args)          => genPromise(args,'getListingsByFilter', 1),
 		// socket
 		startSocketConnection: (onData,_this) => {
       let arr = require('./offline-responses/fromSocket.json');

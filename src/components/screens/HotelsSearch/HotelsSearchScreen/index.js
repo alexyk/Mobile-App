@@ -1084,27 +1084,7 @@ class HotelsSearchScreen extends Component {
     // console.log(`### [HotelsSearchScreen] {all:this.state.allElements});
 
     const isHotelDetails = this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS;
-    const isMap = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
-    const isList = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST;
-
     this.isWebviewHotelDetail = (isHotelDetails && !isNative.hotelItem)
-    const totalText = ''/*(
-      this.state.totalHotels > 0
-        ? `of maximum ${this.state.totalHotels}`
-        : ''
-    )*/
-    const propertiesText = (
-      (this.state.pricesFromSocketValid > 0)
-        ? `\n\n${this.state.pricesFromSocketValid} found ${totalText}`
-        : ""
-    )
-
-    const message = ((isList || isMap)
-      ? `Loading matches for your search ...${propertiesText}`
-      : isHotelDetails
-         ? `Loading hotel details ...`
-         : ''
-    )
     // log('LTLoader/HotelSearch',`isLoading: ${this.state.isLoading} isApplyingFilter: ${this.props.isApplyingFilter} isList: ${isList} isMap: ${isMap}`,{props:this.props, state:this.state})
 
     return (
@@ -1119,7 +1099,7 @@ class HotelsSearchScreen extends Component {
             {this.renderResultsAsMap()}
             {this.renderResultsAsList()}
   
-            {this.renderPreloader(message)}
+            {this.renderPreloader()}
             {this.renderMapButton()}
           </View>
 

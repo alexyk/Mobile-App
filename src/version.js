@@ -5,7 +5,7 @@ const exploreIsNative = true;   // false: webview version, true: native search v
 const hotelitemIsNative = false;// this line is updated by scripts/select_config.rb
 const travisVersion='';         // this line is updated by scripts/select_config.rb
 const branchName='';            // this line is updated by scripts/select_config.rb
-const compilationTime = '2019-05-08 17:16:27 EEST';
+const compilationTime = '';     // this line is updated by scripts/select_config.rb
 
 let ui = '';
 ui += `\n${exploreIsNative

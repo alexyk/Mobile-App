@@ -23,6 +23,7 @@ export default class LTLoader extends PureComponent {
 
   render() {
     if (this.props.isLoading) {
+      const opacity = (this.props.opacity != null ? this.props.opacity : 'F8')
       const defaultStyle = {
         position:'absolute',
         width: "100%",
@@ -34,7 +35,7 @@ export default class LTLoader extends PureComponent {
         
         display: (this.props.isLoading ? "flex" : 'none'),
         
-        backgroundColor: '#FFFFFFF8'
+        backgroundColor: `#FFFFFF${opacity}`
       }
 
       const style = (

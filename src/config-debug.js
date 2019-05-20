@@ -25,8 +25,10 @@ export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed';
 if (!__DEV__) isOffline = false;
 export const isOnline = (!isOffline);
 export const autoHotelSearch                    = false;
-export const autoHotelSearchFocus               = true;
-export const autoHotelSearchPlace               = 'paris'
+export const autoHotelSearchFocus               = false;
+export const autoHotelSearchPlace               = 'london'
+export const autoHomeSearch                     = true;
+export const autoHomeSearchPlace                = 'uk1'
 
 
 // ---------------  function definitions  -----------------
