@@ -18,7 +18,7 @@ esac
 cfg="$1"
 product="$2"
 apk="app-release.apk"
-
+[ -z "$cfg" ] && cfg="release"
 
 # select config
 if [ -n "$cfg" ] && [ "$cfg" != "debug" ]; then
@@ -28,7 +28,7 @@ else
 fi
 
 # build
-echo "Bulding a $cfg version"
+echo "Buldinging a $cfg version"
 cd android
 [ "$cfg" == "debug" ] \
 	&& ./gradlew assembleDebug \
