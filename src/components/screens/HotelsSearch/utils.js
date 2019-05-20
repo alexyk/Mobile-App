@@ -463,8 +463,22 @@ export function mergeAllHotelData(filtered, socketMap, staticMap) {
     result.forEach((item,index) => {
       const socketData = (socketMap ? socketMap[item.id] : null);
       const staticData = (staticMap ? staticMap[item.id] : null);
-      let mergedData = parseFilterHotelData(item, socketData, staticData)
-      mergedData.no = index + 1;
+      
+      // Safe parse hotelData
+      let mergedData;
+      try {
+        mergedData = parseFilterHotelData(item, socketData, staticData)
+      } catch (parseError) {
+        console.warn(`[HotelsSearchScreen/utils::mergeAllHotelData] Parse error: ${parseError.message}`, {parseError,mergedData})
+        mergedData = null;
+      }
+
+      if (mergedData) {
+        mergedData.no = index + 1;
+      } else {
+        mergedData = item;
+      }
+
       return mergedData;
     })
   } catch (e) {log('error','error in merging', {e})}

@@ -151,7 +151,8 @@ export function renderResultsAsList() {
   const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
   const scale = (isList ? 1.0 : 0.0)
   const height = (showBothMapAndListHotelSearch && (isMap || isList) ? "50%" : null)
-  const transform = [{scaleX: scale},{scaleY: scale}]
+  const transform = [{scaleX: scale},{scaleY: scale}];
+  const backgroundColor = '#f0f1f3';
   // console.log(`#@# [HotelsSearchScreen] renderResultsAsList, display: ${this.state.displayMode}, ListScale: ${scale}, data: ${this.state.hotelsInfo}`)
 
   //const currentListData = (this.listViewRef?this.listViewRef.getRows():[]);
@@ -173,7 +174,7 @@ export function renderResultsAsList() {
       paginationFetchingView={this.renderPaginationFetchingView}
       paginationWaitingView={this.renderPaginationWaitingView}
       paginationAllLoadedView={this.renderPaginationAllLoadedView}
-      style={{ transform, height }}
+      style={{ transform, height, backgroundColor }}
     />
   );
 }
@@ -235,26 +236,31 @@ export function renderPaginationAllLoadedView() {
 export function renderResultsAsMap() {
   let result = null;
 
+  console.time('*** renderResultsAsMap')
+
   const data = this.state.hotelsInfoForMap;
   console.log('HOTELS-MAP',`Render map with ${data ? data.length : 'n/a'} hotels`, {data,display:this.state.displayMode});
   
   const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
   const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
   let height = (isMap ? '100%' : '0%')
+  let renderInAndroid = (!isMap && !showBothMapAndListHotelSearch ? false : true);
   if (showBothMapAndListHotelSearch && (isMap || isList)) {
     height = '50%';
   }
   let style;
   
   // TODO: Quick fix for Android - reach a better solution and remove it 
-  if (Platform.OS == 'android') {
-    style =  {height};
+  if (Platform.OS == 'android' && !renderInAndroid) {
+    // fix for T1V4/crash in Android release
+    // hide map behind list
+    style =  {position: 'absolute', width:"70%", height:"30%", left:"5%", top:"50%"};
   }
   if (Platform.OS == 'ios') {
     style = {height};
   }
 
-  if (hasValidCoordinatesForMap(this.state, true)) {
+  if (hasValidCoordinatesForMap(this.state, true) && (isList || isMap)) {
     result = (
       <MapModeHotelsSearch
         key={'resultsAsMap'}
@@ -281,6 +287,8 @@ export function renderResultsAsMap() {
   } else {
     // log('map', `NO VALID COORDS`)
   }
+
+  console.timeEnd('*** renderResultsAsMap')
 
   return result;
 }
@@ -489,7 +497,7 @@ export function renderPreloader() {
   const isFilteringServer = (isFiltering && isServerFilter);
   const isFilteringFromUI = (isFiltering && !isServerFilter);
 
-  const opacity = (isFilteringFromUI ? null : '55');
+  const opacity = null; //(isFilteringFromUI ? null : '55');
   const totalText = ''/*(
     this.state.totalHotels > 0
       ? `of maximum ${this.state.totalHotels}`
@@ -510,7 +518,7 @@ export function renderPreloader() {
   );
 
   return <LTLoader 
-    isLoading={ isLoading || isFiltering }
+    isLoading={ isLoading }
     message={message}
     opacity={opacity} 
   />

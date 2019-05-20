@@ -410,7 +410,7 @@ class HotelsSearchScreen extends Component {
   }
 
   onDataFromSocket(data) {
-    //log('socket-data',`Cache socket hotel data`, {data})
+    //log('socket-data',`onDataFromSocket ${data.body}`, {data})
     if (!this || !this.listViewRef || this.isUnmounted) {
       console.warn(`[HotelsSearchScreen::onDataFromSocket] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
       return;
@@ -447,15 +447,27 @@ class HotelsSearchScreen extends Component {
         const staticHotelData = this.hotelsStaticCacheMap[id];
         
         checkHotelData(hotelData,'socket-orig')
+
+        // Safe parse hotelData
         let initialCoord;
-        const {hotelData: parsedHotelData, initialCoord: coord} = parseSocketHotelData(hotelData,staticHotelData);
-        let {price} = parsedHotelData;
-        if (coord) {
-          initialCoord = coord;
+        let parsedResult;
+        try {
+          parsedResult = parseSocketHotelData(hotelData,staticHotelData);
+        } catch (parseError) {
+          console.warn(`[HotelsSearchScreen] Parse error: ${parseError.message}`, {parseError,parsedResult})
+          parsedResult = null;
         }
-        this.hotelsSocketCacheMap[id] = parsedHotelData;
-        checkHotelData(parsedHotelData,'socket-parsed')
-        
+        const {hotelData: parsedHotelData, initialCoord: coord} = (parsedResult ? parsedResult : {});
+        let {price} = parsedHotelData;
+        if (parsedResult) {
+          if (coord) {
+            initialCoord = coord;
+          }
+          this.hotelsSocketCacheMap[id] = parsedHotelData;
+          checkHotelData(parsedHotelData,'socket-parsed');
+        }
+        //log('socket-data',`onDataFromSocket ${id}, price-parced:${price} price-raw:${hotelData.price}`, {hotelData,parsedHotelData})
+
         if (!isNaN(price)) {
           // update socket prices loaded in footer
           this.validSocketPrices++;
