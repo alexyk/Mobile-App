@@ -39,6 +39,7 @@ export const DEFAULT_HOTEL_PNG = "listings/images/listing_thumbnail_152907786240
 export const showNumberOnHotelItem = (__DEV__ && false);
 export const showBothMapAndListHotelSearch = false;
 export const showSimpleFooterHotelSearch = true;
+export const isFontScalingEnabled = false;
 
 // CONFIGS 
 const LT_PROD       = "PRODUCTION";

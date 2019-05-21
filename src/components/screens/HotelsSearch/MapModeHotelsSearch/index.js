@@ -14,6 +14,7 @@ import { RoomsXMLCurrency } from '../../../../services/utilities/roomsXMLCurrenc
 import { CurrencyConverter } from '../../../../services/utilities/currencyConverter'
 import LocPrice from '../../../atoms/LocPrice'
 import {calculateCoordinatesGridPosition} from '../utils'
+import shortid from 'shortid'
 
 class MapModeHotelsSearch extends Component {
     _markers = [];
@@ -302,7 +303,7 @@ class MapModeHotelsSearch extends Component {
             <Marker
                 image={selectedIndex == index  ? blue_marker : red_marker}
                 style={selectedIndex == index ? {zIndex: 1} : null}
-                key={`marker_${index}`}
+                key={shortid.generate()}
                 ref={(ref) => this._markers[index] = {ref,data,index}}
                 coordinate={coordinates}
                 onPress={(e) => this.onPressMarker(e, index)}

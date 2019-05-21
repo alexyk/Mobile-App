@@ -6,6 +6,16 @@ import lodash from 'lodash';
 // ALL MUST BE FALSE!!!      (unless you know what you are doing)
 export const reactotronLoggingInReleaseForceEnabled  = false;
 export const forceOffline                            = false;
+
+  // error handling
+/*  !__DEV__ console.warn (short version - message only)
+    1 console.warn (message & data)
+    2 console.error
+    3 reactotron.error
+    else:
+           throw Error                                            */
+export const errorLevel                         = 1;
+
   // reactotron
 export const reactotronReduxLoggingEnabled      = false;
 export const logConverterErrorToReactrotron     = false;
@@ -20,8 +30,7 @@ export const consoleTimeCalculations            = true;    // enable/disable "co
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
 export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
-  // other
-// Offline mode
+  // offline mode
 // Enabled if: (__DEV__ == true) and (isOffline == true)
                                 let isOffline   = false;
                     if (forceOffline) isOffline = forceOffline;
@@ -32,6 +41,20 @@ export const autoHotelSearchFocus               = false;
 export const autoHotelSearchPlace               = 'london'
 export const autoHomeSearch                     = true;
 export const autoHomeSearchPlace                = 'uk1'
+  // TODO: Add the foolowing options
+/*
+    (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
+    (2) Logging level
+      (0) reactotron only
+      (1) combine with console.log
+      (2) only console.log
+      Note: Maybe combine with first or have (1) console logging options (2) reactotron logging options (3) combined options
+      Best - make logging defined, as per A) delete console.log/info etc. and B) replace with planned log(), logd() - no more than 3 versions
+      for example:
+        logd - only when debugging (disabled/cleaned in release)
+        log - for info/logging purposes
+      and a rule - only one line logs (for easy ato deletion in release -> select_config.rb)
+*/
 
 
 // ---------------  function definitions  -----------------
@@ -103,6 +126,46 @@ function configureReactotron() {
 
 
 // ---------------     exports     -----------------
+
+// TODO: Implement error handling - logging or throw
+export function processError(description, data) {
+  if (!__DEV__) {
+
+    console.warn(description);
+
+  } else {
+
+    switch (errorLevel) {
+      case 1:
+        console.warn(description, data);
+        break;
+
+      case 2:
+        console.error(description, data);
+        break;
+
+      case 3:
+        if (console.tron && console.tron.error) {
+          //TODO: Try this - not tested!!!
+          console.tron.error(description, data);
+        }
+        break;
+
+      default:      
+        console.error(description, data);
+        throw new Error(description);
+    }
+
+  }
+
+}
+
+export function logd(tag, description, data, isImportant = false) {
+  if (__DEV__) {
+    log('dev-debug', `[${tag}] `+description, data, isImportant);
+  }
+}
+
 
 /**
  * Logs using Reactotron.display

@@ -40,7 +40,7 @@ import {
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
   HOTELS_MINIMUM_RESULTS
 } from "../../../../config";
-import { isOnline, log } from "../../../../config-debug";
+import { isOnline, log, processError } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -454,8 +454,8 @@ class HotelsSearchScreen extends Component {
         try {
           parsedResult = parseSocketHotelData(hotelData,staticHotelData);
         } catch (parseError) {
-          console.warn(`[HotelsSearchScreen] Parse error: ${parseError.message}`, {parseError,parsedResult})
           parsedResult = null;
+          processError(`[HotelsSearchScreen] Parse error: ${parseError.message}`,{error:parseError,parsedResult});
         }
         const {hotelData: parsedHotelData, initialCoord: coord} = (parsedResult ? parsedResult : {});
         let {price} = parsedHotelData;
@@ -498,9 +498,8 @@ class HotelsSearchScreen extends Component {
           //console.log('skipping hotel data from socket without price', hotelData)
         }
       }
-    } catch (e) {
-      throw e
-      console.error(`ERROR in HotelsSearchScreen::onDataFromSocket: ${e.message}`, {e});
+    } catch (error) {
+      processError(`[HotelsSearchScreen] Error while processing in onDataFromSocket: ${error.message}`, {error})
     }
 
     console.timeEnd('*** onDataFromSocket')
@@ -921,7 +920,7 @@ class HotelsSearchScreen extends Component {
         //console.log("### onFetch Error", err);
         //console.log("onFetch--=- error  ", err);
         this.listAbortFetch(); // manually stop the refresh or pagination if it encounters network error
-        console.log('Error in HotelsSearchScreen::onFetchNewListViewData', err)
+        console.warn('Error in HotelsSearchScreen::onFetchNewListViewData', err)
       }
     }
   }
