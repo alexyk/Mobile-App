@@ -2,7 +2,7 @@ import moment from "moment";
 import lodash from "lodash";
 import { validateObject, isObject, isNumber, isString, isArray } from '../utils'
 import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config";
-import { log, checkHotelsDataWithTemplates } from "../../../config-debug";
+import { log, checkHotelsDataWithTemplates, processError } from "../../../config-debug";
 
 export const DISPLAY_MODE_NONE = "mode_none";
 export const DISPLAY_MODE_SEARCHING = "mode_searching";
