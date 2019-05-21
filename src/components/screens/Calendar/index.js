@@ -7,7 +7,7 @@ import {
     TouchableHighlight
 } from 'react-native';
 
-import Moment from 'moment';
+import moment from 'moment';
 import styles from './styles';
 import MonthList from '../../organisms/MonthList';
 import { I18N_MAP } from './i18n';
@@ -33,10 +33,15 @@ export default class Calendar extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-        };
-        this.today = Moment();
+
+        this.state = {};
+        this.today = moment();
         this.year = this.today.year();
+        const { startDate, endDate } = this.props.navigation.state.params;
+        this.state = { startDate, endDate };
+
+        this.getDateRange();
+
         this.i18n = this.i18n.bind(this);
         this.getDateRange = this.getDateRange.bind(this);
         this.onChoose = this.onChoose.bind(this);
@@ -44,20 +49,17 @@ export default class Calendar extends Component {
         this.cancel = this.cancel.bind(this);
         this.clear = this.clear.bind(this);
         this.confirm = this.confirm.bind(this);
-        this.getDateRange();
     }
+
+    
     componentDidMount() {
         this.resetCalendar();
     }
 
     onChoose(day) {
-        const {
-            startDate,
-            endDate
-        } = this.state;
-        //console.log("onChoose", startDate, endDate);
+        const { startDate, endDate } = this.state;
+
         if ((!startDate && !endDate) || day < startDate || (startDate && endDate)) {
-            //console.log("startDate", day);
             this.setState({
                 startDate: day,
                 endDate: null,
@@ -67,7 +69,6 @@ export default class Calendar extends Component {
                 endWeekdayText: ''
             });
         } else if (startDate && !endDate && day > startDate) {
-            //console.log("endDate", day);
             this.setState({
                 endDate: day,
                 endDateText: this.i18n(day, 'date'),
@@ -77,19 +78,16 @@ export default class Calendar extends Component {
     }
 
     getDateRange() {
-        const { 
-            maxDate,
-            minDate,
-            format_input 
-        } = this.props.navigation.state.params;
+        const { maxDate, minDate, format_input } = this.props.navigation.state.params;
 
-        let max = Moment(maxDate, format_input);
-        let min = Moment(minDate, format_input);
+        let max = moment(maxDate, format_input);
+        let min = moment(minDate, format_input);
         const maxValid = max.isValid();
         const minValid = min.isValid();
+
         if (!maxValid && !minValid) {
-            max = Moment().add(12, 'months');
-            min = Moment();
+            max = moment().add(12, 'months');
+            min = moment();
         }
         if (!maxValid && minValid) {
             max = min.add(12, 'months');
@@ -97,23 +95,16 @@ export default class Calendar extends Component {
         if (maxValid && !minValid) {
             min = max.subtract(12, 'months');
         }
-        if (min.isSameOrAfter(max)) return {};
+        //if (min.isSameOrAfter(max)) return;
+
         this.minDate = min;
         this.maxDate = max;
-        return {};
     }
 
     resetCalendar() {
-        const { 
-            startDate,
-            endDate,
-            format_input
-        } = this.props.navigation.state.params;
-
-        //console.log("resetCalendar --", startDate, endDate, format_input);
-
-        const start = Moment(startDate, format_input);
-        const end = Moment(endDate, format_input);
+        const { startDate, endDate, format_input } = this.props.navigation.state.params;
+        const start = moment(startDate, format_input);
+        const end = moment(endDate, format_input);
         const isStartValid = start.isValid() && start >= this.minDate && start <= this.maxDate;
         const isEndValid = end.isValid() && end >= this.minDate && end <= this.maxDate;
         this.setState({
@@ -133,7 +124,14 @@ export default class Calendar extends Component {
             return (customI18n[type] || {})[data] || I18N_MAP[i18n][type][data];
         }
         if (type === 'date') {
-            return data.format(customI18n[type] || I18N_MAP[i18n][type]);
+            let result = data.format(customI18n[type] || I18N_MAP[i18n][type]);
+            const year = data.year();
+            // if date is next year
+            if (this.year < year) {
+                result += `, ${year}`
+            }
+
+            return result;
         }
         return {};
     }
@@ -184,6 +182,7 @@ export default class Calendar extends Component {
             borderColor,
             primaryColor
         } = this.props.color;
+        const { format_input } = this.props.navigation.state.params;
 
         const color = {
             mainColor, subColor, borderColor, primaryColor
@@ -242,7 +241,8 @@ export default class Calendar extends Component {
                         startDate={this.state.startDate}
                         endDate={this.state.endDate}
                         onChoose={this.onChoose}
-                        i18n={this.props.i18n}
+                        format_input={format_input}
+                        i18n={'en'}
                         color={color}
                     />
                 </View>

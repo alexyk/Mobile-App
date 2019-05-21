@@ -1,21 +1,22 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import {
-    ListView,
-    Dimensions
-} from 'react-native';
-import Moment from 'moment';
+import { FlatList, View, Dimensions } from 'react-native';
+import moment from 'moment';
 import Month from '../../molecules/Month';
+import shortid from 'shortid'
+import { log, logd } from '../../../config-debug'
 
 const { width } = Dimensions.get('window');
-export default class MonthList extends Component {
+export default class MonthList extends PureComponent {
     static propTypes = {
-        minDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Moment)]),
-        startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Moment)]),
-        endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Moment)])
+        format_input: PropTypes.string,
+        minDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
+        startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
+        endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)])
     }
 
     static defaultProps = {
+        format_input: '',
         minDate: '',
         startDate: '',
         endDate: ''
@@ -23,38 +24,20 @@ export default class MonthList extends Component {
 
     constructor(props) {
         super(props);
-        this.ds = new ListView.DataSource({
-            rowHasChanged: (r1, r2) => r2.shouldUpdate
-        });
+
+        this.state = {data: this.getMonthList()};
         this.monthList = [];
-        this.state = {
-            dataSource: this.ds.cloneWithRows(this.getMonthList())
-        };
-        this.renderMonth = this.renderMonth.bind(this);
+
+        this._renderMonth = this._renderMonth.bind(this);
         this.shouldUpdate = this.shouldUpdate.bind(this);
         this.checkRange = this.checkRange.bind(this);
         this.getWeekNums = this.getWeekNums.bind(this);
-        this.scrollToSelecetdMonth = this.scrollToSelecetdMonth.bind(this);
+        this.scrollToSelectedMonth = this.scrollToSelectedMonth.bind(this);
     }
 
     componentDidMount() {
         if (this.props.startDate) {
-            this.scrollToSelecetdMonth();
-        }
-    }
-
-    componentWillReceiveProps(nextProps) {
-        const isDateUpdated = ['startDate', 'endDate', 'minDate', 'maxDate'].reduce((prev, next) => {
-            if (prev || nextProps[next] !== this.props[next]) {
-                return true;
-            }
-            return prev;
-        }, false);
-        if (isDateUpdated) {
-            this.setState({
-                dataSource:
-          this.state.dataSource.cloneWithRows(this.getMonthList(nextProps))
-            });
+            // this.scrollToSelectedMonth();
         }
     }
 
@@ -65,7 +48,7 @@ export default class MonthList extends Component {
         if (!maxDate || !minDate) return monthList;
         while (maxDate > minDate || (
             maxDate.year() === minDate.year() &&
-      maxDate.month() === minDate.month()
+            maxDate.month() === minDate.month()
         )) {
             const month = {
                 date: minDate.clone()
@@ -74,10 +57,12 @@ export default class MonthList extends Component {
             monthList.push(month);
             minDate.add(1, 'month');
         }
+
         return monthList;
     }
+
     getWeekNums(start, end) {
-        const clonedMoment = Moment(start);
+        const clonedMoment = moment(start, this.props.format_input);
         let date;
         let day;
         let num;
@@ -119,42 +104,53 @@ export default class MonthList extends Component {
         return true;
     }
 
-    scrollToSelecetdMonth() {
-        const {
-            startDate,
-            minDate
-        } = this.props;
+    scrollToSelectedMonth() {
+        const { startDate, minDate } = this.props;
         const monthOffset = ((12 * (startDate.year() - minDate.year())) + startDate.month()) - minDate.month();
         const weekOffset = this.getWeekNums(minDate, startDate);
+
         setTimeout(() => {
-            this.list.scrollTo({
-                x: 0,
-                y: (monthOffset * (24 + 25)) + (monthOffset ? weekOffset * Math.ceil((width / 7) + 10) : 0),
+            this.list.scrollToOffset({
+                offset: (monthOffset * (24 + 25)) + (monthOffset ? weekOffset * Math.ceil((width / 7) + 10) : 0),
                 animated: true
             });
         }, 400);
     }
 
-    renderMonth(month) {
+
+    _renderMonth({item, index}) {
+        let props = { ...this.props };
+        const {startDate, endDate} = props;
+        
+        if (startDate == '') {
+            props.startDate = undefined;
+        }
+        if (endDate == '') {
+            props.endDate = undefined;
+        }
+        
+        const month = (item.date || {});
+        
         return (
             <Month
-                month={month.date || {}}
-                {...this.props}
+                month={month}
+                {...props}
             />
         );
     }
 
     render() {
-        return (
-            <ListView
+        const result = (
+            <FlatList
                 ref={(list) => { this.list = list; }}
                 style={{flex: 1}}
-                dataSource={this.state.dataSource}
-                renderRow={this.renderMonth}
-                pageSize={12}
-                initialListSize={12}
-                showsVerticalScrollIndicator={false}
+                data={this.state.data}
+                extractData={this.state.data}
+                keyExtractor={item => shortid.generate()}
+                renderItem={this._renderMonth}
             />
         );
+
+        return result;
     }
 }
