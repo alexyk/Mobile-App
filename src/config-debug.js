@@ -41,7 +41,7 @@ export const autoHotelSearchFocus               = false;
 export const autoHotelSearchPlace               = 'london'
 export const autoHomeSearch                     = true;
 export const autoHomeSearchPlace                = 'uk1'
-  // TODO: Add the foolowing options
+  // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
     (2) Logging level
