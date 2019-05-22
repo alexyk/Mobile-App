@@ -33,6 +33,7 @@ const TEXT = {
     SEARCH_HOTEL_RESULTS_FILTERED: "%1 matches",
     SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS: "Loading all available matches",
     SEARCH_HOTEL_RESULTS_APPLYING_FILTER: "Applying filters",
+    SEARCH_HOTEL_RESULTS_LOADING: "%1 matches and loading...",
     SEARCH_HOTEL_FILTER_NA: "Filtering is disabled while loading in progress",
     SEARCH_HOTEL_FILTER_ERROR: "Filter error",
     SEARCH_HOTEL_FILTERED_MSG: 'Filtering out hotels that are not available for your dates',
