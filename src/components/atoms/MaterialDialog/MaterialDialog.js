@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import colors from './colors';
 import { material } from 'react-native-typography';
+import { getFontSize } from '../../../utils/designUtils';
 
 const { height, width } = Dimensions.get('window');
 
@@ -71,7 +72,7 @@ const MaterialDialog = ({
               <View>
                 {title != null ? (
                   <View style={scrolled ? styles.titleContainerScrolled : styles.titleContainer}>
-                    <Text style={[material.title, { color: titleColor, fontSize:20 }]}>{title}</Text>
+                    <Text style={[material.title, { color: titleColor, fontSize: getFontSize(20) }]}>{title}</Text>
                   </View>
                 ) : null}
                 <View

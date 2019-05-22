@@ -2,6 +2,7 @@ import {
     StyleSheet,
     Dimensions
 } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const { scale, width } = Dimensions.get('window');
 let paddingH = 30;
@@ -39,12 +40,12 @@ export default StyleSheet.create({
     },
     dayText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         textAlign: 'center'
     },
     dayTextDisabled: {
         fontFamily: 'FuturaStd-Medium',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         color: '#898c8d',
         textAlign: 'center'
     }

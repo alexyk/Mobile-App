@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
 
@@ -54,13 +55,13 @@ const styles = StyleSheet.create({
     etcName: {
         fontFamily: 'FuturaStd-Light',
         color: '#000000',
-        fontSize: 15,
+        fontSize: getFontSize(15),
     },
 
     etcButton: {
         fontFamily: 'FuturaStd-Light',
         color: '#d97b61',
-        fontSize: 15,
+        fontSize: getFontSize(15),
     },
 
     subView: {
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
 
     price: {
         color: 'black',
-        fontSize: 17
+        fontSize: getFontSize(17)
     },
     
     fontFuturaStd: {
@@ -109,13 +110,13 @@ const styles = StyleSheet.create({
 
     period1: {
         marginTop: 5,
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#000',
     },
 
     period2: {
         marginTop: 5,
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#000',
     },
 
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
 
     confirmPayText: {
         color: 'white',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontFamily: 'FuturaStd-Light'
     },
 });

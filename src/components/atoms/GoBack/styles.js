@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
     },
     iconText: {
         color: '#fff',
-        fontSize: 8
+        fontSize: getFontSize(8)
     }
 });
 

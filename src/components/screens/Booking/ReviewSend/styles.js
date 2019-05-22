@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -29,7 +30,7 @@ const styles = StyleSheet.create({
     textarea: {
         textAlignVertical: 'top',  // hack android
         height: 190,
-        fontSize: 15,
+        fontSize: getFontSize(15),
         fontFamily: 'FuturaStd-Light',
         color: '#000',
     },

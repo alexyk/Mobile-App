@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
     walletAddres: {
         color: '#fff',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 11.5,
+        fontSize: getFontSize(11.5),
         margin: 20,
         marginTop: 10,
         marginBottom: 30
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
 
     titleText: {
         color: '#000',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         fontFamily: 'FuturaStd-Light',
         marginTop: 5,
         marginLeft: 20
@@ -74,13 +75,13 @@ const styles = StyleSheet.create({
     },
 
     balanceLabel: {
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#fff',
         marginLeft: 20,
         fontFamily: 'FuturaStd-Light'
     },
     balanceText: {
-        fontSize: 20,
+        fontSize: getFontSize(20),
         color: '#fff',
         marginLeft: 20,
         fontFamily: 'FuturaStd-Light'
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
     },
     addMorePlus: {
         color: '#fff',
-        fontSize: 16
+        fontSize: getFontSize(16)
     },
     copyBox: {
         backgroundColor: '#fff',
@@ -114,7 +115,7 @@ const styles = StyleSheet.create({
     },
     copyText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         color: '#000'
     },
     navItem: {
@@ -135,17 +136,17 @@ const styles = StyleSheet.create({
     },
     navItemText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 21,
+        fontSize: getFontSize(21),
         color: '#000'
     },
     navText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 15
+        fontSize: getFontSize(15)
     },
     navCurrency: {
         color: '#da7b60',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18
+        fontSize: getFontSize(18)
     },
     switchCheckView: {
         position: 'absolute',
@@ -160,11 +161,11 @@ const styles = StyleSheet.create({
     },
     switchCheckText: {
         color: '#FFF',
-        fontSize: 10.5
+        fontSize: getFontSize(10.5)
     },
     unSwitchCheckText: {
         color: '#cccccc',
-        fontSize: 10.5
+        fontSize: getFontSize(10.5)
     }
 });
 export default styles;

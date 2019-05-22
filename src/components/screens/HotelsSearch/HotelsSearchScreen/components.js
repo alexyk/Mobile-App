@@ -38,6 +38,7 @@ import { commonText } from "../../../../common.styles"
 import styles from "./styles";
 
 import { hasValidCoordinatesForMap } from '../utils'
+import { getFontSize } from '../../../../utils/designUtils';
 
 const { width, height } = Dimensions.get("window");
 
@@ -576,7 +577,7 @@ export function renderDebugMap() {
   return (
     <TouchableOpacity onPress={onPress}>
       <View style={{left:200, bottom:5, backgroundColor: '#777A', width: 100, borderRadius: 5, padding: 2}}>
-        <Text style={{textAlign: 'center', fontSize:11}}>{this.state.optimiseMapMarkers ? "OPTIMISED" : "ALL MARKERS"}</Text>
+        <Text style={{textAlign: 'center', fontSize: getFontSize(11)}}>{this.state.optimiseMapMarkers ? "OPTIMISED" : "ALL MARKERS"}</Text>
       </View>
     </TouchableOpacity>
   )
@@ -600,7 +601,7 @@ export function renderContentMessage(text) {
         style={{
           ...commonText,
           textAlign: "center",
-          fontSize: 20
+          fontSize: getFontSize(20)
         }}
       >
         {text}

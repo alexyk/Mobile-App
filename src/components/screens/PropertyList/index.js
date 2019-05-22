@@ -173,7 +173,7 @@ class PropertyList extends React.Component {
                     }
                 />
                 {/* 
-                <Text style={{fontSize: 36}}>{this.state.status}</Text> */}
+                <Text style={{fontSize: getFontSize(36)}}>{this.state.status}</Text> */}
             </View>
         );
     }

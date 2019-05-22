@@ -2,6 +2,7 @@ import {
     StyleSheet,
     Dimensions
 } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const { scale, width } = Dimensions.get('window');
 let iconSize = 30;
@@ -58,7 +59,7 @@ export default StyleSheet.create({
     },
     clearText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontWeight: '400'
     },
     startText: {
@@ -110,7 +111,7 @@ export default StyleSheet.create({
     },
     confirmText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         color: '#ffffff',
         textAlign: 'center'
     },

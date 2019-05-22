@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 export default StyleSheet.create({
     leftIconView: {
@@ -10,7 +11,7 @@ export default StyleSheet.create({
     },
     leftIconText: {
         color: '#5a5a5c',
-        fontSize: 16
+        fontSize: getFontSize(16)
     },
     container: {
         display: 'flex',
@@ -24,7 +25,7 @@ export default StyleSheet.create({
         marginRight: 20,
         marginTop:0,
         color: '#000',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         fontFamily: 'FuturaStd-Light',
         textAlignVertical: "center"
     },
@@ -34,7 +35,7 @@ export default StyleSheet.create({
         marginRight: 20,
         marginTop:0,
         color: '#d9d9d9',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         fontFamily: 'FuturaStd-Light',
         textAlignVertical: "center"
     }

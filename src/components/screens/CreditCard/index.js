@@ -12,6 +12,7 @@ import SmartInputDate from '../../atoms/SmartInput/date';
 import Switch from 'react-native-customisable-switch';
 import { TextInputMask } from 'react-native-masked-text';
 import { Header } from 'react-navigation';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -34,12 +35,12 @@ const styles = StyleSheet.create({
     },
     titleText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontFamily: 'FuturaStd-Light'
     },
     maintitleText: {
         color: '#ffffff',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         fontFamily: 'Futura',
     },
 
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
     },
     finePrintText: {
         color: '#fff',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         fontFamily: 'FuturaStd-Light',
         maxWidth: 280
     },
@@ -79,7 +80,7 @@ const styles = StyleSheet.create({
     },
     switchCheckText: {
         color: '#DA7B61',
-        fontSize: 10.5
+        fontSize: getFontSize(10.5)
     },
     nextButtonView: {
         display: 'flex',
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 17
+        fontSize: getFontSize(17)
     },
     lowOpacity: {
         opacity: 0.3

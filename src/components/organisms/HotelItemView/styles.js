@@ -1,5 +1,6 @@
 import { StyleSheet, Dimensions, Platform } from 'react-native';
 import { commonText } from '../../../common.styles'
+import { getFontSize } from '../../../utils/designUtils';
 
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round(dimensions.width * 0.25);
@@ -41,7 +42,7 @@ const styles = StyleSheet.create({
     },
     indexText: {
         ...commonText,
-        fontSize: 14,
+        fontSize: getFontSize(14),
         color: "#FFFFFF",
     },
     favoriteIcon: {
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
         ...commonText,
         marginTop: 8,
         marginLeft: 8,
-        fontSize: 18,
+        fontSize: getFontSize(18),
         color: 'black',
         fontWeight: '100',
     },
@@ -66,17 +67,17 @@ const styles = StyleSheet.create({
     },
     placeReviewText: {
         ...commonText,
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: '#aeaeae'
     },
     placeReviewNumber: {
         ...commonText,
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: '#aeaeae'
     },
     totalReviews: {
         ...commonText,
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: '#aeaeae'
     },
     ratingIconsWrapper: {
@@ -93,19 +94,19 @@ const styles = StyleSheet.create({
     cost: {
         ...commonText,
         color: 'black',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         textAlign: 'right',
         width: "100%"
     },
     costLoc: {
         ...commonText,
         color: 'black',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         marginLeft: 5
     },
     perNight: {
         ...commonText,
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: 'black',
     },
     star: {

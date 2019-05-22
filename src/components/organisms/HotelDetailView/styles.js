@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -15,7 +16,7 @@ const styles = StyleSheet.create({
 
     topTitleText:{
         fontFamily: 'futura',
-        fontSize:19,
+        fontSize: getFontSize(19),
         marginTop:5,
         marginLeft:10,
         marginRight:10,
@@ -28,7 +29,7 @@ const styles = StyleSheet.create({
 
     rateText:{
         fontFamily: 'FuturaStd-Light',
-        fontSize:9,
+        fontSize:getFontSize(9),
         paddingLeft:10,
         paddingRight:10,
         color:'#898c8d',
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
 
     addressText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:10,
+        fontSize: getFontSize(10),
         paddingTop:3,
         paddingBottom:2,
         paddingLeft:10,
@@ -61,13 +62,13 @@ const styles = StyleSheet.create({
 
     normalText:{
         fontFamily: 'FuturaStd-Light',
-        fontSize:12,
+        fontSize: getFontSize(12),
         lineHeight: 20,
     },
 
     smallTitle:{
       fontFamily: 'futura',
-      fontSize:12,
+      fontSize: getFontSize(12),
       marginTop:5,
       lineHeight: 20,
       color:'#000000'
@@ -80,13 +81,13 @@ const styles = StyleSheet.create({
 
     spaceText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:10,
+        fontSize: getFontSize(10),
         lineHeight: 20,
     },
 
     readmore: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         marginTop: -2,
     }
 });

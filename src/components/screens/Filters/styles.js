@@ -1,4 +1,5 @@
 import {StyleSheet, Dimensions} from 'react-native'
+import { getFontSize } from '../../../utils/designUtils';
 
 export default styles = StyleSheet.create({
     container: {
@@ -29,7 +30,7 @@ export default styles = StyleSheet.create({
     },
     doneButtonText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontFamily: 'FuturaStd-Light'
     },
     header: {
@@ -78,7 +79,7 @@ export default styles = StyleSheet.create({
         padding: 15
     },
     starRatingText: {
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontWeight: 'bold'
     },
     starView: {
@@ -95,7 +96,7 @@ export default styles = StyleSheet.create({
     },
     ratingNumber: {
         textAlign: 'center',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         color: '#999999'
     },
     star: {
@@ -119,7 +120,7 @@ export default styles = StyleSheet.create({
         width : 0
     },
     pricingText: {
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontFamily: 'FuturaStd-Medium',
     },
     set: {
@@ -143,7 +144,7 @@ export default styles = StyleSheet.create({
     },
     typeText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18
+        fontSize: getFontSize(18)
     },
     minusButton: {
         height: 34,
@@ -156,7 +157,7 @@ export default styles = StyleSheet.create({
     },
     minusText: {
         color: '#cc8068',
-        fontSize: 30,
+        fontSize: getFontSize(30),
         marginTop: -5
     },
     plusButton: {
@@ -171,17 +172,17 @@ export default styles = StyleSheet.create({
     },
     plusText: {
         color: '#cc8068',
-        fontSize: 20,
+        fontSize: getFontSize(20),
         marginTop: -5
     },
     countText: {
         marginHorizontal: 18,
         fontFamily: 'FuturaStd-Light',
-        fontSize: 20,
+        fontSize: getFontSize(20),
         marginTop: 5
     },
     typeSubText: {
-        fontSize: 11,
+        fontSize: getFontSize(11),
         fontFamily: 'FuturaStd-Light',
         color: '#6e6e6e'
     },

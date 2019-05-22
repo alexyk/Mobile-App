@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 const dimensionWindows = Dimensions.get('window');
 const { width } = dimensionWindows;
 
@@ -48,7 +49,7 @@ const styles = StyleSheet.create({
 
     leftIconText: {
         color: '#5a5a5c',
-        fontSize: 16
+        fontSize: getFontSize(16)
     },
     
     pickerWrapHomes:{
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
 
     icon: {
         color: '#fff',
-        fontSize: 24
+        fontSize: getFontSize(24)
     },
 
     map: {
@@ -110,14 +111,14 @@ const styles = StyleSheet.create({
 
     location: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         color: '#000000',
         marginTop: 5,
     },
 
     description: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         lineHeight:15,
         fontWeight: 'bold',
         color: '#000000',
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
 
     ratingsMap: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         lineHeight:15,
         color: 'grey',
     }

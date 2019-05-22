@@ -18,6 +18,7 @@ import { validateEmail, validateName } from '../../../../utils/validation';
 import SmartInput from '../../../atoms/SmartInput';
 import WhiteBackButton from '../../../atoms/WhiteBackButton';
 import requester from '../../../../initDependencies';
+import { getFontSize } from '../../../../utils/designUtils';
 
 class CreateAccount extends Component {
 
@@ -330,7 +331,7 @@ class CreateAccount extends Component {
 const pickerSelectStyles = {
     inputIOS: {
         height: 50,
-        fontSize: 17,
+        fontSize: getFontSize(17),
         paddingLeft: 20,
         paddingTop: 13,
         paddingRight: 10,

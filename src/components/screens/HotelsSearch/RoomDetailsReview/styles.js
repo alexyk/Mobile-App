@@ -17,7 +17,7 @@ const styles = StyleSheet.create({
         marginBottom: 32
     },
     steps: {
-        fontSize: 10,
+        fontSize: getFontSize(10),
         fontFamily: 'FuturaStd-Medium',
         color: '#a2c5bf'
     },
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
         color: 'black',
         fontFamily: 'FuturaStd-Medium',
         marginTop: 5,
-        fontSize: 20,
+        fontSize: getFontSize(20),
         marginBottom: 30
     },
     hotelInfoContainer: {
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
     },
     confirmPayText: {
         color: 'white',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontFamily: 'FuturaStd-Light'
     },
     pricePeriodWrapper: {
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     },
     price: {
         color: 'black',
-        fontSize: 17
+        fontSize: getFontSize(17)
     },
     listItem: {
         flex: 1,
@@ -116,27 +116,27 @@ const styles = StyleSheet.create({
     },
     listItemText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16,
+        fontSize: getFontSize(16),
         color: '#000'
     },
     hotelName: {
         color: 'black',
         fontFamily: 'FuturaStd-Medium',
-        fontSize: 16,
+        fontSize: getFontSize(16),
     },
     hotelPlace: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#54585b',
     },
     period1: {
         marginTop: 5,
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#000',
     },
     period2: {
         marginTop: 5,
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#000',
     },
     bold400: {
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
         fontFamily: 'FuturaStd-Medium'
     },
     rhs: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         fontFamily: 'FuturaStd-Light',
         color: '#d97b61'
     },
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     },
     walletPasswordLabel: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16
+        fontSize: getFontSize(16)
     },
     closeButtonView: {
         flex: 1,
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     walletPasswordInput: {
         backgroundColor: '#fff',
         padding: 15,
-        fontSize: 16,
+        fontSize: getFontSize(16),
         marginTop: 15,
         borderWidth: 1,
         borderColor: '#b6b6b6',
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     confirmButtonText: {
         fontFamily: 'FuturaStd-Light',
         color: '#fff',
-        fontSize: 15
+        fontSize: getFontSize(15)
     }
 });
 

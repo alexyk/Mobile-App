@@ -3,6 +3,7 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { TextInputMask } from 'react-native-masked-text'
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import PropTypes from 'prop-types';
+import { getFontSize } from '../../../utils/designUtils';
 
 // TODO: move styles to separate file
 const styles = StyleSheet.create({
@@ -20,7 +21,7 @@ const styles = StyleSheet.create({
     },
     rightIconText: {
         color: '#DA7B61',
-        fontSize: 11
+        fontSize: getFontSize(11)
     },
     container: {
         display: 'flex',
@@ -36,7 +37,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         color: '#fff',
         marginBottom: -4,
-        fontSize: 17,
+        fontSize: getFontSize(17),
         fontFamily: 'FuturaStd-Light'
     }
 });

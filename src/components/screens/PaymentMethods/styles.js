@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 const dimensionWindows = Dimensions.get('window');
 
 const styles = StyleSheet.create({
@@ -26,21 +27,21 @@ const styles = StyleSheet.create({
     },
     titleText: {
         color: '#000',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         fontFamily: 'FuturaStd-Light',
         marginLeft: 20,
         marginTop: 5,
     },
     navItemText: {
         fontFamily: 'Futura',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         color: '#000',
         marginLeft: 15,
         marginTop: 35,
     },
     navText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         marginLeft: 15,
         marginTop: 5,
     },
@@ -52,7 +53,7 @@ const styles = StyleSheet.create({
         borderColor: '#cc8068'
     },
     subtitleText: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         fontFamily: 'FuturaStd-Light'
     },
     tilesView: {
@@ -96,7 +97,7 @@ const styles = StyleSheet.create({
     },
     btn_text: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16,
+        fontSize: getFontSize(16),
         color: '#1f2427',
         paddingTop: 10
     },
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     },
     btn_subtext: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: '#d97b61',
         paddingBottom: 10
     },
@@ -135,14 +136,14 @@ const styles = StyleSheet.create({
     searchText: {
 
         fontFamily: 'FuturaStd-Light',
-        fontSize: 20,
+        fontSize: getFontSize(20),
         color: '#fff'
     },
     discoverView: {
         padding: 18
     },
     discoverText: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         marginBottom: 15,
         fontWeight: '500'
     },
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
         padding: 18
     },
     topDestinationsText: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         marginBottom: 15,
         fontWeight: '500'
     },
@@ -170,7 +171,7 @@ const styles = StyleSheet.create({
         paddingBottom: 18
     },
     popularHotelsText: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         marginBottom: 15,
         fontWeight: '500'
     },
@@ -202,13 +203,13 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     locationText: {
-        fontSize: 9,
+        fontSize: getFontSize(9),
         fontFamily: 'FuturaStd-Light',
         marginTop: 2
     },
     placeName: {
         marginTop: 8,
-        fontSize: 15,
+        fontSize: getFontSize(15),
         color: 'black',
         fontFamily: 'FuturaStd-Light'
     },
@@ -217,15 +218,15 @@ const styles = StyleSheet.create({
         marginTop: 2
     },
     placeReviewText: {
-        fontSize: 8,
+        fontSize: getFontSize(8),
         color: '#aeaeae'
     },
     placeReviewNumber: {
-        fontSize: 8,
+        fontSize: getFontSize(8),
         color: '#aeaeae'
     },
     totalReviews: {
-        fontSize: 8,
+        fontSize: getFontSize(8),
         color: '#aeaeae'
     },
     ratingIconsWrapper: {
@@ -241,11 +242,11 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
     cost: {
-        fontSize: 12,
+        fontSize: getFontSize(12),
         fontFamily: 'FuturaStd-Light'
     },
     perNight: {
-        fontSize: 10,
+        fontSize: getFontSize(10),
         fontFamily: 'FuturaStd-Light',
         marginTop: 2
     },
@@ -266,20 +267,20 @@ const styles = StyleSheet.create({
     showAllText: {
         color: '#fff',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18
+        fontSize: getFontSize(18)
     },
     listHotelView: {
         padding: 18,
         alignItems: 'center'
     },
     hostHeader: {
-        fontSize: 12,
+        fontSize: getFontSize(12),
         fontFamily: 'FuturaStd-Light',
     },
     hostDescription: {
         fontFamily: 'FuturaStd-Light',
         textAlign: 'center',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         marginHorizontal: 30
     },
     getStartedButton: {
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     searchButtonText: {
         color: '#fff',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         padding: 15
     },
     map: {
@@ -355,21 +356,21 @@ const styles = StyleSheet.create({
     },
     location: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         color: '#000000',
         marginTop: 5,
     },
 
     description: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         lineHeight:15,
         fontWeight: 'bold',
         color: '#000000',
     },
     ratingsMap: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         lineHeight:15,
         color: 'grey',
     }

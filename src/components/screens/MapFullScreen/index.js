@@ -8,6 +8,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import MapView from 'react-native-maps';
 import styles from './styles';
+import { getFontSize } from '../../../utils/designUtils';
 
 class MapFullScreen extends Component {
     static propTypes = {
@@ -50,7 +51,7 @@ class MapFullScreen extends Component {
                         marginLeft: 12, height: 28, flexDirection: 'row', alignItems: 'center'
                     }}
                     >
-                        <Text style={{ fontFamily: 'FuturaStd-Medium', fontSize: 14 }}>Location</Text>
+                        <Text style={{ fontFamily: 'FuturaStd-Medium', fontSize: getFontSize(14) }}>Location</Text>
                     </View>
                 </View>
                 <View style={{ flex: 0.75 }}>
@@ -83,8 +84,8 @@ class MapFullScreen extends Component {
                     flex: 0.15, flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center', paddingLeft: 18, paddingBottom: 10
                 }}
                 >
-                    <Text style={{ fontFamily: 'FuturaStd-Medium', fontSize: 16 }}>{params.name}</Text>
-                    <Text style={{ fontFamily: 'FuturaStd-Light', fontSize: 14 }}>{params.address}</Text>
+                    <Text style={{ fontFamily: 'FuturaStd-Medium', fontSize: getFontSize(16) }}>{params.name}</Text>
+                    <Text style={{ fontFamily: 'FuturaStd-Light', fontSize: getFontSize(14) }}>{params.address}</Text>
                 </View>
             </View>
         );

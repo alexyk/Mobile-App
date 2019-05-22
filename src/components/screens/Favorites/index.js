@@ -6,6 +6,7 @@ import Icon from 'react-native-fontawesome';
 import Image from 'react-native-remote-svg';
 
 import styles from './styles';
+import { getFontSize } from '../../../utils/designUtils';
 
 class Favorites extends Component {
     state = {
@@ -83,7 +84,7 @@ class Favorites extends Component {
                                     source={require('../../../assets/temple/overview.jpg')}
                                 />
                                 <View style={{flexDirection:'column', alignItems: 'flex-start', width:'90%'}}>
-                                    <Text style={styles.subtitle}>Summer <FontAwesome style={{fontSize: 8}}>{Icons.circle}</FontAwesome><Text  style={styles.subtext}> 4 Listings </Text></Text>
+                                    <Text style={styles.subtitle}>Summer <FontAwesome style={{fontSize: getFontSize(8)}}>{Icons.circle}</FontAwesome><Text  style={styles.subtext}> 4 Listings </Text></Text>
                                 </View>
                             </TouchableOpacity>
                         }

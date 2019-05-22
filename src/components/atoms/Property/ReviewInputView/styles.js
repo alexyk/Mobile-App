@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container:{
@@ -12,7 +13,7 @@ const styles = StyleSheet.create({
 
     textFirst:{
         color:'black',
-        fontSize:15,
+        fontSize: getFontSize(15),
         fontFamily: 'FuturaStd-Light',
         alignSelf: "center"
     },
@@ -20,7 +21,7 @@ const styles = StyleSheet.create({
     textLast:{
         flex: 1,
         color:'#DA7B61',
-        fontSize:15,
+        fontSize: getFontSize(15),
         textAlign:'right',
         fontFamily: 'FuturaStd-Light',
     }

@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 const { width } = Dimensions.get('screen');
 const dimensionWindows = Dimensions.get('window');
 
@@ -43,14 +44,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     locationText: {
-        fontSize: 9,
+        fontSize: getFontSize(9),
         fontFamily: 'FuturaStd-Light',
         marginTop: 2
     },
     placeName: {
         color: 'black',
         marginTop: 8,
-        fontSize: 15,
+        fontSize: getFontSize(15),
         fontFamily: 'FuturaStd-Light'
     },
     aboutPlaceView: {
@@ -58,15 +59,15 @@ const styles = StyleSheet.create({
         marginTop: 2
     },
     placeReviewText: {
-        fontSize: 8,
+        fontSize: getFontSize(8),
         color: '#aeaeae'
     },
     placeReviewNumber: {
-        fontSize: 8,
+        fontSize: getFontSize(8),
         color: '#aeaeae'
     },
     totalReviews: {
-        fontSize: 8,
+        fontSize: getFontSize(8),
         color: '#aeaeae'
     },
     ratingIconsWrapper: {
@@ -82,11 +83,11 @@ const styles = StyleSheet.create({
         marginTop: 10
     },
     cost: {
-        fontSize: 12,
+        fontSize: getFontSize(12),
         fontFamily: 'FuturaStd-Light'
     },
     perNight: {
-        fontSize: 10,
+        fontSize: getFontSize(10),
         fontFamily: 'FuturaStd-Light',
         marginTop: 2
     },
@@ -107,20 +108,20 @@ const styles = StyleSheet.create({
     showAllText: {
         color: '#fff',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18
+        fontSize: getFontSize(18)
     },
     listHotelView: {
         padding: 18,
         alignItems: 'center'
     },
     hostHeader: {
-        fontSize: 12,
+        fontSize: getFontSize(12),
         fontFamily: 'FuturaStd-Light',
     },
     hostDescription: {
         fontFamily: 'FuturaStd-Light',
         textAlign: 'center',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         marginHorizontal: 30
     },
     getStartedButton: {

@@ -3,6 +3,7 @@ import { View, Text } from 'react-native'
 import Image from "react-native-remote-svg";
 import {commonText} from '../../../common.styles'
 import { BarIndicator } from "react-native-indicators";
+import { getFontSize } from "../../../utils/designUtils";
 export default class LTLoader extends PureComponent {
   constructor(props) {
     super(props);
@@ -12,7 +13,7 @@ export default class LTLoader extends PureComponent {
     const {message} = this.props;
     if (message) {
       return (
-        <Text style={{...commonText, position:'absolute', top:"60%", width:"100%", textAlign:'center', fontSize:19}}>
+        <Text style={{...commonText, position:'absolute', top:"60%", width:"100%", textAlign:'center', fontSize: getFontSize(19)}}>
           {message}
         </Text>
       )

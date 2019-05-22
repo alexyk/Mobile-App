@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const dimensionWindows = Dimensions.get('window');
 const styles = StyleSheet.create({
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
 
     description: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 11,
+        fontSize: getFontSize(11),
         lineHeight: 20,
         flexDirection:'row',
         color:'#000000'

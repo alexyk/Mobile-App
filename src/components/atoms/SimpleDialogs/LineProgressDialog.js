@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import Dialog from './Dialog'
 import ProgressBar from './ProgressBar'
+import { getFontSize } from '../../../utils/designUtils';
 
 const { width } = Dimensions.get('window');
 
@@ -19,7 +20,7 @@ class LineProgressDialog extends Component {
         return (
             <Dialog {...this.props} >
                 <View style={{flexDirection: 'column'}} >
-                    <Text style={[{ marginLeft: 0, marginRight: 10, fontSize: 15, color: "#000", fontFamily: 'FuturaStd-Light'}, messageStyle]}>{message}</Text>
+                    <Text style={[{ marginLeft: 0, marginRight: 10, fontSize: getFontSize(15), color: "#000", fontFamily: 'FuturaStd-Light'}, messageStyle]}>{message}</Text>
                     <ProgressBar 
                         progress={this.props.progress} 
                         style={{marginTop: 10}} 

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {TouchableOpacity, Text, StyleSheet} from 'react-native';
 import Image from 'react-native-remote-svg';
+import { getFontSize } from '../../../utils/designUtils';
 
 type Props = {
   onClose: () => void,
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
   },
   cross: {
     color: 'white',
-    fontSize: 30,
+    fontSize: getFontSize(30),
   },
 
   ButtonImage: {

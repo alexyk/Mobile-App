@@ -33,6 +33,7 @@ import { setCurrency } from '../../../redux/action/Currency'
 
 import {isNative} from '../../../version'
 import { gotoWebview } from '../utils';
+import { getFontSize } from '../../../utils/designUtils';
 const isExploreSearchNative = isNative.explore; // false: webview version, true: native search version
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
 
@@ -740,7 +741,7 @@ class Explore extends Component {
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
         height: 50,
-        fontSize: 16,
+        fontSize: getFontSize(16),
         paddingTop: 13,
         paddingHorizontal: 10,
         paddingBottom: 12,

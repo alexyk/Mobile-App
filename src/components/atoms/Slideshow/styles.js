@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -44,12 +45,12 @@ const styles = StyleSheet.create({
     },
     textTitle: {
         fontWeight: 'bold',
-        fontSize: 15,
+        fontSize: getFontSize(15),
         color: 'white',
     },
     textCaption: {
         fontWeight: '400',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: 'white',
     }
 });

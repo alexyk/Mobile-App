@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     costLoc: {
         color: 'black',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         fontFamily: 'FuturaStd-Medium'
     },
 });

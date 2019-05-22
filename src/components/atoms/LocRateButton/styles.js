@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     fab: {
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
     fabText: {
         fontFamily: 'FuturaStd-Medium',
         color: '#fff',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         width: 88,
     },
 });

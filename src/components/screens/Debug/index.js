@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import requester from '../../../initDependencies';
 import styles from './styles';
 import { withNavigation } from 'react-navigation';
+import { getFontSize } from '../../../utils/designUtils';
 
 //Bellow are details of hardcoded hotel
 // const dummyHotel = {
@@ -284,7 +285,7 @@ class Explore extends Component {
             <View style={styles.container}>
                 <Image style={{ width: '60%', height: 50, alignSelf: 'center', resizeMode: 'contain' }} source={require('../../../assets/splash.png')} />
                 <ScrollView>
-                    <Text style={{ marginTop: 10, fontSize: 20 }}>URL Details</Text>
+                    <Text style={{ marginTop: 10, fontSize: getFontSize(20) }}>URL Details</Text>
 
                     <Text>Region Id:</Text>
                     <Text
@@ -312,7 +313,7 @@ class Explore extends Component {
                         underlineColorAndroid={"transparent"}
                     />
 
-                    <Text style={{ marginTop: 10, fontSize: 20 }}>Hotel Details</Text>
+                    <Text style={{ marginTop: 10, fontSize: getFontSize(20) }}>Hotel Details</Text>
 
 
                     <Text>Hotel Id:</Text>
@@ -324,7 +325,7 @@ class Explore extends Component {
                     />
 
                     <TouchableOpacity onPress={() => this.assembleJson()} style={{ marginTop: 10, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', width: '100%', height: 50, backgroundColor: '#DA7B61' }}>
-                        <Text style={{ fontSize: 20, color: 'white' }}>Search</Text>
+                        <Text style={{ fontSize: getFontSize(20), color: 'white' }}>Search</Text>
                     </TouchableOpacity>
                 </ScrollView>
             </View>
@@ -334,7 +335,7 @@ class Explore extends Component {
 
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         paddingTop: 13,
         paddingHorizontal: 10,
         paddingBottom: 12,

@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -22,7 +23,7 @@ const styles = StyleSheet.create({
     },
     titleText: {
         color: '#fff',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         fontFamily: 'FuturaStd-Light'
     },
     infoView: {
@@ -33,7 +34,7 @@ const styles = StyleSheet.create({
     },
     infoText: {
         color: '#fff',
-        fontSize: 13.3,
+        fontSize: getFontSize(13.3),
         fontFamily: 'FuturaStd-Light',
         lineHeight: 20
     },
@@ -52,7 +53,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         fontFamily: 'FuturaStd-Light'
     },
     nextButton: {
@@ -98,13 +99,13 @@ const styles = StyleSheet.create({
     acceptButtonText: {
         color: '#DA7B61',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 17
+        fontSize: getFontSize(17)
     },
     declineButtonText: {
         textAlign: 'center',
         color: '#fcf9f8',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 14,
+        fontSize: getFontSize(14),
         padding: 5
     }
 });

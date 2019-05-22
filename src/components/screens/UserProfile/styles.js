@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
 
     report: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:16,
+        fontSize: getFontSize(16),
         marginTop:15,
         marginLeft:20,
         marginRight:20,

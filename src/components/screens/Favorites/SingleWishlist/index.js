@@ -4,10 +4,11 @@ import { Image, StyleSheet, Text, View, FlatList,TouchableOpacity, ProgressBarAn
 import styles from './styles';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import Icon from 'react-native-fontawesome';
+import { getFontSize } from '../../../../utils/designUtils';
 
-const dot = <FontAwesome style={{fontSize: 5}}>{Icons.circle}</FontAwesome>
-const starEmpty = <FontAwesome style={{fontSize: 15, color: '#8f9191'}}>{Icons.starO}</FontAwesome>;
-const starFill = <FontAwesome style={{fontSize: 15, color: '#bacfc9'}}>{Icons.starO}</FontAwesome>;
+const dot = <FontAwesome style={{fontSize: getFontSize(5)}}>{Icons.circle}</FontAwesome>
+const starEmpty = <FontAwesome style={{fontSize: getFontSize(15), color: '#8f9191'}}>{Icons.starO}</FontAwesome>;
+const starFill = <FontAwesome style={{fontSize: getFontSize(15), color: '#bacfc9'}}>{Icons.starO}</FontAwesome>;
 
 const flastlst_data = [{
     title1: "ENTIRE APPARTMENT . 1 BEDROOM 1 BED 1.5 BATHS",
@@ -59,7 +60,7 @@ class SingleWishList extends Component {
                     <Image style={styles.btn_backImage} source={require('../../../../assets/png/arrow-back.png')} />
                 </TouchableOpacity>
                 <Text style={styles.title}>Summer</Text>
-                <Text style={styles.subtTitle}>Anytime <FontAwesome style={{fontSize: 5}}>{Icons.circle}</FontAwesome> 2 guests</Text>
+                <Text style={styles.subtTitle}>Anytime <FontAwesome style={{fontSize: getFontSize(5)}}>{Icons.circle}</FontAwesome> 2 guests</Text>
                 <View style={{width: '100%'}}>
                 <FlatList style={styles.flatList}
                     data={flastlst_data}

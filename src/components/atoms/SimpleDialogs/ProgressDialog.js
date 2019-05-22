@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 
 import Dialog from './Dialog'
+import { getFontSize } from '../../../utils/designUtils';
 
 class ProgressDialog extends Component {
     render() {
@@ -18,7 +19,7 @@ class ProgressDialog extends Component {
             <Dialog {...this.props} >
                 <View style={{ flexDirection: 'row', alignItems: 'center'}} >
                     <ActivityIndicator animating={true} color={activityIndicatorColor} size={activityIndicatorSize} style={activityIndicatorStyle} />
-                    <Text style={[{ marginLeft: 15, marginRight: 10, fontSize: 16, color: "#00000089", fontFamily: 'FuturaStd-Light'}, messageStyle]}>{message}</Text>
+                    <Text style={[{ marginLeft: 15, marginRight: 10, fontSize: getFontSize(16), color: "#00000089", fontFamily: 'FuturaStd-Light'}, messageStyle]}>{message}</Text>
                 </View>
             </Dialog>
         )

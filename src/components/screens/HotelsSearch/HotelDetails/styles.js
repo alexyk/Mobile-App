@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
 
@@ -54,13 +55,13 @@ const styles = StyleSheet.create({
     etcName: {
         fontFamily: 'FuturaStd-Light',
         color: '#000000',
-        fontSize: 15,
+        fontSize: getFontSize(15),
     },
 
     etcButton: {
         fontFamily: 'FuturaStd-Light',
         color: '#d97b61',
-        fontSize: 15,
+        fontSize: getFontSize(15),
     },
 
     subView: {

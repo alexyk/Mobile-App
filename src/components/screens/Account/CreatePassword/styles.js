@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import Dimensions from 'Dimensions';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const { height } = Dimensions.get('window');
 
@@ -29,12 +30,12 @@ const styles = StyleSheet.create({
     },
     titleText: {
         color: '#fff',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         fontFamily: 'FuturaStd-Light'
     },
     finePrintText: {
         color: '#fff',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         fontFamily: 'FuturaStd-Light',
         marginBottom: 15,
         width: '100%',
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 17
+        fontSize: getFontSize(17)
     },
     lowOpacity: {
         opacity: 0.3,

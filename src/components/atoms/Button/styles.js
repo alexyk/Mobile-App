@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     buttonWrap: {
@@ -13,7 +14,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         textAlign: 'center',
         color: '#fff',
-        fontSize: 16,
+        fontSize: getFontSize(16),
         fontFamily: 'FuturaStd-Light'
     }
 });

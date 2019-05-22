@@ -17,6 +17,7 @@ import ImageCarousel from '../../../atoms/ImagePage';
 import HomeDetailBottomBar from '../../../atoms/HomeDetailBottomBar'
 
 import styles from './styles';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const dimensionWindows = Dimensions.get('window');
 const logoWidth = dimensionWindows.width;
@@ -169,7 +170,7 @@ class HomeDetails extends Component {
                         />
                         <TouchableOpacity activeOpacity={1} onPress={() => this.onMapTap()}>
                             <LocationView
-                                titleStyle={{ fontSize: 17 }}
+                                titleStyle={{ fontSize: getFontSize(17) }}
                                 name={params.homeData.name}
                                 lat={params.homeData.latitude != null ? parseFloat(params.homeData.latitude) : 0.0}
                                 lon={params.homeData.longitude != null ? parseFloat(params.homeData.longitude) : 0.0}

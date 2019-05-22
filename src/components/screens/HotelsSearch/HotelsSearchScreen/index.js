@@ -536,7 +536,7 @@ class HotelsSearchScreen extends Component {
 
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
-    log('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
+    log('list-socket-done',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap},true)
     
     //TODO: @@@debug remove
 //     let asArray = []
@@ -717,13 +717,13 @@ class HotelsSearchScreen extends Component {
         const hotelsAll = data.content;
         checkHotelData(hotelsAll,'filter')
 
-        log('@@filter-on-server',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
+        log('server-filter',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
 
         // parse data
         mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap)
         checkHotelData(hotelsAll,'filter-parsed')
 
-        // log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
+        log('server-filter',`${count} filtered hotels, after parsing`, {hotelsAll}, true)
 
         const oldHotels = this.hotelsAll;
         if (this.isFirstFilter) {

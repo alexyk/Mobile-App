@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -58,7 +59,7 @@ const styles = StyleSheet.create({
 
     messageTitle:{
         fontFamily: 'FuturaStd-Light',
-        fontSize: 15,
+        fontSize: getFontSize(15),
        // color: '#DA7B61',
         letterSpacing: 1,
         backgroundColor: 'transparent',
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
 
     messageSubTitle:{
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         fontWeight: '100',
         lineHeight: 13,
         letterSpacing: 1,
@@ -76,7 +77,7 @@ const styles = StyleSheet.create({
     },
     messageValues:{
         fontFamily: 'FuturaStd-Light',
-        fontSize:12,
+        fontSize: getFontSize(12),
         color: '#000',
         width:'100%',
         flex: 1,
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
 
     heading: {
         fontFamily: 'FuturaStd-Medium',
-        fontSize: 20,
+        fontSize: getFontSize(20),
         color: '#000',
         marginTop: 10,
         marginBottom: 5,
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
     },
     subHeading:{
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color:'#000'
     },
     topText:{
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
 
     buttonText: {
         color: '#fff',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         fontFamily: 'FuturaStd-Light'
     },
 
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
 
       messageTimeTitle:{
           fontFamily: 'FuturaStd-Light',
-          fontSize: 12
+          fontSize: getFontSize(12)
       },
       lastView:{
           marginTop:5,
@@ -186,14 +187,14 @@ const styles = StyleSheet.create({
 
     normalText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         lineHeight: 20,
         marginTop: 10,
     },
 
     readmore: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         marginTop: -2,
     },
 });

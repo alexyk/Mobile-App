@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round(dimensions.width * 0.25);
 const imageWidth = Math.round(dimensions.width * 0.32);
@@ -35,7 +36,7 @@ const styles = StyleSheet.create({
     placeName: {
         marginTop: 8,
         marginLeft: 8,
-        fontSize: 18,
+        fontSize: getFontSize(18),
         color: 'black',
         fontWeight: '100',
         fontFamily: 'FuturaStd-Medium',
@@ -47,17 +48,17 @@ const styles = StyleSheet.create({
     },
     placeReviewText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: '#aeaeae'
     },
     placeReviewNumber: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: '#aeaeae'
     },
     totalReviews: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: '#aeaeae'
     },
     ratingIconsWrapper: {
@@ -73,16 +74,16 @@ const styles = StyleSheet.create({
     },
     cost: {
         color: 'black',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         fontFamily: 'FuturaStd-Medium'
     },
     costLoc: {
         color: 'black',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         fontFamily: 'FuturaStd-Medium'
     },
     perNight: {
-        fontSize: 10,
+        fontSize: getFontSize(10),
         fontFamily: 'FuturaStd-Light',
         color: 'black',
     },

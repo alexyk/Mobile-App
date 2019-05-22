@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     floatingBar: {
@@ -22,16 +23,16 @@ const styles = StyleSheet.create({
     },
     price: {
         color: 'black',
-        fontSize: 17
+        fontSize: getFontSize(17)
     },
     period1: {
         marginTop: 5,
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#000',
     },
     period2: {
         marginTop: 5,
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#000',
     },
     fontFuturaStd: {
@@ -53,7 +54,7 @@ const styles = StyleSheet.create({
     },
     nextText: {
         color: 'white',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontFamily: 'FuturaStd-Light'
     },
 });

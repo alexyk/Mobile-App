@@ -13,6 +13,7 @@ import LocationView from '../../../atoms/LocationView';
 import BackButton from '../../../atoms/BackButton';
 import styles from './styles';
 import ImageCarousel from '../../../atoms/ImagePage';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const dimensionWindows = Dimensions.get('window');
 const logoWidth = dimensionWindows.width;
@@ -152,7 +153,7 @@ class HotelDetails extends Component {
                         <TouchableOpacity activeOpacity={1} onPress={() => this.onMapTap()}>
                             <LocationView
                                 location={`${this.state.mainAddress}, ${this.state.countryName}`}
-                                titleStyle={{ fontSize: 17 }}
+                                titleStyle={{ fontSize: getFontSize(17) }}
                                 name={this.state.hotel.name}
                                 description={this.state.hotel.generalDescription}
                                 lat={this.state.latitude != null ? parseFloat(this.state.latitude) : 0.0}

@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -18,21 +19,21 @@ const styles = StyleSheet.create({
       },
       requestTo:{
         fontFamily: 'FuturaStd-Medium',
-        fontSize: 20,
+        fontSize: getFontSize(20),
         marginTop: 10,
         marginLeft: 15,
         color: '#1f2427'
       },
       requestTitle:{
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         marginTop: 5,
         marginLeft: 15,
         color: '#1f2427'
       },
       requestDate:{
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         marginTop: 10,
         marginLeft: 16,
         color: '#1f2427'
@@ -55,7 +56,7 @@ const styles = StyleSheet.create({
       },
       btn_requestapprove:{
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16,
+        fontSize: getFontSize(16),
         color: '#ffffff',
         paddingTop: 12.5,
         paddingBottom: 12.5,
@@ -71,7 +72,7 @@ const styles = StyleSheet.create({
       },
       btn_requestdecline:{
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16,
+        fontSize: getFontSize(16),
         color: '#1f2427',
         paddingTop: 14,
         paddingBottom: 14,
@@ -111,7 +112,7 @@ const styles = StyleSheet.create({
       },
       listChild: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 11,
+        fontSize: getFontSize(11),
         lineHeight: 18,
         padding: 5,
         marginLeft: 10,
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
       },
       listChildSender: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         padding: 5,
         margin: 10,
         color: 'white'
@@ -168,7 +169,7 @@ const styles = StyleSheet.create({
         borderRadius: 100,
         backgroundColor: 'white',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16
+        fontSize: getFontSize(16)
       },
       btn_camera: {},//To be used in future
       btn_gallery: {},//To be used in future
@@ -194,19 +195,19 @@ const styles = StyleSheet.create({
       },
       dateText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         marginTop: 0,
         color: '#1f2427'
       },
       price: {
         fontFamily: 'FuturaStd-Medium',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         marginTop: 0,
         color: '#1f2427',
     },
     sendButton: {
       fontFamily: 'FuturaStd-Medium',
-      fontSize: 15,
+      fontSize: getFontSize(15),
       margin: 10,
       color: '#000',
     }

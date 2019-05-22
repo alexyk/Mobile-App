@@ -8,6 +8,7 @@ import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 import SmartInput from '../../atoms/SmartInput';
 import Switch from 'react-native-customisable-switch';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -30,12 +31,12 @@ const styles = StyleSheet.create({
     },
     titleText: {
         color: '#fff',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontFamily: 'FuturaStd-Light'
     },
     maintitleText: {
         color: '#fff',
-        fontSize: 24,
+        fontSize: getFontSize(24),
         fontFamily: 'FuturaStd-Light'
     },
 
@@ -67,7 +68,7 @@ const styles = StyleSheet.create({
     },
     finePrintText: {
         color: '#fff',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         fontFamily: 'FuturaStd-Light',
         maxWidth: 280
     },
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
     },
     switchCheckText: {
         color: '#DA7B61',
-        fontSize: 10.5
+        fontSize: getFontSize(10.5)
     },
     nextButtonView: {
         display: 'flex',
@@ -101,7 +102,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 17
+        fontSize: getFontSize(17)
     },
     lowOpacity: {
         opacity: 0.3

@@ -1,4 +1,5 @@
 import {StyleSheet, Dimensions, Platform} from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 const { width } = Dimensions.get('screen');
 const dimensionWindows = Dimensions.get('window');
 
@@ -20,7 +21,7 @@ export default styles = StyleSheet.create({
     },
     titleText: {
     color: '#000',
-    fontSize: 22,
+    fontSize: getFontSize(22),
     fontFamily: 'FuturaStd-Light',
     marginLeft: 20,
   },
@@ -48,7 +49,7 @@ export default styles = StyleSheet.create({
   },
   doneButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: getFontSize(18),
     fontFamily: 'FuturaStd-Light'
   },
   header: {
@@ -112,7 +113,7 @@ export default styles = StyleSheet.create({
     padding: 15
   },
   starRatingText: {
-    fontSize: 18,
+    fontSize: getFontSize(18),
     fontFamily: 'FuturaStd-Medium',
   },
   starView: {
@@ -129,7 +130,7 @@ export default styles = StyleSheet.create({
   },
   ratingNumber: {
     textAlign: 'center',
-    fontSize: 18,
+    fontSize: getFontSize(18),
     color: '#999999'
   },
   star: {
@@ -184,7 +185,7 @@ export default styles = StyleSheet.create({
     width : 0
   },
   pricingText: {
-    fontSize: 18,
+    fontSize: getFontSize(18),
     fontFamily: 'FuturaStd-Medium',
     width:"50%"
   },
@@ -209,7 +210,7 @@ export default styles = StyleSheet.create({
   },
   typeText: {
     fontFamily: 'FuturaStd-Light',
-    fontSize: 18
+    fontSize: getFontSize(18)
   },
   minusButton: {
     height: 34,
@@ -222,7 +223,7 @@ export default styles = StyleSheet.create({
   },
   minusText: {
     color: '#cc8068',
-    fontSize: 30,
+    fontSize: getFontSize(30),
     marginTop: -5
   },
   plusButton: {
@@ -237,17 +238,17 @@ export default styles = StyleSheet.create({
   },
   plusText: {
     color: '#cc8068',
-    fontSize: 20,
+    fontSize: getFontSize(20),
     marginTop: -5
   },
   countText: {
     marginHorizontal: 18,
     fontFamily: 'FuturaStd-Light',
-    fontSize: 20,
+    fontSize: getFontSize(20),
     marginTop: 5
   },
   typeSubText: {
-    fontSize: 11,
+    fontSize: getFontSize(11),
     fontFamily: 'FuturaStd-Light',
     color: '#6e6e6e'
   },
@@ -265,7 +266,7 @@ export default styles = StyleSheet.create({
   },
   inputIOS: {
     height: 50,
-    fontSize: 16,
+    fontSize: getFontSize(16),
     paddingTop: 13,
     paddingHorizontal: 10,
     paddingBottom: 12,
@@ -295,7 +296,7 @@ export default styles = StyleSheet.create({
 export const orderbyPickerSelectStyles = StyleSheet.create({
   inputIOS: {
     height: 50,
-    fontSize: 16,
+    fontSize: getFontSize(16),
     color: 'black',
     alignSelf: 'flex-end',
     justifyContent: 'flex-end',
@@ -306,7 +307,7 @@ export const orderbyPickerSelectStyles = StyleSheet.create({
   inputAndroid: {
     height: 50,
     width: 120,
-    //fontSize: 16,
+    //fontSize: getFontSize(16),
     // color: 'black',
     alignSelf: 'flex-end',
     justifyContent: 'flex-end',

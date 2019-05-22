@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const dimensionWindows = Dimensions.get('window');
 const styles = StyleSheet.create({
@@ -10,7 +11,7 @@ const styles = StyleSheet.create({
 
     title: {
         fontFamily: 'futura',
-        fontSize:17,
+        fontSize: getFontSize(17),
         color: '#000000',
         marginTop: 10,
         marginBottom: 10
@@ -34,13 +35,13 @@ const styles = StyleSheet.create({
 
     totalRateTitle: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 25,
+        fontSize: getFontSize(25),
         color: '#fff',
     },
 
     totalReviews: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#fff',
     },
 
@@ -67,13 +68,13 @@ const styles = StyleSheet.create({
 
     name: {
         fontFamily: 'futura',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color:'#000000'
     },
 
     date: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color:'#000000'
     },
 
@@ -100,25 +101,25 @@ const styles = StyleSheet.create({
 
     normalText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         lineHeight: 20,
         marginTop: 10,
     },
 
     moreText: {
-        fontSize:12,
+        fontSize: getFontSize(12),
         color: '#d97b61',
         fontFamily: 'FuturaStd-Light'
     },
 
     readmore: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         marginTop: -2,
     },
 
     more: {
-      fontSize:13,
+      fontSize: getFontSize(13),
       color: '#d97b61',
       fontFamily: 'FuturaStd-Light'
     }

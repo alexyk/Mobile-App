@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import Dimensions from 'Dimensions';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const { height } = Dimensions.get('window');
 
@@ -29,7 +30,7 @@ const styles = StyleSheet.create({
     },
     titleText: {
         color: '#fff',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         fontFamily: 'FuturaStd-Light'
     },
     inputView: {
@@ -49,7 +50,7 @@ const styles = StyleSheet.create({
         paddingLeft: 18,
         flex: 0.8,
         color: '#fff',
-        fontSize: 13,
+        fontSize: getFontSize(13),
         fontFamily: 'FuturaStd-Light',
     },
     switchContainer: {
@@ -63,7 +64,7 @@ const styles = StyleSheet.create({
     },
     switchCheckText: {
         color: '#DA7B61',
-        fontSize: 10.5
+        fontSize: getFontSize(10.5)
     },
     nextButtonView: {
         display: 'flex',
@@ -87,7 +88,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 17
+        fontSize: getFontSize(17)
     },
     lowOpacity: {
         opacity: 0.3,

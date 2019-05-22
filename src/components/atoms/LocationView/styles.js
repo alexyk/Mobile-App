@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const dimensionWindows = Dimensions.get('window');
 const styles = StyleSheet.create({
@@ -19,27 +20,27 @@ const styles = StyleSheet.create({
 
     title: {
         fontFamily: 'futura',
-        fontSize: 15,
+        fontSize: getFontSize(15),
         color: '#000000'
     },
 
     detail: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 12,
+        fontSize: getFontSize(12),
         lineHeight:20,
         color: '#000000'
     },
 
     subtitle: {
         fontFamily: 'futura',
-        fontSize:12,
+        fontSize: getFontSize(12),
         color:'#000000',
         marginTop:15
     },
 
     subdetail: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#000000',
         lineHeight: 17,
         marginTop: 5
@@ -65,14 +66,14 @@ const styles = StyleSheet.create({
 
     location: {
           fontFamily: 'futura',
-          fontSize: 13,
+          fontSize: getFontSize(13),
           color: '#000000',
           marginTop: 5,
     },
 
     description: {
           fontFamily: 'FuturaStd-Light',
-          fontSize: 10,
+          fontSize: getFontSize(10),
           lineHeight:15,
           color: '#000000',
     },

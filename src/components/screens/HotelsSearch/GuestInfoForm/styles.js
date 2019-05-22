@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -19,7 +20,7 @@ const styles = StyleSheet.create({
         marginBottom: 32
     },
     steps: {
-        fontSize: 10,
+        fontSize: getFontSize(10),
         fontFamily: 'FuturaStd-Medium',
         color: '#a2c5bf'
     },
@@ -31,7 +32,7 @@ const styles = StyleSheet.create({
         color: 'black',
         fontFamily: 'FuturaStd-Medium',
         marginTop: 5,
-        fontSize: 20,
+        fontSize: getFontSize(20),
         marginBottom: 30
     },
     hotelInfoContainer: {
@@ -56,11 +57,11 @@ const styles = StyleSheet.create({
     hotelName: {
         color: 'black',
         fontFamily: 'FuturaStd-Medium',
-        fontSize: 16,
+        fontSize: getFontSize(16),
     },
     hotelPlace: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#54585b',
     },
     
@@ -73,7 +74,7 @@ const styles = StyleSheet.create({
     },
     labelGuest: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16
+        fontSize: getFontSize(16)
     },
     inputFieldsView: {
         flexDirection: 'row',
@@ -113,11 +114,11 @@ const styles = StyleSheet.create({
         },
         shadowRadius: 2,
         shadowOpacity: 0.5,
-        fontSize: 16,
+        fontSize: getFontSize(16),
         fontFamily: 'FuturaStd-Light'
     },
     genderText: {
-        fontSize: 14,
+        fontSize: getFontSize(14),
         fontFamily: 'FuturaStd-Light'
     },
     spaceRight: {

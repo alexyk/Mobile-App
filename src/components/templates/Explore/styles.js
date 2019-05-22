@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const { width } = Dimensions.get('screen');
 
@@ -43,7 +44,7 @@ export default StyleSheet.create({
         borderColor: '#d7d8d8'
     },
     subtitleText: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         fontFamily: 'FuturaStd-Light'
     },
     tilesView: {

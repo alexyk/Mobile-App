@@ -18,6 +18,7 @@ import HomeDetailBottomBar from '../../../atoms/HomeDetailBottomBar'
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
 import styles from './styles';
+import { getFontSize } from '../../../../utils/designUtils';
 
 class HomeReview extends Component {
     
@@ -175,8 +176,8 @@ class HomeReview extends Component {
                     textFirst = "Total"
                     textLast = {this.props.currencySign + ((defaultPrice + defaultCleaningFee) * params.nights).toFixed(2) }
                     styleContainer = {{marginTop: 15}}
-                    styleFirst = {{color:'#000', fontFamily: 'FuturaStd-Medium', fontSize: 16}}
-                    styleLast = {{color:'#000', fontFamily: 'FuturaStd-Medium', fontSize: 16}}/> */}
+                    styleFirst = {{color:'#000', fontFamily: 'FuturaStd-Medium', fontSize: getFontSize(16)}}
+                    styleLast = {{color:'#000', fontFamily: 'FuturaStd-Medium', fontSize: getFontSize(16)}}/> */}
 
                 {/* <ReviewListItem
                     textFirst= { "LOC" + locPrice.toFixed(2) + " x " + params.nights + " nights"}
@@ -194,8 +195,8 @@ class HomeReview extends Component {
                     textFirst = "Total"
                     textLast =  { "LOC" + ((locPrice + locCleaningFee) * params.nights).toFixed(2) }
                     styleContainer = {{marginTop: 15}}
-                    styleFirst={{color:'#000', fontFamily: 'FuturaStd-Medium', fontSize: 16}}
-                    styleLast={{color:'#000', fontFamily: 'FuturaStd-Medium', fontSize: 16}}/> */}
+                    styleFirst={{color:'#000', fontFamily: 'FuturaStd-Medium', fontSize: getFontSize(16)}}
+                    styleLast={{color:'#000', fontFamily: 'FuturaStd-Medium', fontSize: getFontSize(16)}}/> */}
 
                 {/* <View style={styles.floatingBar}>
                     <View style={styles.detailsView}>
@@ -252,7 +253,7 @@ const pickerSelectStyles = {
     height: 50,
     inputIOS: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 15,
+        fontSize: getFontSize(15),
         paddingTop: 13,
         paddingHorizontal: 10,
         paddingBottom: 12,
@@ -261,7 +262,7 @@ const pickerSelectStyles = {
 
     inputAndroid: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 15,
+        fontSize: getFontSize(15),
     },
 
     underline: {

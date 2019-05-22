@@ -20,6 +20,7 @@ import { log, processError } from '../../../../config-debug';
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
 import styles from './styles';
+import { getFontSize } from '../../../../utils/designUtils';
 
 
 class HomesSearchScreen extends Component {
@@ -637,7 +638,7 @@ export default connect(mapStateToProps, null)(HomesSearchScreen);
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
         height: 50,
-        fontSize: 16,
+        fontSize: getFontSize(16),
         paddingTop: 13,
         paddingHorizontal: 10,
         paddingBottom: 12,

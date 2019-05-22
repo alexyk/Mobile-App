@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const dimensionWindows = Dimensions.get('window');
 const avatarWidth = dimensionWindows.width;
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
 
     title: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 20,
+        fontSize: getFontSize(20),
         color: '#000',
         marginTop: 40,
         marginLeft: 20,
@@ -88,7 +89,7 @@ const styles = StyleSheet.create({
         paddingLeft: 20,
         paddingRight: 20,
         fontFamily: 'FuturaStd-Medium',
-        fontSize:17,
+        fontSize: getFontSize(17),
         color:'#000'
     },
 
@@ -102,13 +103,13 @@ const styles = StyleSheet.create({
         paddingLeft: 20,
         paddingRight: 20,
         fontFamily: 'FuturaStd-Light',
-        fontSize:16,
+        fontSize: getFontSize(16),
         color:'#000'
     },
 
     editButton: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:15,
+        fontSize: getFontSize(15),
         marginTop:5,
         color:'#d97b61'
     },
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
 
     subtitleText: {
         fontFamily: 'FuturaStd-Medium',
-        fontSize:16,
+        fontSize: getFontSize(16),
         color:'#000'
     },
 

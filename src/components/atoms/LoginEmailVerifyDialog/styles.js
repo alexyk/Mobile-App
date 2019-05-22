@@ -1,9 +1,10 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     editInput: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16,
+        fontSize: getFontSize(16),
         width: '100%'
     },
 });

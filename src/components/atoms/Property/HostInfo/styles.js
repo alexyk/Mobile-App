@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
   Item:{
@@ -8,13 +9,13 @@ const styles = StyleSheet.create({
 
   optionalText:{
       color:'black',
-      fontSize:9,
+      fontSize:getFontSize(9),
       fontFamily: 'FuturaStd-Light',
   },
 
   titleText:{
       color:'black',
-      fontSize:17,
+      fontSize: getFontSize(17),
       fontFamily: 'FuturaStd-Light',
       marginTop:14
   },

@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -9,7 +10,7 @@ const styles = StyleSheet.create({
 
     title:{
       fontFamily: 'futura',
-      fontSize:17,
+      fontSize: getFontSize(17),
       color: '#000000',
       marginTop: 10,
       marginBottom: 10

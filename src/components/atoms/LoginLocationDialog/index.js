@@ -6,6 +6,7 @@ import RNPickerSelect from 'react-native-picker-select';
 
 import MaterialDialog from '../MaterialDialog/MaterialDialog';
 import Toast from 'react-native-simple-toast';
+import { getFontSize } from '../../../utils/designUtils';
 
 class LoginLocationDialog extends Component {
     static propTypes = {
@@ -85,7 +86,7 @@ class LoginLocationDialog extends Component {
 
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         paddingTop: 13,
         paddingHorizontal: 10,
         paddingBottom: 12,

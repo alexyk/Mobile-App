@@ -6,6 +6,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import _ from 'lodash';
 import styles from './styles';
 import requester from '../../../initDependencies';
+import { getFontSize } from '../../../utils/designUtils';
 
 class EditLocationModal extends Component {
     static propTypes = {
@@ -255,7 +256,7 @@ class EditLocationModal extends Component {
 
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         paddingTop: 13,
         paddingHorizontal: 10,
         paddingBottom: 12,

@@ -7,6 +7,7 @@ import { TextInput } from 'react-native';
 import MaterialDialog from '../MaterialDialog/MaterialDialog';
 import Toast from 'react-native-simple-toast';
 import styles from './styles'
+import { getFontSize } from '../../../utils/designUtils';
 
 class LoginEmailVerifyDialog extends Component {
     static propTypes = {
@@ -69,7 +70,7 @@ class LoginEmailVerifyDialog extends Component {
 
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         paddingTop: 13,
         paddingHorizontal: 10,
         paddingBottom: 12,

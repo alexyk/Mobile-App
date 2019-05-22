@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -22,7 +23,7 @@ const styles = StyleSheet.create({
         marginTop: 45,
         marginLeft: 15,
         fontFamily: 'FuturaStd-Light',
-        fontSize: 30,
+        fontSize: getFontSize(30),
         fontWeight:'normal',
         color : '#000'
     },
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginLeft: 15,
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontWeight:'normal',
         color : '#000'
     },
@@ -53,7 +54,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginLeft: 6,
         fontFamily: 'FuturaStd-Light',
-        fontSize: 14,
+        fontSize: getFontSize(14),
         fontWeight:'normal',
         color : '#bacfc9'
     },
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
         marginLeft: 6,
         fontFamily: 'FuturaStd-Light',
-        fontSize: 20,
+        fontSize: getFontSize(20),
         fontWeight:'normal',
         color : '#25292c'
     },
@@ -69,7 +70,7 @@ const styles = StyleSheet.create({
         marginTop: 4,
         marginLeft: 6,
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         fontWeight:'normal',
         color : '#8f9191'
     },
@@ -78,7 +79,7 @@ const styles = StyleSheet.create({
         marginLeft: 6,
         marginBottom: 10,
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16,
+        fontSize: getFontSize(16),
         fontWeight:'normal',
         color : '#272a2c'
     },

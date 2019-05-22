@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     cardBox: {
@@ -17,7 +18,7 @@ const styles = StyleSheet.create({
     walletAddres: {
         color: '#fff',
         fontFamily: 'FuturaStd-Light',
-        fontSize: 11.5,
+        fontSize: getFontSize(11.5),
         margin: 20,
         marginTop: 10,
         marginBottom: 30
@@ -37,13 +38,13 @@ const styles = StyleSheet.create({
         height: '60%'
     },
     balanceLabel: {
-        fontSize: 10,
+        fontSize: getFontSize(10),
         color: '#fff',
         marginLeft: 20,
         fontFamily: 'FuturaStd-Light'
     },
     balanceText: {
-        fontSize: 18.5,
+        fontSize: getFontSize(18.5),
         color: '#fff',
         marginLeft: 20,
         fontFamily: 'FuturaStd-Medium'
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
     },
     addMorePlus: {
         color: '#fff',
-        fontSize: 16
+        fontSize: getFontSize(16)
     },
 });
 

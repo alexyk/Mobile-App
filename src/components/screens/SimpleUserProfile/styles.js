@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -37,12 +38,12 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color:'#fff',
         fontFamily: 'FuturaStd-Medium',
-        fontSize:13
+        fontSize: getFontSize(13)
     },
 
     title: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 20,
+        fontSize: getFontSize(20),
         color: '#000',
         marginTop: 40,
         marginLeft: 20,
@@ -94,14 +95,14 @@ const styles = StyleSheet.create({
 
     name: {
         fontFamily: 'FuturaStd-Medium',
-        fontSize:17,
+        fontSize: getFontSize(17),
         marginTop:10,
         color: '#000000',
     },
 
     location:{
         fontFamily: 'FuturaStd-Light',
-        fontSize:13,
+        fontSize: getFontSize(13),
         marginTop:2,
         color:'#000000',
     },
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
 
     report: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:16,
+        fontSize: getFontSize(16),
         marginTop:15,
         marginLeft:20,
         marginRight:20,

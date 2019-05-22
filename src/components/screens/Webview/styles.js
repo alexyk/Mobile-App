@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { commonText } from '../../../common.styles';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -34,7 +35,7 @@ const styles = StyleSheet.create({
         color: 'black',
         marginTop: 25,
         marginLeft: 20,
-        fontSize: 20
+        fontSize: getFontSize(20)
         // backgroundColor: 'red',
     },
     backText: {
@@ -42,7 +43,7 @@ const styles = StyleSheet.create({
         color: 'black',
         marginTop: 35,
         marginLeft: 10,
-        fontSize: 14
+        fontSize: getFontSize(14)
         // backgroundColor: 'red',
     },
     webView: {

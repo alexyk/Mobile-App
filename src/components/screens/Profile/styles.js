@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
   container: {
@@ -27,7 +28,7 @@ const styles = StyleSheet.create({
   },
   copyText: {
       fontFamily: 'FuturaStd-Light',
-      fontSize: 13,
+      fontSize: getFontSize(13),
       color: '#000'
   },
   navItem: {
@@ -48,12 +49,12 @@ const styles = StyleSheet.create({
   },
   navItemText: {
     fontFamily: 'FuturaStd-Light',
-    fontSize: 17,
+    fontSize: getFontSize(17),
   },
   navCurrency: {
       color: '#da7b60',
       fontFamily: 'FuturaStd-Light',
-      fontSize: 18
+      fontSize: getFontSize(18)
   }
 });
 

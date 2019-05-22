@@ -1,4 +1,5 @@
 import {StyleSheet, Dimensions} from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 const dimensionWindows = Dimensions.get('window');
 
 export default styles = StyleSheet.create({
@@ -19,7 +20,7 @@ export default styles = StyleSheet.create({
     },
     titleText: {
         color: '#000',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         fontFamily: 'FuturaStd-Light',
         marginLeft: 20,
     },
@@ -69,7 +70,7 @@ export default styles = StyleSheet.create({
         marginTop: 15, 
         marginBottom: 5,
         marginLeft: 5,
-        fontSize: 18,
+        fontSize: getFontSize(18),
         fontFamily: 'FuturaStd-Medium',
     },
     searchButtonView: {

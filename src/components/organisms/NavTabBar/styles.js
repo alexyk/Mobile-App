@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 export default StyleSheet.create({
     container: {
@@ -19,22 +20,22 @@ export default StyleSheet.create({
         paddingRight: 10
     },
     activeIconStyle: {
-        fontSize: 25,
+        fontSize: getFontSize(25),
         color: '#DA7B61'
     },
     inactiveIconStyle: {
-        fontSize: 25,
+        fontSize: getFontSize(25),
         color: '#646467'
     },
 
     activeTextStyle: {
-        fontSize: 8.5,
+        fontSize: getFontSize(8.5),
         fontFamily: 'FuturaStd-Light',
         color: '#DA7B61',
         marginTop: 6
     },
     inactiveTextStyle: {
-        fontSize: 8.5,
+        fontSize: getFontSize(8.5),
         fontFamily: 'FuturaStd-Light',
         color: '#646464',
         marginTop: 6

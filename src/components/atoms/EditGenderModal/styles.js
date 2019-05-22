@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -79,16 +80,16 @@ const styles = StyleSheet.create({
     },
     editInput: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16,
+        fontSize: getFontSize(16),
         width: '100%',
     },
     title: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 20,
+        fontSize: getFontSize(20),
     },
     buttonTitle: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         color: '#fff',
         textAlign: 'center'
     }

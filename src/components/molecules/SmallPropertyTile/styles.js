@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 export default StyleSheet.create({
     container: {
@@ -18,28 +19,28 @@ export default StyleSheet.create({
     },
     favoriteText: {
         color: '#fff',
-        fontSize: 18
+        fontSize: getFontSize(18)
     },
     locationText: {
-        fontSize: 8.5,
+        fontSize: getFontSize(8.5),
         fontFamily: 'FuturaStd-Light',
         padding: 5,
         paddingBottom: 0
     },
     nameText: {
-        fontSize: 15.5,
+        fontSize: getFontSize(15.5),
         fontFamily: 'FuturaStd-Light',
         padding: 5,
         paddingBottom: 0
     },
     reviewText: {
-        fontSize: 9,
+        fontSize: getFontSize(9),
         fontFamily: 'FuturaStd-Light',
         padding: 5,
         paddingTop: 0
     },
     costText: {
-        fontSize: 10.5,
+        fontSize: getFontSize(10.5),
         fontFamily: 'FuturaStd-Light',
         padding: 5
     }

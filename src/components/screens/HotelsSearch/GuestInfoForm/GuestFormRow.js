@@ -3,6 +3,7 @@ import React, { Component } from 'react';
 
 import PropTypes from 'prop-types';
 import styles from './styles';
+import { getFontSize } from '../../../../utils/designUtils';
 
 export default class GuestFormRow extends Component {
     constructor(props) {
@@ -101,7 +102,7 @@ export default class GuestFormRow extends Component {
                             <Picker 
                                 selectedValue={this.state.guest.genderRepresentation}
                                 style={{ height: '100%', width: '100%'}}
-                                itemStyle={{backgroundColor: '#fff', height: '100%', fontFamily: 'FuturaStd-Light', fontSize:17}}
+                                itemStyle={{backgroundColor: '#fff', height: '100%', fontFamily: 'FuturaStd-Light', fontSize: getFontSize(17)}}
                                 onValueChange={this.onValueChange}>
                                 <Picker.Item label="Mr" value="Mr" />
                                 <Picker.Item label="Mrs" value="Mrs" />

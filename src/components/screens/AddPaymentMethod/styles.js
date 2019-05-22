@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -30,19 +31,19 @@ const styles = StyleSheet.create({
     },
     navItemText: {
       fontFamily: 'FuturaStd',
-      fontSize: 22,
+      fontSize: getFontSize(22),
       color:'#000'
     },
     listItemText:{
       fontFamily: 'FuturaStd-Light',
-      fontSize: 17,
+      fontSize: getFontSize(17),
       marginLeft:20,
       color:'#000'
   },
     navText:{
       marginTop: 12,
       fontFamily: 'FuturaStd-Light',
-      fontSize: 15,
+      fontSize: getFontSize(15),
     },
   
     listItem:{flex:1,

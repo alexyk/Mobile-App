@@ -13,6 +13,7 @@ import ReviewImageItem from '../../../molecules/ReviewImageItem';
 import Footer from '../../../atoms/Footer';
 
 import styles from './styles';
+import { getFontSize } from '../../../../utils/designUtils';
 
 class RequestAccepted extends Component {
     static propTypes = {
@@ -60,7 +61,7 @@ class RequestAccepted extends Component {
 
           <ReviewTitle
               style={{marginTop:70, width:'100%', marginLeft:20, marginRight: 20}}
-              titleStyle={{fontFamily: 'FuturaStd-Light', fontSize: 18}}
+              titleStyle={{fontFamily: 'FuturaStd-Light', fontSize: getFontSize(18)}}
               pageNumber="Entire Appartment.Folrance.ITALY"
               text="Garden Loft Appartment"/>
 

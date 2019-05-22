@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 export default StyleSheet.create({
     month: {
@@ -10,7 +11,7 @@ export default StyleSheet.create({
     },
     monthTitleText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 18,
+        fontSize: getFontSize(18),
         lineHeight: 20,
     },
     dayRow: {

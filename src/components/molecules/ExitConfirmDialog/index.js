@@ -5,6 +5,7 @@ import {
 
 import MaterialDialog from '../../atoms/MaterialDialog/MaterialDialog'
 import styles from './styles';
+import { getFontSize } from '../../../utils/designUtils';
 
 class ExitConfirmDialog extends Component {
 
@@ -23,12 +24,12 @@ class ExitConfirmDialog extends Component {
                 isVisibleBottomBar = {true}
                 cancelLabel = {"No"}
                 onCancel={ this.props.onCancel }
-                cancelStyle = {{color:'#000', fontSize: 17}}
+                cancelStyle = {{color:'#000', fontSize: getFontSize(17)}}
                 okLabel = {"Yes"}
                 onOk={ this.props.onOk }
-                okStyle = {{color:'#000', fontSize: 17}}
+                okStyle = {{color:'#000', fontSize: getFontSize(17)}}
             >
-                <Text style={{fontSize: 17}}>
+                <Text style={{fontSize: getFontSize(17)}}>
                     Are you sure to exit?
                 </Text>
             </MaterialDialog>

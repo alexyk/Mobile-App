@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 
 export const commonStyles = {
     hotelImageCommon: {
@@ -69,45 +70,45 @@ const styles = StyleSheet.create({
 
     // texsts
     txtHotelNoImage: {
-        fontSize: 22,
+        fontSize: getFontSize(22),
         color: '#AAA',
     },
     textBookingStatus: {
         ...commonStyles.fontsCommon,
-        fontSize: 16
+        fontSize: getFontSize(16)
     },
     textBookingId: {
         ...commonStyles.fontsCommon,
-        fontSize: 16
+        fontSize: getFontSize(16)
     },
     title: {
         ...commonStyles.fontsCommon,
-        fontSize: 22,
+        fontSize: getFontSize(22),
         color: '#000',
         marginLeft: 20,
         marginTop: 10
     },
     subtitle: {
         ...commonStyles.fontsCommon,
-        fontSize: 16,
+        fontSize: getFontSize(16),
         // marginRight: 10,
         color: '#000'
     },
     subtext: {
         ...commonStyles.fontsCommon,
-        fontSize: 15,
+        fontSize: getFontSize(15),
         marginTop: 5,
         color: '#000'
     },
     subtext1: {
         ...commonStyles.fontsCommon,
-        fontSize: 13,
+        fontSize: getFontSize(13),
         marginTop: 5,
         color: '#000'
     },
     hoteltext: {
         ...commonStyles.fontsCommon,
-        fontSize: 12,
+        fontSize: getFontSize(12),
         color: '#000'
     },
     buttonExplore: {
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     },
     exploreBtnText: {
         ...commonStyles.fontsCommon,
-        fontSize: 17,
+        fontSize: getFontSize(17),
         color: '#fff'
     },
     btn_backImage:{
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     },
     innertext:{
         color: '#fff',
-        fontSize: 30,
+        fontSize: getFontSize(30),
         marginTop: 5
     },
     Listcontainer:{

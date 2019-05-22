@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -21,12 +22,12 @@ const styles = StyleSheet.create({
     },
     titleText: {
         color: '#fff',
-        fontSize: 22,
+        fontSize: getFontSize(22),
         fontFamily: 'FuturaStd-Light'
     },
     infoText: {
         color: '#fff',
-        fontSize: 13.3,
+        fontSize: getFontSize(13.3),
         fontFamily: 'FuturaStd-Light',
         margin: 20,
         lineHeight: 20
@@ -46,7 +47,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         color: '#fff',
-        fontSize: 17,
+        fontSize: getFontSize(17),
         fontFamily: 'FuturaStd-Light'
     },
     nextButton: {

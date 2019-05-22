@@ -10,6 +10,7 @@ import {
 const { OS } = Platform;
 
 import PropTypes from 'prop-types';
+import { getFontSize } from '../../../utils/designUtils';
 
 class Dialog extends Component {
 
@@ -40,7 +41,7 @@ class Dialog extends Component {
                     margin: 24,
                     marginBottom: 0,
                     fontFamily: 'FuturaStd-Medium',
-                    fontSize: 20
+                    fontSize: getFontSize(20)
                 }, titleStyle]}>
                     {title}
                 </Text>

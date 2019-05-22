@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import requester from '../../../initDependencies';
 import styles from './styles';
 import { toJS } from '../../../utils/toJS';
+import { getFontSize } from '../../../utils/designUtils';
 
 // TODO: Separate component from container in the new containers dir
 // components dir should contain only stateless components
@@ -44,12 +45,12 @@ class SmallPropertyTile extends Component {
         // Determine stars
         const stars = [];
         const fullStar = key => (
-            <Text style={{ color: '#acc6c1', fontSize: 7 }} key={key}>
+            <Text style={{ color: '#acc6c1', fontSize: getFontSize(7) }} key={key}>
                 <FontAwesome>{Icons.starO}</FontAwesome>
             </Text>
         );
         const emptyStar = key => (
-            <Text style={{ color: '#d8d8d8', fontSize: 7 }} key={key}>
+            <Text style={{ color: '#d8d8d8', fontSize: getFontSize(7) }} key={key}>
                 <FontAwesome>{Icons.starO}</FontAwesome>
             </Text>
         );

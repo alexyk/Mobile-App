@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const dimensionWindows = Dimensions.get('window');
 const checkWidth = (dimensionWindows.width - 150) / 2;
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        fontSize:20,
+        fontSize: getFontSize(20),
         fontFamily: 'futura',
         justifyContent:'center',
         alignItems:'center',
@@ -52,7 +53,7 @@ const styles = StyleSheet.create({
     msg: {
         marginTop:10,
         fontFamily: 'FuturaStd-Light',
-        fontSize:12,
+        fontSize: getFontSize(12),
         textAlign: 'center',
         color:'black'
     },
@@ -74,14 +75,14 @@ const styles = StyleSheet.create({
     subTitle: {
         marginTop: 10,
         fontFamily: 'FuturaStd-Light',
-        fontSize:15,
+        fontSize: getFontSize(15),
         color: '#000',
         textAlign: 'center'
     },
 
     subInfo: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:16,
+        fontSize: getFontSize(16),
         color: '#d97b61',
         textAlign: 'center'
     },

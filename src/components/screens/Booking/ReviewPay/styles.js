@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getFontSize } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
@@ -28,7 +29,7 @@ const styles = StyleSheet.create({
         marginLeft:20,
         marginRight:20,
         marginTop:35,
-        fontSize:13,
+        fontSize: getFontSize(13),
         color:'black'
     }
 });

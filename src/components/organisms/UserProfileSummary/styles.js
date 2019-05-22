@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getFontSize } from '../../../utils/designUtils';
 const dimensionWindows = Dimensions.get('window');
 
 const logoWidth = dimensionWindows.width;
@@ -24,7 +25,7 @@ const styles = StyleSheet.create({
 
     topTitleText:{
         fontFamily: 'FuturaStd-Medium',
-        fontSize:19,
+        fontSize: getFontSize(19),
         marginTop:5,
         marginLeft:10,
         marginRight:10,
@@ -37,7 +38,7 @@ const styles = StyleSheet.create({
 
     infoText:{
         fontFamily: 'FuturaStd-Light',
-        fontSize:10,
+        fontSize: getFontSize(10),
         paddingLeft:10,
         paddingRight:10,
         color:'#000000',
@@ -59,7 +60,7 @@ const styles = StyleSheet.create({
         width:40,
         height:25,
         fontFamily: 'FuturaStd-Light',
-        fontSize:13,
+        fontSize: getFontSize(13),
         textAlignVertical: "center",
         textAlign: 'center',
         color:'#FFF',
@@ -72,7 +73,7 @@ const styles = StyleSheet.create({
 
     subtitleText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:16,
+        fontSize: getFontSize(16),
         color:'#000',
         marginLeft:5
     },
@@ -94,13 +95,13 @@ const styles = StyleSheet.create({
 
     normalText:{
         fontFamily: 'FuturaStd-Light',
-        fontSize:12,
+        fontSize: getFontSize(12),
         lineHeight: 20,
     },
 
     smallTitle:{
       fontFamily: 'FuturaStd-Medium',
-      fontSize:12,
+      fontSize: getFontSize(12),
       marginTop:5,
       lineHeight: 20,
       color:'#000000'
@@ -113,13 +114,13 @@ const styles = StyleSheet.create({
 
     spaceText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:10,
+        fontSize: getFontSize(10),
         lineHeight: 20,
     },
 
     readmore: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: getFontSize(10),
         marginTop: -2,
     }
 });

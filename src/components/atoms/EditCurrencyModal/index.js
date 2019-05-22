@@ -3,6 +3,7 @@ import { Text, TouchableOpacity, View, StyleSheet} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 import PropTypes from 'prop-types';
 import styles from './styles';
+import { getFontSize } from '../../../utils/designUtils';
 
 class EditCurrencyModal extends Component {
     static propTypes = {
@@ -93,7 +94,7 @@ class EditCurrencyModal extends Component {
 }
 const pickerSelectStyles = StyleSheet.create({
     inputIOS: {
-        fontSize: 16,
+        fontSize: getFontSize(16),
         paddingTop: 13,
         paddingHorizontal: 10,
         paddingBottom: 12,

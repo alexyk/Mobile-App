@@ -5,6 +5,7 @@ import { material } from 'react-native-typography';
 import MaterialDialog from './MaterialDialog';
 
 import colors from './colors';
+import { getFontSize } from '../../../utils/designUtils';
 
 export default class SingleSelectMaterialDialog extends Component {
   constructor(props) {
@@ -81,7 +82,7 @@ export default class SingleSelectMaterialDialog extends Component {
             size={24}
           />
         </View> */}
-        <Text style={[material.subheading, {fontSize:15}]}>{row.label}</Text>
+        <Text style={[material.subheading, {fontSize: getFontSize(15)}]}>{row.label}</Text>
       </View>
     </TouchableOpacity>
   );
