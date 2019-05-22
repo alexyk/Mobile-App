@@ -237,7 +237,11 @@ export function log(tag, description, data, isImportant = false) {
           } catch (e) {}          
           lodash.merge(result,{[`${prop}${className}`]:parseObjTypes(item)});
         } else {
-          result[prop] = `${item} (${typeof(item)})`
+          try {
+            result[prop] = `${item} (${typeof(item)})`
+          } catch (error) {
+            console.error(`Error in config-debug - while parsing types: ${error.message}`,{error,item,result})
+          }
         }
       }
 
