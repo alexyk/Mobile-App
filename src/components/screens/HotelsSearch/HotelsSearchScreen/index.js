@@ -123,6 +123,7 @@ class HotelsSearchScreen extends Component {
     this.isAllHotelsLoaded = false;
     this.isFirstLoad = true;
     this.isFirstFilter = true;
+    this.isFilterFromUI = false;
     this.isSocketDown = true;
     this.isUnmounted = true;
     this.validSocketPrices = 0;
@@ -709,10 +710,6 @@ class HotelsSearchScreen extends Component {
     const _this = this;
 
     if (res.success) {
-      if (this.refs.toast && this.state.displayMode != DISPLAY_MODE_HOTEL_DETAILS) {
-        this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTERED_MSG, 3000);
-      }
-
       res.body.then((data) => {
         // not used so far
         // const isCacheExpired = data.isCacheExpired;
@@ -985,10 +982,11 @@ class HotelsSearchScreen extends Component {
       ...filterParams
     })
 
-
+    this.props.setIsApplyingFilter(true);
+    this.isFilterFromUI = fromUI;
+    
     if (fromUI) {
       // filter in UI
-      this.props.setIsApplyingFilter(true);
       filterParams.priceRange = data.priceRange
 
       const hotelsAll = this.hotelsAll;
@@ -1023,6 +1021,7 @@ class HotelsSearchScreen extends Component {
         this.isAllHotelsLoaded = true;
       }
     } else {
+      this.isFilterFromUI = false;
       // filter on server
       filterParams.priceRange = (data.priceRange[0] > data.priceRange[1]
           ? [0,50000]
@@ -1110,8 +1109,8 @@ class HotelsSearchScreen extends Component {
             {this.renderResultsAsMap()}
             {this.renderResultsAsList()}
   
-            {this.renderPreloader()}
             {this.renderMapButton()}
+            {this.renderPreloader()}
           </View>
 
           {this.renderFooter()}

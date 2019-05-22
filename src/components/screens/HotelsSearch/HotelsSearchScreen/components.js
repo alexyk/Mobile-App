@@ -357,7 +357,9 @@ export function renderFooter() {
     //const isRed = (isSocketRedColor || this.state.isStaticTimeout); 
     const textContent = (isFiltering
       ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
-      : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1",hotelsLoadedCount)
+      : this.isAllHotelsLoaded
+          ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1",hotelsLoadedCount)
+          : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING.replace("%1",hotelsLoadedCount)
     )
     simpleText = (
       <Text
@@ -484,12 +486,15 @@ export function renderPreloader() {
   const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
   const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
   const isLoading = this.state.isLoading;
+  const isFiltering = (this.props.isApplyingFilter);
   const isServerFilter = (this.state.isFilterResult);
-  const isFiltering = (this.props.isApplyingFilter && isServerFilter);
-  const isFilteringServer = (isFiltering && isServerFilter);
-  const isFilteringFromUI = (isFiltering && !isServerFilter);
+  const isFilteringFromServer = (isFiltering && isServerFilter);
+  const isFilteringFromUI = (this.isFilterFromUI);
+  const isFirstFilter = (this.isFirstFilter);
+  const opacity = null; //(isFilteringFromServer ? '77' : null);
 
-  const opacity = (isFilteringFromUI ? null : '55');
+  //log('filterUI',`${isFirstFilter ? 'first+' : 'first-'} ${isFilteringFromUI ? 'ui+' : 'ui-'} ${isFilteringFromServer ? 'srv+' : "srv-"} ${isServerFilter ? 'respSrv+' : 'respSrv-'}`)
+
   const totalText = ''/*(
     this.state.totalHotels > 0
       ? `of maximum ${this.state.totalHotels}`
@@ -502,7 +507,9 @@ export function renderPreloader() {
   )
   const message = ((isList || isMap)
     ? isFiltering
-        ? ``
+        ?  isFilteringFromUI && !isFirstFilter
+            ? ''
+            : lang.TEXT.SEARCH_HOTEL_FILTERED_MSG
         : `Loading matches for your search ...${propertiesText}`
     : isHotelDetails
        ? `Loading hotel details ...`
