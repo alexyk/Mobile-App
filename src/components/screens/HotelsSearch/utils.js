@@ -470,7 +470,7 @@ export function mergeAllHotelData(filtered, socketMap, staticMap) {
         mergedData = parseFilterHotelData(item, socketData, staticData)
       } catch (parseError) {
         mergedData = null;
-        processError(`[HotelsSearchScreen/utils::mergeAllHotelData] Parse error while executing parseFilterHotelData: ${parseError.message}`, {error:parseError,mergedData})
+        processError(`[HotelsSearch::utils] Parse error in parseFilterHotelData: ${parseError.message}`, {parseError,mergedData});
       }
 
       if (mergedData) {
@@ -481,7 +481,9 @@ export function mergeAllHotelData(filtered, socketMap, staticMap) {
 
       return mergedData;
     })
-  } catch (e) {log('error','error in merging', {e})}
+  } catch (e) {
+    processError(`[HotelsSearch::utils] Error in mergeAllHotelData: ${e.message}`, {error:e, filtered, socketMap, staticMap})
+  }
   return result;
 }
 
