@@ -1,5 +1,11 @@
 #!/usr/bin/env ruby
 
+# sequence
+#  main_exec
+#    create_config  - prepare changes to execute
+#      (1) find_change     - parse params
+#      (2) process_change  - get change to execute
+
 # const
 configs = {
   "name" => "config",
@@ -124,7 +130,7 @@ def help()
 end
 
 def replace_line_in_file(file_name, line_pattern, target, item)
-  if ($debug > 0) then
+  if ($debug > 1) then
     puts "    name: #{item['name']}\n    file: #{file_name}\n    regex: #{line_pattern}\n    target: #{target}"
     return
   end
@@ -171,11 +177,19 @@ end
 
 
 def process_change(item,default)
-  result = nil
+  result = item
+  if result.key?('changes') then
+    result["change"] = nil
+  end
   is_array = false
+
+  if $debug > 2 then puts "   [process_change]\n\titem: #{item},\n\tdefault: #{default}" end
+  if $debug > 1 then puts "   [process_change]\n     default[param]: #{default['param']}" end
   
-  default["file"] = item["file"] if (item.key?("file"))
-  default["regex"] = item["regex"] if (item.key?("regex"))
+  tmp_file = item["file"] if item["file"]
+  tmp_regex = item["regex"] if (item.key?("regex"))
+  default["file"] = tmp_file
+  default["regex"] = tmp_regex
 
   if item.key?("changes") then
     item2 = item['changes']
@@ -198,10 +212,26 @@ def process_change(item,default)
   end
 
   if !is_array then
-    result = 
-      (result.key?('param')) \
-        ? { "#{result['param']}" => result } \
-        : { "#{result['name']}" => result }
+    # debug
+    if $debug > 0 then
+      puts("   [process_change] not array -> result has param key: #{result.key?('param')}")
+      puts("   [process_change] not array -> result: #{result}")
+    end
+
+    # fill gaps for name and file
+    if !result.key?('file') && item.key?('file') then
+      result['file'] = item['file']
+    end
+    if !result.key?('name') && item.key?('name') then
+      result['name'] = item['name']
+    end
+    name = ( result.key?('param') ? result['param'] : result['name'] )
+    result = { "#{name}": result}
+
+    # debug
+    if $debug > 0 then
+      puts("   [process_change] result name: #{name}")
+    end
   end
   
   return result
@@ -211,11 +241,17 @@ end
 def find_change(key, all, param)
   result = nil
 
+  if $debug > 0 then
+    puts
+    puts "[DEBUG][find_change] Parsing parameter '#{param}'"
+  end
+
+  default = {
+    "param" => param
+  }
+
   all.each do |item|
-    default = {
-      "name" => item['name'],
-      "param" => param
-    }
+    default["name"] = item['name'],
     default["file"] = item["file"] if (item.key?("file"))
     default["regex"] = item["regex"] if (item.key?("regex"))
 
@@ -227,6 +263,12 @@ def find_change(key, all, param)
 
   if result.key?("file") && !result.key?("param") then
     result["param"] = param
+  end
+
+  if $debug > 0 then
+    puts "[result][process_change -> find_change]: #{result}"
+    puts "[DEBUG][find_change] End parsing parameter '#{param}'"
+    puts
   end
 
   return result
@@ -271,8 +313,10 @@ def create_config(changes_auto, changes_other)
     changes_names.each_with_index {|item,i| puts "   #{i}: #{item}"}
     puts "changes"
     changes.each_with_index {|item,i| puts "    #{i}: #{item["name"]}"}
-    puts "params"
-    changes.each {|key,item| puts "    #{key}: #{item}"}
+    if $debug > 2 then
+      puts "params"
+      changes.each {|key,item| puts "    #{key}: #{item}"}
+    end
   end
 
   $changes_names = changes_names
@@ -314,9 +358,12 @@ end
 # The use of global variables is for readability
 # Used globals: $changes, $changes_names
   # global variable
-$debug = 0
+$debug = 2
 $changes = []
 $changes_names = {}
+if $debug > 0 then
+  puts("\nDebug mode active: #{$debug}\n\n")
+end
   # if help param
 create_config(changes_auto,changes_other)
 help()
