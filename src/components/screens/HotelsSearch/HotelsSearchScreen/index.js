@@ -855,18 +855,14 @@ class HotelsSearchScreen extends Component {
   }
 
   listStartFetch(dataArray, pageLimit) {
-    log('list-startFetch',`data: ${dataArray.length}, pageLimit: ${pageLimit}`,{dataArray,pageLimit,hotelsAll:this.hotelsAll,state:this.state});
+    //log('list-startFetch',`data: ${dataArray.length}, pageLimit: ${pageLimit}`,{dataArray,pageLimit,hotelsAll:this.hotelsAll,state:this.state});
 
     this.listViewHelpers.startFetch(dataArray, pageLimit)
   }
 
   listUpdateDataSource(data) {
-    log('list-updateData',`listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {
-      hotels: this.state.hotelsInfo,
-      hotelsForMap: this.state.hotelsInfoForMap,
-      props:this.props,
-      data
-    });
+    //log('list-updateData',`listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {hotels: this.state.hotelsInfo,hotelsForMap: this.state.hotelsInfoForMap,props:this.props,data});
+
   	console.time('*** HotelsSearchScreen::listUpdateDataSource()')
     this.listViewRef.updateDataSource(data)
   	console.timeEnd('*** HotelsSearchScreen::listUpdateDataSource()')

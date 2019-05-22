@@ -236,7 +236,7 @@ export function renderResultsAsMap() {
   let result = null;
 
   const data = this.state.hotelsInfoForMap;
-  console.log('HOTELS-MAP',`Render map with ${data ? data.length : 'n/a'} hotels`, {data,display:this.state.displayMode});
+  //console.log('HOTELS-MAP',`Render map with ${data ? data.length : 'n/a'} hotels`, {data,display:this.state.displayMode});
   
   const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
   const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
