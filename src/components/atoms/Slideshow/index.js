@@ -14,6 +14,7 @@ import {
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 import styles from './styles';
+import shortid from 'shortid';
 
 const reactNativePackage = require('react-native/package.json');
 const splitVersion = reactNativePackage.version.split('.');
@@ -173,7 +174,7 @@ class Slideshow extends Component {
                             </View>
                         );
                         const imageComponent = (
-                            <View key={index}>
+                            <View key={shortid.generate()}>
                             <Image
                                 source={imageObject}
                                 style={{height, width}}/>
@@ -181,7 +182,7 @@ class Slideshow extends Component {
                             </View>
                         );
                         const imageComponentWithOverlay = (
-                            <View key={index} style={styles.containerImage}>
+                            <View key={shortid.generate()} style={styles.containerImage}>
                                 <View style={styles.overlay}>
                                     <Image
                                         source={imageObject}
@@ -193,7 +194,7 @@ class Slideshow extends Component {
                         if (this.props.onPress) {
                             return (
                                 <TouchableOpacity
-                                    key={index}
+                                    key={shortid.generate()}
                                     style={{height, width}}
                                     onPress={() => this.props.onPress({image, index})}
                                     delayPressIn={200}>
@@ -211,7 +212,7 @@ class Slideshow extends Component {
                     {this.props.dataSource.map((image, index) => {
                         return (
                             <TouchableOpacity
-                                key={index}
+                                key={shortid.generate()}
                                 onPress={() => { return this._move(index); }}
                                 style={[ [ styles.indicator, setIndicatorSize(this.props.indicatorSize), setIndicatorColor(this.props.indicatorColor) ],
                                     position === index && [ styles.indicatorSelected, setIndicatorColor(this.props.indicatorSelectedColor)]

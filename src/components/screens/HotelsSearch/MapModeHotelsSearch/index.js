@@ -5,7 +5,7 @@ import MapView, { Marker } from 'react-native-maps';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import styles from './styles';
 import { imgHost } from '../../../../config';
-import { log, reactotronLoggingInReleaseForceEnabled } from '../../../../config-debug';
+import { log, reactotronLoggingInReleaseForceEnabled, processError } from '../../../../config-debug';
 import lang from '../../../../language';
 import red_marker from '../../../../assets/red_marker.png';
 import blue_marker from '../../../../assets/blue_marker.png';
@@ -14,6 +14,7 @@ import { RoomsXMLCurrency } from '../../../../services/utilities/roomsXMLCurrenc
 import { CurrencyConverter } from '../../../../services/utilities/currencyConverter'
 import LocPrice from '../../../atoms/LocPrice'
 import {calculateCoordinatesGridPosition} from '../utils'
+import shortid from 'shortid'
 
 class MapModeHotelsSearch extends Component {
     _markers = [];
@@ -140,16 +141,20 @@ class MapModeHotelsSearch extends Component {
     }
 
     renderCalloutStars = ({stars}) => {
+        let result = null;
         if (stars != null) {
             const arr = Array(stars).fill();
-            return (
-                <Text style={styles.ratingsMap}>
-                    {arr.map(i => <FontAwesome key={"star_"+i}>{Icons.starO}</FontAwesome>)}
-                </Text>
-            )
-        } else {
-            return null;
+            try {
+                result = (
+                    <Text style={styles.ratingsMap}>
+                        {arr.map(i => <FontAwesome key={"star_"+i}>{Icons.starO}</FontAwesome>)}
+                    </Text>
+                )
+            } catch (error) {
+                processError(`[MapModeHotelsSearch] Error rendering stars in callout: ${error.message}`,{error});
+            }
         }
+        return result;
     }
 
     renderCallout = (hotel) => {
@@ -299,7 +304,7 @@ class MapModeHotelsSearch extends Component {
             <Marker
                 image={selectedIndex == index  ? blue_marker : red_marker}
                 style={selectedIndex == index ? {zIndex: 1} : null}
-                key={`marker_${index}`}
+                key={shortid.generate()}
                 ref={(ref) => this._markers[index] = {ref,data,index}}
                 coordinate={coordinates}
                 onPress={(e) => this.onPressMarker(e, index)}

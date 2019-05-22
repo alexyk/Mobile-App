@@ -16,7 +16,7 @@ import requester from '../../../../initDependencies';
 import { UltimateListView } from 'react-native-ultimate-listview';
 import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import { imgHost } from '../../../../config';
-import { log } from '../../../../config-debug';
+import { log, processError } from '../../../../config-debug';
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
 import styles from './styles';
@@ -212,6 +212,7 @@ class HomesSearchScreen extends Component {
         } catch (err) {
             startFetch([], 0, false);
             abortFetch(); 
+            processError('[HomesSearchScreen] onFetch: ${err.message}',{error:err})
         }
     }
 

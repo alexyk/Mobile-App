@@ -2,7 +2,7 @@ import moment from "moment";
 import lodash from "lodash";
 import { validateObject, isObject, isNumber, isString, isArray } from '../utils'
 import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config";
-import { log, checkHotelsDataWithTemplates } from "../../../config-debug";
+import { log, checkHotelsDataWithTemplates, processError } from "../../../config-debug";
 
 export const DISPLAY_MODE_NONE = "mode_none";
 export const DISPLAY_MODE_SEARCHING = "mode_searching";
@@ -463,8 +463,22 @@ export function mergeAllHotelData(filtered, socketMap, staticMap) {
     result.forEach((item,index) => {
       const socketData = (socketMap ? socketMap[item.id] : null);
       const staticData = (staticMap ? staticMap[item.id] : null);
-      let mergedData = parseFilterHotelData(item, socketData, staticData)
-      mergedData.no = index + 1;
+      
+      // Safe parse hotelData
+      let mergedData;
+      try {
+        mergedData = parseFilterHotelData(item, socketData, staticData)
+      } catch (parseError) {
+        mergedData = null;
+        processError(`[HotelsSearchScreen/utils::mergeAllHotelData] Parse error while executing parseFilterHotelData: ${parseError.message}`, {error:parseError,mergedData})
+      }
+
+      if (mergedData) {
+        mergedData.no = index + 1;
+      } else {
+        mergedData = item;
+      }
+
       return mergedData;
     })
   } catch (e) {log('error','error in merging', {e})}
