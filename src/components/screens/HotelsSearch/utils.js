@@ -45,6 +45,7 @@ export function createHotelSearchInitialState(params) {
     isStaticTimeout: false,
 
     isLoading: true, // progress dialog
+    optimiseMapMarkers: false,
 
     checkInDateFormated: startDate.format("DD/MM/YYYY").toString(),
     checkOutDateFormated: endDate.format("DD/MM/YYYY").toString(),

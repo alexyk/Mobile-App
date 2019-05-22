@@ -362,7 +362,7 @@ class MapModeHotelsSearch extends Component {
                 // isNaN -> fix for iOS - JSON value null of NSNULL cannot be converted to CLLLocationDergees
                 // isSkipRender -> optimise overlaping markers
                 if (isNaN(longitude) || isNaN(latitude) || isSkipRender) {
-                    console.log(`[Map] case 1 - gridPos: ${grid}`,{grid})
+                    //console.log(`[Map] case 1 - gridPos: ${grid}`,{grid})
                     return null;
                 }
                 
@@ -374,14 +374,14 @@ class MapModeHotelsSearch extends Component {
                     newList.push(rendered);
                 }
             } else {
-                console.log(`[Map] case 2 - null coord: ${latitude}/${longitude}`,{data,index})
+                //console.log(`[Map] case 2 - null coord: ${latitude}/${longitude}`,{data,index})
                 return null;
             }
         })
 
         console.timeEnd('*** MapModeHotelsSearch::prepareMarkers')
 
-        console.log('[Map] Prepared markers', {newList,map,hotels:this.props.hotelsInfo})
+        //console.log('[Map] Prepared markers', {newList,map,hotels:this.props.hotelsInfo})
         
         return {
             newList,
