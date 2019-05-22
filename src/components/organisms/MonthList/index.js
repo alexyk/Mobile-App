@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { FlatList, View, Dimensions } from 'react-native';
 import moment from 'moment';
 import Month from '../../molecules/Month';
-import shortid from 'shortid'
 import { log, logd } from '../../../config-debug'
 
 const { width } = Dimensions.get('window');
@@ -27,12 +26,24 @@ export default class MonthList extends PureComponent {
 
         this.state = {data: this.getMonthList()};
         this.monthList = [];
+        this.itemKey = 0;
 
         this._renderMonth = this._renderMonth.bind(this);
+        this._keyExtractor = this._keyExtractor.bind(this);
         this.shouldUpdate = this.shouldUpdate.bind(this);
         this.checkRange = this.checkRange.bind(this);
         this.getWeekNums = this.getWeekNums.bind(this);
         this.scrollToSelectedMonth = this.scrollToSelectedMonth.bind(this);
+    }
+
+    _keyExtractor() {
+        this.itemKey++;
+
+        if (this.itemKey == Number.MAX_VALUE) {
+            this.itemKey = 0;
+        }
+
+        return this.itemKey;
     }
 
     componentDidMount() {
@@ -146,7 +157,7 @@ export default class MonthList extends PureComponent {
                 style={{flex: 1}}
                 data={this.state.data}
                 extractData={this.state.data}
-                keyExtractor={item => shortid.generate()}
+                keyExtractor={this._keyExtractor}
                 renderItem={this._renderMonth}
             />
         );

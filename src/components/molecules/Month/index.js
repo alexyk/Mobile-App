@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { View, Text } from 'react-native';
 
 import PropTypes from 'prop-types';
-import shortid from 'shortid';
 import moment from 'moment';
 
 import styles from './styles';
@@ -39,6 +38,7 @@ export default class Month extends Component {
     constructor(props) {
         super(props);
 
+        this.itemIndex = 0;
         this.getDayList = this.getDayList.bind(this);
         this.renderDayRow = this.renderDayRow.bind(this);
         this.getMonthText = this.getMonthText.bind(this);
@@ -89,17 +89,27 @@ export default class Month extends Component {
 
     
     renderDayRow(dayList, index) {
-        return (
-            <View style={styles.dayRow} key={`row_${shortid.generate()}`}>
+        let id = this.itemIndex;
+
+        const result = (
+            <View style={styles.dayRow} key={`row_${id}`}>
                 {dayList.map(item =>
-                    (<Day
+                    {
+                      id++;
+                      if (id == Number.MAX_VALUE) id = 0;
+                      
+                      return <Day
                         date={item.date}
                         empty={item.empty}
                         {...this.props}
-                        key={shortid.generate()}
-                    />))}
+                        key={`day_${id}`}
+                      />
+                    })}
             </View>
         );
+        this.itemIndex = (id + 1);
+
+        return result;
     }
 
 

@@ -752,7 +752,8 @@ class HotelsSearchScreen extends Component {
             const newState = {
               hotelsInfo: hotelsAll,
               hotelsInfoForMap: hotelsAll,
-              totalHotels: count
+              totalHotels: count,
+              isLoading: false
             }
             return newState;
           },
@@ -932,6 +933,7 @@ class HotelsSearchScreen extends Component {
     console.time('*** HotelsSearchScreen::gotoFilter()')
 
     // log('HotelsSearchScreen','gotoFilter', {props:this.props, state: this.state})
+    log('HotelsSearchScreen',`gotoFilter  isLoading: ${this.state.isLoading} isFiltering: ${this.props.isApplyingFilter}`, {props:this.props, state: this.state})
 
     if (this.state.isLoading || this.props.isApplyingFilter) {
       //log('[HotelsSearch] gotoFilter::toast', {state:this.state, props:this.props})

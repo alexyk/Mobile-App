@@ -14,7 +14,6 @@ import { RoomsXMLCurrency } from '../../../../services/utilities/roomsXMLCurrenc
 import { CurrencyConverter } from '../../../../services/utilities/currencyConverter'
 import LocPrice from '../../../atoms/LocPrice'
 import {calculateCoordinatesGridPosition} from '../utils'
-import shortid from 'shortid'
 
 class MapModeHotelsSearch extends Component {
     _markers = [];
