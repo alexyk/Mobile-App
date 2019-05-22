@@ -1,24 +1,36 @@
+import { isObject } from './components/screens/utils';
+import lodash from 'lodash';
 
 // FORCE modes - possible in RELEASE
 // 
 // ALL MUST BE FALSE!!!      (unless you know what you are doing)
 export const reactotronLoggingInReleaseForceEnabled  = false;
 export const forceOffline                            = false;
+
+  // error handling
+/*  !__DEV__ console.warn (short version - message only)
+    1 console.warn (message & data)
+    2 console.error
+    3 reactotron.error
+    else:
+           throw Error                                            */
+export const errorLevel                         = 1;
+
   // reactotron
 export const reactotronReduxLoggingEnabled      = false;
 export const logConverterErrorToReactrotron     = false;
+export const showTypesInReactotronLog           = true;
   // console
 export const reduxConsoleLoggingEnabled         = false;
 export const reduxConsoleCollapsedLogging       = true;
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
-export const consoleTimeCalculations            = false;
+export const consoleTimeCalculations            = true;    // enable/disable "console.time" & "console.timeEnd" calls
   // other
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
 export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
-  // other
-// Offline mode
+  // offline mode
 // Enabled if: (__DEV__ == true) and (isOffline == true)
                                 let isOffline   = false;
                     if (forceOffline) isOffline = forceOffline;
@@ -29,6 +41,20 @@ export const autoHotelSearchFocus               = false;
 export const autoHotelSearchPlace               = 'london'
 export const autoHomeSearch                     = true;
 export const autoHomeSearchPlace                = 'uk1'
+  // TODO: Add the following options
+/*
+    (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
+    (2) Logging level
+      (0) reactotron only
+      (1) combine with console.log
+      (2) only console.log
+      Note: Maybe combine with first or have (1) console logging options (2) reactotron logging options (3) combined options
+      Best - make logging defined, as per A) delete console.log/info etc. and B) replace with planned log(), logd() - no more than 3 versions
+      for example:
+        logd - only when debugging (disabled/cleaned in release)
+        log - for info/logging purposes
+      and a rule - only one line logs (for easy ato deletion in release -> select_config.rb)
+*/
 
 
 // ---------------  function definitions  -----------------
@@ -101,6 +127,46 @@ function configureReactotron() {
 
 // ---------------     exports     -----------------
 
+// TODO: Implement error handling - logging or throw
+export function processError(description, data) {
+  if (!__DEV__) {
+
+    console.warn(description);
+
+  } else {
+
+    switch (errorLevel) {
+      case 1:
+        console.warn(description, data);
+        break;
+
+      case 2:
+        console.error(description, data);
+        break;
+
+      case 3:
+        if (console.tron && console.tron.error) {
+          //TODO: Try this - not tested!!!
+          console.tron.error(description, data);
+        }
+        break;
+
+      default:      
+        console.error(description, data);
+        throw new Error(description);
+    }
+
+  }
+
+}
+
+export function logd(tag, description, data, isImportant = false) {
+  if (__DEV__) {
+    log('dev-debug', `[${tag}] `+description, data, isImportant);
+  }
+}
+
+
 /**
  * Logs using Reactotron.display
  * @param {String/Object} tag Tag as in ERROR, API, DEBUG etc. / Can be just an object to trace
@@ -151,7 +217,34 @@ export function log(tag, description, data, isImportant = false) {
   if (params['value'] == null) {
     params['value'] = {}
   }
+
   params.value['_preview'] = params.preview;
+  
+  // types parsing
+  if (params.value && showTypesInReactotronLog) {
+    let parseObjTypes;
+
+    parseObjTypes = function(o) {
+      let result = {};
+      for (let prop in o) {
+        let item = o[prop];
+        if (isObject(item)) {
+          let className = '';
+          try {
+            className = result.constructor.name;
+            if (!className) className = result.prototype.constructor.name;
+            if (className) className = ":" + className;
+          } catch (e) {}          
+          lodash.merge(result,{[`${prop}${className}`]:parseObjTypes(item)});
+        } else {
+          result[prop] = `${item} (${typeof(item)})`
+        }
+      }
+
+      return result;
+    }
+    params.value._valueWithTypes = parseObjTypes(params.value);
+  }
 
   console.tron.display(params)
 }

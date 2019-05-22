@@ -1,7 +1,11 @@
 import { Platform, Dimensions, PixelRatio } from 'react-native'
-import { log } from '../config-debug';
+import { logd } from '../config-debug';
+import { isFontScalingEnabled } from '../config';
 
-export function getFontSize(value) {
+export const pixelRatio = PixelRatio.getPixelSizeForLayoutSize(100)/100;
+
+
+export function getFontSizeByFontScle(value) {
   const fontScale = PixelRatio.getFontScale();
   let result = PixelRatio.roundToNearestPixel(fontScale * value)
 
@@ -9,14 +13,24 @@ export function getFontSize(value) {
 }
 
 //TODO: Finish this implementation
-export function getFontSizeByWidth(value) {
+export function getFontSize(value,caller='') {
+  if (!isFontScalingEnabled) {
+    return value;
+  }
+
   // Small emulator ->    RN:320x568    real: 480x800     hdpi  (240dpi)
   // ???                                                  xhdpi (320dpi)
   // Samsung S8+    ->    RN:411x798    real:1080x1920    529ppi            (logged resolution: 411.43x797.71)
-  const defScreenWidth = 1080;
-  const defSize = 17;
-  const fontScale = PixelRatio.getFontScale();
-  let result = PixelRatio.roundToNearestPixel(fontScale * value)
+  const {height, width} = Dimensions.get('window');
+  const defPixelWidth = 1438.5;
+  const calculatedPixelWidth = width * pixelRatio;
+  const fontScale = calculatedPixelWidth / defPixelWidth;
+  let asFloat = (fontScale * value);
+  let result = PixelRatio.roundToNearestPixel(asFloat);
+
+  if (__DEV__) {
+    logd('getFontSizeByWidth',`[designUtils] ${caller} result:${result} asFloat:${asFloat.toFixed(2)}`,{asFloat,result,value,caller})
+  }
 
   return result;
 }
@@ -30,7 +44,6 @@ export function getImageSize(value) {
 
 export function logDebugInformation() {
   const {height, width} = Dimensions.get('window');
-  const pixelRatio = PixelRatio.getPixelSizeForLayoutSize(100)/100;
   const fontScale = PixelRatio.getFontScale();
   const font12 = PixelRatio.roundToNearestPixel(12*fontScale);
 

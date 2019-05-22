@@ -47,8 +47,30 @@ compilation_time = {
   "regex" => /const compilationTime.*/,
   "target" => "const compilationTime = '#{Time.now.strftime("%Y-%m-%d %H:%M:%S %Z")}';"
 }
+reactotron = {
+  "prod" => {
+    "file" => 'src/config-debug.js',
+    # "regex": /const exploreIsNative.*/,
+    # "target" => "const exploreIsNative = false;"
+    "exec" => 'npm i reactotron-react-native -P'
+  },
+  "dev" => {
+    # "file" => 'src/utils/reactotronLogging.js',
+    "file" => 'src/config-debug.js',
+    # "regex": /const exploreIsNative.*/,
+    # "target" => "const exploreIsNative = false;"
+    "exec" => 'npm i reactotron-react-native -D'
+  },
+}
+errorLevel = {
+  "name" => "error-level",
+  "file" => 'src/config-debug.js',
+  "regex": /const errorLevel.*/,
+  "target" => "const errorLevel = 0;"
+}
+
 # all automatically executed
-changes_auto = [compilation_time]; # CURRENTLY ENABLED by default
+changes_auto = [compilation_time, errorLevel]; # CURRENTLY ENABLED by default (release)
 # the rest
 changes_other = [configs, native_cfg];
 
