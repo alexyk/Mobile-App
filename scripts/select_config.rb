@@ -9,20 +9,17 @@ configs = {
     'prod'    => "const LT_CFG = LT_PROD;",
     'beta'    => "const LT_CFG = LT_PROD;",
     'prod2'   => "const LT_CFG = LT_PROD2;",
-    'staging' => "const LT_CFG = LT_STAGING;",
-    'stage'   => "const LT_CFG = LT_STAGING;",
-    'staging2'=> "const LT_CFG = LT_STAGING2;",
-    'stage2'  => "const LT_CFG = LT_STAGING2;",
     'dev'     => "const LT_CFG = LT_DEV;",
     'dev2'    => "const LT_CFG = LT_DEV2;",
     'local'   => "const LT_CFG = LT_LOCAL;",
-    # 'dev-local'   => [
-    #   {
-    #     "regex" => /const LT_CFG.*/,
-    #     ""
-    # ]
+    'staging' => "const LT_CFG = LT_STAGING;",
+    'staging2'=> "const LT_CFG = LT_STAGING2;",
+    'stage2'  => "const LT_CFG = LT_STAGING2;",
   }
 }
+# TODO: Make this an option of the object - alt, or alt_name(s) etc.
+configs["changes"]["stage"] = configs["changes"]["staging"]
+configs["changes"]["beta"] = configs["changes"]["prod"]
 native_cfg = {
   "name" => "native-config",
   "file" => 'src/version.js',
@@ -48,31 +45,58 @@ compilation_time = {
   "target" => "const compilationTime = '#{Time.now.strftime("%Y-%m-%d %H:%M:%S %Z")}';"
 }
 reactotron = {
-  "prod" => {
-    "file" => 'src/config-debug.js',
-    # "regex": /const exploreIsNative.*/,
-    # "target" => "const exploreIsNative = false;"
-    "exec" => 'npm i reactotron-react-native -P'
-  },
-  "dev" => {
-    # "file" => 'src/utils/reactotronLogging.js',
-    "file" => 'src/config-debug.js',
-    # "regex": /const exploreIsNative.*/,
-    # "target" => "const exploreIsNative = false;"
-    "exec" => 'npm i reactotron-react-native -D'
-  },
+  "name" => "reactotron-installation-type",
+  "changes" => {
+    "prod" => {
+      "file" => 'src/config-debug.js',
+      # "regex": /const exploreIsNative.*/,
+      # "target" => "const exploreIsNative = false;"
+      "exec" => 'npm i reactotron-react-native -P'
+    },
+    "dev" => {
+      # "file" => 'src/utils/reactotronLogging.js',
+      "file" => 'src/config-debug.js',
+      # "regex": /const exploreIsNative.*/,
+      # "target" => "const exploreIsNative = false;"
+      "exec" => 'npm i reactotron-react-native -D'
+    }
+  }
 }
+reactotron["changes"]["saveProd"] = reactotron["changes"]["prod"]
+reactotron["changes"]["saveDev"] = reactotron["changes"]["dev"]
 errorLevel = {
   "name" => "error-level",
   "file" => 'src/config-debug.js',
-  "regex": /const errorLevel.*/,
-  "target" => "const errorLevel = 0;"
+  "changes" => {
+    "release" => {
+      "regex" => /const errorLevel.*/,
+      "target" => "const errorLevel = 0;"
+    },
+    "error0" => {
+      "regex" => /const errorLevel.*/,
+      "target" => "const errorLevel = 0;"
+    },
+    "error1" => {
+      "regex" => /const errorLevel.*/,
+      "target" => "const errorLevel = 1;"
+    },
+    "error2" => {
+      "regex" => /const errorLevel.*/,
+      "target" => "const errorLevel = 2;"
+    },
+    "error3" => {
+      "regex" => /const errorLevel.*/,
+      "target" => "const errorLevel = 3;"
+    },
+  }
 }
+errorLevel["changes"]["release"]["file"] = errorLevel["file"]
+errorLevel["changes"]["release"]["name"] = errorLevel["name"]
 
 # all automatically executed
-changes_auto = [compilation_time, errorLevel]; # CURRENTLY ENABLED by default (release)
+changes_auto = [compilation_time, errorLevel["changes"]["release"]]; # CURRENTLY ENABLED by default (release)
 # the rest
-changes_other = [configs, native_cfg];
+changes_other = [configs, native_cfg, reactotron, errorLevel];
 
 
 # functions
@@ -272,8 +296,12 @@ def main_exec(changes)
       regex = item["regex"]
       file = item["file"]
       target = item["target"]
-      puts("  Reading file '#{file}'")
-      replace_line_in_file(file, regex, target, item)
+      if file and file.length>0 then
+        puts("  Reading file '#{file}'")
+        replace_line_in_file(file, regex, target, item)
+      else
+        puts("File name is empty: '#{file}', for '#{item}'")
+      end
       puts("\n\n")
     end
   end
