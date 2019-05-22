@@ -28,7 +28,7 @@ export default StyleSheet.create({
         marginTop:28,
         marginLeft:15,
         marginRight:15,
-        paddingHorizontal:slashLength / 2,
+        paddingHorizontal:slashLength / 4,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',

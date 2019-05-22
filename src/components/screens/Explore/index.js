@@ -6,7 +6,7 @@ import {
     Text, 
     TouchableOpacity,
     View, SafeAreaView,
-    Keyboard
+    Keyboard, Platform
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -19,7 +19,7 @@ import SearchBar from '../../molecules/SearchBar';
 import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
 import { autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace,
-    isOnline, log, autoHomeSearch 
+    isOnline, autoHomeSearch,
 } from '../../../config-debug';
 import requester from '../../../initDependencies';
 import styles from './styles';
@@ -41,10 +41,8 @@ class Explore extends Component {
     constructor(props) {
         super(props);
 
-        const startDate = moment()
-            .add(1, 'day');
-        const endDate = moment()
-            .add(2, 'day');
+        const startDate = moment().add(1, 'day');
+        const endDate = moment().add(2, 'day');
 
         this.onChangeHandler = this.onChangeHandler.bind(this);
         this.updateData = this.updateData.bind(this);
@@ -73,9 +71,11 @@ class Explore extends Component {
             cities: [],
             search: '',
             regionId: '',
+            checkInDateMoment: startDate,
             checkInDate: startDate.format('ddd, DD MMM').toString(),
             checkInDateFormated: startDate.format('DD/MM/YYYY').toString(),
             daysDifference: 1,
+            checkOutDateMoment: endDate,
             checkOutDate: endDate.format('ddd, DD MMM').toString(),
             checkOutDateFormated: endDate.format('DD/MM/YYYY').toString(),
             guests: 2,
@@ -118,11 +118,9 @@ class Explore extends Component {
             this.searchBarRef.focus()
         }
 
-        //console.log('componentWillMount', token_value, email_value);
         // Below line gives null cannot be casted to string error on ios please look into it
         requester.getUserInfo().then((res) => {
             res.body.then((data) => {
-                // console.log('componentWillMount', data);
                 if (email_value == undefined || email_value == null || email_value == "") {
                     AsyncStorage.setItem(`${domainPrefix}.auth.username`, data.email);
                     this.setState({
@@ -192,13 +190,17 @@ class Explore extends Component {
         };
     }
 
-    onDatesSelect({ startDate, endDate, startMoment, endMoment }) {
-        //console.log("onDatesSelect", startDate, endDate);
+    onDatesSelect(params) {
+        const { startDate, endDate, startMoment, endMoment } = params;
         const year = (new Date()).getFullYear();
-        const start = moment(startDate, 'ddd, DD MMM');
+        const start = moment(startDate, 'ddd, DD MMM, YYYY');
         const end = moment(endDate, 'ddd, DD MMM');
+        const daysDifference = moment.duration(endMoment.diff(startMoment)).asDays();
+
+        //logd('date-select',`year:${year} start:${start}(${typeof(start)}) end:${daysDifference}(${typeof(daysDifference)})`,{daysDifference,year,start,end,params,typrOfStartDate:`${typeof(startDate)}, ${startDate.prototype}`})
+
         this.setState({
-            daysDifference: moment.duration(end.diff(start)).asDays(),
+            daysDifference,
             checkInDate: startDate,
             checkOutDate: endDate,
             checkInDateFormated: startMoment.format('DD/MM/YYYY'),
@@ -229,7 +231,7 @@ class Explore extends Component {
                                 if (__DEV__ && autoHotelSearch) {
                                     setTimeout(() => {
                                             const {id, query} = data[0];
-                                            //log('citites','citites',{data,id,query})
+                                            //logd('citites','citites',{data,id,query})
                                             this.handlePopularCities(id, query);
                                             setTimeout(() => this.gotoSearch(), 100)
                                         },
@@ -578,11 +580,48 @@ class Explore extends Component {
         )
     }
 
-    render() {
+    renderDateAndGuestsPicker() {
         const {
-            checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated, guests
+            checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated, guests,
+            checkInDateMoment, checkOutDateMoment, infants, children, adults
         } = this.state;
 
+        let checkInDatePatched, checkOutDatePatched;
+
+        // if (Platform.OS == 'ios') {
+            checkInDatePatched = checkInDateMoment;
+            checkOutDatePatched = checkOutDateMoment;
+        // } else {
+        //     checkInDatePatched = checkInDateFormated;
+        //     checkOutDatePatched = checkOutDateFormated;
+        // }
+
+        //log('render-date-picker',`[Explore::renderDateAndGuestsPicker] State, checkInDatePatched:${checkInDatePatched}, checkOutDateFormated:${checkOutDateFormated}`,{state:true.state,checkOutDateFormated,checkInDateFormated})
+
+        return (
+            <View style={styles.scrollViewContentMain}>
+                <DateAndGuestPicker
+                    checkInDate={checkInDate}
+                    checkOutDate={checkOutDate}
+                    checkInDateFormated={checkInDatePatched}
+                    checkOutDateFormated={checkOutDatePatched}
+                    adults={adults}
+                    children={children}
+                    guests={guests}
+                    infants={infants}
+                    gotoGuests={this.gotoGuests}
+                    gotoSearch={this.gotoSearch}
+                    onDatesSelect={this.onDatesSelect}
+                    gotoSettings={this.gotoSettings}
+                    showSearchButton={true}
+                    disabled={false}
+                    isFilterable={false}
+                />
+            </View>
+        )
+    }
+
+    render() {
         return (
             <SafeAreaView style={styles.container}>
 
@@ -597,30 +636,13 @@ class Explore extends Component {
                         opacity={1.0}
                         textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                     />
+
                     {this.state.isHotel ? this.renderHotelTopView() : this.renderHomeTopView()}
                     {this.renderAutocomplete()}
 
                     <ScrollView  style={styles.scrollView} automaticallyAdjustContentInsets={true}>
 
-                        <View style={styles.scrollViewContentMain}>
-                            <DateAndGuestPicker
-                                checkInDate={checkInDate}
-                                checkOutDate={checkOutDate}
-                                checkInDateFormated={checkInDateFormated}
-                                checkOutDateFormated={checkOutDateFormated}
-                                adults={this.state.adults}
-                                children={this.state.children}
-                                guests={this.state.guests}
-                                infants={this.state.infants}
-                                gotoGuests={this.gotoGuests}
-                                gotoSearch={this.gotoSearch}
-                                onDatesSelect={this.onDatesSelect}
-                                gotoSettings={this.gotoSettings}
-                                showSearchButton={true}
-                                disabled={false}
-                                isFilterable={false}
-                            />
-                        </View>
+                        { this.renderDateAndGuestsPicker() }
 
                         <Text style={[styles.scrollViewTitles, { marginBottom: 10, marginTop: 5 }]}>Discover</Text>
 

@@ -1,21 +1,19 @@
 import React, { Component } from 'react';
+import { View, Text } from 'react-native';
+
 import PropTypes from 'prop-types';
 import shortid from 'shortid';
 import moment from 'moment';
-
-import {
-    View,
-    Text
-} from 'react-native';
 
 import styles from './styles';
 import Day from '../../atoms/Day';
 import { I18N_MAP } from './i18n';
 
+
 export default class Month extends Component {
     static propTypes = {
-        startDate: PropTypes.instanceOf(moment),
-        endDate: PropTypes.instanceOf(moment),
+        startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
+        endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         month: PropTypes.instanceOf(moment),
         today: PropTypes.instanceOf(moment),
         i18n: PropTypes.string,
@@ -36,24 +34,30 @@ export default class Month extends Component {
             subColor: ''
         }
     }
+
+
     constructor(props) {
         super(props);
+
         this.getDayList = this.getDayList.bind(this);
         this.renderDayRow = this.renderDayRow.bind(this);
         this.getMonthText = this.getMonthText.bind(this);
     }
+
+
     getMonthText() {
-        const {
-            month,
-            i18n
-        } = this.props;
+        const { month, i18n } = this.props;
+
         const y = month.year();
         const m = month.month();
         if (i18n === 'en') {
             return `${I18N_MAP[i18n][m]}, ${y}`;
+        } else {
+            return month.format('YYYY年M月');
         }
-        return month.format('YYYY年M月');
     }
+
+
     getDayList(date) {
         let dayList;
         const month = date.month();
@@ -82,9 +86,11 @@ export default class Month extends Component {
             empty: date.clone().hour(1)
         }));
     }
+
+    
     renderDayRow(dayList, index) {
         return (
-            <View style={styles.dayRow} key={`row${index}`}>
+            <View style={styles.dayRow} key={`row_${shortid.generate()}`}>
                 {dayList.map(item =>
                     (<Day
                         date={item.date}
@@ -95,15 +101,15 @@ export default class Month extends Component {
             </View>
         );
     }
+
+
     render() {
-        const {
-            month,
-            color
-        } = this.props;
+        const { month, color } = this.props;
         const subColor = { color: color.subColor };
         const titleText = this.getMonthText();
         const dayList = this.getDayList(month.clone());
         const rowArray = new Array(dayList.length / 7).fill('');
+
         return (
             <View style={styles.month}>
                 <View style={styles.monthTitle}>

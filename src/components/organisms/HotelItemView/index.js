@@ -116,16 +116,13 @@ class HotelItemView extends Component {
       isPriceReady = false;
     }
 
-    if (!isPriceReady) {
-      const { props, state, isAllHotelsLoaded } = this.props.parent;
-      // if (isAllHotelsLoaded) {
-        // log('@@hotel-item', `Item not showing price, all: ${state.totalHotels}`, {props,state,item,currencySign,converted,days})
-      // }
-    }
-
     if (isPriceReady) {
       fiatPrice = (price / days).toFixed(0);
       priceToFixed2 = parseFloat(price).toFixed(2);
+      
+      //const { props, state, isAllHotelsLoaded } = this.props.parent;
+      //log('@@hotel-item', `Item price, fiatPrice:${fiatPrice}, days:${days}, priceToFixed2:${priceToFixed2}, price-ready:${isPriceReady}`, {props,state,item,currencySign,converted,days,price,fiatPrice,days,priceToFixed2})
+
       content = (
         <View style={styles.costView}>
           <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
