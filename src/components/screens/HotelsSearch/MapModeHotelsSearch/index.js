@@ -80,8 +80,10 @@ class MapModeHotelsSearch extends Component {
                 const oldLen = (hotelsOld ? hotelsOld.length : 'n/a')
                 const newLen = (hotelsNew ? hotelsNew.length : 'n/a')
                 const equal = (hotelsOld === hotelsNew) ? '===' : '!==';
-                log('map-props',`componentDidUpdate ${oldLen} ${equal} ${newLen}`, {newProps, oldProps, equal, oldLen, newLen}, true)
+                //log('map-props',`componentDidUpdate ${oldLen} ${equal} ${newLen}`, {newProps, oldProps, equal, oldLen, newLen}, true)
             }
+            
+
             const {newList:renderedMarkers, map:markersMap} = this.prepareMarkers(prevState.selectedRegion);
             this.setState({renderedMarkers,markersMap})
         }
@@ -207,13 +209,11 @@ class MapModeHotelsSearch extends Component {
     }
 
     onPressMarker = (e, indexParam) => {
-        e.stopPropagation();
-
         const {data,ref,index} = this._markers[indexParam];
 
         log("onPressMarker", `thumb:${data.thumbnail} index:${index} id:${data.id}`, {index,e,data,props:this.props});
 
-        if (this.state.selectedMarkerIndex != index) {
+        /*if (this.state.selectedMarkerIndex != index) {
             this.selectedMarker = ref;
             if (this.selectedMarker) {
                         // change selection
@@ -235,26 +235,24 @@ class MapModeHotelsSearch extends Component {
                         selectedData: data
                 }});
             }
-        }
+        }*/
     }
 
     onPressMap = (e) => {
-        e.stopPropagation();
-
+        log('map-press',`e: ${e}`,{e})
         const index = this.state.selectedMarkerIndex;
-        if (index != -1 && this._markers[index]) {
+        /* if (index != -1 && this._markers[index]) {
             //this._markers[index].hideCallout();
             this.selectedMarker = null;
             this.setState(
                 (prev) => ({selectedMarkerIndex: -1,prevSelectedMarkerIndex: prev.selectedMarkerIndex, selectedData: null})
             );
-        }
+        } */
     }
 
     renderMarkers() {
         let renderedMarkers = this.state.renderedMarkers;
-
-        log('render-markers', `${renderedMarkers ? renderedMarkers.length : 0}`)
+        // log('render-markers', `${renderedMarkers ? renderedMarkers.length : 0}`)
 
         const now = Date.now()
         console.time(`*** MapModeHotelsSearch::renderMarkers ${now}`)
@@ -265,10 +263,11 @@ class MapModeHotelsSearch extends Component {
         }        
         //this.allMarkers = [];
 
+        /* 
         const prev = this.state.prevHotelsInfo;
         const current = this.props.hotelsInfo;
-        // log('map-markers-render',`prev: ${prev ? prev.length : 'n/a'}    current: ${current.length}/${renderedMarkers?renderedMarkers.length:'n/a'}`,{prev,current,state:this.state,props:this.props})
-
+        log('map-markers-render',`prev: ${prev ? prev.length : 'n/a'}    current: ${current.length}/${renderedMarkers?renderedMarkers.length:'n/a'}`,{prev,current,state:this.state,props:this.props})
+ */
         //log('map-msettingarkers',{all:this.allMarkers})
         console.timeEnd(`*** MapModeHotelsSearch::renderMarkers ${now}`)
 
