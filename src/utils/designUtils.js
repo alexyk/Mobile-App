@@ -5,7 +5,7 @@ import { isFontScalingEnabled } from '../config';
 export const pixelRatio = PixelRatio.getPixelSizeForLayoutSize(100)/100;
 
 
-export function getFontSizeByFontScle(value) {
+export function getFontSizeByFontScale(value) {
   const fontScale = PixelRatio.getFontScale();
   let result = PixelRatio.roundToNearestPixel(fontScale * value)
 
@@ -13,6 +13,8 @@ export function getFontSizeByFontScle(value) {
 }
 
 //TODO: Finish this implementation
+//TODO: Maybe a good idea to use this as a general font import
+// including what's in common.style.js
 export function getFontSize(value,caller='') {
   if (!isFontScalingEnabled) {
     return value;
