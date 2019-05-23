@@ -209,9 +209,9 @@ class Explore extends Component {
     }
     
     onSearchEnterKey(event) {
-        if (this.state.cities.length > 0) {
+        // auto search on enter (done) key from keyboard
+        if (__DEV__ && this.state.cities.length > 0) {
             const {id, query} = this.state.cities[0];
-            // console.tron.log(`[Explore] onSearchEnterKey: ${query}, id: ${id}`);
             this.handleAutocompleteSelect(id, query, this.gotoSearch);
         }
     }

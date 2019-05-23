@@ -55,6 +55,8 @@ class MapModeHotelsSearch extends Component {
         this.onCalloutPress = this.onCalloutPress.bind(this)
         this.onPressMap = this.onPressMap.bind(this)
         //this.allMarkers = []
+
+        this.itemId = 0;
     }
 
     componentDidMount() {
@@ -298,11 +300,15 @@ class MapModeHotelsSearch extends Component {
         const {latitude, longitude} = data;
         const coordinates = {latitude, longitude};
         const selectedIndex = this.state.selectedMarkerIndex;
+        this.itemId++;
+        if (this.itemId == Number.MAX_VALUE) {
+            this.itemId = 0;
+        }
         return (
             <Marker
                 image={selectedIndex == index  ? blue_marker : red_marker}
                 style={selectedIndex == index ? {zIndex: 1} : null}
-                key={shortid.generate()}
+                key={this.itemId}
                 ref={(ref) => this._markers[index] = {ref,data,index}}
                 coordinate={coordinates}
                 onPress={(e) => this.onPressMarker(e, index)}
