@@ -358,7 +358,7 @@ end
 # The use of global variables is for readability
 # Used globals: $changes, $changes_names
   # global variable
-$debug = 2
+$debug = 0
 $changes = []
 $changes_names = {}
 if $debug > 0 then

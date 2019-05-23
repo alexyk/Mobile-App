@@ -34,7 +34,7 @@ fi
 
 # select config
 ./scripts/select_config.rb "$@"
-exit
+
 # build
 echo "Buldinging a $cfg version"
 cd android
