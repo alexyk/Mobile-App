@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import { setDatesAndGuestsData } from '../../../redux/action/userInterface'
 
 import {
     View,
@@ -13,7 +16,7 @@ import MonthList from '../../organisms/MonthList';
 import { I18N_MAP } from './i18n';
 import CloseButton from '../../atoms/CloseButton';
 
-export default class Calendar extends Component {
+class Calendar extends Component {
     static propTypes = {
         color: PropTypes.shape({
             mainColor: PropTypes.string,
@@ -37,9 +40,10 @@ export default class Calendar extends Component {
         this.state = {};
         this.today = moment();
         this.year = this.today.year();
-        const { startDate, endDate } = this.props.navigation.state.params;
+        const { startDate, endDate } = this.props.datesAndGuestsData;
         this.state = { startDate, endDate };
-
+        this.weekRendered = null;
+        
         this.getDateRange();
 
         this.i18n = this.i18n.bind(this);
@@ -56,29 +60,39 @@ export default class Calendar extends Component {
         this.resetCalendar();
     }
 
+    componentDidUpdate() {
+        const subFontColor = { color: this.props.color.subColor };
+        this.weekRendered = [7, 1, 2, 3, 4, 5, 6].map(item => <Text style={[styles.weekText, subFontColor]} key={item}>{this.i18n(item, 'w')}</Text>);
+    }
+
     onChoose(day) {
         const { startDate, endDate } = this.state;
-
+        let newData = {};
+        const dayAsI18Str = this.i18n(day, 'date');
+        const dayAsI18WeekDayStr = this.i18n(day.isoWeekday(), 'w');
+        
         if ((!startDate && !endDate) || day < startDate || (startDate && endDate)) {
-            this.setState({
+            newData = {
                 startDate: day,
                 endDate: null,
-                startDateText: this.i18n(day, 'date'),
-                startWeekdayText: this.i18n(day.isoWeekday(), 'w'),
+                startDateText: dayAsI18Str,
+                startWeekdayText: dayAsI18WeekDayStr,
                 endDateText: '',
                 endWeekdayText: ''
-            });
+            }
         } else if (startDate && !endDate && day > startDate) {
-            this.setState({
+            newData = {
                 endDate: day,
-                endDateText: this.i18n(day, 'date'),
-                endWeekdayText: this.i18n(day.isoWeekday(), 'w')
-            });
+                endDateText: dayAsI18Str,
+                endWeekdayText: dayAsI18WeekDayStr
+            };
         }
+
+        this.setState(newData);
     }
 
     getDateRange() {
-        const { maxDate, minDate, format_input } = this.props.navigation.state.params;
+        const { maxDate, minDate, format_input } = this.props.datesAndGuestsData;
 
         let max = moment(maxDate, format_input);
         let min = moment(minDate, format_input);
@@ -101,7 +115,7 @@ export default class Calendar extends Component {
     }
 
     resetCalendar() {
-        const { startDate, endDate, format_input } = this.props.navigation.state.params;
+        const { startDate, endDate, format_input } = this.props.datesAndGuestsData;
         const start = moment(startDate, format_input);
         const end = moment(endDate, format_input);
         const isStartValid = start.isValid() && start >= this.minDate && start <= this.maxDate;
@@ -150,22 +164,27 @@ export default class Calendar extends Component {
             endWeekdayText: ''
         });
     }
+    
     confirm() {
-        const {
-            startDate,
-            endDate
-        } = this.state;
-        const startMoment = startDate ? startDate : null;
-        const endMoment = endDate ? endDate : null;
-        this.props.navigation.state.params.onConfirm({
-            startDate: startMoment ? startMoment.format(this.props.navigation.state.params.format_display) : null,
-            endDate: endMoment ? endMoment.format(this.props.navigation.state.params.format_display) : null,
+        const { startDate,endDate } = this.state;
+        const startMoment = (startDate ? startDate : null);
+        const endMoment = (endDate ? endDate : null);
+
+        const { format_display } = this.props.datesAndGuestsData;
+
+        this.props.datesAndGuestsData.onConfirm({
+            startDate: startMoment ? startMoment.format(format_display) : null,
+            endDate: endMoment ? endMoment.format(format_display) : null,
             startMoment,
             endMoment
         });
+
         this.props.navigation.goBack();
     }
+
     render() {
+        console.time('*** render Calendar')
+
         const {
             startDate,
             endDate,
@@ -181,7 +200,7 @@ export default class Calendar extends Component {
             borderColor,
             primaryColor
         } = this.props.color;
-        const { format_input } = this.props.navigation.state.params;
+        const { format_input } = this.props.datesAndGuestsData;
 
         const color = {
             mainColor, subColor, borderColor, primaryColor
@@ -192,7 +211,8 @@ export default class Calendar extends Component {
         const primaryFontColor = { color: primaryColor };
         const isValid = !startDate || endDate;
         const isClearVisible = startDate || endDate;
-        return (
+
+        const result = (
             <View style={[styles.container, mainBack]}>
                 <View style={{justifyContent: 'space-between', flexDirection: 'row',}}>
                     <CloseButton onPress={this.cancel} />
@@ -229,8 +249,7 @@ export default class Calendar extends Component {
                     </View>
                 </View>
                 <View style={styles.week}>
-                    {[7, 1, 2, 3, 4, 5, 6].map(item =>
-                        <Text style={[styles.weekText, subFontColor]} key={item}>{this.i18n(item, 'w')}</Text>)}
+                    {this.weekRendered}
                 </View>
                 <View style={[styles.scroll]}>
                     <MonthList
@@ -277,5 +296,22 @@ export default class Calendar extends Component {
                 </View>
             </View>
         );
+
+        console.timeEnd('*** render Calendar')
+
+        return result;
     }
 }
+
+
+let mapStateToProps = (state) => {
+    return {
+        datesAndGuestsData: state.userInterface.datesAndGuestsData,
+    };
+}
+
+const mapDispatchToProps = dispatch => ({
+    setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Calendar);

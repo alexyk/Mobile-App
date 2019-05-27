@@ -27,20 +27,21 @@ export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = true;    // enable/disable "console.time" & "console.timeEnd" calls
   // other
-export const webviewDebugEnabled                = false;
-export const hotelsSearchMapDebugEnabled        = false;
-export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
+  export const webviewDebugEnabled                = false;
+  export const hotelsSearchMapDebugEnabled        = false;
+  export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
   // offline mode
-// Enabled if: (__DEV__ == true) and (isOffline == true)
+  // Enabled if: (__DEV__ == true) and (isOffline == true)
                                 let isOffline   = false;
-                    if (forceOffline) isOffline = forceOffline;
+  if (forceOffline) isOffline = forceOffline;
 if (!__DEV__) isOffline = false;
-export const isOnline = (!isOffline);
-export const autoHotelSearch                    = false;
-export const autoHotelSearchFocus               = false;
-export const autoHotelSearchPlace               = 'london'
-export const autoHomeSearch                     = true;
-export const autoHomeSearchPlace                = 'uk1'
+  export const isOnline = (!isOffline);
+  export const autoHotelSearch                    = false;
+  export const autoHotelSearchFocus               = false;
+  export const autoHotelSearchPlace               = 'london'
+  export const autoHomeSearch                     = true;
+  export const autoHomeSearchPlace                = 'uk1'
+  export const autoCalendar                       = true;
   // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
@@ -91,6 +92,8 @@ function configureConsole() {
         clear: (...args) => func('clear',...args),
         error: (...args) => func('error',...args),
         warn: (...args) => func('clear',...args),
+        mylog: (...args) => func('mylog',...args),
+        mylogd: (...args) => func('mylogd',...args),
     }
   }  
 

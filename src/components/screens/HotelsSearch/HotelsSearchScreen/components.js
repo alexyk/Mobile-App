@@ -84,6 +84,10 @@ export function renderBackButtonAndSearchField() {
 
 
 export function renderCalendarAndFilters() {
+  const {
+    checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated,
+    guests, infants, children, adults
+  } = this.props.datesAndGuestsData;
   return (
     <View
       key={'calendarAndFilters'}
@@ -100,14 +104,14 @@ export function renderCalendarAndFilters() {
       ]}
     >
       <DateAndGuestPicker
-        checkInDate={this.state.checkInDate}
-        checkOutDate={this.state.checkOutDate}
-        checkInDateFormated={this.state.checkInDateFormated}
-        checkOutDateFormated={this.state.checkOutDateFormated}
-        adults={this.state.adults}
-        children={this.state.children}
-        infants={this.state.infants}
-        guests={this.state.guests}
+        checkInDate={checkInDate}
+        checkOutDate={checkOutDate}
+        checkInDateFormated={checkInDateFormated}
+        checkOutDateFormated={checkOutDateFormated}
+        adults={adults}
+        children={children}
+        infants={infants}
+        guests={guests}
         gotoFilter={this.gotoFilter}
         disabled={!this.state.editable}
         showSearchButton={this.state.isNewSearch}

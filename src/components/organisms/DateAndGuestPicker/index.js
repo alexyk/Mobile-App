@@ -4,38 +4,36 @@ import PropTypes from 'prop-types';
 import styles from './styles';
 import { withNavigation } from 'react-navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { autoCalendar } from '../../../config-debug';
 
 
 class DateAndGuestPicker extends Component {
     constructor(props) {
         super(props);
-        //console.log("DateAndGuestPicker", props);
+    }
+
+    componentDidMount() {
+        if (__DEV__ && autoCalendar) setTimeout(() => this.onCalendar());
     }
 
     onFilter = () => {
-        this.props.gotoFilter();
+        setTimeout(() => this.props.gotoFilter());
     }
 
     onGuests = () => {
-        this.props.gotoGuests();
+        setTimeout(() => this.props.gotoGuests());
     }
 
     onSearch = () => {
-        this.props.gotoSearch();
+        setTimeout(() => this.props.gotoSearch());
     }
 
     onCancel = () => {
-        this.props.gotoCancel();
+        setTimeout(() => this.props.gotoCancel());
     }
 
     onCalendar = () => {
-        this.props.navigation.navigate('CalendarScreen', {
-            startDate: this.props.checkInDateFormated,
-            endDate: this.props.checkOutDateFormated,
-            format_input: "DD/MM/YYYY",
-            format_display: "ddd, DD MMM",
-            onConfirm: this.props.onDatesSelect
-        });
+        setTimeout(() => this.props.navigation.navigate('CalendarScreen'));
     }
 
     render() {

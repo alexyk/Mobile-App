@@ -1,9 +1,8 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { FlatList, View, Dimensions } from 'react-native';
+import { Dimensions, FlatList } from 'react-native';
 import moment from 'moment';
 import Month from '../../molecules/Month';
-import { log, logd } from '../../../config-debug'
 
 const { width } = Dimensions.get('window');
 export default class MonthList extends PureComponent {
@@ -30,7 +29,7 @@ export default class MonthList extends PureComponent {
 
         this._renderMonth = this._renderMonth.bind(this);
         this._keyExtractor = this._keyExtractor.bind(this);
-        this.shouldUpdate = this.shouldUpdate.bind(this);
+        // this.shouldUpdate = this.shouldUpdate.bind(this);
         this.checkRange = this.checkRange.bind(this);
         this.getWeekNums = this.getWeekNums.bind(this);
         this.scrollToSelectedMonth = this.scrollToSelectedMonth.bind(this);
@@ -43,7 +42,7 @@ export default class MonthList extends PureComponent {
             this.itemKey = 0;
         }
 
-        return this.itemKey;
+        return this.itemKey.toString();
     }
 
     componentDidMount() {
@@ -64,7 +63,7 @@ export default class MonthList extends PureComponent {
             const month = {
                 date: minDate.clone()
             };
-            month.shouldUpdate = this.shouldUpdate(month, props);
+            //month.shouldUpdate = this.shouldUpdate(month, props);
             monthList.push(month);
             minDate.add(1, 'month');
         }
@@ -89,12 +88,13 @@ export default class MonthList extends PureComponent {
             total += Math.ceil((num + day) / 7);
             clonedMoment.add(1, 'months');
         }
+
         return total;
     }
 
     shouldUpdate(month, props) {
         if (!props) return false;
-        const {
+         const {
             startDate,
             endDate
         } = props;
@@ -104,6 +104,7 @@ export default class MonthList extends PureComponent {
         const next = this.checkRange(date, startDate, endDate);
         const prev = this.checkRange(date, this.props.startDate, this.props.endDate);
         if (prev || next) return true;
+
         return false;
     }
 
@@ -144,6 +145,7 @@ export default class MonthList extends PureComponent {
         
         return (
             <Month
+                key={`${this.itemId}`}
                 month={month}
                 {...props}
             />
@@ -156,7 +158,6 @@ export default class MonthList extends PureComponent {
                 ref={(list) => { this.list = list; }}
                 style={{flex: 1}}
                 data={this.state.data}
-                extractData={this.state.data}
                 keyExtractor={this._keyExtractor}
                 renderItem={this._renderMonth}
             />

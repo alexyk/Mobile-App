@@ -394,9 +394,9 @@ class HotelFilters extends Component {
             </TouchableOpacity>
           </View> */}
         
-        <LTLoader isLoading={this.props.isApplyingFilter} 
+        {/* <LTLoader isLoading={this.props.isApplyingFilter} 
           style={{height:'80%', marginTop:'20%'}}
-        />
+        /> */}
           
         </View>
       </SafeAreaView>

@@ -1135,6 +1135,7 @@ const mapStateToProps = state => {
     currency: state.currency.currency,
     isApplyingFilter: state.userInterface.isApplyingFilter,
     searchResults: state.hotels.searchResults,
+    datesAndGuestsData: state.userInterface.datesAndGuestsData,
     //searchResultsFiltered: state.hotels.searchResultsFiltered,
   };
 };

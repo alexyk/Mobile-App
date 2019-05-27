@@ -6,7 +6,7 @@ import {
     Text, 
     TouchableOpacity,
     View, SafeAreaView,
-    Keyboard, Platform
+    Keyboard
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -30,6 +30,7 @@ import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectM
 
 import LocRateButton from '../../atoms/LocRateButton'
 import { setCurrency } from '../../../redux/action/Currency'
+import { setDatesAndGuestsData } from '../../../redux/action/userInterface'
 
 import {isNative} from '../../../version'
 import { gotoWebview } from '../utils';
@@ -40,9 +41,6 @@ class Explore extends Component {
     static self;
     constructor(props) {
         super(props);
-
-        const startDate = moment().add(1, 'day');
-        const endDate = moment().add(2, 'day');
 
         this.onChangeHandler = this.onChangeHandler.bind(this);
         this.updateData = this.updateData.bind(this);
@@ -71,17 +69,7 @@ class Explore extends Component {
             cities: [],
             search: '',
             regionId: '',
-            checkInDateMoment: startDate,
-            checkInDate: startDate.format('ddd, DD MMM').toString(),
-            checkInDateFormated: startDate.format('DD/MM/YYYY').toString(),
             daysDifference: 1,
-            checkOutDateMoment: endDate,
-            checkOutDate: endDate.format('ddd, DD MMM').toString(),
-            checkOutDateFormated: endDate.format('DD/MM/YYYY').toString(),
-            guests: 2,
-            adults: 2,
-            children: 0,
-            infants: 0,
             roomsDummyData: encodeURI(JSON.stringify(roomsData)),
             filter: {
                 showUnavailable: true, name: '', minPrice: 1, maxPrice: 5000, stars: [0, 1, 2, 3, 4, 5]
@@ -99,6 +87,9 @@ class Explore extends Component {
             countriesLoaded: false,
             currencySelectionVisible: false,
         };
+
+        // init dates
+        props.setDatesAndGuestsData({onConfirm: this.onDatesSelect})
         // this.props.actions.getCurrency(props.currency, false);//eslint-disable-line
         Explore.self = this;
 
@@ -114,8 +105,8 @@ class Explore extends Component {
             email: email_value,
         });
 
-        if (__DEV__ && autoHotelSearchFocus) {
-            this.searchBarRef.focus()
+        if (__DEV__) {
+            if (autoHotelSearchFocus) this.searchBarRef.focus()
         }
 
         // Below line gives null cannot be casted to string error on ios please look into it
@@ -192,20 +183,15 @@ class Explore extends Component {
 
     onDatesSelect(params) {
         const { startDate, endDate, startMoment, endMoment } = params;
-        const year = (new Date()).getFullYear();
-        const start = moment(startDate, 'ddd, DD MMM, YYYY');
-        const end = moment(endDate, 'ddd, DD MMM');
         const daysDifference = moment.duration(endMoment.diff(startMoment)).asDays();
 
-        //logd('date-select',`year:${year} start:${start}(${typeof(start)}) end:${daysDifference}(${typeof(daysDifference)})`,{daysDifference,year,start,end,params,typrOfStartDate:`${typeof(startDate)}, ${startDate.prototype}`})
-
-        this.setState({
-            daysDifference,
+        setTimeout(() => this.setState({daysDifference}));
+        setTimeout(() => this.props.setDatesAndGuestsData({
             checkInDate: startDate,
             checkOutDate: endDate,
             checkInDateFormated: startMoment.format('DD/MM/YYYY'),
             checkOutDateFormated: endMoment.format('DD/MM/YYYY'),
-        });
+        }));
     }
     
     onSearchEnterKey(event) {
@@ -582,19 +568,13 @@ class Explore extends Component {
 
     renderDateAndGuestsPicker() {
         const {
-            checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated, guests,
+            checkInDate, checkOutDate, guests,
             checkInDateMoment, checkOutDateMoment, infants, children, adults
-        } = this.state;
+        } = this.props.datesAndGuestsData;
 
         let checkInDatePatched, checkOutDatePatched;
-
-        // if (Platform.OS == 'ios') {
-            checkInDatePatched = checkInDateMoment;
-            checkOutDatePatched = checkOutDateMoment;
-        // } else {
-        //     checkInDatePatched = checkInDateFormated;
-        //     checkOutDatePatched = checkOutDateFormated;
-        // }
+        checkInDatePatched = checkInDateMoment;
+        checkOutDatePatched = checkOutDateMoment;
 
         //log('render-date-picker',`[Explore::renderDateAndGuestsPicker] State, checkInDatePatched:${checkInDatePatched}, checkOutDateFormated:${checkOutDateFormated}`,{state:true.state,checkOutDateFormated,checkInDateFormated})
 
@@ -724,7 +704,6 @@ class Explore extends Component {
                         visible = { this.state.currencySelectionVisible }
                         onCancel = { () =>this.setState({ currencySelectionVisible: false }) }
                         onOk = { result => {
-                            //console.log("select country", result);
                             this.setState({ currencySelectionVisible: false });
                             this.props.setCurrency({currency: result.selectedItem.label});
                             // this.props.actions.getCurrency(result.selectedItem.label);
@@ -754,11 +733,13 @@ let mapStateToProps = (state) => {
         currency: state.currency.currency,
         currencySign: state.currency.currencySign,
         countries: state.country.countries,
+        datesAndGuestsData: state.userInterface.datesAndGuestsData,
     };
 }
 
 const mapDispatchToProps = dispatch => ({
     setCurrency: bindActionCreators(setCurrency, dispatch),
+    setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Explore);

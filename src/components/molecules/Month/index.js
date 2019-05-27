@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { View, Text } from 'react-native';
 
 import PropTypes from 'prop-types';
@@ -9,7 +9,7 @@ import Day from '../../atoms/Day';
 import { I18N_MAP } from './i18n';
 
 
-export default class Month extends Component {
+export default class Month extends PureComponent {
     static propTypes = {
         startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
@@ -38,12 +38,19 @@ export default class Month extends Component {
     constructor(props) {
         super(props);
 
-        this.itemIndex = 0;
+        this.state = {
+            renderedDays: []
+        }
+
+        this.itemId = 0;
         this.getDayList = this.getDayList.bind(this);
         this.renderDayRow = this.renderDayRow.bind(this);
         this.getMonthText = this.getMonthText.bind(this);
     }
 
+    componentDidMount() {
+        this.prepareDaysRendering();
+    }
 
     getMonthText() {
         const { month, i18n } = this.props;
@@ -59,6 +66,9 @@ export default class Month extends Component {
 
 
     getDayList(date) {
+        // const now = Date.now()
+        // console.time(`*** Month::getDayList ${now}`);
+
         let dayList;
         const month = date.month();
         let weekday = date.isoWeekday();
@@ -82,21 +92,39 @@ export default class Month extends Component {
                 empty: date.clone().hour(1)
             }));
         }
-        return dayList.concat(new Array(Math.abs(weekday - 6)).fill({
+
+        const result = dayList.concat(new Array(Math.abs(weekday - 6)).fill({
             empty: date.clone().hour(1)
         }));
+
+        // console.timeEnd(`*** Month::getDayList ${now}`);
+
+        return result;
     }
 
+    prepareDaysRendering() {
+        // console.time('*** Month::prepareDaysRendering')
+
+        const dayList = this.getDayList(this.props.month.clone());
+        const rowArray = new Array(dayList.length / 7).fill('');
+        const renderedDays = rowArray.map((item, i) => {
+            return this.renderDayRow(dayList.slice(i * 7, (i * 7) + 7), i)
+        })
+
+        this.setState({renderedDays})
+
+        // console.timeEnd('*** Month::prepareDaysRendering')
+    }
     
     renderDayRow(dayList, index) {
-        let id = this.itemIndex;
+        let id = this.itemId;
 
         const result = (
             <View style={styles.dayRow} key={`row_${id}`}>
                 {dayList.map(item =>
                     {
                       id++;
-                      if (id == Number.MAX_VALUE) id = 0;
+                      if (id == Number.MAX_VALUE-1) id = 0;
                       
                       return <Day
                         date={item.date}
@@ -107,18 +135,15 @@ export default class Month extends Component {
                     })}
             </View>
         );
-        this.itemIndex = (id + 1);
+        this.itemId = (id+1);
 
         return result;
     }
 
-
     render() {
-        const { month, color } = this.props;
+        const { color } = this.props;
         const subColor = { color: color.subColor };
         const titleText = this.getMonthText();
-        const dayList = this.getDayList(month.clone());
-        const rowArray = new Array(dayList.length / 7).fill('');
 
         return (
             <View style={styles.month}>
@@ -126,8 +151,7 @@ export default class Month extends Component {
                     <Text style={[styles.monthTitleText, subColor]}>{titleText}</Text>
                 </View>
                 <View style={styles.days}>
-                    {rowArray.map((item, i) =>
-                        this.renderDayRow(dayList.slice(i * 7, (i * 7) + 7), i))}
+                    { this.state.renderedDays }
                 </View>
             </View>
         );
