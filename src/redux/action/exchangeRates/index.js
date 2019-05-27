@@ -27,8 +27,6 @@ export const getLocRate = (baseCurrency) => {
         requester.getLocRateByCurrency(baseCurrency).then(res => {
             res.body.then(data => {
                 const parsedValue = 1/parseFloat(data);
-                //log('get-locrate',`Base currency: ${baseCurrency}, rate: ${data instanceof Array ? data[0].price_eur : parsedValue}`, {data});
-                //console.log("getLocRate", data);
                 dispatch(setLocEurRate(parsedValue));
             });
         });

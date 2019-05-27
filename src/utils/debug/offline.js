@@ -52,14 +52,16 @@ export default function createOfflineRequester() {
     body:new Promise(
       function (success,reject) {
         try {
-          const keys = Object.keys(data)
-          /* let keysStr = keys.map( key => `${key} ` ).join('')
+          const keys = (isObject(data) ? Object.keys(data) : [typeof(data)])
+          let keysStr = keys.map( key => `${key} ` ).join('')
           if (keysStr.length > 70) {
             keysStr = keysStr.substr(0,70) + ' ...'
           }
           const keysDetails = keys.map( key => `${key}:${isObject(data[key])?'{...}':data[key]} ` )
-          log('API-OFFLINE', `${title} -> ${keysStr.substr(0,80)}...`, {data,keysDetails} ) */
-          log('API-OFFLINE', title, {data})
+        
+          // log('API-OFFLINE', `${title} -> ${keysStr.substr(0,80)}...`, {data,keysDetails,keys} )
+          log('API-OFFLINE', `${title}`, {data,keysDetails,keys,keysStr} )
+          // log('API-OFFLINE', title, {data})
         } catch (e) {
           log('API-OFFLINE',`ERROR in ${title}: ${e.message}`, {e}, true)
         }
@@ -112,7 +114,7 @@ export default function createOfflineRequester() {
 		getLocRateByCurrency: (...args) 		    => genPromise(args,'getLocRateByCurrency'),
 		getRegionsBySearchParameter: (...args) 	=> genPromise(args,'getRegionsBySearchParameter'),
 		getStaticHotels: (...args) 				      => genPromise(args,'getStaticHotels',2),
-		getMapInfo: (...args) 					        => genPromise(args,'getMapInfo', 15),
+		getMapInfo: (...args) 					        => genPromise(args,'getMapInfo', 1),
 		getHotelById: (...args) 					      => genPromise(args,'getHotelById', 0.5),
 		getHotelRooms: (...args) 					      => genPromise(args,'getHotelRooms', 0.5),
 		getConfigVarByName: (...args) 					=> genPromise(args,'getConfigVarByName'),
