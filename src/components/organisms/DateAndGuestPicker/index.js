@@ -41,6 +41,11 @@ class DateAndGuestPicker extends Component {
             checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable
         } = this.props;
 
+        console.log('[TEMP] props', {props:this.props})
+
+        const checkInDateText = (checkInDate || 'Select Date')
+        const checkOutDateText = (checkOutDate  || '------')
+
         const isCalendarDisabled = (disabled || this.props.onDatesSelect == null);
         const isGuestsDisabled = (disabled || this.props.gotoGuests == null);
 
@@ -54,14 +59,14 @@ class DateAndGuestPicker extends Component {
                             disabled={isCalendarDisabled}>
                             <View style={styles.datePickerView}>
                                 <Text style={isCalendarDisabled ? styles.label_disabled : styles.label}>Check In</Text>
-                                <Text style={styles.value}>{ checkInDate || 'Select Date' }</Text>
+                                <Text style={styles.value}>{ checkInDateText }</Text>
                             </View>
 
                             <View style={styles.separator} />
 
                             <View style={styles.datePickerView}>
                                 <Text style={isCalendarDisabled ? styles.label_disabled : styles.label}>Check Out</Text>
-                                <Text style={styles.value}>{ checkOutDate || '------' }</Text>
+                                <Text style={styles.value}>{ checkOutDateText }</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

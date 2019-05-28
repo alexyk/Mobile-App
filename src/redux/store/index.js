@@ -5,7 +5,7 @@ import appReducers from '../reducers';
 import { middleware } from '../../routing'
 import { logger } from 'redux-logger'
 import {
-    reduxConsoleLoggingEnabled, reduxConsoleCollapsedLogging, reactotronReduxLoggingEnabled
+    reduxConsoleLoggingEnabled, reduxConsoleCollapsedLogging, reduxReactotronLoggingEnabled
 } from '../../config-debug'
 
 let middlewares = [thunk, middleware];
@@ -34,7 +34,7 @@ const enchancer = composeWithDevTools({
 })(applyMiddleware(...middlewares));
 
 let store;
-if (console.tron.createStore && reactotronReduxLoggingEnabled) {
+if (console.tron.createStore && reduxReactotronLoggingEnabled) {
  store = console.tron.createStore(appReducers, enchancer); // eslint-disable-line
 } else {
  store = createStore(appReducers, enchancer); // eslint-disable-line

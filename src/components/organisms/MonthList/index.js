@@ -3,18 +3,21 @@ import PropTypes from 'prop-types';
 import { Dimensions, FlatList } from 'react-native';
 import moment from 'moment';
 import Month from '../../molecules/Month';
+import LTLoader from '../../molecules/LTLoader';
+import { processError } from '../../../config-debug';
 
 const { width } = Dimensions.get('window');
 export default class MonthList extends PureComponent {
     static propTypes = {
-        format_input: PropTypes.string,
+        data: PropTypes.array,
+        inputFormat: PropTypes.string,
         minDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)])
     }
 
     static defaultProps = {
-        format_input: '',
+        inputFormat: '',
         minDate: '',
         startDate: '',
         endDate: ''
@@ -23,9 +26,9 @@ export default class MonthList extends PureComponent {
     constructor(props) {
         super(props);
 
-        this.state = {data: this.getMonthList()};
-        this.monthList = [];
         this.itemKey = 0;
+        this.isFirst = true;
+        this._renderedItems = [];
 
         this._renderMonth = this._renderMonth.bind(this);
         this._keyExtractor = this._keyExtractor.bind(this);
@@ -45,34 +48,8 @@ export default class MonthList extends PureComponent {
         return this.itemKey.toString();
     }
 
-    componentDidMount() {
-        if (this.props.startDate) {
-            // this.scrollToSelectedMonth();
-        }
-    }
-
-    getMonthList(props) {
-        const minDate = (props || this.props).minDate.clone().date(1);
-        const maxDate = (props || this.props).maxDate.clone();
-        const monthList = [];
-        if (!maxDate || !minDate) return monthList;
-        while (maxDate > minDate || (
-            maxDate.year() === minDate.year() &&
-            maxDate.month() === minDate.month()
-        )) {
-            const month = {
-                date: minDate.clone()
-            };
-            //month.shouldUpdate = this.shouldUpdate(month, props);
-            monthList.push(month);
-            minDate.add(1, 'month');
-        }
-
-        return monthList;
-    }
-
     getWeekNums(start, end) {
-        const clonedMoment = moment(start, this.props.format_input);
+        const clonedMoment = moment(start, this.props.inputFormat);
         let date;
         let day;
         let num;
@@ -89,10 +66,12 @@ export default class MonthList extends PureComponent {
             clonedMoment.add(1, 'months');
         }
 
+        console.tron.mylog(`month-list`,`Start: ${start} End: ${end} Total Weeks: ${total}`)
+
         return total;
     }
 
-    shouldUpdate(month, props) {
+    /*shouldUpdate(month, props) {
         if (!props) return false;
          const {
             startDate,
@@ -106,7 +85,7 @@ export default class MonthList extends PureComponent {
         if (prev || next) return true;
 
         return false;
-    }
+    }*/
 
     checkRange(date, start, end) {
         if (!date || !start) return false;
@@ -116,52 +95,59 @@ export default class MonthList extends PureComponent {
         return true;
     }
 
-    scrollToSelectedMonth() {
-        const { startDate, minDate } = this.props;
-        const monthOffset = ((12 * (startDate.year() - minDate.year())) + startDate.month()) - minDate.month();
-        const weekOffset = this.getWeekNums(minDate, startDate);
-
+    scrollToSelectedMonth() {        
         setTimeout(() => {
-            this.list.scrollToOffset({
-                offset: (monthOffset * (24 + 25)) + (monthOffset ? weekOffset * Math.ceil((width / 7) + 10) : 0),
-                animated: true
-            });
-        }, 400);
+            const { startDate, minDate } = this.props;
+            const date1 = minDate.startOf('month');
+            const date2 = startDate.startOf('month');
+            const index = date2.diff(date1, 'months');
+    
+            console.log(`[MonthList] scrolling to index ${index}`)
+                const item = this._renderedItems[index];
+            if (this.list && item) {
+                this.list.scrollToItem({ item, animated: true });
+            } else {
+                processError(`[MonthList] Trying to scroll to index ${index} failed - this.list or item is not defined`,{has_list:(this.list != null),has_item: (item!=null)});
+            }
+        }, 200);
     }
 
 
-    _renderMonth({item, index}) {
-        let props = { ...this.props };
-        const {startDate, endDate} = props;
-        
-        if (startDate == '') {
-            props.startDate = undefined;
-        }
-        if (endDate == '') {
-            props.endDate = undefined;
-        }
-        
-        const month = (item.date || {});
-        
-        return (
+    _renderMonth({item,index}) {
+        const result = (
             <Month
                 key={`${this.itemId}`}
-                month={month}
-                {...props}
+                data={item}
+                color={this.props.color}
+                onChoose={this.props.onChoose}
             />
         );
+        this._renderedItems[index] = result;
+
+        return result;
     }
 
     render() {
-        const result = (
-            <FlatList
-                ref={(list) => { this.list = list; }}
-                style={{flex: 1}}
-                data={this.state.data}
-                keyExtractor={this._keyExtractor}
-                renderItem={this._renderMonth}
-            />
+        const {data} = this.props;
+
+        let result = (
+            (!data || data.length == 0) 
+                ? <LTLoader message={'Loading ...'} isLoading={true} opacity={'FF'} />
+                :
+                    <FlatList
+                        ref={(list) => { this.list = list; }}
+                        style={{flex: 1}}
+                        data={data}
+                        style={{paddingHorizontal:10}}
+                        keyExtractor={this._keyExtractor}
+                        renderItem={this._renderMonth}
+                    />
         );
+
+        if (this.isFirst && data && data.length > 0) {
+            this.isFirst = false;
+            this.scrollToSelectedMonth();
+        }
 
         return result;
     }

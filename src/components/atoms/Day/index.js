@@ -13,7 +13,8 @@ import { log } from '../../../config-debug';
 export default class Day extends PureComponent {
     static propTypes = {
         onChoose: PropTypes.func,
-        date: PropTypes.instanceOf(moment),
+        // date: PropTypes.oneOfType([PropTypes.string]),
+        date: PropTypes.oneOfType([PropTypes.instanceOf(moment)]),
         color: PropTypes.shape({
             mainColor: PropTypes.string,
             subColor: PropTypes.string,
@@ -36,91 +37,46 @@ export default class Day extends PureComponent {
     constructor(props) {
         super(props);
         
-        this.chooseDay = this.chooseDay.bind(this);
-        this.statusCheck = this.statusCheck.bind(this);
-        
-        //console.log('props of day',{props})
-
-        const { date,color } = props;
-        const text = date ? date.date() : '';
-        const mainColor = { color: color.mainColor };
-        const subColor = { color: color.subColor };
-        const subBack = { backgroundColor: color.primaryColor };
-        
-        /* const statusResult = {
-            isToday:false,
-            isStart:false,
-            isStartPart:false,
-            isEnd:false,
-            isFocus:false,
-            isValid:true
-        } */
-        const statusResult = this.statusCheck(props, false);
-        this.state = {text, mainColor, subColor, subBack, ...statusResult};
+        this.chooseDay = this.chooseDay.bind(this);        
     }
 
-    /*shouldComponentUpdate(nextProps) {
+    /* shouldComponentUpdate(nextProps) {
         const prevStatus = this.isFocus;
-        const { isFocus } = this.statusCheck(nextProps, false);
+        const { isFocus } = this.props;
         if (prevStatus || isFocus) return true;
 
         return false;
-    }*/
-
-    statusCheck(props, useSetState=true) {
-        //const now = Date.now()
-        //console.time(`*** Day::statusCheck ${now}`);
-
-        const { 
-            startDate, endDate, today, date = null,
-            minDate, maxDate, empty
-        } = props || this.props;
-
-        const isToday = today.isSame(date, 'd');
-        const isValid = (
-            date
-            && (date >= minDate || date.isSame(minDate, 'd'))
-            && (date <= maxDate || date.isSame(maxDate, 'd'))
-        );
-
-        const isMid = (
-            ((date > startDate) && (date < endDate))
-            || (!date && empty >= startDate && empty <= endDate)
-        );
-        const isStart = (date && date.isSame(startDate, 'd'));
-        const isStartPart = (isStart && endDate);
-        const isEnd = (date && date.isSame(endDate, 'd'));
-        const isFocus = (isMid || isStart || isEnd);
-
-        const state = {isToday, isStart, isStartPart, isEnd, isFocus, isValid};
-
-        if (useSetState) {
-            this.setState({isToday, isStart, isStartPart, isEnd, isFocus, isValid})
-        }
-
-        //console.timeEnd(`*** Day::statusCheck ${now}`);
-
-        return state;
-    }
+    } */
 
     chooseDay() {
-        this.props.onChoose(this.props.date);
+        if (!this.props.isEmpty) {
+            setTimeout(() => this.props.onChoose(this.props.date));
+        }
     }
 
     render() {
-        const { text, mainColor, subColor, subBack, 
-            isMid, isStartPart, isEnd, isValid, isFocus, isToday
-        } = this.state;
+        if (this.props.isEmpty) {
+            return <View style={styles.dayContainer} />
+        }
+
+        //console.info('[day] props',{props:this.props});
+        const { color, text, date,
+            isMid, isStartPart, isStart, isEnd, isValid=true, isFocus, isToday
+        } = this.props;        
+
+        const mainColor = { color: color.mainColor };
+        const subColor = { color: color.subColor };
+        const subBack = { backgroundColor: color.primaryColor };
+
+        let stylesCollection = [styles.dayContainer];
+        if (isMid) stylesCollection.push(subBack);
+        if (isStartPart) stylesCollection.push(styles.startContainer);
+        if (isEnd) stylesCollection.push(styles.endContainer);
+        if (isStartPart || isEnd) stylesCollection.push(subBack);
 
         return (
             <View
-                style={[
-                    styles.dayContainer,
-                    isMid && subBack,
-                    isStartPart && styles.startContainer,
-                    isEnd && styles.endContainer,
-                    (isStartPart || isEnd) && subBack
-                ]}
+                style={stylesCollection}
             >
                 {isValid ?
                     <TouchableHighlight

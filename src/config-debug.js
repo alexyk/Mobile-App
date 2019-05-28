@@ -17,12 +17,14 @@ export const forceOffline                            = false;
 export const errorLevel                         = 1;
 
   // reactotron
-export const reactotronReduxLoggingEnabled      = false;
+export const reactotronLoggingEnabled           = false;
 export const logConverterErrorToReactrotron     = false;
 export const showTypesInReactotronLog           = true;
-  // console
+  // redux
+export const reduxReactotronLoggingEnabled      = false;
 export const reduxConsoleLoggingEnabled         = false;
 export const reduxConsoleCollapsedLogging       = true;
+  // console
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = true;    // enable/disable "console.time" & "console.timeEnd" calls
@@ -41,7 +43,7 @@ if (!__DEV__) isOffline = false;
   export const autoHotelSearchPlace               = 'london'
   export const autoHomeSearch                     = true;
   export const autoHomeSearchPlace                = 'uk1'
-  export const autoCalendar                       = true;
+  export const autoCalendar                       = false;
   // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log

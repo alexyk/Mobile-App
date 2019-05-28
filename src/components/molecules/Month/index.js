@@ -43,7 +43,6 @@ export default class Month extends PureComponent {
         }
 
         this.itemId = 0;
-        this.getDayList = this.getDayList.bind(this);
         this.renderDayRow = this.renderDayRow.bind(this);
         this.getMonthText = this.getMonthText.bind(this);
     }
@@ -53,7 +52,8 @@ export default class Month extends PureComponent {
     }
 
     getMonthText() {
-        const { month, i18n } = this.props;
+        const { data, i18n } = this.props;
+        const month = data.date;
 
         const y = month.year();
         const m = month.month();
@@ -64,51 +64,13 @@ export default class Month extends PureComponent {
         }
     }
 
-
-    getDayList(date) {
-        // const now = Date.now()
-        // console.time(`*** Month::getDayList ${now}`);
-
-        let dayList;
-        const month = date.month();
-        let weekday = date.isoWeekday();
-        if (weekday === 7) {
-            dayList = [];
-        } else {
-            dayList = new Array(weekday).fill({
-                empty: date.clone().subtract(1, 'h')
-            });
-        }
-        while (date.month() === month) {
-            dayList.push({
-                date: date.clone()
-            });
-            date.add(1, 'days');
-        }
-        date.subtract(1, 'days');
-        weekday = date.isoWeekday();
-        if (weekday === 7) {
-            return dayList.concat(new Array(6).fill({
-                empty: date.clone().hour(1)
-            }));
-        }
-
-        const result = dayList.concat(new Array(Math.abs(weekday - 6)).fill({
-            empty: date.clone().hour(1)
-        }));
-
-        // console.timeEnd(`*** Month::getDayList ${now}`);
-
-        return result;
-    }
-
     prepareDaysRendering() {
         // console.time('*** Month::prepareDaysRendering')
 
-        const dayList = this.getDayList(this.props.month.clone());
-        const rowArray = new Array(dayList.length / 7).fill('');
+        const dayRows = this.props.data.dayRows;
+        const rowArray = new Array(dayRows.length / 7).fill('');
         const renderedDays = rowArray.map((item, i) => {
-            return this.renderDayRow(dayList.slice(i * 7, (i * 7) + 7), i)
+            return this.renderDayRow(dayRows.slice(i * 7, (i * 7) + 7), i)
         })
 
         this.setState({renderedDays})
@@ -116,20 +78,19 @@ export default class Month extends PureComponent {
         // console.timeEnd('*** Month::prepareDaysRendering')
     }
     
-    renderDayRow(dayList, index) {
+    renderDayRow(dayRows, index) {
         let id = this.itemId;
 
         const result = (
             <View style={styles.dayRow} key={`row_${id}`}>
-                {dayList.map(item =>
+                {dayRows.map(item =>
                     {
                       id++;
                       if (id == Number.MAX_VALUE-1) id = 0;
                       
                       return <Day
-                        date={item.date}
-                        empty={item.empty}
-                        {...this.props}
+                        {...item}
+                        onChoose={this.props.onChoose}
                         key={`day_${id}`}
                       />
                     })}

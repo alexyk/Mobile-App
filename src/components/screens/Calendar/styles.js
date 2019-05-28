@@ -85,7 +85,7 @@ export default StyleSheet.create({
         flex: 1,
         borderTopWidth: 3,
         borderColor: '#d6d7da',
-        paddingHorizontal:15
+        paddingHorizontal:0
     },
     btn: {
         height: 90,

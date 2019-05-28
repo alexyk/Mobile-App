@@ -33,7 +33,7 @@ import { setCurrency } from '../../../redux/action/Currency'
 import { setDatesAndGuestsData } from '../../../redux/action/userInterface'
 
 import {isNative} from '../../../version'
-import { gotoWebview } from '../utils';
+import { gotoWebview, formatDatesData } from '../utils';
 const isExploreSearchNative = isNative.explore; // false: webview version, true: native search version
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
 
@@ -55,8 +55,9 @@ class Explore extends Component {
         this.onSearchHandler = this.onSearchHandler.bind(this);
         this.onSearchEnterKey = this.onSearchEnterKey.bind(this);
 
+        const {adults, childrenBool} = this.props.datesAndGuestsData;
         let roomsData = [{
-            adults: 2,
+            adults,
             children: []
         }];
 
@@ -79,7 +80,7 @@ class Explore extends Component {
                 bedrooms: 0,
                 bathrooms: 0
             },
-            childrenBool: false,
+            childrenBool,
             currency: props.currency,//eslint-disable-line
             currencySign: props.currencySign,//eslint-disable-line
             email: '',
@@ -181,17 +182,16 @@ class Explore extends Component {
         };
     }
 
-    onDatesSelect(params) {
-        const { startDate, endDate, startMoment, endMoment } = params;
-        const daysDifference = moment.duration(endMoment.diff(startMoment)).asDays();
+    onDatesSelect(newState) {
+        console.log('paramsa', {newState})
+
+        const { today, startDate, endDate, displayFormat, inputFormat } = newState;
+        const daysDifference = moment.duration(endDate.diff(startDate)).asDays();
 
         setTimeout(() => this.setState({daysDifference}));
-        setTimeout(() => this.props.setDatesAndGuestsData({
-            checkInDate: startDate,
-            checkOutDate: endDate,
-            checkInDateFormated: startMoment.format('DD/MM/YYYY'),
-            checkOutDateFormated: endMoment.format('DD/MM/YYYY'),
-        }));
+        setTimeout(() => this.props.setDatesAndGuestsData(
+            formatDatesData(today, startDate, endDate, displayFormat, inputFormat)
+        ));
     }
     
     onSearchEnterKey(event) {
@@ -238,6 +238,8 @@ class Explore extends Component {
     };
 
     updateData(data) {
+        console.log('update date in Explore', {data})
+
         let baseInfo = {};
         baseInfo['adults'] = data.adults;
         baseInfo['children'] = [];
@@ -247,14 +249,16 @@ class Explore extends Component {
         let roomsData = [baseInfo];
         let roomsDummyData = encodeURI(JSON.stringify(roomsData));
 
-        this.setState({
+        const newState = {
             adults: data.adults,
             children: data.children,
             infants: data.infants,
             guests: data.adults + data.children + data.infants,
             childrenBool: data.childrenBool,
             roomsDummyData: roomsDummyData
-        });
+        };
+        this.setState(newState);
+        this.props.setDatesAndGuestsData(newState);
     }
 
     updateFilter(data) {
@@ -266,12 +270,7 @@ class Explore extends Component {
 
     gotoGuests() {
         this.props.navigation.navigate('GuestsScreen', {
-            guests: this.state.guests,
-            adults: this.state.adults,
-            children: this.state.children,
-            infants: this.state.infants,
             updateData: this.updateData,
-            childrenBool: this.state.childrenBool
         });
     }
 

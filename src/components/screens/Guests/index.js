@@ -4,12 +4,15 @@ import {
     View,
     TouchableOpacity,
     } from 'react-native';
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import { setDatesAndGuestsData } from '../../../redux/action/userInterface'
 import PropTypes from 'prop-types';
 import Toast from 'react-native-easy-toast';
-
 import CloseButton from '../../atoms/CloseButton';
 import GuestRow from '../../molecules/GuestRow';
 import styles from './styles';
+
 
 class Guests extends Component {
     static propTypes = {
@@ -29,17 +32,13 @@ class Guests extends Component {
         this.onClose = this.onClose.bind(this);
         this.onDone = this.onDone.bind(this);
         this.onPersonChange = this.onPersonChange.bind(this);
+        const {adults, children, infants, childrenBool} = this.props.datesAndGuestsData;
         this.state = {
-            adults:0,
-            childrenBool: false,
-            children:0,
-            infants:0,
+            adults,
+            children,
+            infants,
+            childrenBool
         };
-        const { params } = this.props.navigation.state;
-        this.state.adults = params ? params.adults : 0;
-        this.state.childrenBool = params ? params.childrenBool : false;
-        this.state.children = params ? params.children : 0;
-        this.state.infants = params ? params.infants : 0;
     }
 
     onPersonChange(type, value) {
@@ -112,4 +111,14 @@ class Guests extends Component {
     }
 }
 
-export default Guests;
+let mapStateToProps = (state) => {
+    return {
+        datesAndGuestsData: state.userInterface.datesAndGuestsData,
+    };
+}
+
+const mapDispatchToProps = dispatch => ({
+    setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch),
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Guests);
