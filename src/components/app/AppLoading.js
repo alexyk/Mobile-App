@@ -11,6 +11,7 @@ import { bindActionCreators } from 'redux';
 import { getCountries } from '../../redux/action/Country'
 import { getCurrencyRates, getLocRate } from '../../redux/action/exchangeRates'
 import { socketHost, ROOMS_XML_CURRENCY } from '../../config';
+import { processError, autoLoginInOfflineMode } from '../../config-debug';
 
 const androidStomp = NativeModules.StompModule;
 
@@ -53,6 +54,16 @@ class AppLoading extends Component {
         const keys = await AsyncStorage.getAllKeys();
         const isLoggedIn = keys.includes(`${domainPrefix}.auth.locktrip`) &&
                         keys.includes(`${domainPrefix}.auth.username`);
+
+        // enable auto login on reload
+        if (__DEV__ && !isLoggedIn  && autoLoginInOfflineMode) {
+            console.info(`[AppLoading] Auto logging in - please reload the app to take effect`)
+            AsyncStorage.multiSet([
+                    [`${domainPrefix}.auth.locktrip`,'oa*erh$oaeksnrtmok'],
+                    [`${domainPrefix}.auth.username`,'theUserName']
+                ], (...args)=>processError('error setting auth.username/locktrip',{args})
+            )
+        }
 
         // TODO: Fix hidden stompjs code - put it in one place, visible and readable
         if (Platform.OS === 'ios') {
