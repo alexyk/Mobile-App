@@ -23,17 +23,17 @@ if [ "$1" == "debug" ] || [ "$1" == "release" ]; then
 fi
 
 # check if a product name from travis or options to select_config.rb
-s1=$1
+s1=$2
 s2=${s1%apk}
 len1=${#s1}
 len2=${#s2}
 if [ $len1 -ne $len2 ]; then
-	product="$1"
+	product="$2"
 	shift
 fi
 
 # select config
-./scripts/select_config.rb "$@"
+./scripts/select_config.rb "$1"
 
 # build
 echo "Buldinging a $cfg version"
