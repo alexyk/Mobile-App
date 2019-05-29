@@ -9,9 +9,9 @@ export const forceOffline                            = false;
 
   // error handling
 /*  !__DEV__ console.warn (short version - message only)
-    1 console.warn (message & data)
-    2 console.error
-    3 reactotron.error
+    0 console.warn (message & data)
+    1   console.error
+    2   reactotron.error
     else:
            throw Error                                            */
 export const errorLevel                         = 1;
@@ -29,22 +29,24 @@ export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = true;    // enable/disable "console.time" & "console.timeEnd" calls
   // other
-  export const webviewDebugEnabled                = false;
-  export const hotelsSearchMapDebugEnabled        = false;
-  export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
+export const webviewDebugEnabled                = false;
+export const hotelsSearchMapDebugEnabled        = false;
+export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
   // offline mode
   // Enabled if: (__DEV__ == true) and (isOffline == true)
                                 let isOffline   = false;
   if (forceOffline) isOffline = forceOffline;
-if (!__DEV__) isOffline = false;
-  export const isOnline = (!isOffline);
-  export const autoHotelSearch                    = false;
-  export const autoHotelSearchFocus               = false;
-  export const autoHotelSearchPlace               = 'london'
-  export const autoHomeSearch                     = true;
-  export const autoHomeSearchPlace                = 'uk1'
-  export const autoCalendar                       = false;
-  // TODO: Add the following options
+  if (!__DEV__) isOffline = false;
+export const isOnline = (!isOffline);
+export const autoLoginInOfflineMode             = true;
+  // automated flows
+export const autoHotelSearch                    = false;
+export const autoHotelSearchFocus               = false;
+export const autoHotelSearchPlace               = 'london'
+export const autoHomeSearch                     = true;
+export const autoHomeSearchPlace                = 'uk1'
+export const autoCalendar                       = false;
+// TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
     (2) Logging level
@@ -141,15 +143,15 @@ export function processError(description, data) {
   } else {
 
     switch (errorLevel) {
-      case 1:
+      case 0:
         console.warn(description, data);
         break;
 
-      case 2:
+      case 1:
         console.error(description, data);
         break;
 
-      case 3:
+      case 2:
         if (console.tron && console.tron.error) {
           //TODO: Try this - not tested!!!
           console.tron.error(description, data);
@@ -245,7 +247,7 @@ export function log(tag, description, data, isImportant = false) {
           try {
             result[prop] = `${item} (${typeof(item)})`
           } catch (error) {
-            console.error(`Error in config-debug - while parsing types: ${error.message}`,{error,item,result})
+            processError(`[config-debug::log::parseObjTypes] Error while setting result['${prop}']: ${error.message}`,{error,item,result})
           }
         }
       }
@@ -261,4 +263,5 @@ export function log(tag, description, data, isImportant = false) {
 export function configureDebug() {
   configureReactotron()
   configureConsole()
+
 }

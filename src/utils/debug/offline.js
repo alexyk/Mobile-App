@@ -1,4 +1,4 @@
-import { autoHotelSearchPlace, autoHomeSearchPlace, log } from '../../config-debug'
+import { autoHotelSearchPlace, autoHomeSearchPlace, log, processError } from '../../config-debug'
 import { isObject } from '../../components/screens/utils'
 
 const offlinePacksHomes = {
@@ -129,7 +129,9 @@ export default function createOfflineRequester() {
       try {
         const tmp = offlinePacks[autoHotelSearchPlace].socket;
         if (tmp) arr = tmp;
-      } catch (e) {}
+      } catch (e) {
+        processError(`[offline::startSocketConnection] Error in getting offline pack: ${e.message}`, {error:e})
+      }
 
 			const delayPerRefresh = socketDelay
 			const delay2 = 500

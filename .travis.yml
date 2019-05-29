@@ -75,7 +75,7 @@ jobs:
         - "echo -n \"Ending at \" >> info.txt"
         - date >> info.txt
         - df -h >> info.txt
-        - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$dir1/info_ios.txt"
+        - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$dir1/info_ios.txt"  &> /dev/null
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
         - scp -o "StrictHostKeyChecking no" travis_$TRAVIS_JOB_NUMBER.log "$var_799cfba7:$dir2"
         - scp -o "StrictHostKeyChecking no" $log_file "$var_799cfba7:$dir1"
@@ -96,6 +96,8 @@ jobs:
         - echo -n "Starting " > info.txt
         - date >> info.txt
         - date
+        - ./scripts/travis_version.rb "src/version.js" "$TRAVIS_JOB_NUMBER" "$TRAVIS_BRANCH"
+        - cat src/version.js
         - openssl aes-256-cbc -K $encrypted_acf840ecd253_key -iv $encrypted_acf840ecd253_iv -in deploy_key.enc -out deploy_key -d
         - which java
         - java -version
@@ -117,7 +119,6 @@ jobs:
         - chmod 600 ./deploy_key
         - ssh-add ./deploy_key
         - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2" &> /dev/null
-        - nvm install 8.14.1
         - npm install
       script:
         - ./scripts/select_config.rb native1
@@ -153,7 +154,7 @@ jobs:
         - "echo -n \"Ending at \" >> info.txt"
         - date >> info.txt
         - df -h >> info.txt
-        - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$dir1/info_android.txt"
+        - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$dir1/info_android.txt" &> /dev/null
         - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
         - scp -o "StrictHostKeyChecking no" travis_$TRAVIS_JOB_NUMBER.log "$var_799cfba7:$dir2"
         - scp -o "StrictHostKeyChecking no" $log_file "$var_799cfba7:$dir1"
