@@ -15,7 +15,8 @@ import styles from './styles';
 import MonthList from '../../organisms/MonthList';
 import { I18N_MAP } from './i18n';
 import CloseButton from '../../atoms/CloseButton';
-import { logd, log } from '../../../config-debug';
+import { processError } from '../../../config-debug';
+import { updateMarkedCalendarData, generateInitialCalendarData } from './utils';
 
 const useRedux = true;
 
@@ -46,7 +47,7 @@ class Calendar extends Component {
         this.today = today;
         this.year = this.today.year();
 
-        this.weekRendered = null;
+        this.isFirst = true;
         
         const subFontColor = { color: props.color.subColor };
         this.state = {
@@ -56,7 +57,9 @@ class Calendar extends Component {
         };
         this.initialState = this.state;
         if (useRedux) {
-            props.setDatesAndGuestsData(this.state);
+            if (props.datesAndGuestsData.calendarData.length == 0) {
+                props.setDatesAndGuestsData(this.state);
+            }
             this.state = {};
         }
         
@@ -74,110 +77,46 @@ class Calendar extends Component {
         setTimeout(() => this.setCalendarData());
     }
 
-
-    generateCalendarData(extraData=null) {
-        let monthList = [];
-        let {minDate: minDateSrc, maxDate: maxDateSrc} = this.props.datesAndGuestsData;
-        let minDate = (minDateSrc && minDateSrc.clone().date(1));
-        let maxDate = (maxDateSrc && maxDateSrc.clone());
-        let current = minDate;
-        while ( current.isSameOrBefore(maxDate) ) {
-            const dateClone = current.clone();
-            let month = {
-                dayRows: this.generateDaysForMonth(dateClone,extraData),
-                date: dateClone
-            };
-            //month.shouldUpdate = this.shouldUpdate(month, props);
-            monthList.push(month);
-            current.add(1, 'month');
-        }
-
-        return monthList;
-    }
-
-    generateDaysForMonth(date,extraData=null) {
-        // const now = Date.now()
-        // console.time(`*** Calendar::generateDaysForMonth ${now}`);
-
-        
-        let { inputFormat } = (useRedux ? this.props.datesAndGuestsData : this.state);
-        let checkInDateMoment = moment(this.startDate, inputFormat);
-        let checkOutDateMoment = moment(this.endDate, inputFormat);
-        const month = date.month();
-        let weekday = date.isoWeekday();
-        let dayList;
-
-        //console.debug(`[calc] generateDaysForMonth: ${month+1}`, {checkInDateMoment, checkOutDateMoment})
-
-        if (weekday === 7) {
-            dayList = [];
-        } else {
-            dayList = new Array(weekday).fill({
-                isEmpty: true
-            });
-        }
-        while (date.month() === month) {
-            const isStart = date.isSame(checkInDateMoment);
-            const isMid = date.isAfter(checkInDateMoment) && date.isBefore(checkOutDateMoment);// || (!date && empty >= checkInDateMoment && empty <= checkOutDateMoment),
-            const isEnd = date.isSame(checkOutDateMoment);
-            const isFocus = (isMid || isStart || isEnd);
-            const isStartPart = (isStart && (checkOutDateMoment != null));
-            const text = date.date().toString();
-            const newDay = {
-                // date: date.format(internalFormat),
-                text,
-                date: date.clone(),
-                isToday: date.isSame(this.today),
-                isStart, isMid, isEnd, isFocus, isStartPart,
-                isValid: (date.isSameOrAfter(this.today)),
-            };
-
-            /* 
-            // debug
-            if (isStart || isMid || isStartPart || isEnd || isFocus) {
-                //console.log('day-data-match', `${text}-${(date.month()+1).toString()} -> ${isStart?'S,':'s,'}${isMid?'M,':'m,'}${isEnd?'E,':'e,'}${isStartPart?'SP,':'sp,'}${isFocus?'F,':'f,'}`,{isStart,isMid,isStartPart,isEnd,isFocus,text,newDay,checkInDateMoment,checkOutDateMoment})
-            } else {
-                //console.info('day-data-debug',`${text}-${(date.month()+1).toString()}, ${date.toString()}(${typeof(date)}) => ${checkInDateMoment}***${checkOutDateMoment}(${typeof(checkInDateMoment)}**${typeof(checkOutDateMoment)})`,{newDay})
-            } */
-
-            dayList.push(newDay);
-            date.add(1, 'days');
-        }
-        date.subtract(1, 'days');
-        weekday = date.isoWeekday();
-        if (weekday === 7) {
-            return dayList.concat(new Array(6).fill({
-                isEmpty: true,
-            }));
-        }
-
-        dayList = dayList.concat(new Array(Math.abs(weekday - 6)).fill({
-            isEmpty: true
-        }));
-
-        // console.timeEnd(`*** Calendar::generateDaysForMonth ${now}`);
-
-        return dayList;
-    }
-
     setCalendarData(extraData=null) {
         // console.time('**** setCalendarData 1');
+        const {
+            internalFormat, inputFormat, minDate: minDateSrc, maxDate: maxDateSrc,
+        } = this.props.datesAndGuestsData;
+        let newData = {};
+        const checkInDateMoment = moment(this.startDate, inputFormat);
+        const checkOutDateMoment = moment(this.endDate, inputFormat);
+        const minDate = (minDateSrc && minDateSrc.clone());
+        const maxDate = (maxDateSrc && maxDateSrc.clone());
+        this.minDate = minDate.clone();
+        this.maxDate = maxDate.clone();
 
-        const calendarData = this.generateCalendarData(extraData);
-
-        const newData = {
-            ...extraData,
-            calendarData
-        };
+        try {
+            if (this.isFirst) {
+                const {calendarData, calendarMarkedDays} = generateInitialCalendarData(checkInDateMoment,checkOutDateMoment,this.today,minDate,maxDate,internalFormat,extraData);
+                newData = {
+                    ...extraData,
+                    calendarData,
+                    calendarMarkedDays
+                };
+                this.isFirst = false;
+            } else {
+                const calendarMarkedDays = updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateMoment,this.today,internalFormat);
+                newData = {
+                    ...extraData,
+                    calendarMarkedDays
+                };    
+            }
+        } catch (error) {
+            processError(`[Calendar::setCalendarData] Error generating calendar data: ${error.message}`,{error});
+        }
 
         // console.timeEnd('**** setCalendarData 1');
 
         console.time('**** setCalendarData 2');
 
-        if (useRedux) {
-            this.props.setDatesAndGuestsData(newData);
-        } else {
-            this.props.setDatesAndGuestsData(newData);
+        this.props.setDatesAndGuestsData(newData);
+
+        if (!useRedux) {
             this.setState(newData);
         }
 
@@ -239,18 +178,24 @@ class Calendar extends Component {
     }
     
     clear() {
-        this.setState({
+        const calendarMarkedDays = updateMarkedCalendarData(this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
+        const newState = {
             startDate: null,
             endDate: null,
             startDateText: '',
             startWeekdayText: '',
             endDateText: '',
-            endWeekdayText: ''
-        });
+            endWeekdayText: '',
+            calendarMarkedDays
+        }
+        if (useRedux) {
+            this.props.setDatesAndGuestsData(newState);
+        } else {
+            this.setState(newState);
+        }
     }
     
     confirm() {
-        
         const newState = (useRedux ? this.props.datesAndGuestsData : this.state);
         const { onConfirm } = this.props.datesAndGuestsData;
         onConfirm(newState);
@@ -307,9 +252,10 @@ class Calendar extends Component {
             endDateText,
             endWeekdayText,
             weekDays,
-            inputFormat,
+            inputFormat, internalFormat,
             minDate, maxDate,
-            calendarData
+            calendarData,
+            calendarMarkedDays,
         } = this.props.datesAndGuestsData;
         const {color} = this.props;
 
@@ -323,7 +269,7 @@ class Calendar extends Component {
         const subBack = { backgroundColor: subColor };
         const subFontColor = { color: subColor };
         const primaryFontColor = { color: primaryColor };
-        const isValid = !startDate || endDate;
+        const isValid = (startDate != null &&  endDate != null);
         const isClearVisible = startDate || endDate;
 
         const result = (
@@ -369,12 +315,14 @@ class Calendar extends Component {
                     <MonthList
                         today={this.today}
                         data={calendarData}
+                        markedData={calendarMarkedDays}
                         minDate={minDate}
                         maxDate={maxDate}
                         startDate={checkInDateMoment}
                         endDate={checkOutDateMoment}
                         onChoose={this.onChoose}
                         inputFormat={inputFormat}
+                        inputFinternalFormatormat={internalFormat}
                         i18n={'en'}
                         color={color}
                     />

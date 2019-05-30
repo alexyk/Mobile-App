@@ -8,7 +8,6 @@ import {
     TouchableHighlight
 } from 'react-native';
 import styles from './styles';
-import { log } from '../../../config-debug';
 
 export default class Day extends PureComponent {
     static propTypes = {
@@ -49,7 +48,7 @@ export default class Day extends PureComponent {
     } */
 
     chooseDay() {
-        if (!this.props.isEmpty) {
+        if (this.props.isValid) {
             setTimeout(() => this.props.onChoose(this.props.date));
         }
     }
@@ -59,10 +58,9 @@ export default class Day extends PureComponent {
             return <View style={styles.dayContainer} />
         }
 
-        //console.info('[day] props',{props:this.props});
         const { color, text, date,
-            isMid, isStartPart, isStart, isEnd, isValid=true, isFocus, isToday
-        } = this.props;        
+            isMid, isStartPart, isStart, isEnd, isValid, isFocus, isToday
+        } = this.props;
 
         const mainColor = { color: color.mainColor };
         const subColor = { color: color.subColor };

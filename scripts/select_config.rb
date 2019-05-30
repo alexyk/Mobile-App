@@ -98,9 +98,21 @@ errorLevel = {
 }
 errorLevel["changes"]["release"]["file"] = errorLevel["file"]
 errorLevel["changes"]["release"]["name"] = errorLevel["name"]
+logging = {
+  "name" => "logging",
+  "changes" => {
+    "release" => {
+      "file"=>"src/config-debug.js",
+      "regex"=>/const clog =.*/,
+      "target"=>"const clog = () => {};"
+    }
+  }
+}
+logging["changes"]["release"]["name"] = logging["name"]
+
 
 # all automatically executed
-changes_auto = [compilation_time, errorLevel["changes"]["release"]]; # CURRENTLY ENABLED by default (release)
+changes_auto = [compilation_time, errorLevel["changes"]["release"], logging["changes"]["release"]]; # CURRENTLY ENABLED by default (release)
 # the rest
 changes_other = [configs, native_cfg, reactotron, errorLevel];
 
@@ -183,8 +195,11 @@ def process_change(item,default)
   end
   is_array = false
 
-  if $debug > 2 then puts "   [process_change]\n\titem: #{item},\n\tdefault: #{default}" end
-  if $debug > 1 then puts "   [process_change]\n     default[param]: #{default['param']}" end
+  if $debug > 2 then
+    puts "   [process_change]\n\titem: #{item},\n\tdefault: #{default}"
+  else
+    if $debug > 1 then puts "   [process_change]   default[param]: #{default['param']}\n" end
+  end
   
   tmp_file = item["file"] if item["file"]
   tmp_regex = item["regex"] if (item.key?("regex"))
@@ -215,7 +230,7 @@ def process_change(item,default)
     # debug
     if $debug > 0 then
       puts("   [process_change] not array -> result has param key: #{result.key?('param')}")
-      puts("   [process_change] not array -> result: #{result}")
+      puts("                                 result: #{result}\n")
     end
 
     # fill gaps for name and file
@@ -230,7 +245,7 @@ def process_change(item,default)
 
     # debug
     if $debug > 0 then
-      puts("   [process_change] result name: #{name}")
+      puts("                     result name: #{name}")
     end
   end
   
@@ -358,7 +373,7 @@ end
 # The use of global variables is for readability
 # Used globals: $changes, $changes_names
   # global variable
-$debug = 0
+$debug = 3
 $changes = []
 $changes_names = {}
 if $debug > 0 then

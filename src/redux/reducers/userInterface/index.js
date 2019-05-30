@@ -25,6 +25,7 @@ const initialState  = {
   isApplyingFilter: false,
   datesAndGuestsData: {
       calendarData:[],
+      calendarMarkedDays:{},
       guests: 2,
       adults: 2,
       children: 0,

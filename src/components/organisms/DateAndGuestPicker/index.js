@@ -41,8 +41,6 @@ class DateAndGuestPicker extends Component {
             checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable
         } = this.props;
 
-        console.log('[TEMP] props', {props:this.props})
-
         const checkInDateText = (checkInDate || 'Select Date')
         const checkOutDateText = (checkOutDate  || '------')
 

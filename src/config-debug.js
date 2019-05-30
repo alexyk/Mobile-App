@@ -1,10 +1,11 @@
-import { isObject } from './components/screens/utils';
+import { isObject, isString } from './components/screens/utils';
 import lodash from 'lodash';
+import { isMoment } from 'moment';
 
 // FORCE modes - possible in RELEASE
 // 
 // ALL MUST BE FALSE!!!      (unless you know what you are doing)
-export const reactotronLoggingInReleaseForceEnabled  = false;
+export const reactotronLoggingInReleaseForceEnabled  = true;
 export const forceOffline                            = false;
 
   // error handling
@@ -14,16 +15,16 @@ export const forceOffline                            = false;
     2   reactotron.error
     else:
            throw Error                                            */
-export const errorLevel                         = 1;
+export const errorLevel = 1;
 
   // reactotron
 export const reactotronLoggingEnabled           = false;
 export const logConverterErrorToReactrotron     = false;
 export const showTypesInReactotronLog           = true;
   // redux
-export const reduxReactotronLoggingEnabled      = false;
-export const reduxConsoleLoggingEnabled         = false;
-export const reduxConsoleCollapsedLogging       = true;
+  export const reduxConsoleLoggingEnabled         = true;
+  export const reduxConsoleCollapsedLogging       = true;
+  export const reduxReactotronLoggingEnabled      = false;
   // console
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
@@ -164,8 +165,45 @@ export function processError(description, data) {
     }
 
   }
-
 }
+
+/**
+ * Print object in console log having in mind moment
+ * @param {Object} obj
+ */
+function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
+  let result = '';
+  let isFirst = true;
+
+  for (let i in obj) {
+    let item = obj[i];
+
+    if (isMoment(item)) {
+      result += indent + `${i}: ${item.format('YYYY-MM-DD HH:mm:ss.SSS ZZ, ddd, MMM')} (moment)\n`;
+    } else if (isObject(item)) {
+      result += indent + `${i}: {\n  ${dlog(item,i,true,indent)}${indent}}\n`;
+    } else {
+      result += indent + `${i}: ${item} (${typeof(item)})\n`;
+    }
+    if (isFirst) {
+      if (isInternal) indent += '  ';
+      isFirst = false;
+    }
+  }
+
+  if (!isObject(obj)) result = `${obj}`;
+
+  if (!isInternal) {
+    result = `[dlog]${title ? (' ' + title) : ''}:\n${result}`;
+  }
+  if (!isInternal) {
+    console.log(result);
+  } else {
+    return result;
+  }
+}
+export const dlog = dlogFunc;
+
 
 export function logd(tag, description, data, isImportant = false) {
   if (__DEV__) {

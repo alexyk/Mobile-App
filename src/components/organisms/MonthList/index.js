@@ -1,15 +1,15 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { Dimensions, FlatList } from 'react-native';
+import { FlatList } from 'react-native';
 import moment from 'moment';
 import Month from '../../molecules/Month';
 import LTLoader from '../../molecules/LTLoader';
 import { processError } from '../../../config-debug';
 
-const { width } = Dimensions.get('window');
 export default class MonthList extends PureComponent {
     static propTypes = {
         data: PropTypes.array,
+        markedData: PropTypes.any,
         inputFormat: PropTypes.string,
         minDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
@@ -29,6 +29,7 @@ export default class MonthList extends PureComponent {
         this.itemKey = 0;
         this.isFirst = true;
         this._renderedItems = [];
+        this._scrollingAttemtps = 0;
 
         this._renderMonth = this._renderMonth.bind(this);
         this._keyExtractor = this._keyExtractor.bind(this);
@@ -102,32 +103,45 @@ export default class MonthList extends PureComponent {
             const date2 = startDate.startOf('month');
             const index = date2.diff(date1, 'months');
     
-            console.log(`[MonthList] scrolling to index ${index}`)
-                const item = this._renderedItems[index];
+            console.info(`[MonthList] scrolling to index ${index}`)
+            const item = this._renderedItems[index];
             if (this.list && item) {
                 this.list.scrollToItem({ item, animated: true });
             } else {
-                processError(`[MonthList] Trying to scroll to index ${index} failed - this.list or item is not defined`,{has_list:(this.list != null),has_item: (item!=null)});
+                const tryAgain = (this._scrollingAttemtps < 3);
+                if (tryAgain) {
+                    this._scrollingAttemtps++;
+                    this.scrollToSelectedMonth();
+                }
+                processError(`[MonthList] Trying to scroll to index ${index} failed - this.list or item is not defined. Try again: ${tryAgain}`,{hasList:(this.list != null),hasItem: (item!=null),tryAgain});
             }
         }, 200);
     }
 
 
     _renderMonth({item,index}) {
-        const result = (
-            <Month
-                key={`${this.itemId}`}
-                data={item}
-                color={this.props.color}
-                onChoose={this.props.onChoose}
-            />
-        );
-        this._renderedItems[index] = result;
 
-        return result;
+        const {markedData, color, onChoose} = this.props;
+
+      //console.log('&&&render',`Result: ${item.days?item.days.length:'n/a'}`,{item,index,props:this.props})
+      //clog(`&render `,{item,index,markedData});
+    //   clog(`&prender `,{item,index,markedData,props:this.props});
+
+      const result = (
+        <Month
+            data={item}
+            markedData={markedData}
+            color={color}
+            onChoose={onChoose}
+        />
+      );
+      this._renderedItems[index] = result;
+
+      return result;
     }
 
     render() {
+
         const {data} = this.props;
 
         let result = (

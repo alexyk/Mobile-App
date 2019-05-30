@@ -1,3 +1,5 @@
+import { isMoment } from "moment";
+
 export function log(title,obj) {
     if (typeof(title) == 'object' || obj == null) {
         console.log(printAny(title))
@@ -15,7 +17,9 @@ export function printAny(obj,indent=2) {
         const key = keys[i];
         const item = obj[key];
         const type = typeof(item);
-        if (item instanceof Object) {
+        if (isMoment(item)) {
+            out += ''.padStart(indent+2, ' ') + key + ': ' + item.format('YYYY-MM-DD HH:mm:ss.SSS ZZ, ddd, MMM') + " (moment)\n"
+        } else if (item instanceof Object) {
             out += ''.padStart(indent+2, ' ') + key + ': ' + printAny(item, indent+4)
         } else {
             out += ''.padStart(indent+2, ' ') + key +
