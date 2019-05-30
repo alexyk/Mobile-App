@@ -25,3 +25,5 @@ Reactotron
   .clear();
 
   console.tron = Reactotron;
+  console.tron.mylog = log;
+  console.tron.mylogd = logd;

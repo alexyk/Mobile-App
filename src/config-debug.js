@@ -173,6 +173,8 @@ export function logd(tag, description, data, isImportant = false) {
   }
 }
 
+export const clog = console.log;
+
 
 /**
  * Logs using Reactotron.display

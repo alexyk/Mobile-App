@@ -19,7 +19,7 @@ import SearchBar from '../../molecules/SearchBar';
 import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
 import { autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace,
-    isOnline, autoHomeSearch,
+    isOnline, autoHomeSearch, processError,
 } from '../../../config-debug';
 import requester from '../../../initDependencies';
 import styles from './styles';
@@ -183,8 +183,7 @@ class Explore extends Component {
     }
 
     onDatesSelect(newState) {
-        console.log('paramsa', {newState})
-
+        try {
         const { today, startDate, endDate, displayFormat, inputFormat } = newState;
         const daysDifference = moment.duration(endDate.diff(startDate)).asDays();
 
@@ -192,6 +191,9 @@ class Explore extends Component {
         setTimeout(() => this.props.setDatesAndGuestsData(
             formatDatesData(today, startDate, endDate, displayFormat, inputFormat)
         ));
+        } catch (error) {
+            processError(`[Explore::onDateSelect] Error while setting date: ${error.message}`,{error});
+        }
     }
     
     onSearchEnterKey(event) {

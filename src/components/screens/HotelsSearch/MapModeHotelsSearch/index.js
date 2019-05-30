@@ -5,7 +5,7 @@ import MapView, { Marker } from 'react-native-maps';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import styles from './styles';
 import { imgHost } from '../../../../config';
-import { log, reactotronLoggingInReleaseForceEnabled, processError } from '../../../../config-debug';
+import { log, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, processError } from '../../../../config-debug';
 import lang from '../../../../language';
 import red_marker from '../../../../assets/red_marker.png';
 import blue_marker from '../../../../assets/blue_marker.png';
@@ -77,7 +77,7 @@ class MapModeHotelsSearch extends Component {
                 || (hotelsOld && hotelsNew && hotelsOld.length != hotelsNew.length) 
             )
         {
-            if (__DEV__ || reactotronLoggingInReleaseForceEnabled) {
+            if ((__DEV__ && reactotronLoggingEnabled) || reactotronLoggingInReleaseForceEnabled) {
                 const oldLen = (hotelsOld ? hotelsOld.length : 'n/a')
                 const newLen = (hotelsNew ? hotelsNew.length : 'n/a')
                 const equal = (hotelsOld === hotelsNew) ? '===' : '!==';
