@@ -300,7 +300,7 @@ class HotelsSearchScreen extends Component {
 
       // callback (after change state above)
       function() {
-        _this.getNextStaticPage()
+        _this.getNextStaticPage(_this.pagesLoaded-1)
       }
     );
     //console.log("#hotel-search# 4.2/6 [HotelsSearchScreen] getStaticHotelsData");
