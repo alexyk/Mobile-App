@@ -55,9 +55,8 @@ class Explore extends Component {
         this.onSearchHandler = this.onSearchHandler.bind(this);
         this.onSearchEnterKey = this.onSearchEnterKey.bind(this);
 
-        const {adults, childrenBool} = this.props.datesAndGuestsData;
         let roomsData = [{
-            adults,
+            adults: props.datesAndGuestsData.adults,
             children: []
         }];
 
@@ -80,13 +79,13 @@ class Explore extends Component {
                 bedrooms: 0,
                 bathrooms: 0
             },
-            childrenBool,
             currency: props.currency,//eslint-disable-line
             currencySign: props.currencySign,//eslint-disable-line
             email: '',
             token: '',
             countriesLoaded: false,
             currencySelectionVisible: false,
+            ...props.datesAndGuestsData
         };
 
         // init dates
@@ -184,13 +183,11 @@ class Explore extends Component {
 
     onDatesSelect(newState) {
         try {
-        const { today, startDate, endDate, displayFormat, inputFormat } = newState;
-        const daysDifference = moment.duration(endDate.diff(startDate)).asDays();
-
-        setTimeout(() => this.setState({daysDifference}));
-        setTimeout(() => this.props.setDatesAndGuestsData(
-            formatDatesData(today, startDate, endDate, displayFormat, inputFormat)
-        ));
+            const { today, startDate, endDate, displayFormat, inputFormat } = newState;
+            const daysDifference = moment.duration(endDate.diff(startDate)).asDays();
+            const newState = formatDatesData(today, startDate, endDate, displayFormat, inputFormat);
+            setTimeout(() => this.setState({daysDifference,...newState}));
+            setTimeout(() => this.props.setDatesAndGuestsData(newState));
         } catch (error) {
             processError(`[Explore::onDateSelect] Error while setting date: ${error.message}`,{error});
         }

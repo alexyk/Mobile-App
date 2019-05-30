@@ -208,6 +208,8 @@ export function formatDatesData(today, startMoment, endMoment, displayDateFormat
     endDate: endMoment.format(inputDateFormat),
     checkInDateMoment: startMoment,
     checkOutDateMoment: endMoment,
+    checkInDateFormated: startMoment.format(inputDateFormat),
+    checkOutDateFormated: endMoment.format(inputDateFormat),
     checkInDate: startMoment.format(displayFormat1),
     checkOutDate: endMoment.format(displayFormat2),
   };
