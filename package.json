@@ -22,7 +22,8 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "test": "node node_modules/jest/bin/jest.js",
-    "lint": "./node_modules/.bin/eslint ."
+    "lint": "./node_modules/.bin/eslint .",
+    "test-debug": "node --inspect node_modules/.bin/jest --watch --runInBand"
   },
   "jest": {
     "preset": "react-native"

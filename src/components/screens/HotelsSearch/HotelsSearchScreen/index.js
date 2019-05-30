@@ -40,7 +40,7 @@ import {
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
   HOTELS_MINIMUM_RESULTS
 } from "../../../../config";
-import { isOnline, log, processError } from "../../../../config-debug";
+import { isOnline, log, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -308,6 +308,8 @@ class HotelsSearchScreen extends Component {
 
   // TODO: Inspect this flow - and create a component to implement it
   async startSocketConnection() {
+    log('socket',`startSocketConnection`);
+
     this.isSocketDown = false;
 
     if (isOnline) {
@@ -359,20 +361,22 @@ class HotelsSearchScreen extends Component {
   }
 
   stompiOSConnect() {
-    //console.log("stompiOSConnect ---------------");
+    const headers = { "content-length": false };
+    const data = { uuid: this.uuid, query: this.searchString };
 
+    //console.log("stompiOSConnect ---------------");
+    //log('socket',`stompiOSConnect`,{socketHost,data,headers});
+    
     stompiOSClient = stomp.client(socketHost);
-    stompiOSClient.debug = null;
+    stompiOSClient.debug = (hotelsSearchSocketDebug
+      ? (msg) => log('debug-socket', `${msg.substr(0,30)}` , {msg})
+      : null
+    );
     stompiOSClient.connect(
       {},
       frame => {
-        var headers = { "content-length": false };
         stompiOSClient.subscribe(`search/${this.uuid}`, this.onDataFromSocket);
-        stompiOSClient.send(
-          "search",
-          headers,
-          JSON.stringify({ uuid: this.uuid, query: this.searchString })
-        );
+        stompiOSClient.send( "search", headers, JSON.stringify(data));
       },
       error => {
         stompiOSClient.disconnect();
@@ -412,6 +416,7 @@ class HotelsSearchScreen extends Component {
 
   onDataFromSocket(data) {
     //log('socket-data',`onDataFromSocket ${data.body}`, {data})
+    
     if (!this || !this.listViewRef || this.isUnmounted) {
       console.warn(`[HotelsSearchScreen::onDataFromSocket] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
       return;
@@ -523,7 +528,7 @@ class HotelsSearchScreen extends Component {
     }
 
     this.listStartFetch(hotelsToRender, this.pageLimit);
-    //log('list-refresh-footer',`[old state] ${prevState.hotelsInfo.length} / ${prevState.hotelsInfoForMap.length} [new state] ${result.hotelsInfo.length} / ${result.hotelsInfoForMap.length}`)
+    // log('list-refresh-footer',`[old state] ${prevState.hotelsInfo.length} / ${prevState.hotelsInfoForMap.length} [new state] ${result.hotelsInfo.length} / ${result.hotelsInfoForMap.length}`)
     
     console.timeEnd('*** onSocketUpdateTick')
 
@@ -781,7 +786,7 @@ class HotelsSearchScreen extends Component {
     }
   }
 
-  onStaticData(res) {  
+  onStaticData(res) { 
     if (!this || !this.listViewRef || this.isUnmounted) {
       console.warn(`[HotelsSearchScreen::onStaticData] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
       return;
@@ -794,7 +799,6 @@ class HotelsSearchScreen extends Component {
       _this.staticDataReceived = true;
       
       res.body.then(function(data) {
-        
         if (data.last) {
           _this.isAllPagesDone = true;
         }
@@ -819,7 +823,7 @@ class HotelsSearchScreen extends Component {
         }
         _this.pagesLoaded++;
         
-        //log('static-hotels',`+${hotels.length} of ${_this.state.totalHotels} static hotels`, {hotels}, true)
+        // log('static-hotels',`+${hotels.length} of ${_this.state.totalHotels} static hotels`, {hotels}, true)
         checkHotelData(hotels,'static')
 
         const newState = {

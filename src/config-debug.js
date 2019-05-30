@@ -32,6 +32,7 @@ export const consoleTimeCalculations            = true;    // enable/disable "co
   // other
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
+export const hotelsSearchSocketDebug            = false;
 export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
   // offline mode
   // Enabled if: (__DEV__ == true) and (isOffline == true)
