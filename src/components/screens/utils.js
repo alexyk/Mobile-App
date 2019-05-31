@@ -249,6 +249,10 @@ export function isString(value) {
   return (typeof(value) == 'string')
 }
 
+export function isSymbol(obj, className=null) {
+  return ( (className || getObjectClassName(obj)) == 'Symbol');
+}
+
 export function getObjectKeysCount(obj) {
   const result = ( (obj && Object.keys(obj).length) || -1);
   return result;

@@ -1,4 +1,4 @@
-import { isObject, isString, getObjectClassName } from './components/screens/utils';
+import { isObject, isString, getObjectClassName, isSymbol } from './components/screens/utils';
 import lodash from 'lodash';
 import { isMoment } from 'moment';
 

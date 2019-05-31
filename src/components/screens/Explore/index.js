@@ -185,9 +185,10 @@ class Explore extends Component {
         try {
             const { today, startDate, endDate, displayFormat, inputFormat } = newState;
             const daysDifference = moment.duration(endDate.diff(startDate)).asDays();
-            const newState = formatDatesData(today, startDate, endDate, displayFormat, inputFormat);
-            setTimeout(() => this.setState({daysDifference,...newState}));
-            setTimeout(() => this.props.setDatesAndGuestsData(newState));
+            const newStateEdit = formatDatesData(today, startDate, endDate, displayFormat, inputFormat);
+            const newStateCombined = {...newStateEdit, daysDifference};
+            setTimeout(() => this.setState(newStateCombined));
+            setTimeout(() => this.props.setDatesAndGuestsData(newStateEdit));
         } catch (error) {
             processError(`[Explore::onDateSelect] Error while setting date: ${error.message}`,{error});
         }
