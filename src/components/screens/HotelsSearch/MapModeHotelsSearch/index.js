@@ -294,13 +294,9 @@ class MapModeHotelsSearch extends Component {
                 title: lang.TEXT.SEARCH_HOTEL_DETAILS_TILE,
                 isHotel: true
             };
-
-            clog('callout',`callout data`,{item,data,extraParams,props,state})
             
             const func = () => this.props.gotoHotelDetailsPage(item, state, extraParams);
-            setTimeout(func,100)
-        } else {
-            clog(`callout NO data`,{item,data,props,state})
+            setTimeout(func)
         }
     }
 
