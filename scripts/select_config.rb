@@ -296,6 +296,23 @@ def create_config(changes_auto, changes_other)
     # add automatic changes
   changes = process_auto_changes(changes_auto)
 
+  if $debug > 4 then
+    puts
+    puts "Changes class: #{changes.class}"
+    changes.each{|item|
+      n=1
+      item.each{|key,value|
+        puts
+        puts "------  auto change #{n} -------"
+        puts "  key: #{key}"
+        puts "  value: #{value}"
+        puts
+        n+=1
+      }
+    }
+    exit()
+  end
+
   # gather names of changes enabled and keys for params
   changes_names = {}
   changes_all = changes_other
@@ -373,7 +390,7 @@ end
 # The use of global variables is for readability
 # Used globals: $changes, $changes_names
   # global variable
-$debug = 3
+$debug = 0
 $changes = []
 $changes_names = {}
 if $debug > 0 then

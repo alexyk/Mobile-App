@@ -9,7 +9,7 @@ import { isMoment } from 'moment';
  * ALL MUST BE FALSE!!!      (unless you know what you are doing)  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-export const __MYDEV__                               = false; //(__DEV__ || false);
+export const __MYDEV__                               = false; //(__DEV__);
 export const reactotronLoggingInReleaseForceEnabled  = true;
 export const forceOffline                            = false;
 
@@ -57,11 +57,10 @@ export const autoHotelSearch                    = false;
 export const autoHotelSearchFocus               = false;
 export const autoHotelSearchPlace               = 'london'
     // homes search
-export const autoHomeSearch                     = true;
+export const autoHomeSearch                     = false;
 export const autoHomeSearchPlace                = 'uk1'
   // calendar
 export const autoCalendar                       = false;
-export const debugCalendar                      = (!__DEV__ ? false : 0);   //  1 - day, 2 - day in month, 3 - month
 // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
@@ -80,7 +79,24 @@ export const debugCalendar                      = (!__DEV__ ? false : 0);   //  
 
 // ---------------  function definitions  -----------------
 
+const emptyFunc = function() {};
+export var dlog = dlogFunc;
+export var clog = console.log;
+export var ilog = console.info;
+export var wlog = console.warn;
+export var elog = console.error;
+export var tslog = (consoleTimeCalculations ? console.time : emptyFunc);
+export var telog = (consoleTimeCalculations ? console.timeEnd : emptyFunc);
+
 function configureConsole() {
+  if (!__DEV__ || !__MYDEV__) {
+    clog = emptyFunc;
+    ilog = emptyFunc;
+    dlog = emptyFunc;
+    wlog = emptyFunc;
+    elog = emptyFunc;
+  }
+
   // in both release & debug/dev
   // Check if reactotron enabled - make safe calls
   if (!console.tron) {
@@ -101,7 +117,7 @@ function configureConsole() {
           }
         }
     } else {
-      func = ()=>{}
+      func = emptyFunc;
     }
     console.tron = {
         ...console.tron,
@@ -118,24 +134,21 @@ function configureConsole() {
   }  
 
   // in case any forgotten console calls crash the build
-  if (!console.time) {
-    console.time = function() {}
-    console.timeEnd = function() {}
-    console.group = function() {}
-    console.groupEnd = function() {}
-    console.groupCollapsed = function() {}
-  } else {
-    if (!consoleTimeCalculations) {
-      console.time = function() {}
-      console.timeEnd = function() {}  
-    }
+  if (!console.time || !consoleTimeCalculations || !__MYDEV__) {
+    console.time = emptyFunc;
+    console.timeEnd = emptyFunc;
+    console.group = emptyFunc;
+    console.groupEnd = emptyFunc;
+    console.groupCollapsed = emptyFunc;
+    tslog = emptyFunc;
+    telog = emptyFunc;
   }
 }
 
 
 function configureReactotron() {
   // if in dev mode or forceReactotronLogging
-  if (__DEV__ || reactotronLoggingInReleaseForceEnabled) {
+  if ((__DEV__ && reactotronLoggingEnabled) || reactotronLoggingInReleaseForceEnabled) {
     // Reactotron config
     try {
       require('./utils/reactotronLogging')
@@ -221,14 +234,6 @@ function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
     return result;
   }
 }
-export const dlog = (__MYDEV__ ? dlogFunc : () => {});
-export const clog = (__MYDEV__ ? console.log : () => {});
-export const ilog = (__MYDEV__ ? console.info : () => {});
-export const wlog = (__MYDEV__ ? console.warn : () => {});
-export const elog = (__MYDEV__ ? console.error : () => {});
-export const tslog = (__MYDEV__ ? console.time : () => {});
-export const telog = (__MYDEV__ ? console.timeEnd : () => {});
-
 
 /**
  * Reactotron logging - for temporary debug
@@ -298,7 +303,7 @@ export function rlog(tag, description, data, isImportant = false) {
   params.value['_preview'] = params.preview;
   
   // types parsing
-  if (params.value && showTypesInReactotronLog) {
+  if (params.value && showTypesInReactotronLog && (__DEV__ && __MYDEV__)) {
     let parseObjTypes;
 
     parseObjTypes = function(o) {
