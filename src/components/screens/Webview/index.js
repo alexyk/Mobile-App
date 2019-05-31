@@ -18,7 +18,7 @@ import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
-import { webviewDebugEnabled } from '../../../config-debug';
+import { webviewDebugEnabled, clog, wlog } from '../../../config-debug';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -37,7 +37,6 @@ class WebviewScreen extends Component {
     constructor(props) {
         super(props);
         const { params } = this.props.navigation.state;
-        //console.log(`[${this.debug()}]### [WebviewScreen] Constructor `, {params});
 
         // TODO: Figure out what is this for and how was it supposed to work  / commented on by Alex K, 2019-03-06
         // UUIDGenerator.getRandomUUID((uuid) => {
@@ -48,9 +47,7 @@ class WebviewScreen extends Component {
         const allParams = Object.assign({},params,{currency:props.currency});
         this.state = generateWebviewInitialState(allParams);
 
-        console.log(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
-        // console.tron.log(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
-        
+        clog(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
 
         // Fix for using WebView::onMessage
         this.patchPostMessageFunction = function() {
@@ -58,7 +55,7 @@ class WebviewScreen extends Component {
             var originalPostMessage = window.postMessage;
           
             var patchedPostMessage = function(message, targetOrigin, transfer) { 
-                //console.log('Patched', {message,targetOrigin,transfer});
+                log('Patched', `WebView post message`, {message,targetOrigin,transfer});
                 
                 originalPostMessage(message, targetOrigin, transfer);
             };
@@ -210,15 +207,7 @@ class WebviewScreen extends Component {
     }
 
     onWebViewNavigationState(navState) {
-        /*console.log(`[${this.debug()}]`
-            +`WebView::onNavigationState %c back %c:${navState.canGoBack}, %c for %c :${navState.canGoForward}`
-            +`, url:${navState.url.substr(29,40)}`,
-            'font-weight: bold',
-            'font-weight: normal',
-            'font-weight: bold',
-            'font-weight: normal',
-            // ,{url:String(navState.url).substr(0,60),forw:navState.canGoForward,["back/res"]:navState.canGoBack}, navState
-        );*/
+        log('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
 
         this.webViewRef.canGoBackAndroid = navState.canGoBack;
         this.setState({canGoForward:    navState.canGoForward});
@@ -271,7 +260,7 @@ class WebviewScreen extends Component {
         }
         
         if (this.webViewRef.ref == null) {
-            console.warn('[WebView::renderDebug] this.webViewRef.ref is not set - not showing debug button')
+            wlog('[WebView::renderDebug] this.webViewRef.ref is not set - not showing debug button')
             return null;
         }
 

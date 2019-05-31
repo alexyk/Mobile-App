@@ -2,7 +2,7 @@ import moment from "moment";
 import lodash from "lodash";
 import { validateObject, isObject, isNumber, isString, isArray } from '../utils'
 import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config";
-import { log, checkHotelsDataWithTemplates, processError } from "../../../config-debug";
+import { rlog, checkHotelsDataWithTemplates, processError } from "../../../config-debug";
 
 export const DISPLAY_MODE_NONE = "mode_none";
 export const DISPLAY_MODE_SEARCHING = "mode_searching";
@@ -120,7 +120,7 @@ export function hasValidCoordinatesForMap(data, isInitial = false) {
     }
   }
   catch (e) {
-    log('error-coordinates',`[utils::hasValidCoordinatesForMap] error in calculating coordinates`,e)
+    rlog('error-coordinates',`[utils::hasValidCoordinatesForMap] error in calculating coordinates`,e)
   }
 
   //log('utils', `hasValidCoordinatesForMap(), lat/lon: ${lat}/${lon}`,{lat,lon})
@@ -612,7 +612,7 @@ export function parseAndCacheHotelDataFromSocket(
         : hotelData
   );
 
-  log('list-parse-socket',`${hotelData.name}, id:${hotelData.id}`, {hotelData,oldData,current: backupData,indexNotNull,index,hotelsSocketCacheMap,hotelsIndicesByIdMap});
+  rlog('list-parse-socket',`${hotelData.name}, id:${hotelData.id}`, {hotelData,oldData,current: backupData,indexNotNull,index,hotelsSocketCacheMap,hotelsIndicesByIdMap});
   
   const parsedInfo = parseSocketHotelData_Alt(hotelData);
 
@@ -808,7 +808,7 @@ export function checkHotelData(data, type, index) {
   }
 
   if (result.length > 0) {
-    log(`X-${type}`, `@${result}@, index: ${index} failed: ${isArrayInstance ? failed : 'n/a'}, isArray: ${isArrayInstance}`,{invalid_types:result,data,type,props, isArrayInstance},true);
+    rlog(`X-${type}`, `@${result}@, index: ${index} failed: ${isArrayInstance ? failed : 'n/a'}, isArray: ${isArrayInstance}`,{invalid_types:result,data,type,props, isArrayInstance},true);
     //console.warn(`[utils::checkHotelData] @${result}@, index: ${index}`,{result,data,type,props})
   }
 }

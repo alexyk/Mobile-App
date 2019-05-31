@@ -5,7 +5,7 @@ import MapView, { Marker } from 'react-native-maps';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import styles from './styles';
 import { imgHost } from '../../../../config';
-import { log, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, processError } from '../../../../config-debug';
+import { rlog, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, processError } from '../../../../config-debug';
 import lang from '../../../../language';
 import red_marker from '../../../../assets/red_marker.png';
 import blue_marker from '../../../../assets/blue_marker.png';
@@ -19,7 +19,7 @@ class MapModeHotelsSearch extends Component {
     _markers = [];
     constructor(props) {
         super(props);
-        log('map-view',`Constructor`,{props});
+        rlog('map-view',`Constructor`,{props});
 
         const isValid = (!isNaN(props.initialLat) && !isNaN(props.initialLon))
 
@@ -59,6 +59,10 @@ class MapModeHotelsSearch extends Component {
         this.itemId = 0;
     }
 
+    componentDidCatch(error, errorInfo) {
+        processError(`[MapModeHotelsSearch] Error in component: ${error.message}`, {error,errorInfo});
+    }
+
     componentDidMount() {
         if (this._map != null) {
             this._map.animateToRegion(this.state.selectedRegion, 0);
@@ -77,14 +81,6 @@ class MapModeHotelsSearch extends Component {
                 || (hotelsOld && hotelsNew && hotelsOld.length != hotelsNew.length) 
             )
         {
-            if ((__DEV__ && reactotronLoggingEnabled) || reactotronLoggingInReleaseForceEnabled) {
-                const oldLen = (hotelsOld ? hotelsOld.length : 'n/a')
-                const newLen = (hotelsNew ? hotelsNew.length : 'n/a')
-                const equal = (hotelsOld === hotelsNew) ? '===' : '!==';
-                //log('map-props',`componentDidUpdate ${oldLen} ${equal} ${newLen}`, {newProps, oldProps, equal, oldLen, newLen}, true)
-            }
-            
-
             const {newList:renderedMarkers, map:markersMap} = this.prepareMarkers(prevState.selectedRegion);
             this.setState({renderedMarkers,markersMap})
         }
@@ -212,7 +208,7 @@ class MapModeHotelsSearch extends Component {
     onPressMarker = (e, indexParam) => {
         const {data,ref,index} = this._markers[indexParam];
 
-        log("onPressMarker", `thumb:${data.thumbnail} index:${index} id:${data.id}`, {index,e,data,props:this.props});
+        rlog("onPressMarker", `thumb:${data.thumbnail} index:${index} id:${data.id}`, {index,e,data,props:this.props});
 
         /*if (this.state.selectedMarkerIndex != index) {
             this.selectedMarker = ref;
@@ -240,7 +236,7 @@ class MapModeHotelsSearch extends Component {
     }
 
     onPressMap = (e) => {
-        log('map-press',`e: ${e}`,{e})
+        rlog('map-press',`e: ${e}`,{e})
         const index = this.state.selectedMarkerIndex;
         /* if (index != -1 && this._markers[index]) {
             //this._markers[index].hideCallout();
@@ -289,7 +285,7 @@ class MapModeHotelsSearch extends Component {
                 isHotel: true
             };
 
-            log('callout',`callout data`,{item,data,extraParams,props,state})
+            rlog('callout',`callout data`,{item,data,extraParams,props,state})
 
             const func = () => this.props.gotoHotelDetailsPage(item, state, extraParams);
             setTimeout(func,100)

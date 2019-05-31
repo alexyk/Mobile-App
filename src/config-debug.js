@@ -1,21 +1,31 @@
-import { isObject, isString } from './components/screens/utils';
+import { isObject, isString, getObjectClassName } from './components/screens/utils';
 import lodash from 'lodash';
 import { isMoment } from 'moment';
 
-// FORCE modes - possible in RELEASE
-// 
-// ALL MUST BE FALSE!!!      (unless you know what you are doing)
+/** 
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * FORCE modes - possible in RELEASE                               *
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * ALL MUST BE FALSE!!!      (unless you know what you are doing)  *
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ */
+export const __MYDEV__                               = false; //(__DEV__ || false);
 export const reactotronLoggingInReleaseForceEnabled  = true;
 export const forceOffline                            = false;
 
-  // error handling
-/*  !__DEV__ console.warn (short version - message only)
-    0 console.warn (message & data)
-    1   console.error
-    2   reactotron.error
-    else:
-           throw Error                                            */
-export const errorLevel = 1;
+/**  
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * Error handling
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * errorLevel: Number
+ * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+ * 
+ *    0   console.warn (message & data)
+ *    1   console.error
+ *    2   reactotron.error
+ * 
+*/
+export const errorLevel = 0;
 
   // reactotron
 export const reactotronLoggingEnabled           = false;
@@ -23,8 +33,8 @@ export const logConverterErrorToReactrotron     = false;
 export const showTypesInReactotronLog           = true;
   // redux
   export const reduxConsoleLoggingEnabled         = true;
-  export const reduxConsoleCollapsedLogging       = true;
-  export const reduxReactotronLoggingEnabled      = false;
+export const reduxConsoleCollapsedLogging       = true;
+export const reduxReactotronLoggingEnabled      = false;
   // console
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
@@ -42,12 +52,16 @@ export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed';
 export const isOnline = (!isOffline);
 export const autoLoginInOfflineMode             = true;
   // automated flows
+    // hotels search
 export const autoHotelSearch                    = false;
 export const autoHotelSearchFocus               = false;
 export const autoHotelSearchPlace               = 'london'
+    // homes search
 export const autoHomeSearch                     = true;
 export const autoHomeSearchPlace                = 'uk1'
+  // calendar
 export const autoCalendar                       = false;
+export const debugCalendar                      = (!__DEV__ ? false : 0);   //  1 - day, 2 - day in month, 3 - month
 // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
@@ -136,7 +150,11 @@ function configureReactotron() {
 
 // ---------------     exports     -----------------
 
-// TODO: Implement error handling - logging or throw
+/**
+ * Logs or throws a captured error
+ * @param {String} description Information about the error
+ * @param {Object} data Not shown in release
+ */
 export function processError(description, data) {
   if (!__DEV__) {
 
@@ -203,26 +221,37 @@ function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
     return result;
   }
 }
-export const dlog = dlogFunc;
-
-
-export function logd(tag, description, data, isImportant = false) {
-  if (__DEV__) {
-    log('dev-debug', `[${tag}] `+description, data, isImportant);
-  }
-}
-
-export const clog = console.log;
+export const dlog = (__MYDEV__ ? dlogFunc : () => {});
+export const clog = (__MYDEV__ ? console.log : () => {});
+export const ilog = (__MYDEV__ ? console.info : () => {});
+export const wlog = (__MYDEV__ ? console.warn : () => {});
+export const elog = (__MYDEV__ ? console.error : () => {});
+export const tslog = (__MYDEV__ ? console.time : () => {});
+export const telog = (__MYDEV__ ? console.timeEnd : () => {});
 
 
 /**
- * Logs using Reactotron.display
+ * Reactotron logging - for temporary debug
+ * @param {String} tag 
+ * @param {String} description 
+ * @param {any} data 
+ * @param {Boolean} isImportant 
+ */
+export function rlogd(tag, description, data, isImportant = false) {
+  if (__DEV__) {
+    rlog('dev-debug', `[${tag}] `+description, data, isImportant);
+  }
+}
+
+
+/**
+ * Reactotron custom logging using Reactotron.display
  * @param {String/Object} tag Tag as in ERROR, API, DEBUG etc. / Can be just an object to trace
  * @param {String/Object} description A short description or preview of data / Or just data to trace
  * @param {any} data Any object data that need to be visible
  * @param {Boolean} isImportant A highlight of tag (as in ERROR)
  */
-export function log(tag, description, data, isImportant = false) {
+export function rlog(tag, description, data, isImportant = false) {
   let params = {}
   let doParsing = true
   
@@ -276,19 +305,16 @@ export function log(tag, description, data, isImportant = false) {
       let result = {};
       for (let prop in o) {
         let item = o[prop];
+        let className = getObjectClassName(result);
+        if (className == 'Object' && item instanceof Symbol) debugger;
         if (isObject(item)) {
-          let className = '';
-          try {
-            className = result.constructor.name;
-            if (!className) className = result.prototype.constructor.name;
-            if (className) className = ":" + className;
-          } catch (e) {}          
           lodash.merge(result,{[`${prop}${className}`]:parseObjTypes(item)});
         } else {
           try {
-            result[prop] = `${item} (${typeof(item)})`
+            result[prop] = `${item} (${className})`
           } catch (error) {
-            processError(`[config-debug::log::parseObjTypes] Error while setting result['${prop}']: ${error.message}`,{error,item,result})
+            wlog(`className: ${className}`)
+            processError(`[config-debug::rlog::parseObjTypes] Error while setting result['${prop}']: ${error.message}`,{error,item,result})
           }
         }
       }

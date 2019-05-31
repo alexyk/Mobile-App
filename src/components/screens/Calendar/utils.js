@@ -134,7 +134,7 @@ export function createInitialCalendarData(monthDate,checkInDateMoment,checkOutDa
  * @param {moment} checkOutDateMoment 
  * @param {moment} today 
  * @param {String} internalFormat 
- * @param {bool}   onlyMarked 
+ * @param {Boolean}   onlyMarked 
  */
 export function calculateDayData(date, checkInDateMoment, checkOutDateMoment, today, internalFormat, onlyMarked=false) {
     let result = {};

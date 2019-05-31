@@ -15,7 +15,7 @@ import LocPrice from "../../atoms/LocPrice";
 import styles from "./styles";
 import lang from "../../../language";
 import { isNative } from "../../../version";
-import { log } from "../../../config-debug";
+import { rlog } from "../../../config-debug";
 
 class HotelItemView extends Component {
   static propTypes = {
@@ -37,6 +37,12 @@ class HotelItemView extends Component {
     this.onPress = this.onPress.bind(this);
   }
 
+
+  componentDidCatch(error, errorInfo) {
+    processError(`[HotelItemView] Error in component: ${error.message}`, {error,errorInfo});
+  }
+
+  
   shouldComponentUpdate(newProps, newState, newContext) {
     const { item } = newProps;
     const oldItem = this.props.item;

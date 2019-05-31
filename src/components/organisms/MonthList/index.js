@@ -4,7 +4,7 @@ import { FlatList } from 'react-native';
 import moment from 'moment';
 import Month from '../../molecules/Month';
 import LTLoader from '../../molecules/LTLoader';
-import { processError } from '../../../config-debug';
+import { processError, rlog, ilog } from '../../../config-debug';
 
 export default class MonthList extends PureComponent {
     static propTypes = {
@@ -36,7 +36,11 @@ export default class MonthList extends PureComponent {
         // this.shouldUpdate = this.shouldUpdate.bind(this);
         this.checkRange = this.checkRange.bind(this);
         this.getWeekNums = this.getWeekNums.bind(this);
-        this.scrollToSelectedMonth = this.scrollToSelectedMonth.bind(this);
+        this._scrollToSelectedMonth = this._scrollToSelectedMonth.bind(this);
+    }
+
+    componentDidCatch(error, errorInfo) {
+        processError(`[MonthList] Error in component: ${error.message}`, {error,errorInfo});
     }
 
     _keyExtractor() {
@@ -67,7 +71,7 @@ export default class MonthList extends PureComponent {
             clonedMoment.add(1, 'months');
         }
 
-        console.tron.mylog(`month-list`,`Start: ${start} End: ${end} Total Weeks: ${total}`)
+        rlog(`month-list`,`Start: ${start} End: ${end} Total Weeks: ${total}`)
 
         return total;
     }
@@ -96,14 +100,14 @@ export default class MonthList extends PureComponent {
         return true;
     }
 
-    scrollToSelectedMonth() {        
+    _scrollToSelectedMonth() {
         setTimeout(() => {
             const { startDate, minDate } = this.props;
             const date1 = minDate.startOf('month');
             const date2 = startDate.startOf('month');
             const index = date2.diff(date1, 'months');
-    
-            console.info(`[MonthList] scrolling to index ${index}`)
+
+            ilog(`[MonthList] scrolling to index ${index}`)
             const item = this._renderedItems[index];
             if (this.list && item) {
                 this.list.scrollToItem({ item, animated: true });
@@ -111,7 +115,7 @@ export default class MonthList extends PureComponent {
                 const tryAgain = (this._scrollingAttemtps < 3);
                 if (tryAgain) {
                     this._scrollingAttemtps++;
-                    this.scrollToSelectedMonth();
+                    this._scrollToSelectedMonth();
                 }
                 processError(`[MonthList] Trying to scroll to index ${index} failed - this.list or item is not defined. Try again: ${tryAgain}`,{hasList:(this.list != null),hasItem: (item!=null),tryAgain});
             }
@@ -145,7 +149,7 @@ export default class MonthList extends PureComponent {
         const {data} = this.props;
 
         let result = (
-            (!data || data.length == 0) 
+            (!data || data.length == 0)
                 ? <LTLoader message={'Loading ...'} isLoading={true} opacity={'FF'} />
                 :
                     <FlatList
@@ -155,12 +159,21 @@ export default class MonthList extends PureComponent {
                         style={{paddingHorizontal:10}}
                         keyExtractor={this._keyExtractor}
                         renderItem={this._renderMonth}
+                        // Virtualised List
+                        // updateCellsBatchingPeriod={100}
+                        // maxToRenderPerBatch={3}
+                        // initialNumToRender={2}
+                        // windowSize={10}
+                        // other
+                        // ListView
+                        // legacyImplementation={true}
+
                     />
         );
 
         if (this.isFirst && data && data.length > 0) {
             this.isFirst = false;
-            this.scrollToSelectedMonth();
+            this._scrollToSelectedMonth();
         }
 
         return result;

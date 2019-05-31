@@ -1,4 +1,4 @@
-import { autoHotelSearchPlace, autoHomeSearchPlace, log, processError } from '../../config-debug'
+import { autoHotelSearchPlace, autoHomeSearchPlace, rlog, processError } from '../../config-debug'
 import { isObject } from '../../components/screens/utils'
 
 const offlinePacksHomes = {
@@ -60,10 +60,10 @@ export default function createOfflineRequester() {
           const keysDetails = keys.map( key => `${key}:${isObject(data[key])?'{...}':data[key]} ` )
         
           // log('API-OFFLINE', `${title} -> ${keysStr.substr(0,80)}...`, {data,keysDetails,keys} )
-          log('API-OFFLINE', `${title}`, {data,keysDetails,keys,keysStr} )
+          rlog('API-OFFLINE', `${title}`, {data,keysDetails,keys,keysStr} )
           // log('API-OFFLINE', title, {data})
         } catch (e) {
-          log('API-OFFLINE',`ERROR in ${title}: ${e.message}`, {e}, true)
+          rlog('API-OFFLINE',`ERROR in ${title}: ${e.message}`, {e}, true)
         }
         // console.tron.display({title,value:data})
         success(data);
@@ -139,7 +139,7 @@ export default function createOfflineRequester() {
 			arr.map((item,index) => {
 				const func = () => {
           onData.apply( _this, [ { body: JSON.stringify(item) } ] )
-          log('SOCKET-OFFLINE',`onData ${index}`,{item,index})
+          rlog('SOCKET-OFFLINE',`onData ${index}`,{item,index})
         }
 				setTimeout(func, index*delayPerRefresh + delay2);
 

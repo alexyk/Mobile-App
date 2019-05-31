@@ -11,7 +11,7 @@ import { bindActionCreators } from 'redux';
 import { getCountries } from '../../redux/action/Country'
 import { getCurrencyRates, getLocRate } from '../../redux/action/exchangeRates'
 import { socketHost, ROOMS_XML_CURRENCY } from '../../config';
-import { processError, autoLoginInOfflineMode } from '../../config-debug';
+import { processError, autoLoginInOfflineMode, ilog } from '../../config-debug';
 
 const androidStomp = NativeModules.StompModule;
 
@@ -57,7 +57,7 @@ class AppLoading extends Component {
 
         // enable auto login on reload
         if (__DEV__ && !isLoggedIn  && autoLoginInOfflineMode) {
-            console.info(`[AppLoading] Auto logging in - please reload the app to take effect`)
+            ilog(`[AppLoading] Auto logging in - please reload the app to take effect`)
             AsyncStorage.multiSet([
                     [`${domainPrefix}.auth.locktrip`,'oa*erh$oaeksnrtmok'],
                     [`${domainPrefix}.auth.username`,'theUserName']

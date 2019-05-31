@@ -1,5 +1,6 @@
+import { isMoment } from "moment";
 import { basePath } from "../../config";
-import { log } from "../../config-debug";
+import { rlog } from "../../config-debug";
 
 
 export function validateObject(sourceData, props, index=-1, path='') {
@@ -87,6 +88,8 @@ export function validateObject(sourceData, props, index=-1, path='') {
 }
 
 export function generateSearchString(state, props) {
+  rlog('generate',`generateSearchString - state and props`, {state,props})
+
   let search = `?region=${state.regionId}`;
   search += `&currency=${props.currency}`;
   search += `&startDate=${state.checkInDateFormated}`;
@@ -213,8 +216,6 @@ export function formatDatesData(today, startMoment, endMoment, displayDateFormat
     checkInDate: startMoment.format(displayFormat1),
     checkOutDate: endMoment.format(displayFormat2),
   };
-
-  console.log('[TEMP] FORMAT',{startMoment, endMoment, displayDateFormat, inputDateFormat,result})
    
   return result;
 }
@@ -229,8 +230,13 @@ export function isArray(value) {
 }
 
 
-export function isObject(value) {
-  return (typeof(value) == 'object')
+export function isObject(value, className=null) {
+  let result = (typeof(value) == 'object')
+  if (!result) {
+    className = ( className ? className : getObjectClassName(value) );
+    result = ( ['Symbol','Object'].includes(className) );
+  }
+  return result;
 }
 
 
@@ -241,4 +247,26 @@ export function isNumber(value) {
 
 export function isString(value) {
   return (typeof(value) == 'string')
+}
+
+export function getObjectKeysCount(obj) {
+  const result = ( (obj && Object.keys(obj).length) || -1);
+  return result;
+}
+
+export function getObjectClassName(obj) {
+  let result = null;
+
+  try {
+    if (isMoment(obj))          { result = 'moment'; }
+    if (obj instanceof Symbol)  { result = 'Symbol'; }
+    if (!result)                { result = (
+                                  (obj && obj.constructor)
+                                    && (obj.constructor.name || obj.constructor.className || null)
+                                );}
+    if (!result)                { result = typeof(obj); }
+  } catch (error) {
+    processError(`[screens::utils::getObjectClassName] Error: ${error.message}`,{error,obj});
+  }
+  return result;
 }

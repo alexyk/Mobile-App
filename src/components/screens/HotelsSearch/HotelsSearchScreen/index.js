@@ -40,7 +40,7 @@ import {
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
   HOTELS_MINIMUM_RESULTS
 } from "../../../../config";
-import { isOnline, log, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
+import { isOnline, rlog, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -179,6 +179,12 @@ class HotelsSearchScreen extends Component {
     this.renderItemTimes = 0;
   }
 
+
+  componentDidCatch(error, errorInfo) {
+    processError(`[HotelsSearchScreen] Error in component: ${error.message}`, {error,errorInfo});
+  }
+
+
   componentDidMount() {
     console.log("#hotel-search# 3/6 HotelSearchScreen componentDidMount START");
 
@@ -304,7 +310,7 @@ class HotelsSearchScreen extends Component {
 
   // TODO: Inspect this flow - and create a component to implement it
   async startSocketConnection() {
-    log('socket',`startSocketConnection`);
+    rlog('socket',`startSocketConnection`);
 
     this.isSocketDown = false;
 
@@ -361,11 +367,11 @@ class HotelsSearchScreen extends Component {
     const data = { uuid: this.uuid, query: this.searchString };
 
     //console.log("stompiOSConnect ---------------");
-    //log('socket',`stompiOSConnect`,{socketHost,data,headers});
+    rlog('socket',`stompiOSConnect`,{socketHost,data,headers});
     
     stompiOSClient = stomp.client(socketHost);
     stompiOSClient.debug = (hotelsSearchSocketDebug
-      ? (msg) => log('debug-socket', `${msg.substr(0,30)}` , {msg})
+      ? (msg) => rlog('debug-socket', `${msg.substr(0,30)}` , {msg})
       : null
     );
     stompiOSClient.connect(
@@ -411,7 +417,7 @@ class HotelsSearchScreen extends Component {
   }
 
   onDataFromSocket(data) {
-    //log('socket-data',`onDataFromSocket ${data.body}`, {data})
+    // log('socket-data',`onDataFromSocket ${data.body}`, {data})
     
     if (!this || !this.listViewRef || this.isUnmounted) {
       console.warn(`[HotelsSearchScreen::onDataFromSocket] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
@@ -537,7 +543,7 @@ class HotelsSearchScreen extends Component {
 
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
-    log('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
+    rlog('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
     
     //TODO: @@@debug remove
 //     let asArray = []
@@ -629,7 +635,7 @@ class HotelsSearchScreen extends Component {
         // webview inside
         let initialState = generateWebviewInitialState(extraParams, state);
 
-        log('item-click',`url: ${initialState.webViewUrl}`)
+        rlog('item-click',`url: ${initialState.webViewUrl}`)
         /*console.log(`[HotelsSearchScreen] Loading hotel info`, {
           initialState,
           extraParams,
@@ -718,7 +724,7 @@ class HotelsSearchScreen extends Component {
         const hotelsAll = data.content;
         checkHotelData(hotelsAll,'filter')
 
-        log('@@filter-on-server',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
+        rlog('@@filter-on-server',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
 
         // parse data
         mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap)
@@ -846,7 +852,7 @@ class HotelsSearchScreen extends Component {
       console.error(
         "[HotelsSearchScreen] Could not fetch Static Data for hotels"
       );
-      log('error',`Could not get hotels static data`,{res})
+      rlog('error',`Could not get hotels static data`,{res})
       this.listStartFetch([], 0);
     }
   }
@@ -933,7 +939,7 @@ class HotelsSearchScreen extends Component {
     console.time('*** HotelsSearchScreen::gotoFilter()')
 
     // log('HotelsSearchScreen','gotoFilter', {props:this.props, state: this.state})
-    log('HotelsSearchScreen',`gotoFilter  isLoading: ${this.state.isLoading} isFiltering: ${this.props.isApplyingFilter}`, {props:this.props, state: this.state})
+    rlog('HotelsSearchScreen',`gotoFilter  isLoading: ${this.state.isLoading} isFiltering: ${this.props.isApplyingFilter}`, {props:this.props, state: this.state})
 
     if (this.state.isLoading || this.props.isApplyingFilter) {
       //log('[HotelsSearch] gotoFilter::toast', {state:this.state, props:this.props})
@@ -992,7 +998,7 @@ class HotelsSearchScreen extends Component {
       const count = filtered.length;
       //this.props.setSearchFiltered(filtered)
       
-      log('@@filter-fromUI',`Filtered from UI: ${count} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams},true);
+      rlog('@@filter-fromUI',`Filtered from UI: ${count} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams},true);
       checkHotelData(filtered,'filter-fromUI')
 
       // add no

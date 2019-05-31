@@ -1,7 +1,9 @@
 import moment from 'moment'
-import {log as logd} from "./common-test-utils"
 
-log = console.log;
+import {log} from "./common-test-utils"
+import {clog} from "../src/config-debug"
+
+
 logd1 = (obj) => {
   let res = {}
   for (let p in obj) {
@@ -52,7 +54,7 @@ test('moment-isBetween',() => {
     isBetween3_1:current3_1.isBetween(start,end),
   })
 
-  log(now.format('YYYY-MM-DD'))
+  clog(now.format('YYYY-MM-DD'))
   // Conclusion - at least 1ms is needed to make the difference
   // So it is not inBetweenOrEqual - it is inBetweenButNotEqual
 })

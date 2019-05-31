@@ -1,5 +1,5 @@
 import { Platform, Dimensions, PixelRatio } from 'react-native'
-import { logd } from '../config-debug';
+import { rlogd } from '../config-debug';
 import { isFontScalingEnabled } from '../config';
 
 export const pixelRatio = PixelRatio.getPixelSizeForLayoutSize(100)/100;
@@ -31,7 +31,7 @@ export function getFontSize(value,caller='') {
   let result = PixelRatio.roundToNearestPixel(asFloat);
 
   if (__DEV__) {
-    logd('getFontSizeByWidth',`[designUtils] ${caller} result:${result} asFloat:${asFloat.toFixed(2)}`,{asFloat,result,value,caller})
+    rlogd('getFontSizeByWidth',`[designUtils] ${caller} result:${result} asFloat:${asFloat.toFixed(2)}`,{asFloat,result,value,caller})
   }
 
   return result;

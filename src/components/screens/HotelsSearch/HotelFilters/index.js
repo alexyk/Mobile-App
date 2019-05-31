@@ -10,7 +10,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import MultiSlider from '@ptomasroos/react-native-multi-slider';
 import LTLoader from '../../../molecules/LTLoader';
 import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
-import { log } from '../../../../config-debug'
+import { rlog } from '../../../../config-debug'
 
 
 class HotelFilters extends Component {

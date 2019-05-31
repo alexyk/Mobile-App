@@ -16,7 +16,7 @@ import requester from '../../../../initDependencies';
 import { UltimateListView } from 'react-native-ultimate-listview';
 import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import { imgHost } from '../../../../config';
-import { log, processError } from '../../../../config-debug';
+import { rlog, processError } from '../../../../config-debug';
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
 import styles from './styles';
@@ -151,10 +151,10 @@ class HomesSearchScreen extends Component {
         //console.log("searchTerms", searchTerms);
 
         requester.getListingsByFilter(searchTerms).then(res => {
-            log('homes-1',"requester.getListingsByFilter", {searchTerms,res},true);
+            rlog('homes-1',"requester.getListingsByFilter", {searchTerms,res},true);
 
             res.body.then(data => {
-                log('homes-2',"requester.getListingsByFilter", {data},true);
+                rlog('homes-2',"requester.getListingsByFilter", {data},true);
 
                 if (this.isFilterResult) {
                     this.setState({
