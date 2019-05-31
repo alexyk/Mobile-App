@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
@@ -8,12 +8,13 @@ import {
     TouchableHighlight
 } from 'react-native';
 import styles from './styles';
+import { tslog, telog } from '../../../config-debug';
 
-export default class Day extends PureComponent {
+export default class Day extends Component {
     static propTypes = {
         onChoose: PropTypes.func,
-        // date: PropTypes.oneOfType([PropTypes.string]),
-        date: PropTypes.oneOfType([PropTypes.instanceOf(moment)]),
+        isValid: PropTypes.bool,
+        date: PropTypes.instanceOf(moment),
         color: PropTypes.shape({
             mainColor: PropTypes.string,
             subColor: PropTypes.string,
@@ -24,6 +25,7 @@ export default class Day extends PureComponent {
 
     static defaultProps = {
         onChoose: () => {},
+        isValid: true,
         date: undefined,
         color: {
             mainColor: '#f0f1f3',
@@ -39,13 +41,13 @@ export default class Day extends PureComponent {
         this.chooseDay = this.chooseDay.bind(this);        
     }
 
-    /* shouldComponentUpdate(nextProps) {
-        const prevStatus = this.isFocus;
-        const { isFocus } = this.props;
-        if (prevStatus || isFocus) return true;
+    shouldComponentUpdate(nextProps) {
+        // const prevStatus = this.isFocus;
+        // const { isFocus } = this.props;
+        // if (prevStatus || isFocus) return true;
 
         return false;
-    } */
+    }
 
     chooseDay() {
         if (this.props.isValid) {
@@ -58,9 +60,12 @@ export default class Day extends PureComponent {
             return <View style={styles.dayContainer} />
         }
 
-        const { color, text, date,
-            isMid, isStartPart, isStart, isEnd, isValid, isFocus, isToday
+        
+        const { 
+            color, text, isMid, isStartPart, isStart, isEnd, isValid, isFocus, isToday
         } = this.props;
+
+        if (text == '1') tslog('*** rendering days 1-25')
 
         const mainColor = { color: color.mainColor };
         const subColor = { color: color.subColor };
@@ -71,6 +76,8 @@ export default class Day extends PureComponent {
         if (isStartPart) stylesCollection.push(styles.startContainer);
         if (isEnd) stylesCollection.push(styles.endContainer);
         if (isStartPart || isEnd) stylesCollection.push(subBack);
+
+        if (text == '25') telog('*** rendering days 1-25')
 
         return (
             <View

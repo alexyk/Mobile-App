@@ -71,7 +71,7 @@ export default class MonthList extends PureComponent {
             clonedMoment.add(1, 'months');
         }
 
-        rlog(`month-list`,`Start: ${start} End: ${end} Total Weeks: ${total}`)
+        //rlog(`month-list`,`Start: ${start} End: ${end} Total Weeks: ${total}`)
 
         return total;
     }
@@ -145,6 +145,20 @@ export default class MonthList extends PureComponent {
     }
 
     render() {
+        /* FlatList options
+        
+        // Virtualised List
+        updateCellsBatchingPeriod={100}
+        maxToRenderPerBatch={3}
+        initialNumToRender={2}
+        windowSize={10}
+
+        // other
+
+        // ListView
+        legacyImplementation={true}
+
+        */
 
         const {data} = this.props;
 
@@ -159,15 +173,6 @@ export default class MonthList extends PureComponent {
                         style={{paddingHorizontal:10}}
                         keyExtractor={this._keyExtractor}
                         renderItem={this._renderMonth}
-                        // Virtualised List
-                        // updateCellsBatchingPeriod={100}
-                        // maxToRenderPerBatch={3}
-                        // initialNumToRender={2}
-                        // windowSize={10}
-                        // other
-                        // ListView
-                        // legacyImplementation={true}
-
                     />
         );
 

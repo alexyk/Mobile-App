@@ -37,6 +37,7 @@ export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment
 
 export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
   let result = {};
+  let markedCount = 0;
   
   let current = minDate.clone();
   let daysDifference = (
@@ -59,6 +60,7 @@ export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateM
       const {marked: dayMarked} = calculateDayData(current, checkInDateMoment, checkOutDateMoment, today, internalFormat, true);
       if (dayMarked) {
           result[dayMarked.asStr] = dayMarked.data;
+          markedCount++;
       }
 
       current.add(1,'day');
@@ -68,6 +70,8 @@ export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateM
   } catch (error) {
     processError(`[Calendar::utils::updateMarkedCalendarData: ${error.message}`, {error});
   }
+
+  // rlog('calendar::utils',`Updating marked days: ${markedCount}`,{daysDifference,markedCount,current,checkInDateMoment,checkOutDateMoment});
 
   return result;
 }

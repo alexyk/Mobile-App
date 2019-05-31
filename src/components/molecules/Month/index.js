@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import { View, Text } from 'react-native';
 
 import PropTypes from 'prop-types';
@@ -7,20 +7,25 @@ import moment from 'moment';
 import styles from './styles';
 import Day from '../../atoms/Day';
 import { I18N_MAP } from './i18n';
+import { rlog, tslog, telog } from '../../../config-debug';
+import { getObjectKeysCount } from '../../screens/utils';
 
-export default class Month extends PureComponent {
-    static propTypes = {
+
+export default class Month extends Component {
+/*     static propTypes = {
         startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         endDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         month: PropTypes.instanceOf(moment),
         today: PropTypes.instanceOf(moment),
         i18n: PropTypes.string,
+        data: PropTypes.array,
+        markedData: PropTypes.object,
         color: PropTypes.shape({
             mainColor: PropTypes.string,
             subColor: PropTypes.string
         })
     }
-
+ */
     static defaultProps = {
         startDate: undefined,
         endDate: undefined,
@@ -33,22 +38,55 @@ export default class Month extends PureComponent {
         }
     }
 
-
     constructor(props) {
         super(props);
-
+        
         this.state = {
             renderedDays: []
         }
-
+        
         this.itemId = 0;
+        this._isFirst = true;
         this._internalDateFormat = 0;
+
         this._renderDayRow = this._renderDayRow.bind(this);
         this.getMonthText = this.getMonthText.bind(this);
     }
 
     componentDidMount() {
         this.prepareDaysRendering();
+    }
+
+    shouldComponentUpdate(nextProps, nextState, unknownObject) {
+
+        if (__DEV__) {
+            //TODO: Remove this debug (@@@@@debug)
+            const {props,state} = this;
+            const {markedData: oldMarked, data: oldData} = props;
+            const {markedData: newMarked, data: newData} = nextProps;
+            const {days: oldDays, date: oldDate} = oldData;
+            const {days: newDays} = newData;
+            const {renderedDays: oldRenderedDays} = state;
+            const {renderedDays: newRenderedDays} = nextState;
+            const objFormat = (label, obj1, obj2) => {
+                const areEqual = (obj1 === obj2);
+                if (areEqual) {
+                    return '';
+                } else {
+                    return `[${label}] ${getObjectKeysCount(obj1)}${areEqual ? ' === ' : ' !== '}${getObjectKeysCount(obj2)}  `;
+                }
+            }
+            let summary = objFormat('days', oldDays, newDays);
+            summary += objFormat('days', oldMarked, newMarked);
+            summary += objFormat('renderedDays', oldRenderedDays, newRenderedDays);
+
+            //rlog('month-should-update',`${oldDate.format('YYYY-MMM')}    Month::shouldUpdate - ${summary}`,{nextProps, nextState, unknownObject, state, props, oldData, newData});
+        }
+
+        const result = (this._isFirst)// || this.props.markedData !== newProps.markedData);
+        this._isFirst = false;
+
+        return result;
     }
 
     getMonthText() {
@@ -97,7 +135,6 @@ export default class Month extends PureComponent {
 
         const {asStr, date, text} = item;
         let marked = ( (markedData && markedData[asStr]) || {}) ;
-        if (marked.isValid == null) {marked.isValid = true;}
         let dayProps = { asStr, text, date, ...marked };
 
         const rendered = (
@@ -129,8 +166,13 @@ export default class Month extends PureComponent {
     }
 
     render() {
+        // if (__DEV__) {
+        //     const d = this.props.data.date;
+        //     const m = d.format('YYYY-MM');
+        //     rlog('render-month', m)
+        // }
+
         const { color } = this.props;
-        const { date } = this.props.data;
         const subColor = { color: color.subColor };
         const titleText = this.getMonthText();
 

@@ -15,7 +15,7 @@ import styles from './styles';
 import MonthList from '../../organisms/MonthList';
 import { I18N_MAP } from './i18n';
 import CloseButton from '../../atoms/CloseButton';
-import { processError } from '../../../config-debug';
+import { processError, tslog, telog, rlog } from '../../../config-debug';
 import { updateMarkedCalendarData, generateInitialCalendarData } from './utils';
 
 const useRedux = true;
@@ -40,6 +40,8 @@ class Calendar extends Component {
 
     constructor(props) {
         super(props);
+
+        tslog('*** calendar - from constructor to render');
 
         const {today, startDate, endDate} = this.props.datesAndGuestsData;
         this.startDate = startDate;
@@ -178,6 +180,8 @@ class Calendar extends Component {
     }
     
     clear() {
+        rlog('calendar',`Clear`)
+        
         const calendarMarkedDays = updateMarkedCalendarData(this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
         const newState = {
             startDate: null,
@@ -206,42 +210,49 @@ class Calendar extends Component {
 
     onChoose(day) {
         // const { startDate, endDate } = (useRedux ? this.props.datesAndGuestsData : this.state);
-        let newData = {};
+        let newData;
         let startDate = this.startDate;
         let endDate = this.endDate;
-        const dayAsI18Str = this.i18n(day, 'date');
-        const dayAsI18WeekDayStr = this.i18n(day.isoWeekday(), 'w');
-        
-        if ((!startDate && !endDate) || day < startDate || (startDate && endDate)) {
-            startDate = day;
-            endDate = null;
-            this.startDate = startDate;
-            this.endDate = endDate;
-            newData = {
-                startDate, endDate,
-                startDateText: dayAsI18Str,
-                startWeekdayText: dayAsI18WeekDayStr,
-                endDateText: '',
-                endWeekdayText: ''
-            }
-            //console.info(`[CALC] case 1: ${day.toString()}`,{day,newData})
-        } else if (startDate && !endDate && day > startDate) {
-            endDate = day;
-            this.endDate = endDate;
-            newData = {
-                endDate,
-                endDateText: dayAsI18Str,
-                endWeekdayText: dayAsI18WeekDayStr,
-            };
-            //console.info(`[CALC] case 2: ${day.toString()}`,{day,newData})
-        }
 
+        try {
+            const dayAsI18Str = this.i18n(day, 'date');
+            const dayAsI18WeekDayStr = this.i18n(day.isoWeekday(), 'w');
+            
+            if ((!startDate && !endDate) || day < startDate || (startDate && endDate)) {
+                startDate = day;
+                endDate = null;
+                this.startDate = startDate;
+                this.endDate = endDate;
+                newData = {
+                    startDate, endDate,
+                    startDateText: dayAsI18Str,
+                    startWeekdayText: dayAsI18WeekDayStr,
+                    endDateText: '',
+                    endWeekdayText: ''
+                }
+                //console.info(`[CALC] case 1: ${day.toString()}`,{day,newData})
+            } else if (startDate && !endDate && day > startDate) {
+                endDate = day;
+                this.endDate = endDate;
+                newData = {
+                    endDate,
+                    endDateText: dayAsI18Str,
+                    endWeekdayText: dayAsI18WeekDayStr,
+                };
+                //console.info(`[CALC] case 2: ${day.toString()}`,{day,newData})
+            }
+        } catch (error) {
+            processError(`[Calendar::onChoose] Error in setting new date: ${e.message}`, {error,day});
+        }
         this.setCalendarData(newData);
     }
 
     render() {
         // console.time('*** render Calendar')
 
+        const {
+            inputFormat, internalFormat, minDate, maxDate,
+        } = (this.props.datesAndGuestsData);
         const {
             startDate,
             endDate,
@@ -252,11 +263,9 @@ class Calendar extends Component {
             endDateText,
             endWeekdayText,
             weekDays,
-            inputFormat, internalFormat,
-            minDate, maxDate,
             calendarData,
-            calendarMarkedDays,
-        } = this.props.datesAndGuestsData;
+            calendarMarkedDays
+        } = (useRedux ? this.props.datesAndGuestsData : this.state);
         const {color} = this.props;
 
         const {
@@ -361,6 +370,7 @@ class Calendar extends Component {
         );
 
         // console.timeEnd('*** render Calendar')
+        telog('*** calendar - from constructor to render');
 
         return result;
     }
