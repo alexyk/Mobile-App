@@ -9,7 +9,7 @@ import { isMoment } from 'moment';
  * ALL MUST BE FALSE!!!      (unless you know what you are doing)  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-export const __MYDEV__                               = false; //(__DEV__);
+export const __MYDEV__                               = (__DEV__ && true);
 export const reactotronLoggingInReleaseForceEnabled  = true;
 export const forceOffline                            = false;
 
@@ -80,6 +80,7 @@ export const autoCalendar                       = false;
 // ---------------  function definitions  -----------------
 
 const emptyFunc = function() {};
+const emptyFuncWithDescr = (descr) => function() { (console.warn && console.warn(`Call of '${descr}' is disabled - see '__MYDEV__'`)) };
 export var dlog = dlogFunc;
 export var clog = console.log;
 export var ilog = console.info;
@@ -89,12 +90,18 @@ export var tslog = (consoleTimeCalculations ? console.time : emptyFunc);
 export var telog = (consoleTimeCalculations ? console.timeEnd : emptyFunc);
 
 function configureConsole() {
-  if (!__DEV__ || !__MYDEV__) {
+  if (!__DEV__) {
     clog = emptyFunc;
     ilog = emptyFunc;
     dlog = emptyFunc;
     wlog = emptyFunc;
     elog = emptyFunc;
+  } else  if (!__MYDEV__) {
+    clog = emptyFuncWithDescr('clog');
+    ilog = emptyFuncWithDescr('ilog');
+    dlog = emptyFuncWithDescr('dlog');
+    wlog = emptyFuncWithDescr('wlog');
+    elog = emptyFuncWithDescr('elog');
   }
 
   // in both release & debug/dev
@@ -134,14 +141,22 @@ function configureConsole() {
   }  
 
   // in case any forgotten console calls crash the build
-  if (!console.time || !consoleTimeCalculations || !__MYDEV__) {
+  if (!console.time) {
     console.time = emptyFunc;
     console.timeEnd = emptyFunc;
-    console.group = emptyFunc;
-    console.groupEnd = emptyFunc;
-    console.groupCollapsed = emptyFunc;
     tslog = emptyFunc;
     telog = emptyFunc;
+    // When console.time is n/a so is console.group etc. (I don't remember the example /Alex K)
+    console.group = (console.log ? console.log : emptyFunc);
+    console.groupEnd = (console.log ? console.log : emptyFunc);
+    console.groupCollapsed = (console.log ? console.log : emptyFunc);
+    if (console.warn) console.warn('[config-debug] console.time is not available - disabling console.time(End) and console.group(End|Collapsed) families of calls');
+  } else if (!consoleTimeCalculations || !__MYDEV__) {
+    console.time = emptyFunc;
+    console.timeEnd = emptyFunc;
+    tslog = emptyFunc;
+    telog = emptyFunc;
+    if (console.warn) console.warn(`[config-debug] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
   }
 }
 
@@ -311,14 +326,16 @@ export function rlog(tag, description, data, isImportant = false) {
       for (let prop in o) {
         let item = o[prop];
         let className = getObjectClassName(result);
-        if (className == 'Object' && item instanceof Symbol) debugger;
         if (isObject(item)) {
-          lodash.merge(result,{[`${prop}${className}`]:parseObjTypes(item)});
+          if (isSymbol(item, className) || (prop[0] == '_')) {
+            result[`${prop}:${className}`] = `[instance of ${className}]`;
+          } else {
+            lodash.merge(result,{[`${prop}:${className}`]:parseObjTypes(item)});
+          }
         } else {
           try {
             result[prop] = `${item} (${className})`
           } catch (error) {
-            wlog(`className: ${className}`)
             processError(`[config-debug::rlog::parseObjTypes] Error while setting result['${prop}']: ${error.message}`,{error,item,result})
           }
         }
