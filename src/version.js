@@ -1,11 +1,12 @@
 import {LT_CFG} from './config'
 
-const productVersion = require("../package.json").version;
-const exploreIsNative = true;   // false: webview version, true: native search version (also updated by scripts/select_config.rb)
-const hotelitemIsNative = false;// this line is updated by scripts/select_config.rb
-const travisVersion='';         // this line is updated by scripts/select_config.rb
-const branchName='';            // this line is updated by scripts/select_config.rb
 const compilationTime = '';     // this line is updated by scripts/select_config.rb
+const branchName='';            // this line is updated by scripts/select_config.rb and travis-version.rb
+const travisVersion='';         // this line is updated by scripts/select_config.rb and travis-version.rb
+const exploreIsNative = true;
+const hotelitemIsNative = false;
+const packJsonVersion = require("../package.json").version;
+const productVersion = `${packJsonVersion}${travisVersion.length >0 ? ` (Build ${travisVersion})` : ''}`;
 
 let ui = '';
 ui += `\n${exploreIsNative

@@ -1,9 +1,13 @@
 import { StyleSheet } from 'react-native';
 
+export const monthTitleHeight = 20;
+export const monthTitlePaddingTop = 5;
+export const monthTitlePaddingBottom = 17;
+
 export default StyleSheet.create({
     month: {
-        paddingTop: 5,
-        paddingBottom: 17
+        paddingTop: monthTitlePaddingTop,
+        paddingBottom: monthTitlePaddingBottom
     },
     monthTitle: {
         paddingHorizontal: 10
@@ -11,14 +15,7 @@ export default StyleSheet.create({
     monthTitleText: {
         fontFamily: 'FuturaStd-Light',
         fontSize: 20,
-        lineHeight: 20,
-    },
-    dayRow: {
-        flex: 1,
-        flexDirection: 'row',
-        alignSelf: 'stretch',
-        alignItems: 'center',
-        paddingVertical: 5
+        lineHeight: monthTitleHeight,
     }
 });
 

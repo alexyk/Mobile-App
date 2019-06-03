@@ -1,22 +1,18 @@
-import React, { Component } from 'react';
+import moment from 'moment';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Text, TouchableHighlight, View } from 'react-native';
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { setDatesAndGuestsData } from '../../../redux/action/userInterface'
-
-import {
-    View,
-    Text,
-    TouchableHighlight
-} from 'react-native';
-
-import moment from 'moment';
-import styles from './styles';
+import { setDatesAndGuestsData } from '../../../redux/action/userInterface';
+import CloseButton from '../../atoms/CloseButton';
 import MonthList from '../../organisms/MonthList';
 import { I18N_MAP } from './i18n';
-import CloseButton from '../../atoms/CloseButton';
+import styles from './styles';
+import { generateInitialCalendarData, updateMarkedCalendarData } from './utils';
 import { processError } from '../../../config-debug';
-import { updateMarkedCalendarData, generateInitialCalendarData } from './utils';
+
+
 
 const useRedux = true;
 
@@ -46,8 +42,9 @@ class Calendar extends Component {
         this.endDate = endDate;
         this.today = today;
         this.year = this.today.year();
-
-        this.isFirst = true;
+        
+        this._isFirst = true;
+        this._calendarData = null;
         
         const subFontColor = { color: props.color.subColor };
         this.state = {
@@ -77,10 +74,12 @@ class Calendar extends Component {
         setTimeout(() => this.setCalendarData());
     }
 
+
     setCalendarData(extraData=null) {
         // console.time('**** setCalendarData 1');
         const {
             internalFormat, inputFormat, minDate: minDateSrc, maxDate: maxDateSrc,
+            calendarMarkedDays: oldMarked
         } = this.props.datesAndGuestsData;
         let newData = {};
         const checkInDateMoment = moment(this.startDate, inputFormat);
@@ -90,24 +89,23 @@ class Calendar extends Component {
         this.minDate = minDate.clone();
         this.maxDate = maxDate.clone();
 
-        try {
-            if (this.isFirst) {
-                const {calendarData, calendarMarkedDays} = generateInitialCalendarData(checkInDateMoment,checkOutDateMoment,this.today,minDate,maxDate,internalFormat,extraData);
-                newData = {
-                    ...extraData,
-                    calendarData,
-                    calendarMarkedDays
-                };
-                this.isFirst = false;
-            } else {
-                const calendarMarkedDays = updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateMoment,this.today,internalFormat);
-                newData = {
-                    ...extraData,
-                    calendarMarkedDays
-                };    
-            }
-        } catch (error) {
-            processError(`[Calendar::setCalendarData] Error generating calendar data: ${error.message}`,{error});
+        if (this._isFirst) {
+            const {calendarData, calendarMarkedDays, calendarMonthsToUpdate} = generateInitialCalendarData(checkInDateMoment,checkOutDateMoment,this.today,minDate,maxDate,internalFormat,extraData);
+            this._calendarData = calendarData;
+            newData = {
+                ...extraData,
+                calendarData,
+                calendarMarkedDays,
+                calendarMonthsToUpdate
+            };
+            this._isFirst = false;
+        } else {
+            const {days:calendarMarkedDays, months: calendarMonthsToUpdate} = updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,checkOutDateMoment,this.today,internalFormat);
+            newData = {
+                ...extraData,
+                calendarMarkedDays,
+                calendarMonthsToUpdate
+            };    
         }
 
         // console.timeEnd('**** setCalendarData 1');
@@ -124,7 +122,8 @@ class Calendar extends Component {
     }
 
     resetCalendar() {
-        const {inputFormat, minDate, maxDate} = (useRedux ? this.props.datesAndGuestsData : this.state);
+        const {inputFormat} = this.props.datesAndGuestsData;
+        const {minDate, maxDate} = (useRedux ? this.props.datesAndGuestsData : this.state);
         const startDate = this.startDate;
         const endDate = this.endDate;
         
@@ -134,10 +133,10 @@ class Calendar extends Component {
         const isEndValid = end.isValid() && end >= minDate && end <= maxDate;
 
         const newState = {
-            startDate: isStartValid ? start : null,
+            startDate: isStartValid ? start.format(inputFormat) : null,
             startDateText: isStartValid ? this.i18n(start, 'date') : '',
             startWeekdayText: isStartValid ? this.i18n(start.isoWeekday(), 'w') : '',
-            endDate: isEndValid ? end : null,
+            endDate: isEndValid ? end.format(inputFormat) : null,
             endDateText: isEndValid ? this.i18n(end, 'date') : '',
             endWeekdayText: isEndValid ? this.i18n(end.isoWeekday(), 'w') : ''
         };
@@ -149,21 +148,26 @@ class Calendar extends Component {
     }
 
     i18n(data, type) {
-        const i18n = 'en';
-        const customI18n = {}
-        if (~['w', 'weekday', 'text'].indexOf(type)) { // eslint-disable-line
-            return (customI18n[type] || {})[data] || I18N_MAP[i18n][type][data];
-        }
-        if (type === 'date') {
-            let result = data.format(customI18n[type] || I18N_MAP[i18n][type]);
-            const year = data.year();
-            // if date is next year
-            if (this.year < year) {
-                result += `, ${year}`
+        try {
+            const i18n = 'en';
+            const customI18n = {}
+            if (~['w', 'weekday', 'text'].indexOf(type)) { // eslint-disable-line
+                return (customI18n[type] || {})[data] || I18N_MAP[i18n][type][data];
             }
+            if (type === 'date') {
+                let result = data.format(customI18n[type] || I18N_MAP[i18n][type]);
+                const year = data.year();
+                // if date is next year
+                if (this.year < year) {
+                    result += `, ${year}`
+                }
 
-            return result;
+                return result;
+            }
+        } catch (error) {
+            processError(`[Calendar::i18n] ${error.message}`, {error,type,data})
         }
+
         return {};
     }
 
@@ -178,7 +182,8 @@ class Calendar extends Component {
     }
     
     clear() {
-        const calendarMarkedDays = updateMarkedCalendarData(this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
+	const { calendarMarkedDays:oldMarked } = ( useRedux ? this.props.datesAndGuestsData : this.state );
+        const {days:calendarMarkedDays,months:calendarMonthsToUpdate} = updateMarkedCalendarData(oldMarked,this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
         const newState = {
             startDate: null,
             endDate: null,
@@ -186,7 +191,8 @@ class Calendar extends Component {
             startWeekdayText: '',
             endDateText: '',
             endWeekdayText: '',
-            calendarMarkedDays
+            calendarMarkedDays,
+            calendarMonthsToUpdate
         }
         if (useRedux) {
             this.props.setDatesAndGuestsData(newState);
@@ -254,8 +260,8 @@ class Calendar extends Component {
             weekDays,
             inputFormat, internalFormat,
             minDate, maxDate,
-            calendarData,
             calendarMarkedDays,
+            calendarMonthsToUpdate,
         } = this.props.datesAndGuestsData;
         const {color} = this.props;
 
@@ -314,8 +320,9 @@ class Calendar extends Component {
                 <View style={[styles.scroll]}>
                     <MonthList
                         today={this.today}
-                        data={calendarData}
-                        markedData={calendarMarkedDays}
+                        data={this._calendarData}
+                        markedDays={calendarMarkedDays}
+                        monthsToUpdate={calendarMonthsToUpdate}
                         minDate={minDate}
                         maxDate={maxDate}
                         startDate={checkInDateMoment}

@@ -1,15 +1,21 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
-import { FlatList } from 'react-native';
+import { FlatList, View } from 'react-native';
 import moment from 'moment';
 import Month from '../../molecules/Month';
 import LTLoader from '../../molecules/LTLoader';
-import { processError, rlog, ilog } from '../../../config-debug';
+import { processError, ilog, dlog, elog, wlog } from '../../../config-debug';
+import Day from '../../atoms/Day';
+import monthListStyles from './styles';
+import { listItemKeyGen } from '../../screens/Calendar/utils';
+import { dayHeight } from '../../atoms/Day/styles';
+import { monthTitlePaddingBottom, monthTitlePaddingTop, monthTitleHeight } from '../../molecules/Month/styles';
 
 export default class MonthList extends PureComponent {
     static propTypes = {
         data: PropTypes.array,
-        markedData: PropTypes.any,
+        markedDays: PropTypes.any,
+        monthsToUpdate: PropTypes.any,
         inputFormat: PropTypes.string,
         minDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
@@ -26,80 +32,53 @@ export default class MonthList extends PureComponent {
     constructor(props) {
         super(props);
 
-        this.itemKey = 0;
-        this.isFirst = true;
+        this._isLoading = false;
+
+        this._itemDayRowId = 0;
+        this._isFirst = true;
         this._renderedItems = [];
         this._scrollingAttemtps = 0;
 
         this._renderMonth = this._renderMonth.bind(this);
         this._keyExtractor = this._keyExtractor.bind(this);
-        // this.shouldUpdate = this.shouldUpdate.bind(this);
-        this.checkRange = this.checkRange.bind(this);
-        this.getWeekNums = this.getWeekNums.bind(this);
         this._scrollToSelectedMonth = this._scrollToSelectedMonth.bind(this);
+
+        this._renderedDaysPerMonth = {};
+        this._getItemLayout = this._getItemLayout.bind(this);
     }
+
 
     componentDidCatch(error, errorInfo) {
         processError(`[MonthList] Error in component: ${error.message}`, {error,errorInfo});
     }
 
-    _keyExtractor() {
-        this.itemKey++;
 
-        if (this.itemKey == Number.MAX_VALUE) {
-            this.itemKey = 0;
+    _keyExtractor(item) {
+        return item.id;
+    }
+
+
+    _getItemLayout(data,index) {
+        // ilog(`[month::getItemLayout] index:${index}`,{data,index})
+
+        //const titleHeight = monthTitleHeight + monthTitlePaddingTop;
+        const titleHeight = monthTitleHeight + monthTitlePaddingBottom;
+        const itemHeight = (rowsHeight + titleHeight);
+        const rowsCount = ( (data && data.days)
+                    ? Math.round(data.days.length / 7)
+                    : 0
+        );
+        const rowsHeight = ( rowsCount * dayHeight );
+
+        return {
+            length: itemHeight,
+            offset:  itemHeight * index, //(index > 0 ? index+1 : 0),
+            index
         }
-
-        return this.itemKey.toString();
     }
+    
 
-    getWeekNums(start, end) {
-        const clonedMoment = moment(start, this.props.inputFormat);
-        let date;
-        let day;
-        let num;
-        let y;
-        let m;
-        let total = 0;
-        while (!clonedMoment.isSame(end, 'months')) {
-            y = clonedMoment.year();
-            m = clonedMoment.month();
-            date = new Date(y, m, 1);
-            day = date.getDay();
-            num = new Date(y, m + 1, 0).getDate();
-            total += Math.ceil((num + day) / 7);
-            clonedMoment.add(1, 'months');
-        }
-
-        rlog(`month-list`,`Start: ${start} End: ${end} Total Weeks: ${total}`)
-
-        return total;
-    }
-
-    /*shouldUpdate(month, props) {
-        if (!props) return false;
-         const {
-            startDate,
-            endDate
-        } = props;
-        const {
-            date
-        } = month;
-        const next = this.checkRange(date, startDate, endDate);
-        const prev = this.checkRange(date, this.props.startDate, this.props.endDate);
-        if (prev || next) return true;
-
-        return false;
-    }*/
-
-    checkRange(date, start, end) {
-        if (!date || !start) return false;
-        if (!end) return date.year() === start.year() && date.month() === start.month();
-        if (date.year() < start.year() || (date.year() === start.year() && date.month() < start.month())) return false;
-        if (date.year() > end.year() || (date.year() === end.year() && date.month() > end.month())) return false;
-        return true;
-    }
-
+    //TODO: fix this
     _scrollToSelectedMonth() {
         setTimeout(() => {
             const { startDate, minDate } = this.props;
@@ -107,10 +86,12 @@ export default class MonthList extends PureComponent {
             const date2 = startDate.startOf('month');
             const index = date2.diff(date1, 'months');
 
-            ilog(`[MonthList] scrolling to index ${index}`)
-            const item = this._renderedItems[index];
-            if (this.list && item) {
-                this.list.scrollToItem({ item, animated: true });
+            ilog(`[MonthList] scrolling to index ${index}`);
+
+            if (this.list && index > -1) {
+                // const viewOffset = ;
+                // const viewPosition = ;
+                this.list.scrollToIndex({ index, animated: true });
             } else {
                 const tryAgain = (this._scrollingAttemtps < 3);
                 if (tryAgain) {
@@ -123,42 +104,107 @@ export default class MonthList extends PureComponent {
     }
 
 
-    _renderMonth({item,index}) {
+    _renderDay(item, index, markedData) {
+        let {id, asStr, date, text} = item;
+        let marked = ( (markedData && markedData[asStr]) || {});
+        if (marked.isValid == null) {
+            marked.isValid = (!marked.isEmpty);
+        }
+        if (id == null) {
+            id = listItemKeyGen('DAY_ID', 'day_na_');
+        }
 
-        const {markedData, color, onChoose} = this.props;
+        let dayProps = {
+            id,
+            asStr,
+            text,
+            date,
+            ...marked
+        };
 
-      //console.log('&&&render',`Result: ${item.days?item.days.length:'n/a'}`,{item,index,props:this.props})
-      //clog(`&render `,{item,index,markedData});
-    //   clog(`&prender `,{item,index,markedData,props:this.props});
+        const rendered = (
+          <Day
+            {...dayProps}
+            onChoose={this.props.onChoose}
+            key={id}
+          />
+        );
 
-      const result = (
-        <Month
-            data={item}
-            markedData={markedData}
-            color={color}
-            onChoose={onChoose}
-        />
-      );
-      this._renderedItems[index] = result;
+        return rendered;
+    }
+    
 
-      return result;
+    _renderDaysRow(days, index, marked, id) {
+        const result = (
+            <View style={monthListStyles.dayRow} key={id} >
+                {days.map(
+                    (item,index) => this._renderDay(item, index, marked)
+                )}
+            </View>
+        );
+
+        return result;
     }
 
-    render() {
 
-        const {data} = this.props;
+    _prepareDaysRendering(data, defaultResult) {
+        // console.time('*** Month::prepareDaysRendering')
 
-        let result = (
-            (!data || data.length == 0)
-                ? <LTLoader message={'Loading ...'} isLoading={true} opacity={'FF'} />
-                :
-                    <FlatList
-                        ref={(list) => { this.list = list; }}
-                        style={{flex: 1}}
-                        data={data}
-                        style={{paddingHorizontal:10}}
-                        keyExtractor={this._keyExtractor}
-                        renderItem={this._renderMonth}
+        const {days} = data;
+        
+        if (days) {
+            const marked = this.props.markedDays;
+            let count = (days.length / 7);
+            if (count < 1) count = days.length;
+            const rowArray = new Array(count).fill('');
+            const renderedDays = rowArray.map((item, i) => {
+                const startI =( 7*i );
+                const endI = ( 7*i + 7 );
+                const currentRow = (days.slice(startI, endI));
+                const rowId = listItemKeyGen('DAYS_ROW_ID', 'days_row');
+                
+                return this._renderDaysRow(currentRow, i, marked, rowId)
+            })
+
+            return renderedDays;
+        }
+
+        return defaultResult;
+        // console.timeEnd('*** Month::prepareDaysRendering')
+    }
+
+
+
+    _renderMonth({item,index}) {
+        
+        const {data, monthsToUpdate, color} = this.props;
+        const { asStr, id } = item;
+        const shouldUpdate = monthsToUpdate[asStr];
+        
+        let renderedDays = this._renderedDaysPerMonth[asStr];
+        
+        if (monthsToUpdate[asStr] == true) { // should update
+            renderedDays = this._prepareDaysRendering(item, renderedDays);
+            this._renderedDaysPerMonth[asStr] = renderedDays;
+        }
+        
+        // ilog(`[month ${asStr}]`,{renderedDays, data, item, monthsToUpdate, asStr, id, shouldUpdate})
+
+        const result = (
+        <Month
+            data={item}
+            renderedDays={renderedDays}
+            shouldUpdate={shouldUpdate}
+            color={color}
+            key={id}
+        />
+        );
+        this._renderedItems[index] = result;
+
+        return result;
+    }
+
+
                         // Virtualised List
                         // updateCellsBatchingPeriod={100}
                         // maxToRenderPerBatch={3}
@@ -168,14 +214,34 @@ export default class MonthList extends PureComponent {
                         // ListView
                         // legacyImplementation={true}
 
-                    />
-        );
+    render() {
+        const { data } = this.props;
 
-        if (this.isFirst && data && data.length > 0) {
-            this.isFirst = false;
+        const dataLen = ( data ? data.length : -1 );
+        // const renderedLen = ( this._renderedItems ? Object.keys(this._renderedItems).length : -1 );
+
+        const isLoading = ( dataLen == -1 );
+        if (this._isFirst && dataLen > 0) {
+            this._isFirst = false;
             this._scrollToSelectedMonth();
         }
 
-        return result;
+        //ilog(`[monthlist]  isLoading:${isLoading}  renderedLen: ${renderedLen} dataLen: ${dataLen}`);
+
+        return (
+            <View style={{flex:1}}>
+                <FlatList
+                    ref={(list) => { this.list = list; }}
+                    style={{flex: 1}}
+                    data={data}
+                    style={{paddingHorizontal:10}}
+                    keyExtractor={this._keyExtractor}
+                    renderItem={this._renderMonth}
+                    getItemLayout={this._getItemLayout}
+                    // onScrollToIndexFailed={(data)=>{wlog({data})}}
+                />
+                <LTLoader message={'Loading ...'} isLoading={isLoading} opacity={'FF'} />
+            </View>
+        )
     }
 }

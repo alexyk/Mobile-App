@@ -10,7 +10,7 @@ import { isMoment } from 'moment';
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 export const __MYDEV__                               = (__DEV__ && true);
-export const reactotronLoggingInReleaseForceEnabled  = true;
+export const reactotronLoggingInReleaseForceEnabled  = false;
 export const forceOffline                            = false;
 
 /**  
@@ -31,14 +31,15 @@ export const errorLevel = 0;
 export const reactotronLoggingEnabled           = false;
 export const logConverterErrorToReactrotron     = false;
 export const showTypesInReactotronLog           = true;
+export const warnOnReactotronDisabledCalls      = false;
   // redux
-  export const reduxConsoleLoggingEnabled         = true;
+export const reduxConsoleLoggingEnabled         = false;
 export const reduxConsoleCollapsedLogging       = true;
 export const reduxReactotronLoggingEnabled      = false;
   // console
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
-export const consoleTimeCalculations            = true;    // enable/disable "console.time" & "console.timeEnd" calls
+export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
   // other
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
@@ -111,10 +112,14 @@ function configureConsole() {
     console.tron = {};
 
     if (__DEV__) {
+      if (warnOnReactotronDisabledCalls) {
       func = (method) => console.warn(
         '[config-debug] Reactotron is disabled, but still calling it as '+
         `console.tron.${method}`
       )
+      } else {
+        func = emptyFunc;
+      }
     } else if (reactotronLoggingInReleaseForceEnabled) {
         func = (method,...args) => {
           switch (method) {
@@ -167,11 +172,14 @@ function configureReactotron() {
     // Reactotron config
     try {
       require('./utils/reactotronLogging')
-      console.log('Reactotron connected');
+      ilog('Reactotron connected');
     } catch (e) {
-      console.warn('Reactotron could not be enabled');
+      console.warn('Reactotron could not be enabled - ' + e.message);
     }
 
+  } else {
+    console.disableYellowBox = true;
+    ilog(`Reactotron is disabled - release=${reactotronLoggingInReleaseForceEnabled} dev=${reactotronLoggingEnabled}`);
   }
 }
 
@@ -208,7 +216,12 @@ export function processError(description, data) {
 
       default:      
         console.error(description, data);
+
+        if (data.error) {
+          throw data.error;
+        } else {
         throw new Error(description);
+    }
     }
 
   }

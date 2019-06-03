@@ -13,6 +13,7 @@ import Moment from 'moment';
 import styles from './styles';
 import MonthList from '../../organisms/MonthList';
 import { I18N_MAP } from './i18n';
+import { processError } from '../../../config-debug';
 
 export default class Calendar extends Component {
     static propTypes = {
@@ -141,17 +142,21 @@ export default class Calendar extends Component {
     }
 
     i18n(data, type) {
-        const {
-            i18n,
-            customI18n
-        } = this.props;
-        if (~['w', 'weekday', 'text'].indexOf(type)) { // eslint-disable-line
-            return (customI18n[type] || {})[data] || I18N_MAP[i18n][type][data];
+        try {
+            const {
+                i18n,
+                customI18n
+            } = this.props;
+            if (~['w', 'weekday', 'text'].indexOf(type)) { // eslint-disable-line
+                return (customI18n[type] || {})[data] || I18N_MAP[i18n][type][data];
+            }
+            if (type === 'date') {
+                return data.format(customI18n[type] || I18N_MAP[i18n][type]);
+            }
+            return {};
+        } catch (error) {
+            processError(`[Calendar(template)::i18n] ${error.message}`, {error,type,data})
         }
-        if (type === 'date') {
-            return data.format(customI18n[type] || I18N_MAP[i18n][type]);
-        }
-        return {};
     }
 
     cancel() {

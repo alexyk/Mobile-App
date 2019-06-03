@@ -10,6 +10,7 @@ const mod = (scale * (width - paddingH)) % 7;
 if (mod) {
     dayWidth = (((7 - mod) / scale) + (width - paddingH)) / 7;
 }
+export const dayHeight = dayWidth - 10;
 export default StyleSheet.create({
     dayContainer: {
         width: dayWidth,
@@ -31,7 +32,7 @@ export default StyleSheet.create({
     },
     day: {
         width: dayWidth - 10,
-        height: dayWidth - 10,
+        height: dayHeight,
         borderRadius: dayWidth / 2,
         overflow: 'hidden',
         justifyContent: 'center',

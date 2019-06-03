@@ -1,15 +1,11 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
 import moment from 'moment';
-
-import {
-    View,
-    Text,
-    TouchableHighlight
-} from 'react-native';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Text, TouchableHighlight, View } from 'react-native';
 import styles from './styles';
 
-export default class Day extends PureComponent {
+
+export default class Day extends Component {
     static propTypes = {
         onChoose: PropTypes.func,
         // date: PropTypes.oneOfType([PropTypes.string]),
@@ -39,13 +35,9 @@ export default class Day extends PureComponent {
         this.chooseDay = this.chooseDay.bind(this);        
     }
 
-    /* shouldComponentUpdate(nextProps) {
-        const prevStatus = this.isFocus;
-        const { isFocus } = this.props;
-        if (prevStatus || isFocus) return true;
-
-        return false;
-    } */
+    shouldComponentUpdate(nextProps) {
+        return (nextProps.shouldUpdate == true);
+    }
 
     chooseDay() {
         if (this.props.isValid) {
@@ -58,9 +50,10 @@ export default class Day extends PureComponent {
             return <View style={styles.dayContainer} />
         }
 
-        const { color, text, date,
+        const { color, text, date, id, asStr, isEmpty,
             isMid, isStartPart, isStart, isEnd, isValid, isFocus, isToday
         } = this.props;
+
 
         const mainColor = { color: color.mainColor };
         const subColor = { color: color.subColor };
@@ -75,16 +68,20 @@ export default class Day extends PureComponent {
         return (
             <View
                 style={stylesCollection}
+                key={`day_view_${id}`}
             >
-                {isValid ?
+                {isValid
+                ?
                     <TouchableHighlight
                         style={[styles.day, isToday && styles.today, isFocus && subBack]}
                         underlayColor="rgba(255, 255, 255, 0.35)"
                         onPress={this.chooseDay}
+                        key={`day_valid_${id}`}
                     >
                         <Text style={[styles.dayText, subColor, isFocus && mainColor]}>{text}</Text>
-                    </TouchableHighlight> :
-                    <View style={[styles.day, isToday && styles.today]}>
+                    </TouchableHighlight>
+                :
+                    <View style={[styles.day, isToday && styles.today]} key={`day_invalid_${id}`}> 
                         <Text style={styles.dayTextDisabled}>{text}</Text>
                     </View>
                 }
