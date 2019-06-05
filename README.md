@@ -23,10 +23,6 @@
   - [Scripts](#scripts)
   - [Reactotron](#reactotron)
   - [Staging and Continuous Integration](#staging-and-continuous-integration)
-- [Notes from developers](#notes-from-developers)
-- [https://zivost.com/blog/xcode-10-causes-haywire-for-react-native-developers/](#httpszivostcomblogxcode-10-causes-haywire-for-react-native-developers)
-- [---](#)
-- [---](#1)
 - [# Default Information](#default-information)
 - [Available Scripts](#available-scripts)
   - [`npm start`](#npm-start)
@@ -137,11 +133,6 @@ Scripts are found at:
 ### Staging and Continuous Integration
 First application of CI is using Travis CI http://travis-ci.org.
 Later on to be applied in this branch.
-
-## Notes from developers  
-**Jinkai note on Building with Xcode 10:  
-BUILDING ISSUE FOR IOS 12, XCODE 10.1  
-https://zivost.com/blog/xcode-10-causes-haywire-for-react-native-developers/
 
 ____
 
