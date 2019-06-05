@@ -99,6 +99,7 @@ ___
 - Use VSCode breakpoints to or *"All expeptions"/"Uncaught exceptions"* to break into code  
 - If running any task before compilation (*preLaunchTask* in *launch.json*) - in VSCode Tasks - make sure to check Terminal view in VSCode if it needs input  
 - Use VScode *Output/React native...* views to see any issues with building the app before installing on device, simulator or emulator  
+*_Tip:_* Use "Attach to packager" and to skip recompiling the app with xcodebuild  
 
 
 #### iOS

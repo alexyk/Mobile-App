@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
-import { Text, TouchableOpacity, View, Image } from 'react-native';
 import PropTypes from 'prop-types';
-import styles from './styles';
-import { withNavigation } from 'react-navigation';
+import React, { Component } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { withNavigation } from 'react-navigation';
 import { autoCalendar } from '../../../config-debug';
+import styles from './styles';
 
 
 class DateAndGuestPicker extends Component {
@@ -13,26 +13,32 @@ class DateAndGuestPicker extends Component {
     }
 
     componentDidMount() {
+        // detach from current code execution (smoother animation)
         if (__DEV__ && autoCalendar) setTimeout(() => this.onCalendar());
     }
 
     onFilter = () => {
+        // detach from current code execution - avoiding button lock
         setTimeout(() => this.props.gotoFilter());
     }
 
     onGuests = () => {
+        // detach from current code execution - avoiding button lock
         setTimeout(() => this.props.gotoGuests());
     }
 
     onSearch = () => {
+        // detach from current code execution - avoiding button lock
         setTimeout(() => this.props.gotoSearch());
     }
 
     onCancel = () => {
+        // detach from current code execution - avoiding button lock
         setTimeout(() => this.props.gotoCancel());
     }
 
     onCalendar = () => {
+        // detach from current code execution - avoiding button lock
         setTimeout(() => this.props.navigation.navigate('CalendarScreen'));
     }
 

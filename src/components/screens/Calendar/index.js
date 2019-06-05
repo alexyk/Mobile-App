@@ -7,14 +7,9 @@ import { bindActionCreators } from "redux";
 import { setDatesAndGuestsData } from '../../../redux/action/userInterface';
 import CloseButton from '../../atoms/CloseButton';
 import MonthList from '../../organisms/MonthList';
-import { I18N_MAP } from './i18n';
 import styles from './styles';
-import { generateInitialCalendarData, updateMarkedCalendarData } from './utils';
-import { processError } from '../../../config-debug';
+import { updateMarkedCalendarData, i18n, formatDay } from './utils';
 
-
-
-const useRedux = true;
 
 class Calendar extends Component {
     static propTypes = {
@@ -37,153 +32,84 @@ class Calendar extends Component {
     constructor(props) {
         super(props);
 
-        const {today, startDate, endDate} = this.props.datesAndGuestsData;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.today = today;
+        // tslog('Calendar constructor');
+        const {
+            today, checkInMoment, checkOutMoment
+        } = props.datesAndGuestsData;
+
+        this.checkInMoment = checkInMoment.clone();
+        this.checkOutMoment = checkOutMoment.clone();
+        this.prevCheckInMoment = null;
+        this.prevCheckOutMoment = null;
+        this.today = today.clone();
         this.year = this.today.year();
         
-        this._isFirst = true;
-        this._calendarData = null;
+        // used for optimised calendar rendering
+        // (just refresh changed range of dates)
+        this.minUpdate = checkInMoment.clone();
+        this.maxUpdate = checkOutMoment.clone();
         
         const subFontColor = { color: props.color.subColor };
-        this.state = {
+
+        // reload cache from redux & set to state
+        this.initialState = {
             ...this.props.datesAndGuestsData,
-            today: today.clone(),
-            weekDays: [7, 1, 2, 3, 4, 5, 6].map(item => <Text style={[styles.weekText, subFontColor]} key={item}>{this.i18n(item, 'w')}</Text>)
+            weekDays: [7, 1, 2, 3, 4, 5, 6].map(item => <Text style={[styles.weekText, subFontColor]} key={item}>{i18n(this.year, item, 'w')}</Text>)
         };
-        this.initialState = this.state;
-        if (useRedux) {
-            if (props.datesAndGuestsData.calendarData.length == 0) {
-                props.setDatesAndGuestsData(this.state);
-            }
-            this.state = {};
-        }
+        this.state = { ... this.initialState }
         
-        this.i18n = this.i18n.bind(this);
         this.onChoose = this.onChoose.bind(this);
-        this.resetCalendar = this.resetCalendar.bind(this);
         this.cancel = this.cancel.bind(this);
         this.clear = this.clear.bind(this);
         this.confirm = this.confirm.bind(this);
-    }
-
-    
-    componentDidMount() {
-        this.resetCalendar();
-        setTimeout(() => this.setCalendarData());
+        // telog('Calendar constructor');
     }
 
 
-    setCalendarData(extraData=null) {
+    setCalendarData(newState=null) {
         // console.time('**** setCalendarData 1');
-        const {
-            internalFormat, inputFormat, minDate: minDateSrc, maxDate: maxDateSrc,
-            calendarMarkedDays: oldMarked
-        } = this.props.datesAndGuestsData;
+        const { internalFormat, calendarMarkedDays: oldMarkedDays } = this.state;
+
         let newData = {};
-        const checkInDateMoment = moment(this.startDate, inputFormat);
-        const checkOutDateMoment = moment(this.endDate, inputFormat);
-        const minDate = (minDateSrc && minDateSrc.clone());
-        const maxDate = (maxDateSrc && maxDateSrc.clone());
-        this.minDate = minDate.clone();
-        this.maxDate = maxDate.clone();
+        const checkInMoment = moment(this.checkInMoment);
+        const checkOutMoment = moment(this.checkOutMoment);
+        const {
+            days: calendarMarkedDays,
+            months: calendarMarkedMonths
+        } = updateMarkedCalendarData(oldMarkedDays,this.minUpdate,this.maxUpdate,checkInMoment,checkOutMoment,this.today,internalFormat);
 
-        if (this._isFirst) {
-            const {calendarData, calendarMarkedDays, calendarMonthsToUpdate} = generateInitialCalendarData(checkInDateMoment,checkOutDateMoment,this.today,minDate,maxDate,internalFormat,extraData);
-            this._calendarData = calendarData;
-            newData = {
-                ...extraData,
-                calendarData,
-                calendarMarkedDays,
-                calendarMonthsToUpdate
-            };
-            this._isFirst = false;
-        } else {
-            const {days:calendarMarkedDays, months: calendarMonthsToUpdate} = updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,checkOutDateMoment,this.today,internalFormat);
-            newData = {
-                ...extraData,
-                calendarMarkedDays,
-                calendarMonthsToUpdate
-            };    
-        }
-
+        newData = {
+            ...newState,
+            calendarMarkedDays,
+            calendarMarkedMonths
+        };
         // console.timeEnd('**** setCalendarData 1');
 
         console.time('**** setCalendarData 2');
-
-        this.props.setDatesAndGuestsData(newData);
-
-        if (!useRedux) {
-            this.setState(newData);
-        }
-
+        this.setState(newData);
         console.timeEnd('**** setCalendarData 2');
     }
 
-    resetCalendar() {
-        const {inputFormat} = this.props.datesAndGuestsData;
-        const {minDate, maxDate} = (useRedux ? this.props.datesAndGuestsData : this.state);
-        const startDate = this.startDate;
-        const endDate = this.endDate;
-        
-        const start = moment(startDate, inputFormat);
-        const end = moment(endDate, inputFormat);
-        const isStartValid = start.isValid() && start >= minDate && start <= maxDate;
-        const isEndValid = end.isValid() && end >= minDate && end <= maxDate;
-
-        const newState = {
-            startDate: isStartValid ? start.format(inputFormat) : null,
-            startDateText: isStartValid ? this.i18n(start, 'date') : '',
-            startWeekdayText: isStartValid ? this.i18n(start.isoWeekday(), 'w') : '',
-            endDate: isEndValid ? end.format(inputFormat) : null,
-            endDateText: isEndValid ? this.i18n(end, 'date') : '',
-            endWeekdayText: isEndValid ? this.i18n(end.isoWeekday(), 'w') : ''
-        };
-        if (useRedux) {
-            this.props.setDatesAndGuestsData(newState);
-        } else {
-            this.setState(newState);
-        }
-    }
-
-    i18n(data, type) {
-        try {
-            const i18n = 'en';
-            const customI18n = {}
-            if (~['w', 'weekday', 'text'].indexOf(type)) { // eslint-disable-line
-                return (customI18n[type] || {})[data] || I18N_MAP[i18n][type][data];
-            }
-            if (type === 'date') {
-                let result = data.format(customI18n[type] || I18N_MAP[i18n][type]);
-                const year = data.year();
-                // if date is next year
-                if (this.year < year) {
-                    result += `, ${year}`
-                }
-
-                return result;
-            }
-        } catch (error) {
-            processError(`[Calendar::i18n] ${error.message}`, {error,type,data})
-        }
-
-        return {};
-    }
 
     cancel() {
-        if (useRedux) {
-            this.props.setDatesAndGuestsData(this.initialState)
-        } else {
-            this.setState(this.initialState)
-        }
-        this.props.navigation.goBack();
-        // this.resetCalendar();
+        // don't block button animation (if any)
+        setTimeout(() => this.props.navigation.goBack());
     }
     
     clear() {
-	const { calendarMarkedDays:oldMarked } = ( useRedux ? this.props.datesAndGuestsData : this.state );
-        const {days:calendarMarkedDays,months:calendarMonthsToUpdate} = updateMarkedCalendarData(oldMarked,this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
+        if (this.checkInMoment
+            && this.checkOutMoment
+            && this.checkOutMoment > this.checkInMoment
+        ) {
+            this.prevCheckInMoment = moment(this.checkInMoment);
+            this.prevCheckOutMoment = moment(this.checkOutMoment);
+        }
+        this.checkInMoment = null;
+        this.checkOutMoment = null;
+        const { calendarMarkedDays:oldMarkedDays, internalFormat } = this.state;
+        const {
+            days:calendarMarkedDays,months:calendarMarkedMonths
+        } = updateMarkedCalendarData(oldMarkedDays,this.minUpdate,this.maxUpdate, null, null, this.today, internalFormat);
         const newState = {
             startDate: null,
             endDate: null,
@@ -192,85 +118,203 @@ class Calendar extends Component {
             endDateText: '',
             endWeekdayText: '',
             calendarMarkedDays,
-            calendarMonthsToUpdate
+            calendarMarkedMonths
         }
-        if (useRedux) {
-            this.props.setDatesAndGuestsData(newState);
-        } else {
-            this.setState(newState);
-        }
+        this.setState(newState);
     }
     
     confirm() {
-        const newState = (useRedux ? this.props.datesAndGuestsData : this.state);
-        const { onConfirm } = this.props.datesAndGuestsData;
+        const {
+            inputFormat, today, onConfirm, calendarMarkedDays, calendarMarkedMonths
+        } = this.state;
+
+        const newState = {
+            checkInMoment: this.checkInMoment,
+            checkOutMoment: this.checkOutMoment,
+            inputFormat, today, calendarMarkedDays, calendarMarkedMonths
+        };
         onConfirm(newState);
 
-        this.props.navigation.goBack();
+        // detach from current code execution (smoother animation)
+        setTimeout(() => this.props.navigation.goBack());
     }
 
 
     onChoose(day) {
-        // const { startDate, endDate } = (useRedux ? this.props.datesAndGuestsData : this.state);
+        const { inputFormat } = this.state;
         let newData = {};
-        let startDate = this.startDate;
-        let endDate = this.endDate;
-        const dayAsI18Str = this.i18n(day, 'date');
-        const dayAsI18WeekDayStr = this.i18n(day.isoWeekday(), 'w');
-        
-        if ((!startDate && !endDate) || day < startDate || (startDate && endDate)) {
-            startDate = day;
-            endDate = null;
-            this.startDate = startDate;
-            this.endDate = endDate;
+        let prevCheckInMoment = this.checkInMoment;
+        let prevCheckOutMoment = this.checkOutMoment;
+        this.prevCheckInMoment = prevCheckInMoment;
+        this.prevCheckOutMoment = (
+            prevCheckOutMoment
+                ? prevCheckOutMoment
+                : this.prevCheckOutMoment
+        );
+
+        let dayFormatted;
+
+        if ( 
+            (prevCheckInMoment && prevCheckOutMoment)
+            || (!prevCheckInMoment && !prevCheckOutMoment)
+            || (prevCheckInMoment && day < prevCheckInMoment)
+        ) {
+            this.checkInMoment = day;
+            this.checkOutMoment = null;
+            dayFormatted = formatDay(this.year, day, inputFormat, true);
             newData = {
-                startDate, endDate,
-                startDateText: dayAsI18Str,
-                startWeekdayText: dayAsI18WeekDayStr,
+                endDate: null,
                 endDateText: '',
-                endWeekdayText: ''
+                endWeekdayText: '',
+                ...dayFormatted
             }
-            //console.info(`[CALC] case 1: ${day.toString()}`,{day,newData})
-        } else if (startDate && !endDate && day > startDate) {
-            endDate = day;
-            this.endDate = endDate;
-            newData = {
-                endDate,
-                endDateText: dayAsI18Str,
-                endWeekdayText: dayAsI18WeekDayStr,
-            };
-            //console.info(`[CALC] case 2: ${day.toString()}`,{day,newData})
+            if (this.minUpdate > day) {
+                this.minUpdate = day.clone();
+            } else if (this.maxUpdate < day) {
+                this.maxUpdate = day;
+            }
+        } else {
+            this.checkOutMoment = day;
+            dayFormatted = formatDay(this.year, day, inputFormat, false);
+            newData = { ...dayFormatted };
+            this.minUpdate = this.checkInMoment;
+            this.maxUpdate = day.clone();
         }
 
         this.setCalendarData(newData);
     }
 
-    render() {
-        // console.time('*** render Calendar')
+    _renderClearButton(isClearVisible, subFontColor) {
+        return (
+            isClearVisible
+                &&  <TouchableHighlight
+                        underlayColor="transparent"
+                        activeOpacity={0.8}
+                        onPress={this.clear}
+                        style={{marginTop: 45, marginRight:18, alignItems:'flex-end', justifyContent:'center'}}
+                    >
+                        <Text style={[styles.clearText, subFontColor]}>{i18n(this.year, 'clear', 'text')}</Text>
+                    </TouchableHighlight>
+        )
+    }
 
+    _renderStartDateText(subFontColor, primaryFontColor) {
+        const { startDateText, startWeekdayText } = this.state;
+
+        return (
+            <View style={styles.resultPart}>
+                <Text style={[styles.resultText, styles.weekdayText, subFontColor]}>
+                    {startWeekdayText || i18n(this.year, 'date', 'text')}
+                </Text>
+                <Text style={[styles.resultText, styles.dateText, primaryFontColor]}>
+                    {startDateText || i18n(this.year, 'start', 'text')}
+                </Text>
+            </View>
+        )
+    }
+    
+    _renderEndDateText(subFontColor, primaryFontColor) {
+        const { endDateText, endWeekdayText } = this.state;
+        return (
+            <View style={styles.resultPart}>
+                <Text style={[styles.resultText, styles.weekdayText, subFontColor]}>
+                    {endWeekdayText || i18n(this.year, 'date', 'text')}
+                </Text>
+                <Text style={[styles.resultText, styles.dateText, primaryFontColor]}>
+                    {endDateText || i18n(this.year, 'end', 'text')}
+                </Text>
+            </View>
+        )
+    }
+    
+
+    _renderCalendar(color) {
         const {
-            startDate,
-            endDate,
-            checkInDateMoment,
-            checkOutDateMoment,
-            startDateText,
-            startWeekdayText,
-            endDateText,
-            endWeekdayText,
+            checkInMoment,
+            checkOutMoment,
             weekDays,
             inputFormat, internalFormat,
             minDate, maxDate,
             calendarMarkedDays,
-            calendarMonthsToUpdate,
-        } = this.props.datesAndGuestsData;
-        const {color} = this.props;
+            calendarMarkedMonths,
+            calendarData
+        } = this.state;
 
+        const id = `${checkInMoment}_${checkOutMoment}`;
+
+        return [
+            <View style={styles.week} key={`${id}_weekdays`}>
+                {weekDays}
+            </View>
+            ,
+            <View style={[styles.scroll]} key={`${id}_calendar`}>
+                <MonthList
+                    today={this.today}
+                    data={calendarData}
+                    markedDays={calendarMarkedDays}
+                    markedMonths={calendarMarkedMonths}
+                    minDate={minDate.clone()}
+                    maxDate={maxDate.clone()}
+                    startDate={checkInMoment.clone()}
+                    endDate={checkOutMoment.clone()}
+                    onChoose={this.onChoose}
+                    inputFormat={inputFormat}
+                    inputFinternalFormatormat={internalFormat}
+                    i18n={'en'}
+                    color={color}
+                />
+            </View>
+        ]
+    }
+
+    _renderDoneButton(isValid, primaryColor) {
+        return (
+            <View style={styles.btn}>
+                {isValid ?
+                    <TouchableHighlight
+                        underlayColor={primaryColor}
+                        style={styles.confirmContainer}
+                        onPress={this.confirm}
+                    >
+                        <View style={styles.confirmBtn}>
+                            <Text
+                                ellipsisMode="tail"
+                                numberOfLines={1}
+                                style={[styles.confirmText]}
+                            >
+                                {i18n(this.year, 'save', 'text')}
+                            </Text>
+                        </View>
+                    </TouchableHighlight> :
+                    <View style={[styles.confirmContainer, styles.confirmContainerDisabled]}>
+                        <View style={styles.confirmBtn}>
+                            <Text
+                                ellipsisMode="tail"
+                                numberOfLines={1}
+                                style={[styles.confirmText, styles.confirmTextDisabled]}
+                            >
+                                {i18n(this.year, 'save', 'text')}
+                            </Text>
+                        </View>
+                    </View>
+                }
+            </View>
+        )
+    }
+
+    render() {
+        // console.time('*** render Calendar')
+
+        const { startDate, endDate } = this.state;
+
+        const {color} = this.props;
         const {
             mainColor,
             subColor,
             borderColor,
             primaryColor
         } = color;
+
         const mainBack = { backgroundColor: mainColor };
         const subBack = { backgroundColor: subColor };
         const subFontColor = { color: subColor };
@@ -282,88 +326,18 @@ class Calendar extends Component {
             <View style={[styles.container, mainBack]}>
                 <View style={{justifyContent: 'space-between', flexDirection: 'row',}}>
                     <CloseButton onPress={this.cancel} />
-                    {
-                        isClearVisible &&
-                        <TouchableHighlight
-                            underlayColor="transparent"
-                            activeOpacity={0.8}
-                            onPress={this.clear}
-                            style={{marginTop: 45, marginRight:18, alignItems:'flex-end', justifyContent:'center'}}
-                        >
-                            <Text style={[styles.clearText, subFontColor]}>{this.i18n('clear', 'text')}</Text>
-                        </TouchableHighlight>
-                    }
+                    { this._renderClearButton(isClearVisible, subFontColor) }
                 </View>
                 
                 <View style={styles.result}>
-                    <View style={styles.resultPart}>
-                        <Text style={[styles.resultText, styles.weekdayText, subFontColor]}>
-                            {startWeekdayText || this.i18n('date', 'text')}
-                        </Text>
-                        <Text style={[styles.resultText, styles.dateText, primaryFontColor]}>
-                            {startDateText || this.i18n('start', 'text')}
-                        </Text>
-                    </View>
+                    { this._renderStartDateText(subFontColor, primaryFontColor) }
                     <View style={[styles.resultSlash, subBack]} />
-                    <View style={styles.resultPart}>
-                        <Text style={[styles.resultText, styles.weekdayText, subFontColor]}>
-                            {endWeekdayText || this.i18n('date', 'text')}
-                        </Text>
-                        <Text style={[styles.resultText, styles.dateText, primaryFontColor]}>
-                            {endDateText || this.i18n('end', 'text')}
-                        </Text>
-                    </View>
+                    { this._renderEndDateText(subFontColor, primaryFontColor) }
                 </View>
-                <View style={styles.week}>
-                    {weekDays}
-                </View>
-                <View style={[styles.scroll]}>
-                    <MonthList
-                        today={this.today}
-                        data={this._calendarData}
-                        markedDays={calendarMarkedDays}
-                        monthsToUpdate={calendarMonthsToUpdate}
-                        minDate={minDate}
-                        maxDate={maxDate}
-                        startDate={checkInDateMoment}
-                        endDate={checkOutDateMoment}
-                        onChoose={this.onChoose}
-                        inputFormat={inputFormat}
-                        inputFinternalFormatormat={internalFormat}
-                        i18n={'en'}
-                        color={color}
-                    />
-                </View>
-                <View style={styles.btn}>
-                    {isValid ?
-                        <TouchableHighlight
-                            underlayColor={primaryColor}
-                            style={styles.confirmContainer}
-                            onPress={this.confirm}
-                        >
-                            <View style={styles.confirmBtn}>
-                                <Text
-                                    ellipsisMode="tail"
-                                    numberOfLines={1}
-                                    style={[styles.confirmText]}
-                                >
-                                    {this.i18n('save', 'text')}
-                                </Text>
-                            </View>
-                        </TouchableHighlight> :
-                        <View style={[styles.confirmContainer, styles.confirmContainerDisabled]}>
-                            <View style={styles.confirmBtn}>
-                                <Text
-                                    ellipsisMode="tail"
-                                    numberOfLines={1}
-                                    style={[styles.confirmText, styles.confirmTextDisabled]}
-                                >
-                                    {this.i18n('save', 'text')}
-                                </Text>
-                            </View>
-                        </View>
-                    }
-                </View>
+
+                { this._renderCalendar(color) }
+                
+                { this._renderDoneButton(isValid, primaryColor) }
             </View>
         );
 

@@ -1,21 +1,21 @@
-import React, { PureComponent } from 'react';
-import PropTypes from 'prop-types';
-import { FlatList, View } from 'react-native';
 import moment from 'moment';
-import Month from '../../molecules/Month';
-import LTLoader from '../../molecules/LTLoader';
-import { processError, ilog, dlog, elog, wlog } from '../../../config-debug';
+import PropTypes from 'prop-types';
+import React, { PureComponent } from 'react';
+import { FlatList, View, Dimensions } from 'react-native';
+import { processError } from '../../../config-debug';
 import Day from '../../atoms/Day';
-import monthListStyles from './styles';
-import { listItemKeyGen } from '../../screens/Calendar/utils';
 import { dayHeight } from '../../atoms/Day/styles';
-import { monthTitlePaddingBottom, monthTitlePaddingTop, monthTitleHeight } from '../../molecules/Month/styles';
+import Month from '../../molecules/Month';
+import { monthTitleHeight } from '../../molecules/Month/styles';
+import { listItemKeyGen } from '../../screens/Calendar/utils';
+import monthListStyles from './styles';
+
 
 export default class MonthList extends PureComponent {
     static propTypes = {
         data: PropTypes.array,
         markedDays: PropTypes.any,
-        monthsToUpdate: PropTypes.any,
+        markedMonths: PropTypes.any,
         inputFormat: PropTypes.string,
         minDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
         startDate: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(moment)]),
@@ -29,22 +29,21 @@ export default class MonthList extends PureComponent {
         endDate: ''
     }
 
+
     constructor(props) {
         super(props);
 
-        this._isLoading = false;
-
         this._itemDayRowId = 0;
         this._isFirst = true;
-        this._renderedItems = [];
         this._scrollingAttemtps = 0;
+        this._renderedDaysPerMonth = {};
 
         this._renderMonth = this._renderMonth.bind(this);
         this._keyExtractor = this._keyExtractor.bind(this);
         this._scrollToSelectedMonth = this._scrollToSelectedMonth.bind(this);
-
-        this._renderedDaysPerMonth = {};
         this._getItemLayout = this._getItemLayout.bind(this);
+        this._getRenderedMonth = this._getRenderedMonth.bind(this);
+        this._setItemLayout = this._setRenderedMonth.bind(this);
     }
 
 
@@ -53,40 +52,66 @@ export default class MonthList extends PureComponent {
     }
 
 
+    _getRenderedMonth(asStr) {
+        return this._renderedDaysPerMonth[asStr];
+    }
+
+
+    _setRenderedMonth(asStr, data) {
+        this._renderedDaysPerMonth[asStr] = data;
+    }
+
+
     _keyExtractor(item) {
         return item.id;
     }
 
-
-    _getItemLayout(data,index) {
-        // ilog(`[month::getItemLayout] index:${index}`,{data,index})
-
-        //const titleHeight = monthTitleHeight + monthTitlePaddingTop;
-        const titleHeight = monthTitleHeight + monthTitlePaddingBottom;
-        const itemHeight = (rowsHeight + titleHeight);
-        const rowsCount = ( (data && data.days)
-                    ? Math.round(data.days.length / 7)
-                    : 0
+    _getItemHeight(data,index,heightCorrection,rowCorrection) {
+        const item = data[index];
+            
+        const titleHeight = monthTitleHeight;
+        const rowsCount = ( (item && item.days)
+            ? Math.round(item.days.length / 7)
+            : 0
         );
-        const rowsHeight = ( rowsCount * dayHeight );
+        const rowHeight = (dayHeight + rowCorrection);
+        const rowsHeight = ( rowsCount * (rowHeight) );
+        const itemHeight = rowsHeight + titleHeight + heightCorrection;
+
+        return itemHeight;
+
+    }
+
+
+    _getItemLayout(data,currentIndex) {
+        let offset = 0;
+        const extraOffset = 0;
+        const heightCorrection = 0;
+        const rowCorrection = 4;
+        const currentItemHeight = this._getItemHeight(data,currentIndex,heightCorrection,rowCorrection);
+        
+        for (let index = currentIndex-1; index >= 0; index--) {
+            const itemHeight = this._getItemHeight(data,index,heightCorrection,rowCorrection);
+            offset += itemHeight;
+        }
+        offset += (currentIndex > 0 ? extraOffset : 0);
 
         return {
-            length: itemHeight,
-            offset:  itemHeight * index, //(index > 0 ? index+1 : 0),
-            index
+            offset,
+            length: currentItemHeight,
+            index: currentIndex
         }
     }
     
 
     //TODO: fix this
     _scrollToSelectedMonth() {
+        // detach from current code execution - for smooth animation
         setTimeout(() => {
             const { startDate, minDate } = this.props;
-            const date1 = minDate.startOf('month');
-            const date2 = startDate.startOf('month');
+            const date1 = minDate.clone().startOf('month');
+            const date2 = startDate.clone().startOf('month');
             const index = date2.diff(date1, 'months');
-
-            ilog(`[MonthList] scrolling to index ${index}`);
 
             if (this.list && index > -1) {
                 // const viewOffset = ;
@@ -98,7 +123,7 @@ export default class MonthList extends PureComponent {
                     this._scrollingAttemtps++;
                     this._scrollToSelectedMonth();
                 }
-                processError(`[MonthList] Trying to scroll to index ${index} failed - this.list or item is not defined. Try again: ${tryAgain}`,{hasList:(this.list != null),hasItem: (item!=null),tryAgain});
+                processError(`[MonthList] Trying to scroll to index ${index} failed - this.list or item is not defined. Try again: ${tryAgain}`,{hasList:(this.list != null),tryAgain});
             }
         }, 200);
     }
@@ -107,6 +132,9 @@ export default class MonthList extends PureComponent {
     _renderDay(item, index, markedData) {
         let {id, asStr, date, text} = item;
         let marked = ( (markedData && markedData[asStr]) || {});
+        if (marked.isEmpty == null) {
+            marked.isEmpty = (date == null);
+        }
         if (marked.isValid == null) {
             marked.isValid = (!marked.isEmpty);
         }
@@ -176,60 +204,49 @@ export default class MonthList extends PureComponent {
 
 
     _renderMonth({item,index}) {
-        
-        const {data, monthsToUpdate, color} = this.props;
-        const { asStr, id } = item;
-        const shouldUpdate = monthsToUpdate[asStr];
-        
-        let renderedDays = this._renderedDaysPerMonth[asStr];
-        
-        if (monthsToUpdate[asStr] == true) { // should update
-            renderedDays = this._prepareDaysRendering(item, renderedDays);
-            this._renderedDaysPerMonth[asStr] = renderedDays;
-        }
-        
-        // ilog(`[month ${asStr}]`,{renderedDays, data, item, monthsToUpdate, asStr, id, shouldUpdate})
+        const {
+            markedMonths, color,
+        } = this.props;
 
+        const { asStr, id } = item;
+        const shouldUpdate = markedMonths[asStr];
+        
+        let renderedDays = this._getRenderedMonth[asStr];
+        
+        // Optimization of month rendering)
+        // (should update if true)
+        if (markedMonths[asStr] == true || renderedDays == null) {
+            renderedDays = this._prepareDaysRendering(item, renderedDays);
+            this._setRenderedMonth(asStr, renderedDays);
+        }
+ 
         const result = (
-        <Month
-            data={item}
-            renderedDays={renderedDays}
-            shouldUpdate={shouldUpdate}
-            color={color}
-            key={id}
-        />
+            <Month
+                data={item}
+                renderedDays={renderedDays}
+                shouldUpdate={shouldUpdate}
+                color={color}
+                key={id}
+            />
         );
-        this._renderedItems[index] = result;
 
         return result;
     }
 
-
-                        // Virtualised List
-                        // updateCellsBatchingPeriod={100}
-                        // maxToRenderPerBatch={3}
-                        // initialNumToRender={2}
-                        // windowSize={10}
-                        // other
-                        // ListView
-                        // legacyImplementation={true}
-
+    
     render() {
         const { data } = this.props;
+        const dataLen = (data ? data.length : -1);
 
-        const dataLen = ( data ? data.length : -1 );
-        // const renderedLen = ( this._renderedItems ? Object.keys(this._renderedItems).length : -1 );
-
-        const isLoading = ( dataLen == -1 );
         if (this._isFirst && dataLen > 0) {
             this._isFirst = false;
             this._scrollToSelectedMonth();
         }
 
-        //ilog(`[monthlist]  isLoading:${isLoading}  renderedLen: ${renderedLen} dataLen: ${dataLen}`);
-
         return (
             <View style={{flex:1}}>
+            {
+
                 <FlatList
                     ref={(list) => { this.list = list; }}
                     style={{flex: 1}}
@@ -240,7 +257,8 @@ export default class MonthList extends PureComponent {
                     getItemLayout={this._getItemLayout}
                     // onScrollToIndexFailed={(data)=>{wlog({data})}}
                 />
-                <LTLoader message={'Loading ...'} isLoading={isLoading} opacity={'FF'} />
+
+            }
             </View>
         )
     }

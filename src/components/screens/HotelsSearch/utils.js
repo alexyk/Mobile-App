@@ -619,11 +619,6 @@ export function parseAndCacheHotelDataFromSocket(
   hotelsSocketCacheMap[hotelData.id] = parsedInfo;
   checkHotelData(parsedInfo,'socket-parsed',index)
 
-  //@@@debug
-  if (!hotelsSocketCacheMap['orig']) hotelsSocketCacheMap['orig'] = {}
-  hotelsSocketCacheMap.orig[id] = hotelData;
-  //@@@debug
-
   const result = {
     initialLat: lat,
     initialLon: lon

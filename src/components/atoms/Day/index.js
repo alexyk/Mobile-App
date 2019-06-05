@@ -41,17 +41,19 @@ export default class Day extends Component {
 
     chooseDay() {
         if (this.props.isValid) {
+            // detach from current code execution (smoother animation and no button lock)
             setTimeout(() => this.props.onChoose(this.props.date));
         }
     }
 
     render() {
+        
         if (this.props.isEmpty) {
             return <View style={styles.dayContainer} />
         }
-
-        const { color, text, date, id, asStr, isEmpty,
-            isMid, isStartPart, isStart, isEnd, isValid, isFocus, isToday
+        
+        const { color, text, id,
+            isMid, isStartPart, isEnd, isValid, isFocus, isToday
         } = this.props;
 
 

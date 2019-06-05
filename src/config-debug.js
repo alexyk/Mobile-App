@@ -89,20 +89,26 @@ export var wlog = console.warn;
 export var elog = console.error;
 export var tslog = (consoleTimeCalculations ? console.time : emptyFunc);
 export var telog = (consoleTimeCalculations ? console.timeEnd : emptyFunc);
+/**
+ * Print moment object in a formated way
+ */
+export var mlog = mlogFunc; // moment logging
 
 function configureConsole() {
-  if (!__DEV__) {
+  if (!__DEV__ && !__MYDEV__) {
     clog = emptyFunc;
     ilog = emptyFunc;
     dlog = emptyFunc;
     wlog = emptyFunc;
     elog = emptyFunc;
+    mlog = emptyFunc;
   } else  if (!__MYDEV__) {
     clog = emptyFuncWithDescr('clog');
     ilog = emptyFuncWithDescr('ilog');
     dlog = emptyFuncWithDescr('dlog');
     wlog = emptyFuncWithDescr('wlog');
     elog = emptyFuncWithDescr('elog');
+    mlog = emptyFuncWithDescr('mlog');
   }
 
   // in both release & debug/dev
@@ -231,7 +237,18 @@ export function processError(description, data) {
  * Print object in console log having in mind moment
  * @param {Object} obj
  */
+function mlogFunc(momentObj, title=`Moment is`, format=`YYYY-MM-DD HH:mm:ss.SSS [GMT]ZZ [T] ddd,MMM`) {
+  if (momentObj == null) momentObj = {format:()=>'moment is null'};
+  console.log(`[mlog] ${title} ${momentObj.format(format)}`)
+}
 function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
+  // reverse params if needed
+  if (isObject(title) && isString(obj)) {
+    let tmp = title;
+    title = obj;
+    obj = tmp;
+  }
+
   let result = '';
   let isFirst = true;
 
@@ -239,7 +256,7 @@ function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
     let item = obj[i];
 
     if (isMoment(item)) {
-      result += indent + `${i}: ${item.format('YYYY-MM-DD HH:mm:ss.SSS ZZ, ddd, MMM')} (moment)\n`;
+      result += indent + `${i}: ${item.format('YYYY-MM-DD HH:mm:ss.SSS GMTZ, ddd, MMM')} (moment)\n`;
     } else if (isObject(item)) {
       result += indent + `${i}: {\n  ${dlog(item,i,true,indent)}${indent}}\n`;
     } else {

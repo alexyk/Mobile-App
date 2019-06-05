@@ -193,33 +193,6 @@ export function getWebviewExtraData(state, extraData = {}) {
   };
 }
 
-export function formatDatesData(today, startMoment, endMoment, displayDateFormat, inputDateFormat) {
-  const y = today.year();
-  const y1 = startMoment.year();
-  const y2 = endMoment.year();
-  let displayFormat1 = displayDateFormat, 
-      displayFormat2 = displayDateFormat;
-  if (y < y1) {
-    displayFormat1 = 'DD MMM, YYYY';
-  }
-  if (y < y2) {
-    displayFormat2 = 'DD MMM, YYYY';
-  }
-
-  let result = {
-    startDate: startMoment.format(inputDateFormat),
-    endDate: endMoment.format(inputDateFormat),
-    checkInDateMoment: startMoment,
-    checkOutDateMoment: endMoment,
-    checkInDateFormated: startMoment.format(inputDateFormat),
-    checkOutDateFormated: endMoment.format(inputDateFormat),
-    checkInDate: startMoment.format(displayFormat1),
-    checkOutDate: endMoment.format(displayFormat2),
-  };
-   
-  return result;
-}
-
 export function gotoWebview(state, navigation, extraData = {}) {
   navigation.navigate("WebviewScreen", getWebviewExtraData(state, extraData));
 }

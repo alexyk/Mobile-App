@@ -51,15 +51,15 @@ class VersionText extends PureComponent {
 
         this.tapsCount = 0;
         this.lastTimeout = 0;
-        this.checkTapscount = this.checkTapscount.bind(this);
+        this.checkTapsCount = this.checkTapsCount.bind(this);
     }
 
-    checkTapscount() {
+    checkTapsCount() {
         if (this.tapsCount >= 5) {
             this.tapsCount = -1; // stop showing this 
             this.setState({
                 version: debugVersion,
-                prefx: ''
+                prefix: ''
             });
         }
     }
@@ -67,7 +67,7 @@ class VersionText extends PureComponent {
     onVersionStringTapped(event) {
         if (this.tapsCount != -1) {
             this.tapsCount++;
-            const func = this.checkTapscount;
+            const func = this.checkTapsCount;
             if (this.lastTimeout) {
                 clearTimeout(this.lastTimeout);
             }

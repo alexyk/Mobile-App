@@ -1,39 +1,35 @@
-import {
-    AsyncStorage,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text, 
-    TouchableOpacity,
-    View, SafeAreaView,
-    Keyboard
-} from 'react-native';
+import moment from 'moment';
 import React, { Component } from 'react';
+import {
+    AsyncStorage, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet,
+    Text, TouchableOpacity, View
+} from 'react-native';
+import Toast from 'react-native-easy-toast'; //eslint-disable-line
+import RNPickerSelect from 'react-native-picker-select'; //eslint-disable-line
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import moment from 'moment';
-
-import DateAndGuestPicker from '../../organisms/DateAndGuestPicker';
-import RNPickerSelect from 'react-native-picker-select';//eslint-disable-line
-import SearchBar from '../../molecules/SearchBar';
-import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
-import { autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace,
-    isOnline, autoHomeSearch, processError,
+import {
+    autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace,
+    isOnline, processError, ilog
 } from '../../../config-debug';
 import requester from '../../../initDependencies';
-import styles from './styles';
 import lang from '../../../language';
+import { setCurrency } from '../../../redux/action/Currency';
+import { setDatesAndGuestsData } from '../../../redux/action/userInterface';
 import { userInstance } from '../../../utils/userInstance';
+import { isNative } from '../../../version';
+import LocRateButton from '../../atoms/LocRateButton';
 import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectMaterialDialog';
+import SearchBar from '../../molecules/SearchBar';
+import DateAndGuestPicker from '../../organisms/DateAndGuestPicker';
+import { gotoWebview } from '../utils';
+import styles from './styles';
+import { formatDatesData } from '../Calendar/utils';
 
 
-import LocRateButton from '../../atoms/LocRateButton'
-import { setCurrency } from '../../../redux/action/Currency'
-import { setDatesAndGuestsData } from '../../../redux/action/userInterface'
 
-import {isNative} from '../../../version'
-import { gotoWebview, formatDatesData } from '../utils';
+
 const isExploreSearchNative = isNative.explore; // false: webview version, true: native search version
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
 
@@ -181,14 +177,19 @@ class Explore extends Component {
         };
     }
 
-    onDatesSelect(newState) {
+    onDatesSelect(inputData) {
         try {
-            const { today, startDate, endDate, displayFormat, inputFormat } = newState;
-            const daysDifference = moment.duration(endDate.diff(startDate)).asDays();
-            const newStateEdit = formatDatesData(today, startDate, endDate, displayFormat, inputFormat);
-            const newStateCombined = {...newStateEdit, daysDifference};
-            setTimeout(() => this.setState(newStateCombined));
-            setTimeout(() => this.props.setDatesAndGuestsData(newStateEdit));
+            const { checkInMoment, checkOutMoment, inputFormat, today } = inputData;
+            const daysDifference = checkOutMoment.diff(checkInMoment,'days');
+            const formattedDates = formatDatesData(today.year(), checkInMoment, checkOutMoment, inputFormat);
+            const newState = { ...formattedDates, daysDifference };
+            const newCache = { ...inputData, ...formattedDates };
+
+            ilog(`[explore] onDateSelect`,{newState, newCache, inputData, formattedDates})
+
+            // detach from current code execution - for smooth transition of screens
+            setTimeout(() => this.setState(newState));
+            setTimeout(() => this.props.setDatesAndGuestsData(newCache));
         } catch (error) {
             processError(`[Explore::onDateSelect] Error while setting date: ${error.message}`,{error});
         }
@@ -567,23 +568,15 @@ class Explore extends Component {
 
     renderDateAndGuestsPicker() {
         const {
-            checkInDate, checkOutDate, guests,
-            checkInDateMoment, checkOutDateMoment, infants, children, adults
+            guests, infants, children, adults,
+            startDateText, endDateText
         } = this.props.datesAndGuestsData;
-
-        let checkInDatePatched, checkOutDatePatched;
-        checkInDatePatched = checkInDateMoment;
-        checkOutDatePatched = checkOutDateMoment;
-
-        //log('render-date-picker',`[Explore::renderDateAndGuestsPicker] State, checkInDatePatched:${checkInDatePatched}, checkOutDateFormated:${checkOutDateFormated}`,{state:true.state,checkOutDateFormated,checkInDateFormated})
 
         return (
             <View style={styles.scrollViewContentMain}>
                 <DateAndGuestPicker
-                    checkInDate={checkInDate}
-                    checkOutDate={checkOutDate}
-                    checkInDateFormated={checkInDatePatched}
-                    checkOutDateFormated={checkOutDatePatched}
+                    checkInDate={startDateText}
+                    checkOutDate={endDateText}
                     adults={adults}
                     children={children}
                     guests={guests}

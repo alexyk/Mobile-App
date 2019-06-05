@@ -4,7 +4,7 @@ import { View, Text } from 'react-native';
 import PropTypes from 'prop-types';
 import styles from './styles';
 import { I18N_MAP } from './i18n';
-import { ilog } from '../../../config-debug';
+
 
 export default class Month extends Component {
     static propTypes = {

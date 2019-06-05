@@ -1,4 +1,5 @@
 import { processError, wlog } from "../../../config-debug";
+import { I18N_MAP } from './i18n';
 
 const MONTH_FORMAT = 'YYYY-MM';
 var ids = {
@@ -29,25 +30,25 @@ export function listItemKeyGen(prop, prefix) {
 
 /**
  * Returns initial days data (calendarData:Array) and initial marked data (calendarMarkedDays:Object)
- * @param {moment} checkInDateMoment 
- * @param {moment} checkOutDateMoment 
+ * @param {moment} checkInMoment 
+ * @param {moment} checkOutMoment 
  * @param {moment} today 
  * @param {moment} minDate 
  * @param {moment} maxDate 
  * @param {String} internalFormat 
  * @param {Object} extraData 
  */
-export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment,today,minDate,maxDate,internalFormat,extraData=null) {
+export function generateInitialCalendarData(checkInMoment,checkOutMoment,today,minDate,maxDate,internalFormat) {
   let calendarData = [];
   let calendarMarkedDays = {};
-  let calendarMonthsToUpdate = {};
+  let calendarMarkedMonths = {};
 
   try {
-      let current = minDate;
+      let current = minDate.clone();
 
       while ( current.isSameOrBefore(maxDate) ) {
           const dateClone = current.clone();
-          const {days, markedDays, monthsToUpdate} = createInitialCalendarData({},dateClone,checkInDateMoment,checkOutDateMoment,today,internalFormat)
+          const {days, markedDays, markedMonths} = createInitialCalendarData({},dateClone,checkInMoment,checkOutMoment,today,internalFormat)
           const asStr = dateClone.format(MONTH_FORMAT);
           const id = listItemKeyGen('MONTH_ID', 'month');
           let month = {
@@ -57,7 +58,7 @@ export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment
               asStr
           };
           Object.assign(calendarMarkedDays,markedDays);
-          Object.assign(calendarMonthsToUpdate,monthsToUpdate);
+          Object.assign(calendarMarkedMonths,markedMonths);
           calendarData.push(month);
           current.add(1, 'month');
         }
@@ -65,7 +66,7 @@ export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment
       processError(`[Calendar::utils::generateInitialCalendarData] ${error.message}`,{error});
   }
 
-  return {calendarData, calendarMarkedDays, calendarMonthsToUpdate};
+  return {calendarData, calendarMarkedDays, calendarMarkedMonths};
 }
 
 /**
@@ -82,37 +83,25 @@ export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment
               ...
        }
  * }
- * @param {Object} oldMarked The previous result, returned by this function
- * @param {moment} minDate 
- * @param {moment} checkInDateMoment 
- * @param {moment} checkOutDateMoment 
+ * @param {Object} oldMarkedDays The previous result, returned by this function
+ * @param {moment} minMoment Optimized refresh range - start date
+ * @param {moment} maxMoment Optimized refresh range - end date
+ * @param {moment} checkInMoment 
+ * @param {moment} checkOutMoment 
  * @param {moment} today 
  * @param {String} internalFormat 
  */
-export function updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
+export function updateMarkedCalendarData(oldMarkedDays,minMoment,maxMoment,checkInMoment,checkOutMoment,today,internalFormat) {
   let days = {};
   let months = {};
-  const {days:oldDays, months: oldMonths} = oldMarked;
-  
-  let current = minDate.clone();
+
+  let current = minMoment.clone();
   let currentMonth = current.month();
-  let daysDifference = (
-    (checkInDateMoment == null && checkOutDateMoment == null)
-      ? today.diff(minDate,'days') + 1 // clear calendar case
-      :
-        checkOutDateMoment.isValid()
-        ? checkOutDateMoment.diff(minDate,'days')
-        : (
-            (checkInDateMoment.isValid() && !checkOutDateMoment.isValid())
-              ? checkInDateMoment.diff(minDate,'days')
-              : 0
-        )
-  );
+  let daysDifference = maxMoment.diff(minMoment, 'days');
   
   try {
-
     while (daysDifference >= 0) {
-      const {marked: dayMarked} = calculateDayData(oldDays, current, checkInDateMoment, checkOutDateMoment, today, internalFormat, true);
+      const {marked: dayMarked} = calculateDayData(oldMarkedDays, current, checkInMoment, checkOutMoment, today, internalFormat, true);
       populateMarkedData(current, dayMarked, days, months);
 
       current.add(1,'day');
@@ -122,7 +111,12 @@ export function updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,ch
         currentMonth = current.month();
       }
     }
+    // add today
+    current = today.clone();
+    const {marked: dayMarked} = calculateDayData(oldMarkedDays, current, checkInMoment, checkOutMoment, today, internalFormat, true);
+    populateMarkedData(current, dayMarked, days, months);
 
+    // ilog('[updateMarkedCalendarData]',{minMoment,maxMoment,days,months,oldMarkedDays,checkInMoment,checkOutMoment,today,current});
   } catch (error) {
     processError(`[Calendar::utils::updateMarkedCalendarData: ${error.message}`, {error});
   }
@@ -135,16 +129,16 @@ export function updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,ch
  *  - marked    the marked days of the current month
  *  - days      the initial days of the month (including 'isEmpty=true' days that are of next & previous months)
  * @param {moment} monthDate As extracted from today (it needs to be reset with moment method 'date(1)' in order to start with day 1) 
- * @param {moment} checkInDateMoment 
- * @param {moment} checkOutDateMoment 
+ * @param {moment} checkInMoment 
+ * @param {moment} checkOutMoment 
  * @param {String} internalFormat 
  */
-export function createInitialCalendarData(oldMarked, monthDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
+export function createInitialCalendarData(oldMarkedDays, monthDate, checkInMoment, checkOutMoment, today, internalFormat) {
     // const now = Date.now()
     // console.time(`*** Calendar::utils::createInitialCalendarData ${now}`);
     let days;
     let markedDays = {};
-    let monthsToUpdate = {};
+    let markedMonths = {};
 
     try {
       const month = monthDate.month();
@@ -159,11 +153,22 @@ export function createInitialCalendarData(oldMarked, monthDate,checkInDateMoment
       }
 
       // parse all days
+      let isMarked = false;
       while (current.month() === month) {
-        const {day: newDay, marked: dayMarked} = calculateDayData(oldMarked,current, checkInDateMoment, checkOutDateMoment, today, internalFormat);
+        const {
+          day: newDay, marked: dayMarked
+        } = calculateDayData(oldMarkedDays, current, checkInMoment, checkOutMoment, today, internalFormat);
         days.push(newDay);
+
+        if (!isMarked) {
+          const monthAsStr = current.format(MONTH_FORMAT)
+          markedMonths[monthAsStr] = true;
+          isMarked = true;
+        }
+
+
         current.add(1, 'days');
-        populateMarkedData(current, dayMarked, markedDays, monthsToUpdate);
+        populateMarkedData(current, dayMarked, markedDays, markedMonths);
       }
 
       current.subtract(1, 'days'); // go back to last day of current month
@@ -181,8 +186,29 @@ export function createInitialCalendarData(oldMarked, monthDate,checkInDateMoment
       processError(`[Calendar::utils::createInitialCalendarData] ${error.message}`,{error});
     }
 
-    return {days, markedDays, monthsToUpdate};
+    return {days, markedDays, markedMonths};
 }
+
+
+function calculateDayPropsAndFlags(date, oldMarkedDays, internalFormat, checkInMoment, checkOutMoment, today) {
+  const asStr = date.format(internalFormat);
+  const isStart = (checkInMoment && date.isSame(checkInMoment));
+  const isMid = (checkInMoment && date.isAfter(checkInMoment) && date.isBefore(checkOutMoment));
+  const isEnd = (checkOutMoment && date.isSame(checkOutMoment));
+  const isFocus = (isMid || isStart || isEnd);
+  const isToday = date.isSame(today);
+  const isValid = (date.isSameOrAfter(today));
+  const isStartPart = (isStart && (checkOutMoment != null));
+  const isMarked = (isStart || isMid || isEnd || isFocus || isStartPart || isToday);
+  const old = (oldMarkedDays ? oldMarkedDays[asStr] : null);
+  const shouldUpdate = (old == null || (old.isMarked != isMarked) || isToday);
+
+  return {
+    asStr, isStart, isMid, isEnd, isFocus, isToday, isValid,
+    isStartPart, isMarked, shouldUpdate, old
+  }
+}
+
 
 /**
  * Returns an object:
@@ -191,27 +217,20 @@ export function createInitialCalendarData(oldMarked, monthDate,checkInDateMoment
  *      day:    {text:String, date:moment}
  *  }
  * @param {moment} date 
- * @param {moment} checkInDateMoment 
- * @param {moment} checkOutDateMoment 
+ * @param {moment} checkInMoment 
+ * @param {moment} checkOutMoment 
  * @param {moment} today 
  * @param {String} internalFormat 
  * @param {Boolean}   onlyMarked 
  */
-export function calculateDayData(oldMarked, date, checkInDateMoment, checkOutDateMoment, today, internalFormat, onlyMarked=false) {
+export function calculateDayData(oldMarkedDays, date, checkInMoment, checkOutMoment, today, internalFormat, onlyMarked=false) {
     let result = {};
     let marked = null;
     
-    const asStr = date.format(internalFormat);
-    const isStart = (checkInDateMoment && date.isSame(checkInDateMoment));
-    const isMid = (checkInDateMoment && date.isAfter(checkInDateMoment) && date.isBefore(checkOutDateMoment));
-    const isEnd = (checkOutDateMoment && date.isSame(checkOutDateMoment));
-    const isFocus = (isMid || isStart || isEnd);
-    const isToday = date.isSame(today);
-    const isValid = (date.isSameOrAfter(today));
-    const isStartPart = (isStart && (checkOutDateMoment != null));
-    const isMarked = (isStart || isMid || isEnd || isFocus || isStartPart || isToday);
-    const old = (oldMarked ? oldMarked[asStr] : null);
-    const shouldUpdate = (old == null || (old.isMarked != isMarked));
+    const {
+      asStr, isStart, isMid, isEnd, isFocus, isToday, isValid,
+      isStartPart, isMarked, shouldUpdate
+    } = calculateDayPropsAndFlags(date, oldMarkedDays, internalFormat, checkInMoment, checkOutMoment, today);
 
     if (isMarked || !isValid || shouldUpdate) {
       if (!isValid && !isMarked) {
@@ -253,11 +272,81 @@ export function calculateDayData(oldMarked, date, checkInDateMoment, checkOutDat
  * @param {object} months A map of months marked in the form: {2019-06: true, ...}
  */
 function populateMarkedData(dayMoment, dayMarked, days, months) {
-  if (dayMarked) {
-    days[dayMarked.asStr] = dayMarked.data;
-    const monthAsStr = dayMoment.format(MONTH_FORMAT);
-    if (dayMarked.data.shouldUpdate) {
-      months[monthAsStr] = true;
+  try {
+    if (dayMarked) {
+      days[dayMarked.asStr] = dayMarked.data;
+      const monthAsStr = dayMoment.format(MONTH_FORMAT);
+      if (dayMarked.data.shouldUpdate) {
+        months[monthAsStr] = true;
+      }
     }
+  } catch (error) {
+    processError(`[Calendar::utils::populateMarkedData] ${error.message}`, {error})
   }
+}
+
+
+
+export function i18n(compareYear, data, type) {
+  try {
+      const i18n = 'en';
+      const customI18n = {}
+      if (~['w', 'weekday', 'text'].indexOf(type)) { // eslint-disable-line
+          return (customI18n[type] || {})[data] || I18N_MAP[i18n][type][data];
+      }
+      if (type === 'date') {
+        const y = compareYear;
+        let displayDateFormat = (customI18n[type] || I18N_MAP[i18n][type]);
+        const year = data.year();
+
+        // if date is next year
+        if (compareYear < year) {
+          displayDateFormat = 'DD MMM, YYYY';
+        }
+        const result = data.format(displayDateFormat);
+
+        return result;
+      }
+  } catch (error) {
+      processError(`[Calendar::i18n] ${error.message}`, {error,type,data})
+  }
+
+  return {};
+}
+
+
+export function formatDatesData(compareYear, startMoment, endMoment, inputFormat) {
+  let result = {
+    checkInMoment: startMoment,
+    checkOutMoment: endMoment,
+    checkInDateFormated: startMoment.format(inputFormat),
+    checkOutDateFormated: endMoment.format(inputFormat),
+    ...formatDay(compareYear, startMoment, inputFormat, true),
+    ...formatDay(compareYear, endMoment, inputFormat, false)
+  };
+   
+  return result;
+}
+
+
+export function formatDay(year, dayAsMoment, inputFormat, isStart) {
+  const dayAsI18Str = i18n(year, dayAsMoment, 'date');
+  const dayAsI18WeekDayStr = i18n(year, dayAsMoment.isoWeekday(), 'w');
+
+  let result;
+  if (isStart) {
+      result = {
+          startDate: dayAsMoment.format(inputFormat),
+          startDateText: dayAsI18Str,
+          startWeekdayText: dayAsI18WeekDayStr,
+      }
+  } else {
+      result = {
+          endDate: dayAsMoment.format(inputFormat),
+          endDateText: dayAsI18Str,
+          endWeekdayText: dayAsI18WeekDayStr,
+      }
+  }
+
+  return result;
 }
