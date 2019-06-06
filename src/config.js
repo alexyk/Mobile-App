@@ -40,6 +40,7 @@ export const showNumberOnHotelItem = (__DEV__ && false);
 export const showBothMapAndListHotelSearch = false;
 export const showSimpleFooterHotelSearch = true;
 export const isFontScalingEnabled = false;
+export const showOfflineMessage = false;
 
 // CONFIGS 
 const LT_PROD       = "PRODUCTION";
@@ -53,7 +54,7 @@ const LT_LOCAL      = "LOCAL";
 // ----------------------------
 //       CHOOSE CONFIG
 // ----------------------------
-export const LT_CFG = LT_PROD;
+export const LT_CFG = LT_STAGING;
 
 
 switch (LT_CFG) {

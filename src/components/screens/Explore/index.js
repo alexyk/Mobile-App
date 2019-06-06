@@ -1,33 +1,31 @@
-import moment from 'moment';
 import React, { Component } from 'react';
 import {
-    AsyncStorage, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet,
+    AsyncStorage, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet, 
     Text, TouchableOpacity, View
 } from 'react-native';
 import Toast from 'react-native-easy-toast'; //eslint-disable-line
 import RNPickerSelect from 'react-native-picker-select'; //eslint-disable-line
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { domainPrefix } from '../../../config';
+import { domainPrefix, showOfflineMessage } from '../../../config';
 import {
     autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace,
-    isOnline, processError, ilog
+    ilog, isOnlineMode, processError
 } from '../../../config-debug';
 import requester from '../../../initDependencies';
 import lang from '../../../language';
 import { setCurrency } from '../../../redux/action/Currency';
-import { setDatesAndGuestsData } from '../../../redux/action/userInterface';
+import { setDatesAndGuestsData, setIsOffline, setServiceState } from '../../../redux/action/userInterface';
 import { userInstance } from '../../../utils/userInstance';
 import { isNative } from '../../../version';
 import LocRateButton from '../../atoms/LocRateButton';
 import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectMaterialDialog';
 import SearchBar from '../../molecules/SearchBar';
 import DateAndGuestPicker from '../../organisms/DateAndGuestPicker';
-import { gotoWebview } from '../utils';
-import styles from './styles';
 import { formatDatesData } from '../Calendar/utils';
-
-
+import { gotoWebview, onNetworkError } from '../utils';
+import styles from './styles';
+import { commonText } from '../../../common.styles';
 
 
 const isExploreSearchNative = isNative.explore; // false: webview version, true: native search version
@@ -81,7 +79,8 @@ class Explore extends Component {
             token: '',
             countriesLoaded: false,
             currencySelectionVisible: false,
-            ...props.datesAndGuestsData
+            ...props.datesAndGuestsData,
+            isOfflineMessageHidden: false
         };
 
         // init dates
@@ -106,19 +105,44 @@ class Explore extends Component {
         }
 
         // Below line gives null cannot be casted to string error on ios please look into it
-        requester.getUserInfo().then((res) => {
-            res.body.then((data) => {
-                if (email_value == undefined || email_value == null || email_value == "") {
-                    AsyncStorage.setItem(`${domainPrefix}.auth.username`, data.email);
-                    this.setState({
-                        email: email_value,
-                    });
+        requester
+            .getUserInfo().then((res) => {
+                if (res && res.body && res.success) {
+                    res.body
+                        .then((data) => {
+                            if (email_value == undefined || email_value == null || email_value == "") {
+                                AsyncStorage.setItem(`${domainPrefix}.auth.username`, data.email);
+                                this.setState({
+                                    email: email_value,
+                                });
+                                this.props.setIsOffline(false)
+                            }
+                            this.props.setIsOffline(false)
+                            userInstance.setUserData(data);
+                        })
+                        .catch(function (error) {
+                            onNetworkError(`getUserInfo - error on level 3: ${error.message}`, {error,res})
+                        })
+                } else {
+                    this.props.setServiceState({userInfoError: res});
+
+                    if (res && res.errors instanceof Promise) {
+                        res.errors
+                            .then(function(error) {
+                                onNetworkError(`getUserInfo - ${error.error} ${error.status} - ${error.message} to ${error.path} (${error.exception})`, {error})
+                            })
+                            .catch(function (error) {
+                                onNetworkError(`getUserInfo - unknown state of res, level 2.1: ${error.message}`, {error})
+                            })
+                    } else {
+                        onNetworkError(`getUserInfo - unknown state of res or res.body, level 2.2`, {res})
+                    }
                 }
-                userInstance.setUserData(data);
-            }).catch((err) => {
-                //console.log('componentWillMount', err);
+            })
+            .catch(function (error) {
+                onNetworkError(`getUserInfo - unknown state of res, level 1: ${error.message}`, {error})
             });
-        });
+
         this.setCountriesInfo();
     }
 
@@ -128,7 +152,7 @@ class Explore extends Component {
         // enable automatic search
         if (__DEV__ && autoHotelSearch) {
             setTimeout(() => {this.onSearchHandler(autoHotelSearchPlace)}, 100)
-            if (!isOnline) {
+            if (!isOnlineMode) {
                 setTimeout(() => this.gotoSearch(), 300)
             }
         }
@@ -403,6 +427,23 @@ class Explore extends Component {
         );
     }
 
+
+    renderToast() {
+        return (
+            <Toast
+                ref="toast"
+                style={{ backgroundColor: '#DA7B61' }}
+                position='bottom'
+                positionValue={150}
+                fadeInDuration={500}
+                fadeOutDuration={500}
+                opacity={1.0}
+                textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
+            />
+        )
+    }
+
+
     renderAutocomplete() {
         const nCities = this.state.cities.length;
         if (nCities > 0) {
@@ -587,30 +628,116 @@ class Explore extends Component {
                     gotoSettings={this.gotoSettings}
                     showSearchButton={true}
                     disabled={false}
+                    isOffline={this.props.isOffline || !isOnlineMode}
                     isFilterable={false}
                 />
+                { this.renderOfflineMessage(this.state.isOfflineMessageHidden) }
             </View>
         )
     }
 
+
+    renderOfflineMessage(isMessageHidden) {
+        if (  (  ! isOnlineMode   ||  this.props.isOffline  )   &&   ! isMessageHidden  &&  showOfflineMessage ) {
+            return (
+                <TouchableOpacity onPress={() => this.setState({isOfflineMessageHidden:true})}>
+                    <View style={{alignItems: 'center', backgroundColor: '#F005', paddingVertical: 10, borderRadius: 15, margin: 5, borderWidth: 3, borderColor:"#A003"}}>
+                        <Text style={{...commonText, fontSize: 17, color:'#000A'}}>
+                            {lang.TEXT.OFFLINE_MESSAGE}
+                        </Text>
+                    </View>
+                </TouchableOpacity>
+            )
+        }
+    }
+
+    renderChooseHotelsOrHomes() {
+        return (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15 }}>
+
+                <TouchableOpacity onPress={() => this.setState({ isHotel: true })}
+                    style={[styles.homehotelsView, {marginRight:5}]}>
+                    <Image
+                        style={styles.imageViewHotelsHomes} resizeMode='stretch'
+                        source={require('../../../assets/home_images/hotels.png')} />
+                    {this.state.isHotel ? this.renderHotelSelected() : this.renderHotelDeSelected()}
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => this.setState({
+                    isHotel: false,
+                    cities: [],
+                    search: '',
+                    regionId: 0
+                })}
+                style={[styles.homehotelsView, {marginLeft:5}]}>
+                    <Image style={styles.imageViewHotelsHomes} resizeMode='stretch'
+                        source={require('../../../assets/home_images/homes.png')} />
+                    {!this.state.isHotel ? this.renderHomeSelected() : this.renderHomeDeSelected()}
+                </TouchableOpacity>
+
+            </View>
+        )
+    }
+
+    
+    renderPopularDestinationsLine1() {
+        return (
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
+                <TouchableOpacity onPress={() => this.handlePopularCities(52612, 'London , United Kingdom')}
+                    style={styles.subViewPopularHotelsLeft}>
+                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
+                        source={require('../../../assets/home_images/london.png')} />
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => this.handlePopularCities(18417, 'Madrid , Spain')}
+                    style={styles.subViewPopularHotelsRight}>
+                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
+                        source={require('../../../assets/home_images/Madrid.png')} />
+                </TouchableOpacity>
+            </View>
+        )
+    }
+
+
+    renderPopularDestinationsLine2() {
+        return (
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
+            <TouchableOpacity onPress={() => this.handlePopularCities(16471, 'Paris , France')}
+                style={styles.subViewPopularHotelsLeft}>
+                <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
+                    source={require('../../../assets/home_images/paris.png')} />
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => this.handlePopularCities(15375, 'Sydney , Australia')}
+                style={styles.subViewPopularHotelsRight}>
+                <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
+                    source={require('../../../assets/home_images/Sydney.png')} />
+            </TouchableOpacity>
+        </View>
+        )
+    }
+
+    renderFooter() {
+        return (
+            <View style={styles.bottomView}>
+                <Image style={styles.bottomViewText} resizeMode='stretch'
+                    source={require('../../../assets/texthome.png')} />
+
+                <Image style={styles.bottomViewBanner} resizeMode='stretch'
+                    source={require('../../../../src/assets/vector.png')} />
+            </View>
+        )
+    }
+
+
     render() {
         return (
             <SafeAreaView style={styles.container}>
-
                 <View style={styles.container}>
-                    <Toast
-                        ref="toast"
-                        style={{ backgroundColor: '#DA7B61' }}
-                        position='bottom'
-                        positionValue={150}
-                        fadeInDuration={500}
-                        fadeOutDuration={500}
-                        opacity={1.0}
-                        textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
-                    />
+                    { this.renderToast() }
 
-                    {this.state.isHotel ? this.renderHotelTopView() : this.renderHomeTopView()}
-                    {this.renderAutocomplete()}
+                    { this.state.isHotel ? this.renderHotelTopView() : this.renderHomeTopView() }
+                    { this.renderAutocomplete() }
 
                     <ScrollView  style={styles.scrollView} automaticallyAdjustContentInsets={true}>
 
@@ -620,74 +747,21 @@ class Explore extends Component {
 
                         <View>
 
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15 }}>
-
-                                <TouchableOpacity onPress={() => this.setState({ isHotel: true })}
-                                    style={[styles.homehotelsView, {marginRight:5}]}>
-                                    <Image
-                                        style={styles.imageViewHotelsHomes} resizeMode='stretch'
-                                        source={require('../../../assets/home_images/hotels.png')} />
-                                    {this.state.isHotel ? this.renderHotelSelected() : this.renderHotelDeSelected()}
-                                </TouchableOpacity>
-
-                                <TouchableOpacity onPress={() => this.setState({
-                                    isHotel: false,
-                                    cities: [],
-                                    search: '',
-                                    regionId: 0
-                                })}
-                                style={[styles.homehotelsView, {marginLeft:5}]}>
-                                    <Image style={styles.imageViewHotelsHomes} resizeMode='stretch'
-                                        source={require('../../../assets/home_images/homes.png')} />
-                                    {!this.state.isHotel ? this.renderHomeSelected() : this.renderHomeDeSelected()}
-                                </TouchableOpacity>
-
-                            </View>
+                            { this.renderChooseHotelsOrHomes() }
 
                             <Text style={[styles.scrollViewTitles,  { marginBottom: 10, marginTop: 5 }]}>Popular Destinations</Text>
 
                             <View style={styles.divsider} />
 
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
-                                <TouchableOpacity onPress={() => this.handlePopularCities(52612, 'London , United Kingdom')}
-                                    style={styles.subViewPopularHotelsLeft}>
-                                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
-                                        source={require('../../../assets/home_images/london.png')} />
-                                </TouchableOpacity>
+                            { this.renderPopularDestinationsLine1() }
+                            { this.renderPopularDestinationsLine2() }
 
-                                <TouchableOpacity onPress={() => this.handlePopularCities(18417, 'Madrid , Spain')}
-                                    style={styles.subViewPopularHotelsRight}>
-                                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
-                                        source={require('../../../assets/home_images/Madrid.png')} />
-                                </TouchableOpacity>
-                            </View>
-
-                            <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
-
-                                <TouchableOpacity onPress={() => this.handlePopularCities(16471, 'Paris , France')}
-                                    style={styles.subViewPopularHotelsLeft}>
-                                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
-                                        source={require('../../../assets/home_images/paris.png')} />
-                                </TouchableOpacity>
-
-                                <TouchableOpacity onPress={() => this.handlePopularCities(15375, 'Sydney , Australia')}
-                                    style={styles.subViewPopularHotelsRight}>
-                                    <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
-                                        source={require('../../../assets/home_images/Sydney.png')} />
-                                </TouchableOpacity>
-                            </View>
-
-                            <View style={styles.bottomView}>
-                                <Image style={styles.bottomViewText} resizeMode='stretch'
-                                    source={require('../../../assets/texthome.png')} />
-
-                                <Image style={styles.bottomViewBanner} resizeMode='stretch'
-                                    source={require('../../../../src/assets/vector.png')} />
-                            </View>
+                            { this.renderFooter() }
 
                         </View>
 
                     </ScrollView>
+
                     <LocRateButton onPress={() => this.setState({ currencySelectionVisible: true })}/>
 
                     <SingleSelectMaterialDialog
@@ -726,12 +800,16 @@ let mapStateToProps = (state) => {
         currencySign: state.currency.currencySign,
         countries: state.country.countries,
         datesAndGuestsData: state.userInterface.datesAndGuestsData,
+        isOffline: state.userInterface.isOffline,
+        serviceState: state.userInterface.serviceState,
     };
 }
 
 const mapDispatchToProps = dispatch => ({
     setCurrency: bindActionCreators(setCurrency, dispatch),
     setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch),
+    setIsOffline: bindActionCreators(setIsOffline, dispatch),
+    setServiceState: bindActionCreators(setServiceState, dispatch),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Explore);

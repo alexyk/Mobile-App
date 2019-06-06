@@ -113,13 +113,15 @@ logging = {
   }
 }
 logging["changes"]["release"]["name"] = logging["name"]
-
-
-# all automatically executed
-changes_auto = [compilation_time, errorLevel["changes"]["release"], logging["changes"]["release"]]; # CURRENTLY ENABLED by default (release)
-# the rest
-changes_other = [configs, native_cfg, reactotron, errorLevel];
-
+offlineMessage = {
+  "name" => "offline-message",
+  "file" => "src/version.js",
+  "regex" => /const showOfflineMessage.*/,
+  "changes" => {
+    "show" => "const showOfflineMessage = false;",
+    "hide" => "const showOfflineMessage = false;",
+  }
+}
 
 # functions
 def help()
@@ -194,8 +196,14 @@ end
 
 
 def process_auto_changes(auto)
-  obj = process_change({"changes" => auto},{})
-  result = [obj]
+  result = {}
+  $changes_auto.each{|item|
+    obj = process_change(item,{})
+    result = result.merge(obj)
+  }
+  puts result
+  exit(1)
+  return result
 end
 
 
@@ -214,6 +222,10 @@ def process_change(item,default)
   
   tmp_file = item["file"] if item["file"]
   tmp_regex = item["regex"] if (item.key?("regex"))
+  # puts "here #{tmp_file}"
+  puts "--------------- #{tmp_file}"
+  puts item['name'], item['file']
+  puts
   default["file"] = tmp_file
   default["regex"] = tmp_regex
 
@@ -301,11 +313,16 @@ def find_change(key, all, param)
 end
 
 
-def create_config(changes_auto, changes_other)
+def parse_param(key, cmd_param)
+  return find_change(key, $changes_without_auto, cmd_param)
+end
+
+
+def create_config()
   # prepare the ones to execute
   changes = []
     # add automatic changes
-  changes = process_auto_changes(changes_auto)
+  changes = process_auto_changes($changes_auto)
 
   if $debug > 4 then
     puts
@@ -326,7 +343,7 @@ def create_config(changes_auto, changes_other)
 
   # gather names of changes enabled and keys for params
   changes_names = {}
-  changes_all = changes_other
+  changes_all = $changes_without_auto
   changes_all.each do |item|
     changes_names[item["name"]] = [];
     result = nil
@@ -342,8 +359,11 @@ def create_config(changes_auto, changes_other)
   # parse arguments from command line
   ARGV.each_with_index do |cmd_param,i|
     changes_names.each do |key,param_names|
+      if $debug > 0
+        puts "  [PARAM] key: #{key}, names: #{param_names}"
+      end
       if param_names.index(cmd_param)
-        another_change = find_change(key,changes_other,cmd_param)
+        another_change = parse_param(key,cmd_param)
         if another_change then
           changes.push(another_change)
         end
@@ -402,15 +422,25 @@ end
 # main exec
 # The use of global variables is for readability
 # Used globals: $changes, $changes_names
-  # global variable
+  # global variables
 $debug = 0
 $changes = []
 $changes_names = {}
+# non-auto changes
+$changes_without_auto = [configs, native_cfg, reactotron, errorLevel, offlineMessage];
+# all automatically executed
+$changes_auto = [
+  compilation_time,
+  errorLevel["changes"]["release"],
+  parse_param("offline-message","hide")
+]; # CURRENTLY ENABLED by default (release)
+
+  # main code
 if $debug > 0 then
   puts("\nDebug mode active: #{$debug}\n\n")
 end
   # if help param
-create_config(changes_auto,changes_other)
+create_config()
 help()
   # execution
 main_exec($changes)

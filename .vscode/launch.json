@@ -44,19 +44,25 @@
             "request": "attach",
             "remoteHost": "127.0.0.1",
             "remotePort": "1234",
-            "remoteWorkspaceRoot": "${workspaceRoot}"
+            "remoteWorkspaceRoot": "${workspaceRoot}",
+            "program": "rdebug-ide",
+            "args": ["${workspaceRoot}/scripts/select_config.rb"],
+            "stopOnEntry": true,
+            "showDebuggerOutput": true
         },
         {
             "name": "Ruby: Debug 'select_config.rb'",
             "type": "Ruby",
             "request": "launch",
             "program": "${workspaceRoot}/scripts/select_config.rb",
-            // "args": [],
-            // "args": ["staging","native1"],
-            // "args": ["staging","web"],
-            // "args": ["web"],
-            "args": ["web", "staging"],
-            // "args": ["native1"],
+            "args": [],
+            "stopOnEntry": true,
+            "showDebuggerOutput": true,
+            "env": {
+                "BASE": "${workspaceRoot}",
+                "EXT": "rb",
+                "RAILS_ENV": "test"
+            }
         },
         {
             "name": "RN: Android",

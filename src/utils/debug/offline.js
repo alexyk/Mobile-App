@@ -1,4 +1,4 @@
-import { autoHotelSearchPlace, autoHomeSearchPlace, rlog, processError } from '../../config-debug'
+import { autoHotelSearchPlace, autoHomeSearchPlace, rlog, processError, rejectNetworkPromisesInOfflineMode } from '../../config-debug'
 import { isObject } from '../../components/screens/utils'
 
 const offlinePacksHomes = {
@@ -51,6 +51,13 @@ export default function createOfflineRequester() {
 	const promiseRes = (data,title) => ({
     body:new Promise(
       function (success,reject) {
+        if (rejectNetworkPromisesInOfflineMode) {
+          const msg = `[API-OFFLINE] ${title} - rejecting offline request by config-debug setting 'rejectNetworkPromisesInOfflineMode'`;
+          console.warn(`${msg}`)
+          reject(`${msg}`);
+          return;
+        }
+
         try {
           const keys = (isObject(data) ? Object.keys(data) : [typeof(data)])
           let keysStr = keys.map( key => `${key} ` ).join('')

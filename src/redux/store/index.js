@@ -35,9 +35,11 @@ const enchancer = composeWithDevTools({
 
 let store;
 if (console.tron.createStore && reduxReactotronLoggingEnabled) {
- store = console.tron.createStore(appReducers, enchancer); // eslint-disable-line
+    console.info('-------------- Creating Redux store with Reactotron ---------------')
+    store = console.tron.createStore(appReducers, enchancer); // eslint-disable-line
 } else {
- store = createStore(appReducers, enchancer); // eslint-disable-line
+    console.info('-------------- Creating Redux store ---------------')
+    store = createStore(appReducers, enchancer); // eslint-disable-line
 }
   
 // if (module.hot) {

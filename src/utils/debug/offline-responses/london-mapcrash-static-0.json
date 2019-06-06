@@ -1,0 +1,102 @@
+{
+  "content": [
+    {
+      "generalDescription": "Discover cutting edge contemporary design in the heart of London where Oxford Street meets Park Lane. The spectacular, spacious lobby creates a striking first impression with contemporary, original art and lighting. Every feature is beautifully considered",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2835711021331056-56059.png"
+      },
+      "name": "The Cumberland",
+      "id": 7203
+    },
+    {
+      "generalDescription": "This hotel's central location makes it an ideal base from which to explore London, and is excellent for all travellers. (1009AB)",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2846889526086382-53176.png"
+      },
+      "name": "Amba Hotel Marble Arch",
+      "id": 6518
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />A stay at The Royal National Hotel places you in the heart of London, walking distance from University of London and Russell Square.  This hotel is close to St. Paul's Cathedral and London Eye.</p><p><b>Rooms</b> <br />Ma",
+      "star": 3,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2844232534544745-57265.png"
+      },
+      "name": "The Royal National Hotel",
+      "id": 7492
+    },
+    {
+      "generalDescription": "",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2885984549076378-54307.png"
+      },
+      "name": "Corus Hotel Hyde Park",
+      "id": 6785
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Park Plaza Westminster Bridge London, you'll be centrally located in London, steps from London Aquarium and Florence Nightingale Museum. This 4-star hotel is close to London Eye and Big Ben.</p><p><b>Rooms<",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "RXLImages/7/LON-PARMhotel_Bar_Lounge_3.jpg"
+      },
+      "name": "Park Plaza Westminster Bridge London",
+      "id": 35231
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Hilton London Olympia in London (Kensington), you'll be minutes from Olympia Conference and Exhibition Centre and close to Royal Albert Hall. This 4-star hotel is close to Imperial College London and Harrod",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2861836994680836-54022.png"
+      },
+      "name": "Hilton London Olympia",
+      "id": 6718
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Hilton London Metropole, you'll be centrally located in London, convenient to Marble Arch and Selfridges. This 4-star hotel is close to London Zoo and Royal Albert Hall.</p><p><b>Rooms</b> <br />Make yourse",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2849441053022429-55492.png"
+      },
+      "name": "Hilton London Metropole",
+      "id": 7063
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />A stay at The Grosvenor Hotel places you in the heart of London, minutes from Victoria Palace Theatre and close to Buckingham Palace.  This 4-star hotel is close to Big Ben and London Dungeon.</p><p><b>Rooms</b> <br />Mak",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2846890089862513-53269.png"
+      },
+      "name": "The Grosvenor Hotel",
+      "id": 6542
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Grand Plaza Serviced Apartments in London (Paddington), you'll be minutes from Whiteleys Shopping Centre and close to Royal Albert Hall. This 4-star apartment is close to Imperial College London and Harrods",
+      "star": 4,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2859618714384076-324034.png"
+      },
+      "name": "Grand Plaza Serviced Apartments",
+      "id": 32126
+    },
+    {
+      "generalDescription": "<p><b>Property Location</b> <br />With a stay at Thistle Barbican Shoreditch in London (London City Centre), you'll be convenient to Barbican Arts Centre and St. Paul's Cathedral.  This spa hotel is close to London Bridge and Tower of London.</p><p><b>Roo",
+      "star": 3,
+      "hotelPhoto": {
+        "url": "hotels/images/img-2-2847138185923117-53209.png"
+      },
+      "name": "Thistle City Barbican",
+      "id": 6527
+    }
+  ],
+  "last": false,
+  "totalElements": 830,
+  "totalPages": 83,
+  "first": true,
+  "sort": null,
+  "numberOfElements": 10,
+  "size": 10,
+  "number": 0
+}

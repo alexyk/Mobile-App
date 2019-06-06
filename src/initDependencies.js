@@ -1,5 +1,5 @@
 import { apiHost, domainPrefix, xDeviceVersion } from './config';
-import { isOnline } from './config-debug';
+import { isOnlineMode } from './config-debug';
 
 import { AsyncStorage } from 'react-native';
 import Requester from 'locktrip-svc-layer';
@@ -12,7 +12,7 @@ let config = {
 
 let requester;
 
-if (isOnline) {
+if (isOnlineMode) {
 	// ONLINE
 	requester = new Requester(AsyncStorage, config, { "X-Device-Version": xDeviceVersion });
 }

@@ -1,5 +1,6 @@
 import { handleActions } from 'redux-actions';
-import { setIsApplyingFilter, setDatesAndGuestsData
+import {
+  setIsApplyingFilter, setDatesAndGuestsData, setIsOffline, setServiceState
 } from '../../action/userInterface';
 
 import moment from 'moment'
@@ -26,6 +27,8 @@ const {
 } = generateInitialCalendarData(checkInMoment,checkOutMoment,today,minDate,maxDate,internalFormat,{});
 const initialState  = {
   isApplyingFilter: false,
+  isOffline: false,
+  serviceState: {},
   datesAndGuestsData: {
       today, minDate, maxDate, 
       calendarData, calendarMarkedDays, calendarMarkedMonths,
@@ -49,6 +52,20 @@ export default handleActions(
       return {
         ...state,
         isApplyingFilter: payload
+      };
+    },
+
+    [setIsOffline]: (state, {payload}) => {
+      return {
+        ...state,
+        isOffline: payload
+      };
+    },
+
+    [setServiceState]: (state, {payload}) => {
+      return {
+        ...state,
+        serviceState: {...payload}
       };
     },
 

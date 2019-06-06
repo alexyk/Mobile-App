@@ -38,9 +38,10 @@ import {
   HOTELS_SOCKET_CONNECTION_TIMEOUT,
   HOTELS_STATIC_CONNECTION_TIMEOUT,
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
-  HOTELS_MINIMUM_RESULTS
+  HOTELS_MINIMUM_RESULTS,
+  LT_CFG
 } from "../../../../config";
-import { isOnline, rlog, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
+import { isOnlineMode, rlog, processError, hotelsSearchSocketDebug, wlog } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -223,12 +224,13 @@ class HotelsSearchScreen extends Component {
 
   startSocketDataConnectionTimeOut() {
     //log({name:'SOCKET',preview:`Starting Socket connection timeout, ${isOnline?'online':'offline'}`,important:true})
-    if (!isOnline) return;
+    if (!isOnlineMode) return;
 
     const _this = this;
     const funcSocketTimeout = function() {
-      if (_this.validSocketPrices == 0  && _this && !_this.isUnmounted) {
-        _this.setState({ isSocketTimeout: true });
+      if (_this.validSocketPrices == 0) {
+        if (_this && !_this.isUnmounted) _this.setState({ isSocketTimeout: true });
+        wlog(`[HotelsSearchScreen] Socket timeout triggered - maybe time to see socket debug and check url. Env is '${LT_CFG}'`,{isUnmounted:(_this ? _this.isUnmounted : 'n/a')});
       }
       //log('SOCKET',`Socket connection timeout DONE, valid socket prices: ${_this.validSocketPrices}`,null,true)
     };
@@ -249,8 +251,9 @@ class HotelsSearchScreen extends Component {
   startStaticDataConnectionTimeOut() {
     const _this = this;
     const funcStaticHotelsTimeout = function() {
-      if (!_this.staticDataReceived && _this && !_this.isUnmounted) {
-        _this.setState({ isStaticTimeout: true });
+      if (!_this.staticDataReceived) {
+        if (_this && !_this.isUnmounted) _this.setState({ isStaticTimeout: true });
+        wlog(`[HotelsSearchScreen] Static hotel data timeout triggered - is this the correct server env:'${LT_CFG}'`,{isUnmounted:(_this ? _this.isUnmounted : 'n/a')});
       }
     };
 
@@ -314,7 +317,7 @@ class HotelsSearchScreen extends Component {
 
     this.isSocketDown = false;
 
-    if (isOnline) {
+    if (isOnlineMode) {
       this.uuid = await UUIDGenerator.getRandomUUID();
 
       // common code
@@ -332,7 +335,7 @@ class HotelsSearchScreen extends Component {
 
   // TODO: Inspect this flow - and create a component to implement it
   stopSocketConnection(removeListeners = true) {
-  	if (!isOnline) return;
+  	if (!isOnlineMode) return;
   	
     // common code
     if (removeListeners) {
@@ -417,7 +420,7 @@ class HotelsSearchScreen extends Component {
   }
 
   onDataFromSocket(data) {
-    // log('socket-data',`onDataFromSocket ${data.body}`, {data})
+    rlog('socket-data',`onDataFromSocket ${data.body}`, {data})
     
     if (!this || !this.listViewRef || this.isUnmounted) {
       console.warn(`[HotelsSearchScreen::onDataFromSocket] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
@@ -687,7 +690,6 @@ class HotelsSearchScreen extends Component {
   gotoHotelDetailsPageNative(item) {
     //console.log("gotoHotelDetailsPageNative", item);
 
-    this.setState({ isLoading: true });
     requester.getHotelById(item.id, this.searchString.split("&")).then(res => {
       // here you set the response in to json
       res.body
@@ -716,7 +718,7 @@ class HotelsSearchScreen extends Component {
   onFilteredData(res) {
     const _this = this;
 
-    if (res.success) {
+    if (res.success && res.body) {
       res.body.then((data) => {
         // not used so far
         // const isCacheExpired = data.isCacheExpired;
@@ -784,7 +786,7 @@ class HotelsSearchScreen extends Component {
       // //console.log('Search expired');
       this.props.setIsApplyingFilter(false)
       this.setState({error:lang.TEXT.SEARCH_HOTEL_FILTER_ERROR.replace('%1',res.message)})
-      console.error('[HotelsSearchScreen] Filter error',{res})
+      processError('[HotelsSearchScreen] Filter error - probably promise rejection or res.success is false',{res})
     }
   }
 
@@ -797,7 +799,7 @@ class HotelsSearchScreen extends Component {
     const _this = this;
     //console.log(` RESULT: ${res.success} `, {res})
     
-    if (res.success) {
+    if (res.success && res.body) {
       _this.staticDataReceived = true;
       
       res.body.then(function(data) {
@@ -849,11 +851,8 @@ class HotelsSearchScreen extends Component {
         _this.setState(newState);
       }); // res.body.then
     } else {
-      console.error(
-        "[HotelsSearchScreen] Could not fetch Static Data for hotels"
-      );
-      rlog('error',`Could not get hotels static data`,{res})
       this.listStartFetch([], 0);
+      processError('[HotelsSearchScreen] [HotelsSearchScreen] Could not fetch Static Data for hotels - probably promise rejection or res.success is false',{res})
     }
   }
 

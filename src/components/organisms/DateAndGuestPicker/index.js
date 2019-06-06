@@ -44,7 +44,8 @@ class DateAndGuestPicker extends Component {
 
     render() {
         const {
-            checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable
+            checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable,
+            isOffline
         } = this.props;
 
         const checkInDateText = (checkInDate || 'Select Date')
@@ -52,6 +53,17 @@ class DateAndGuestPicker extends Component {
 
         const isCalendarDisabled = (disabled || this.props.onDatesSelect == null);
         const isGuestsDisabled = (disabled || this.props.gotoGuests == null);
+
+        const searchButtonStyle = (
+            showSearchButton
+                ?  (
+                    isOffline
+                        ? [styles.searchButtonView,{backgroundColor:'#0005'}]
+                        : styles.searchButtonView
+                    )
+                : {height: 0}
+        )
+        const searchButtonText = ( isOffline ? 'Search Service Unavailable' : 'Search');
 
         return (
             <View style={styles.container}>
@@ -98,8 +110,8 @@ class DateAndGuestPicker extends Component {
                 </View>
 
                 <TouchableOpacity onPress={this.onSearch}>
-                    <View style={showSearchButton ?  styles.searchButtonView : {height: 0}}>
-                        <Text style={showSearchButton ? styles.searchButtonText : {height: 0}}>Search</Text>
+                    <View style={ searchButtonStyle }>
+                        <Text style={showSearchButton ? styles.searchButtonText : {height: 0}}>{searchButtonText}</Text>
                     </View>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={this.onCancel}>

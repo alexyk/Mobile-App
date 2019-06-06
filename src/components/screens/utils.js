@@ -1,6 +1,6 @@
 import { isMoment } from "moment";
 import { basePath } from "../../config";
-import { rlog } from "../../config-debug";
+import { rlog, processError } from "../../config-debug";
 
 
 export function validateObject(sourceData, props, index=-1, path='') {
@@ -246,4 +246,26 @@ export function getObjectClassName(obj) {
     processError(`[screens::utils::getObjectClassName] Error: ${error.message}`,{error,obj});
   }
   return result;
+}
+
+
+let networkErrors = 0;
+export function onNetworkError(message, result, skipOffline=true) {
+  try {
+    if (!skipOffline || networkErrors > 2) {
+      console.warn(`[NetworkError] ----------   Setting isOffline ------------`);
+      const reasons = (
+        (networkErrors > 2 ? `network-errors=${networkErrors} ` : '') 
+        + (skipOffline ? 'skip-offline=true ' : '')
+      );
+      console.warn(`isOffline reason(s): ${reasons}`, {result,message});
+      const store = require('../../redux/store');
+      const setIsOffline = require('../../redux/action/userInterface').setIsOffline;
+      store.dispatch(setIsOffline(true));
+    }
+    networkErrors++;
+    processError(`[getCountries] ${message}`, {result,message});
+  } catch (error) {
+    processError(`[utils] Error while executing onNetworkError - ${error.message}`, {message,res,error})
+  }
 }

@@ -11,6 +11,7 @@ import { userInstance } from '../../../utils/userInstance';
 import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectMaterialDialog'
 import ProfileWalletCard from  '../../atoms/ProfileWalletCard'
 import { setCurrency } from '../../../redux/action/Currency'
+import { setIsOffline } from '../../../redux/action/userInterface'
 import styles from './styles';
 
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];
@@ -116,6 +117,7 @@ class Profile extends Component {
 		});
         this.props.navigation.dispatch(resetAction);
         AsyncStorage.getAllKeys().then(keys => AsyncStorage.multiRemove(keys));
+        this.props.setIsOffline(true);
     }
 
     navigateToPaymentMethods = () => {
@@ -234,6 +236,7 @@ let mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => ({
     setCurrency: bindActionCreators(setCurrency, dispatch),
+    setIsOffline: bindActionCreators(setIsOffline, dispatch),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile);

@@ -9,7 +9,7 @@ import { isMoment } from 'moment';
  * ALL MUST BE FALSE!!!      (unless you know what you are doing)  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-export const __MYDEV__                               = (__DEV__ && true);
+export const __MYDEV__                               = (__DEV__ || true);
 export const reactotronLoggingInReleaseForceEnabled  = false;
 export const forceOffline                            = false;
 
@@ -28,12 +28,12 @@ export const forceOffline                            = false;
 export const errorLevel = 0;
 
   // reactotron
-export const reactotronLoggingEnabled           = false;
+export const reactotronLoggingEnabled           = true;
 export const logConverterErrorToReactrotron     = false;
 export const showTypesInReactotronLog           = true;
 export const warnOnReactotronDisabledCalls      = false;
   // redux
-export const reduxConsoleLoggingEnabled         = false;
+export const reduxConsoleLoggingEnabled         = true;
 export const reduxConsoleCollapsedLogging       = true;
 export const reduxReactotronLoggingEnabled      = false;
   // console
@@ -44,19 +44,21 @@ export const consoleTimeCalculations            = false;    // enable/disable "c
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
 export const hotelsSearchSocketDebug            = false;
-export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
+export const checkHotelsDataWithTemplates       = 'filter'; // typeOfCheck:string or boolean (for all)
   // offline mode
+  // Using offline requester (defined below in this file)
   // Enabled if: (__DEV__ == true) and (isOffline == true)
-                                let isOffline   = false;
-  if (forceOffline) isOffline = forceOffline;
-  if (!__DEV__) isOffline = false;
-export const isOnline = (!isOffline);
+                         let isOfflineDevMode   = false;
+  if (forceOffline) isOfflineDevMode = forceOffline;
+  if (!__DEV__) isOfflineDevMode = false;
+export const isOnlineMode = (!isOfflineDevMode);
 export const autoLoginInOfflineMode             = true;
+export const rejectNetworkPromisesInOfflineMode = false;
   // automated flows
     // hotels search
 export const autoHotelSearch                    = false;
 export const autoHotelSearchFocus               = false;
-export const autoHotelSearchPlace               = 'london'
+export const autoHotelSearchPlace               = 'sofia'
     // homes search
 export const autoHomeSearch                     = false;
 export const autoHomeSearchPlace                = 'uk1'
@@ -119,10 +121,10 @@ function configureConsole() {
 
     if (__DEV__) {
       if (warnOnReactotronDisabledCalls) {
-      func = (method) => console.warn(
-        '[config-debug] Reactotron is disabled, but still calling it as '+
-        `console.tron.${method}`
-      )
+        func = (method) => console.warn(
+          '[config-debug] Reactotron is disabled, but still calling it as '+
+          `console.tron.${method}`
+        )
       } else {
         func = emptyFunc;
       }
@@ -197,7 +199,9 @@ function configureReactotron() {
  * @param {String} description Information about the error
  * @param {Object} data Not shown in release
  */
-export function processError(description, data) {
+export function processError(customMessage, data) {
+  const description = `[ERROR] ${customMessage}`;
+
   if (!__DEV__) {
 
     console.warn(description);
@@ -226,8 +230,8 @@ export function processError(description, data) {
         if (data.error) {
           throw data.error;
         } else {
-        throw new Error(description);
-    }
+          throw new Error(description);
+        }
     }
 
   }

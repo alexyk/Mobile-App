@@ -9,6 +9,9 @@ const {openInEditor,trackGlobalErrors} = r;
 Reactotron
   .configure({
     name: `Locktrip - Mobile App (${(Platform.OS == 'android' ? 'Android' : 'iOS')})`,
+    // host: "192.168.10.11"
+    // host: "192.168.111.85"
+    // host: "192.168.10.38"
     host: "localhost"
   })
   .useReactNative({
