@@ -8,7 +8,7 @@ import { generateInitialCalendarData, formatDatesData } from '../../../component
 const internalFormat = "YYYY-MM-DD";
 const inputDateFormat = 'DD/MM/YYYY';
 const displayDateFormat = 'ddd, DD MMM';
-const today = moment('2019-01-10',internalFormat).startOf('day')//moment().startOf('day');
+const today = moment().startOf('day');
 const checkInMoment = today.clone().add(1, 'day');
 const checkOutMoment = today.clone().add(2, 'day');
 const minDate = today.clone();
