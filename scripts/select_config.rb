@@ -102,9 +102,13 @@ logging = {
   "name" => "logging",
   "changes" => {
     "release" => {
-      "file"=>"src/config-debug.js",
-      "regex"=>/const clog =.*/,
-      "target"=>"const clog = () => {};"
+      "changes" => [
+        {
+          "file"=>"src/config-debug.js",
+          "regex"=>/const __MYDEV__.*/,
+          "target"=>"const __MYDEV__ = false;"},
+      ]
+      
     }
   }
 }
@@ -146,6 +150,13 @@ def replace_line_in_file(file_name, line_pattern, target, item)
     puts "    name: #{item['name']}\n    file: #{file_name}\n    regex: #{line_pattern}\n    target: #{target}"
     return
   end
+  puts "  [ERROR] filename-is-nil: #{file_name == nil} (#{(file_name.class)})  item-is-nil: #{item==nil} (#{item.class})   target-is-nil: #{target == nil} (#{target.class})"
+
+  if file_name == '' || file_name == nil || target == nil || item == nil then
+    puts "  Skipping invalid data ..."
+    return
+  end
+
 
   text = File.read(file_name)
   puts("  Replacing '#{line_pattern}' with '#{target}'")
@@ -376,7 +387,9 @@ def main_exec(changes)
         puts("  Reading file '#{file}'")
         replace_line_in_file(file, regex, target, item)
       else
-        puts("File name is empty: '#{file}', for '#{item}'")
+        puts("  File name is empty: '#{file}', for item:")
+        puts("    '#{item}'")
+        puts("  Skippping...")
       end
       puts("\n\n")
     end
