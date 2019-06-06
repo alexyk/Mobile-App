@@ -521,7 +521,7 @@ export function renderPreloader() {
   );
 
   return <LTLoader 
-    isLoading={ isLoading || isFiltering }
+    isLoading={ isLoading || (isFiltering && !isFirstFilter) }
     message={message}
     opacity={opacity} 
   />

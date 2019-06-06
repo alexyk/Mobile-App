@@ -1,24 +1,18 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { StyleSheet, Text,  TouchableOpacity, View } from 'react-native';
-
-import Image from 'react-native-remote-svg';
-import { DotIndicator } from 'react-native-indicators';
-import _ from 'lodash';
 import moment from 'moment';
-import RNPickerSelect from 'react-native-picker-select';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-easy-toast';
-
+import RNPickerSelect from 'react-native-picker-select';
+import { UltimateListView } from 'react-native-ultimate-listview';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { connect } from 'react-redux';
+import { imgHost } from '../../../../config';
+import { processError, rlog } from '../../../../config-debug';
+import requester from '../../../../initDependencies';
+import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
+import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import DateAndGuestPicker from '../../../organisms/DateAndGuestPicker';
 import HomeItemView from '../../../organisms/HomeItemView';
-import requester from '../../../../initDependencies';
-import { UltimateListView } from 'react-native-ultimate-listview';
-import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
-import { imgHost } from '../../../../config';
-import { rlog, processError } from '../../../../config-debug';
-import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
-
 import styles from './styles';
 
 
