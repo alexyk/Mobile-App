@@ -687,7 +687,6 @@ class HotelsSearchScreen extends Component {
   gotoHotelDetailsPageNative(item) {
     //console.log("gotoHotelDetailsPageNative", item);
 
-    this.setState({ isLoading: true });
     requester.getHotelById(item.id, this.searchString.split("&")).then(res => {
       // here you set the response in to json
       res.body
