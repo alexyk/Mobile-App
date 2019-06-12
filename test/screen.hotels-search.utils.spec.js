@@ -1,8 +1,4 @@
 import {
-    updateHotelsFromSocketCache,
-    updateHotelsFromFilters,
-    popSocketCacheIntoHotelsArray,
-    parseAndCacheHotelDataFromSocket,
     hasValidCoordinatesForMap,
     applyHotelsSearchFilter,
     processFilteredHotels,
@@ -30,94 +26,9 @@ test('hasValidCoordinatesForMap', () => {
     expect(res).not.toBeTruthy()
 })
 
-test('parseAndCacheHotelDataFromSocket', () => {
-    // mock up
-    const {hotel1, hotel2, hotelSocket1} = dummyData2();
-    // data init
-    const hotels = [ hotel1, hotel2 ]
-    const idsMap = {1: 0}
-    let socketCacheMap = {}
 
-    // the test
-    let result = parseAndCacheHotelDataFromSocket(hotelSocket1, socketCacheMap, hotels);
 
-    expect(result.initialLat         )   .toEqual    (77.9)
-    expect(result.initialLon         )   .toEqual    (8.7)
-    const item = socketCacheMap[hotelSocket1.id];
-    expect(item.price                )   .toBe       (12.68)
-    expect(item.longitude            )   .toBe       (8.7)
-    expect(item.latitude             )   .toBe       (77.9)
-    expect(item.name                 )   .toEqual    (undefined)
-})
 
-test('updateHotelsFromSocketCache', () => {
-    let {
-        staticData1, socketData1, socketData2, socketData3,
-        hotelsIndicesById, hotelsSocketCacheMap, hotelsInfo
-    } = dummyData1()
-
-    let state = {hotelsInfo, hotelsInfoForMap:[]}
-    let cacheIds = Object.keys(hotelsSocketCacheMap);
-
-    expect(cacheIds.length)         .toBe(3)
-
-    // ----------------------------- test 1 ----------------------------------
-    // testing with socket cache
-    let r = updateHotelsFromSocketCache(state, hotelsSocketCacheMap, hotelsIndicesById);
-
-    expect(r.hotelsInfoFresh instanceof Array)          .toBeTruthy()
-    expect(r.hotelsInfoFresh.length)                    .toBe(1)
-    expect(r.hotelsInfoForMapFresh instanceof Array)    .toBeTruthy()
-
-    expect(r.hotelsInfoForMapFresh.length)            .toBe(1)
-
-    let item1 = r.hotelsInfoFresh[0];
-    expect(item1.price)             .toBe(23.9)
-    expect(item1.name)              .toEqual("Ala bala")
-    expect(item1.thumbnail)   .not  .toEqual(null)
-    expect(item1.hotelPhoto)  .not  .toEqual(null)
-
-    cacheIds = Object.keys(hotelsSocketCacheMap);
-    expect(cacheIds.length)         .toBe(3) // not deleting any more
-
-    // ----------------------------- test 2 ----------------------------------
-    // testing with EMPTY socket cache
-    r = updateHotelsFromSocketCache(state, hotelsSocketCacheMap, hotelsIndicesById);
-
-    item1 = r.hotelsInfoFresh[0];
-    expect(item1.price)             .toBeDefined()
-    expect(item1.price)             .toBeDefined()
-});
-
-test('updateHotelsFromFilters', function() {
-    const {filtered:sourceHotels,ids} = dummyFilterData1()
-    const old = dummyHotelsLoaded1()
-    const {hotelsFromFilters, indicesById, socketCache} = updateHotelsFromFilters(sourceHotels, old, ids);
-
-    // log(`Param-Filtered`,sourceHotels)
-    // log(`Param-Old`, old)
-    // log(`Parsed`,hotelsFromFilters)
-    // log(`indicesById`,indicesById)
-
-    // to be defined
-    expect(hotelsFromFilters)           .toBeDefined()
-    expect(indicesById)                 .toBeDefined()
-    expect(socketCache)                 .toBeDefined()
-
-    // length
-    expect(hotelsFromFilters.length)    .toBeGreaterThanOrEqual(1)
-    expect(indicesById[sourceHotels[0].id]) .toBeDefined()
-    expect(socketCache[sourceHotels[0].id]) .toBeDefined()
-
-    // item1 properties check
-    const item1 = hotelsFromFilters[0]
-    //log({item1,hotelsFromFilters,sourceHotels})
-    expect(item1.name)                  .toBeDefined()
-    expect(item1.latitude)              .toBeDefined()
-    expect(item1.longitude)             .toBeDefined()
-    expect(item1.thumbnail)             .toBeDefined()
-    expect(item1.hotelPhoto)            .toBeUndefined()
-})
 
 test('applyHotelsSearchFilter',function() {
     let {filtered:hotels, ids} = dummyFilterData2()
@@ -257,7 +168,10 @@ test('calculateCoordinatesGridPosition - complex', () => {
 
 test('processStaticHotels', () => {
     const {filtered, ids} = dummyFilterData2()
-    const result = processStaticHotels(filtered)
+    let hotelsMap = {};
+    let indexes = {};
+    let hotelsAll = [];
+    const result = processStaticHotels(filtered, hotelsMap, indexes, hotelsAll, false)
     // log({result,filtered});
     expect(filtered)            .toBeDefined()
     expect(filtered.length)     .toEqual(4)
@@ -274,8 +188,8 @@ function dummyHotelsLoaded1() {
     return [staticData1]
 }
 function dummyFilterData1() {
-    let item1 = {id:12, name: "Filtered Item 1", latitude:44.880235, longitude:15.987798, price: 23.9, thumbnail: {url: "http://example.io/filter1"}, star:2};
-    let item2 = {id:297, latitude:44.880235, longitude:15.987798, price:11.07, name: "Filtered Item 2", thumbnail: {url: "http://filter.io/snthoesnthu"},star:3};
+    let item1 = {id:12, name: "Filtered Item 1", latitude:44.880235, longitude:15.987798, price: 23.9, thumbnail: {url: "http://example.io/filter1"}, stars:2};
+    let item2 = {id:297, latitude:44.880235, longitude:15.987798, price:11.07, name: "Filtered Item 2", thumbnail: {url: "http://filter.io/snthoesnthu"},stars:3};
     return {
         filtered: [item1,item2],
         ids: {12:0}

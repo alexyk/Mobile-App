@@ -44,7 +44,7 @@ export const consoleTimeCalculations            = false;    // enable/disable "c
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
 export const hotelsSearchSocketDebug            = false;
-export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed'; // typeOfCheck:string or boolean (for all)
+export const checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
   // offline mode
   // Enabled if: (__DEV__ == true) and (isOffline == true)
                                 let isOffline   = false;
@@ -81,14 +81,16 @@ export const autoCalendar                       = false;
 // ---------------  function definitions  -----------------
 
 const emptyFunc = function() {};
-const emptyFuncWithDescr = (descr) => function() { (console.warn && console.warn(`Call of '${descr}' is disabled - see '__MYDEV__'`)) };
+function emptyFuncWithDescr(descr)  { (console.warn && console.warn(`Call of '${descr}' is disabled - see '__MYDEV__'`)) };
 export var dlog = dlogFunc;
-export var clog = console.log;
-export var ilog = console.info;
-export var wlog = console.warn;
-export var elog = console.error;
+export function clog(...all) {console.log(...all)};
+export function ilog(...all) {console.info(...all)}
+export function wlog(...all) {console.warn(...all)}
+export function elog(...all) {console.error(...all)}
 export var tslog = (consoleTimeCalculations ? console.time : emptyFunc);
 export var telog = (consoleTimeCalculations ? console.timeEnd : emptyFunc);
+
+
 /**
  * Print moment object in a formated way
  */

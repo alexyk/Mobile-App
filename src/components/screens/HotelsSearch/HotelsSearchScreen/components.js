@@ -216,24 +216,15 @@ export function renderPaginationFetchingView() {
 }
 
 export function renderPaginationWaitingView() {
-  /* if (this.isAllHotelsLoaded) {
+  if (this.isAllHotelsLoaded) {
     return  null;
-  } else { */
+  } else {
     return  <DotIndicator color="#d97b61" count={3} size={9} animationDuration={1200} />;
-  //}
+  }
 };
 
 export function renderPaginationAllLoadedView() {
-  return (
-    <View style={{flex:1, flexDirection:'column', alignItems:"center", justifyContent:"space-between"}}>
-        {/* {line()} */}
-        <Text style={{...commonText}}>{`All Loaded`}</Text>
-        {/* {line()} */}
-      </View>
-  )
-  // return null;
-  // @@debug
-  // return this.renderContentMessage('All Loaded View');
+  return null;
 };
 
 export function renderResultsAsMap() {

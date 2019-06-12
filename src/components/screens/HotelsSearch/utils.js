@@ -179,10 +179,10 @@ export function applyHotelsSearchFilter(data, filter) {
         break;
 
       case 'selectedRating':
-      	let hasStarToFilter = false;
+        let hasStarToFilter = false;
       	value.map((item,index) => ( hasStarToFilter = (item ?  true : hasStarToFilter) ))
 				if (hasStarToFilter) {
-					result = data.filter((item) => value[item.star-1])
+					result = data.filter((item) => value[item.stars-1])
 				}
       	break
       	
@@ -520,6 +520,12 @@ function parseFilterHotelData(filterData,socketData,staticData) {
       hotelData.thumbnail = hotelData.hotelPhoto;
     }
   }
+
+  // stars
+  if (hotelData.star) {
+    hotelData.stars = parseInt(hotelData.star);
+    delete hotelData.star;
+  }
   
   return hotelData
 }
@@ -697,7 +703,7 @@ export function checkHotelData(data, type, index) {
               price:'number',
               priceForSort:'number',
               // required
-              star:'number',
+              stars:'number',
               generalDescription: 'null,string',
               longitude:'number,null',
               latitude:'number,null',
