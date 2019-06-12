@@ -1,7 +1,7 @@
 import moment from "moment";
 import lodash from "lodash";
 import { validateObject, isObject, isNumber, isString, isArray } from '../utils'
-import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config";
+import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config-settings";
 import { rlog, checkHotelsDataWithTemplates, processError } from "../../../config-debug";
 
 export const DISPLAY_MODE_NONE = "mode_none";
@@ -131,106 +131,7 @@ export function hasValidCoordinatesForMap(data, isInitial = false) {
 }
 
 
-/**
- * (1) Gets previous hotels list
- * (2) Makes a fresh copy
- * (3) Updates with socket cache
- * (4) Deletes socket cach
- * @param {Object} hotelData {id, price, hotelPhoto, star etc...}
- * @param {Object} hotelsSocketCacheMap {id: socketData}
- * @param {Object} hotelsIndicesByIdMap {id: index}
- * @param {Object} prevState
- * @param {Object} updatedProps
- */
-export function updateHotelsFromSocketCache(
-  prevState,
-  socketHotelsCacheMap,
-  hotelIdsMap
-) {
-  let hotelsInfoFresh = prevState.hotelsInfo;
-  let hotelsInfoForMapFresh = prevState.hotelsInfoForMap;
-  const socketIds = Object.keys(socketHotelsCacheMap);
 
-  if (socketIds.length > 0) {
-    // TODO: Performance - check if this is too intensive - creating a copy of all hotels
-    // console.time('Create hotelsInfo copy on socket update');
-    hotelsInfoFresh = [...prevState.hotelsInfo]; // shallow copy, same as Array.slice() ???
-    // console.timeEnd('Create hotelsInfo copy on socket update');
-    // TODO: @@debug - remove
-    // debugHotelData(hotelData, hotelsInfo, index, '>> SOCKET DATA <<');
-
-    // update hotel data that has socket cache
-    socketIds.map(id => {
-      const index = hotelIdsMap[id];
-      const staticData = index != null ? hotelsInfoFresh[index] : null;
-      let refreshedData = staticData;
-      if (staticData != null) {
-        const socketData = socketHotelsCacheMap[id];
-
-        //TODO: @@debug
-        //console.tron.log(`[utils::updateHotelsFromSocketCache] Updated hotel with index ${index}`, {socketData, staticData});
-
-        refreshedData = lodash.merge({}, socketData, staticData);
-        //delete socketHotelsCacheMap[id];
-
-        hotelsInfoFresh[index] = refreshedData;
-      }
-
-      if (hasValidCoordinatesForMap(refreshedData)) {
-        hotelsInfoForMapFresh.push(refreshedData);
-      }
-
-      return id;
-    });
-  }
-
-  return { hotelsInfoFresh, hotelsInfoForMapFresh };
-}
-
-/**
- * Populate targetMap with indices from array
- * @param {Object} targetMap The target map to update as "[index]: item.id"
- * @param {Array} array The Array with items to get item.id from
- */
-export function updateHotelIdsMap(targetMap, array) {
-  // TODO: Performance - check if this is too intensive
-  // console.time('Update hotelIdsMap');
-  array.map((item, index) => {
-    targetMap[item.id] = index;
-    return item;
-  });
-  // console.timeEnd('Update hotelIdsMap');
-}
-
-export function updateHotelsFromFilters(hotelsFromFilters, oldHotels, oldIdsById) {
-  let indicesById = {};
-  let socketCache = {}
-  let initialCordinates = null;
-  const parsedHotels = hotelsFromFilters.map((item,index) => {
-    // try getting old one (oldHotels is usually state.hotelsInfo)
-    let oldHotel = {};
-    try {oldHotel = oldHotels[oldIdsById[item.id]];} catch (e) {console.error('[utils::updateHotelsFromFilters] Hotel old data not found')}
-    
-    // update hotel data
-    indicesById[item.id] = index;
-    const res = parseAndCacheHotelDataFromSocket(item, socketCache, indicesById, null, index, oldHotel);
-    if (!initialCordinates) {
-      initialCordinates = res;
-    }
-    item = socketCache[item.id];
-
-    return item;
-  })
-
-  const result = {
-    hotelsFromFilters: parsedHotels,
-    indicesById,
-    socketCache,
-    initialCordinates
-  };
-
-  return result
-}
 
 export function applyHotelsSearchFilter(data, filter) {
   console.time('*** utils::applyHotelsSearchFilter()')
@@ -487,46 +388,48 @@ export function mergeAllHotelData(filtered, socketMap, staticMap) {
   return result;
 }
 
-const useLongCoordinates = true;  // used in parse functions (long is latitude/longitude and short is lat/lon)
-function parseFilterHotelData(filterData,socketData,staticData) {
-  let hotelData = Object.assign(filterData);
 
-  if (isString(hotelData.latitude)) {
-    if (useLongCoordinates) {
-      hotelData.latitude = parseFloat(hotelData.latitude)
-      hotelData.longitude = parseFloat(hotelData.longitude)
-    } else {
-      hotelData.lat = parseFloat(hotelData.latitude)
-      hotelData.lon = parseFloat(hotelData.longitude)
-      delete hotelData.latitude
-      delete hotelData.longitude
-    }
-  }
 
-  const hasPhoto = hasValidImageData(hotelData,'hotelPhoto');
-  const hasThumb = hasValidImageData(hotelData,'thumbnail');
-  const hasStaticPhoto = hasValidImageData(staticData,'hotelPhoto');
-  const hasSocketThumb = hasValidImageData(socketData,'thumbnail');
-  const patchedThumb = (hasSocketThumb ? socketData.thumbnail : null);
-  if (!hasPhoto) hotelData.hotelPhoto = (hasStaticPhoto ? staticData.hotelPhoto : patchedThumb);
-  if (!hasThumb) hotelData.thumbnail = patchedThumb;
-  if (hotelData.hotelPhoto == null && hotelData.thumbnail == null) {
-    hotelData.hotelPhoto = DEFAULT_HOTEL_PNG;
-    hotelData.thumbnail = DEFAULT_HOTEL_PNG;
-  } else {
-    if (hotelData.hotelPhoto == null) {
-      hotelData.hotelPhoto = hotelData.thumbnail;
-    } else {
-      hotelData.thumbnail = hotelData.hotelPhoto;
+export function processStaticHotels(hotels, hotelsStaticCacheMap, hotelsIndicesByIdMap, hotelsAll, isAllHotelsLoaded) {
+  hotels.forEach( (item, index) => {
+    hotelsStaticCacheMap[item.id] = item;
+    checkHotelData(item,'static',index);
+    parseStaticHotel(item,index);
+
+    // patch with data
+    if (isAllHotelsLoaded) {
+      const indexFromCache = hotelsIndicesByIdMap[item.id];
+      const itemInList = hotelsAll[indexFromCache];
+      if (itemInList) {
+        itemInList.hotelPhoto = item.hotelPhoto;
+      }
+      checkHotelData(itemInList,'static-patched',index)
     }
-  }
-  
-  return hotelData
+  });
 }
 
+
 /**
+ *  --------------   Parsing Functions ----------------
+ * parseStaticHotel(hotels)
+ * parseSocketHotelData(socketData, staticData)
+ * parseFilterHotelData(filterData,socketData,staticData)
+ */
+
+function parseStaticHotel(hotel,index) {
+  if (hotel.star != null) delete hotel.star;
+  checkHotelData(hotel,'static-parsed',index)
+}
+
+
+
+/**
+ * 
+ * @param {*} socketData 
+ * @param {*} staticData 
  * @returns (Object) The result has the following properties: {hotelData:Object, initialCoord: {initialLat:Number,initialLon:Number}}
  */
+const useLongCoordinates = true;  // used in parse functions (long is latitude/longitude and short is lat/lon)
 export function parseSocketHotelData(socketData, staticData) {
   let hotelData = Object.assign({},socketData);
   if (hotelData.lat) {
@@ -584,91 +487,43 @@ export function parseSocketHotelData(socketData, staticData) {
   };
 }
 
-/**
- * Parse current hotelData and return it as initial coordinates
- * @param {Object} hotelData
- * @param {Object} hotelsSocketCacheMap
- * @param {Object} hotelsIndicesByIdMap
- * @param {Array} hotelsInfo
- * @param {Number} index
- */
-export function parseAndCacheHotelDataFromSocket(
-  hotelData,
-  hotelsSocketCacheMap,
-  hotelsIndicesByIdMap,
-  hotelsInfo,
-  index = null,
-  oldData = null
-) {
-  if (index == null) {
-    index = hotelsIndicesByIdMap[hotelData.id];
-  }
-  const indexNotNull = index != null;
-  const backupData = (
-    oldData
-      ? oldData
-      : indexNotNull && hotelsInfo
-        ? hotelsInfo[index]
-        : hotelData
-  );
 
-  rlog('list-parse-socket',`${hotelData.name}, id:${hotelData.id}`, {hotelData,oldData,current: backupData,indexNotNull,index,hotelsSocketCacheMap,hotelsIndicesByIdMap});
+function parseFilterHotelData(filterData,socketData,staticData) {
+  let hotelData = Object.assign(filterData);
+
+  if (isString(hotelData.latitude)) {
+    if (useLongCoordinates) {
+      hotelData.latitude = parseFloat(hotelData.latitude)
+      hotelData.longitude = parseFloat(hotelData.longitude)
+    } else {
+      hotelData.lat = parseFloat(hotelData.latitude)
+      hotelData.lon = parseFloat(hotelData.longitude)
+      delete hotelData.latitude
+      delete hotelData.longitude
+    }
+  }
+
+  const hasPhoto = hasValidImageData(hotelData,'hotelPhoto');
+  const hasThumb = hasValidImageData(hotelData,'thumbnail');
+  const hasStaticPhoto = hasValidImageData(staticData,'hotelPhoto');
+  const hasSocketThumb = hasValidImageData(socketData,'thumbnail');
+  const patchedThumb = (hasSocketThumb ? socketData.thumbnail : null);
+  if (!hasPhoto) hotelData.hotelPhoto = (hasStaticPhoto ? staticData.hotelPhoto : patchedThumb);
+  if (!hasThumb) hotelData.thumbnail = patchedThumb;
+  if (hotelData.hotelPhoto == null && hotelData.thumbnail == null) {
+    hotelData.hotelPhoto = DEFAULT_HOTEL_PNG;
+    hotelData.thumbnail = DEFAULT_HOTEL_PNG;
+  } else {
+    if (hotelData.hotelPhoto == null) {
+      hotelData.hotelPhoto = hotelData.thumbnail;
+    } else {
+      hotelData.thumbnail = hotelData.hotelPhoto;
+    }
+  }
   
-  const parsedInfo = parseSocketHotelData_Alt(hotelData);
-
-  hotelsSocketCacheMap[hotelData.id] = parsedInfo;
-  checkHotelData(parsedInfo,'socket-parsed',index)
-
-  const result = {
-    initialLat: lat,
-    initialLon: lon
-  };
-
-  return result;
+  return hotelData
 }
 
-function parseSocketHotelData_Alt(socketData) {
-  let lat = (socketData.latitude != null ? socketData.latitude : socketData.lat);
-  let lon = (socketData.longitude != null ? socketData.longitude : socketData.lon);
-  lat = parseFloat(lat != null ? lat : (backupData.lat ? backupData.lat : backupData.latitude))
-  lon = parseFloat(lon != null ? lon : (backupData.lon ? backupData.lon : backupData.longitude))
-
-  const {id, name, price, star, stars, thumbnail} = socketData;
-  let parsedInfo = {
-    id,
-    name,
-    price: parseFloat(!isNaN(price) ? price : backupData.price),
-    star: (star || stars || backupData.star || backupData.stars),
-    thumbnail:
-      thumbnail && thumbnail.url
-        ? thumbnail
-        : backupData.thumbnail
-  };
-
-  // if (!parsedInfo.hotelPhoto || parsedInfo.hotelPhoto.url == '') {
-  //   parsedInfo.hotelPhoto = parsedInfo.thumbnail;
-  // }
-  if (socketData.hotelPhoto) {
-    parsedInfo.hotelPhoto = (socketData.hotelPhoto.url ? socketData.hotelPhoto : {url: socketData.hotelPhoto})
-  } else {
-    parsedInfo.hotelPhoto = parsedInfo.thumbnail;
-  }
-
-  if (useLongCoordinates) {
-    parsedInfo.latitude = lat;
-    parsedInfo.longitude = lon;
-  } else {
-    parsedInfo.lat = lat;
-    parsedInfo.long = lon;
-  }
-
-  if (parsedInfo.latitude != null) {
-    parsedInfo.latitude = parseFloat(parsedInfo.latitude)
-    parsedInfo.longitude = parseFloat(parsedInfo.longitude)
-  }
-
-  return parsedInfo;
-}
 
 /**
  * Checks whether data is null, an empty string or an object with 
@@ -683,6 +538,38 @@ function newObject(source, extra=null) {
 	return lodash.merge({}, source, extra)
 }
 
+
+var checkHotelDataCache = {}
+export function checkHotelDataPrepare() {
+  if (__DEV__) {
+    checkHotelDataCache = {};
+  }
+}
+export function printCheckHotelDataCache() {
+  if (__DEV__) {
+    try {
+      const keys = Object.keys(checkHotelDataCache);
+      let totalErrors = 0;
+      const summary = ( keys.length == 0 ? '<empty>' : keys.map(key => {
+        const currentErrorsCount = checkHotelDataCache[key].errors.length;
+        totalErrors += currentErrorsCount;
+        return `${key}:${currentErrorsCount}`;
+      }).join('    ') )
+      if (totalErrors>0) {
+        console.info(`[checkHotelData] Printing errors cache - ${summary}`, {checkHotelDataCache});
+        rlog('X-cache',`checkHotelData - ${totalErrors} errors found  -  ${summary}`, {checkHotelDataCache}, true);
+      } else {
+        console.info(`[checkHotelData] Printing errors cache - no errors`);
+        rlog('X-cache',`checkHotelData - no errors`);
+      }
+    } catch  (error) {
+      processError(`printCheckHotelDataCache - ${error.message}`, {error})
+      rlog('X-cache-error',`checkHotelData - error printing: ${error.message}`, {error}, true);
+    };
+  }
+}
+
+
 export function checkHotelData(data, type, index) {
   if (!__DEV__ 
         || checkHotelsDataWithTemplates == false
@@ -695,14 +582,13 @@ export function checkHotelData(data, type, index) {
 	const isArrayInstance = (data instanceof Array);
   let result = '';
   let props;
-  let failed = 0;
+  if (!checkHotelDataCache[type]) {
+    checkHotelDataCache[type] = {errors:[], errorIndexes:[], success:[]};
+  }
 
   if (isArrayInstance) {
-    data.map((item,index) => {
-      const result = checkHotelData(item,type,index)
-      if (!result || result.length > 0) {
-        failed++;
-      }
+    data.forEach((item,index) => {
+      checkHotelData(item,type,index)
     })
   } else {
 		let commonData = {
@@ -717,14 +603,38 @@ export function checkHotelData(data, type, index) {
         	commonData,
    				{
 						generalDescription:'string',
-   					hotelPhoto:{url:'string'},
-            star:'number',
+            hotelPhoto:{url:'string'},
+            star:'number'
           }
         );
         result = validateObject(data, props);
         break;
 
-      case 'socket-orig':
+      case 'static-parsed':
+        props = newObject(
+        	commonData,
+   				{
+						generalDescription:'string',
+   					hotelPhoto:'object',
+          }
+        );
+        result = validateObject(data, props);
+        break;
+
+      case 'static-patched':
+        props = newObject(
+        	commonData,
+   				{
+						generalDescription:'string',
+   					hotelPhoto:{url:'string'},
+            stars:'number',
+          }
+        );
+        result = validateObject(data, props);
+        break;
+
+
+      case 'socket':
         props = newObject(
 					commonData,
 					{
@@ -803,8 +713,12 @@ export function checkHotelData(data, type, index) {
   }
 
   if (result.length > 0) {
-    rlog(`X-${type}`, `@${result}@, index: ${index} failed: ${isArrayInstance ? failed : 'n/a'}, isArray: ${isArrayInstance}`,{invalid_types:result,data,type,props, isArrayInstance},true);
+    checkHotelDataCache[type].errors.push(result);
+    checkHotelDataCache[type].errorIndexes.push(index);
+    //rlog(`X-${type}`, `@${result}@, index: ${index} failed: ${isArrayInstance ? failed : 'n/a'}, isArray: ${isArrayInstance}`,{invalid_types:result,data,type,props, isArrayInstance},false);
     //console.warn(`[utils::checkHotelData] @${result}@, index: ${index}`,{result,data,type,props})
+  } else {
+    checkHotelDataCache[type].success.push({data,type,index});
   }
 }
 

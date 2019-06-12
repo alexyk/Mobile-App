@@ -1,6 +1,6 @@
 import { Platform, Dimensions, PixelRatio } from 'react-native'
 import { rlogd } from '../config-debug';
-import { isFontScalingEnabled } from '../config';
+import { isFontScalingEnabled } from '../config-settings';
 
 export const pixelRatio = PixelRatio.getPixelSizeForLayoutSize(100)/100;
 

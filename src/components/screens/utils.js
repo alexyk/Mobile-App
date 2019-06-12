@@ -9,7 +9,7 @@ export function validateObject(sourceData, props, index=-1, path='') {
 
 	if (sourceData == null) {
 		result = `<null_object>;` + space;
-	} else if (typeof(sourceData) != 'object') {
+	} else if (!isObject(sourceData)) {
 		result = `<not_an_object>_${typeof(sourceData)};` + space;
 	}
 	if (result.length > 0) {
@@ -31,8 +31,9 @@ export function validateObject(sourceData, props, index=-1, path='') {
     let type2 = (item !== null ? typeof(item) : 'null');
     let doDelete = true
 
+    let types;
 		if (isArray(type1)) {
-      const types = type1;
+      types = type1;
       if (types.indexOf(type2) > -1) {
 				// nothing to do
 			} else {
@@ -43,8 +44,8 @@ export function validateObject(sourceData, props, index=-1, path='') {
         }*/
 				result += `${path}${n}:not_in_[${[type1.join(',')]}]_${type2};` + space;
 			}
-		} else if (typeof(type1) == 'string' && type1.indexOf(',') > 0) {
-			const types = type1.split(',')
+		} else if (isString(type1) && type1.indexOf(',') > 0) {
+			types = type1.split(',')
 			if (types.indexOf(type2) > -1) {
 				// nothing to do
 			} else {
@@ -53,9 +54,9 @@ export function validateObject(sourceData, props, index=-1, path='') {
     } else if (type1 == 'any') {
     	// nothing to do
     } else if ( item == na ) {
-      result += `${path}${n}:na_${type2};` + space;
+      result += `${path}${n}:na_${type1};` + space;
       doDelete = false;
-    } else if (typeof(type1) == 'object') {      
+    } else if (isObject(type1)) {      
       result += validateObject(item, type1, -1, `${n}`);
     } else if (type2 == 'string' && item.length == 0) {
       result += `${path}${n}:empty_str;` + space;

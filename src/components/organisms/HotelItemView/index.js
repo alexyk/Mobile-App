@@ -5,7 +5,8 @@ import FontAwesome, { Icons } from "react-native-fontawesome";
 import Image from "react-native-remote-svg";
 import CardView from "react-native-cardview";
 import PropTypes from "prop-types";
-import { imgHost, DEFAULT_HOTEL_PNG, showNumberOnHotelItem } from "../../../config";
+import { imgHost } from "../../../config";
+import { DEFAULT_HOTEL_PNG, showNumberOnHotelItem } from "../../../config-settings";
 import _ from "lodash";
 import FastImage from "react-native-fast-image";
 import { RoomsXMLCurrency } from "../../../services/utilities/roomsXMLCurrency";
@@ -15,7 +16,7 @@ import LocPrice from "../../atoms/LocPrice";
 import styles from "./styles";
 import lang from "../../../language";
 import { isNative } from "../../../version";
-import { rlog } from "../../../config-debug";
+
 
 class HotelItemView extends Component {
   static propTypes = {

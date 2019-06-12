@@ -12,7 +12,7 @@ import {
 import {
   showBothMapAndListHotelSearch,
   showSimpleFooterHotelSearch,
-} from '../../../../config'
+} from '../../../../config-settings'
 import { webviewDebugEnabled, hotelsSearchMapDebugEnabled } from '../../../../config-debug'
 
 import SearchBar from "../../../molecules/SearchBar";

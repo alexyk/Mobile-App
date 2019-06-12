@@ -34,12 +34,15 @@ import {
 import {
   imgHost,
   socketHost,
+} from "../../../../config";
+import {
   showNumberOnHotelItem,
   HOTELS_SOCKET_CONNECTION_TIMEOUT,
   HOTELS_STATIC_CONNECTION_TIMEOUT,
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
-  HOTELS_MINIMUM_RESULTS
-} from "../../../../config";
+  HOTELS_MINIMUM_RESULTS,
+  autoGetAllStaticPages
+} from "../../../../config-settings";
 import { isOnline, rlog, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
@@ -64,7 +67,10 @@ import {
   DISPLAY_MODE_RESULTS_AS_LIST,
   DISPLAY_MODE_RESULTS_AS_MAP,
   DISPLAY_MODE_HOTEL_DETAILS,
-  checkHotelData
+  checkHotelData,
+  processStaticHotels,
+  checkHotelDataPrepare,
+  printCheckHotelDataCache
 } from "../utils"
 
 import {
@@ -187,6 +193,7 @@ class HotelsSearchScreen extends Component {
 
   componentDidMount() {
     console.log("#hotel-search# 3/6 HotelSearchScreen componentDidMount START");
+    checkHotelDataPrepare();
 
     this.isUnmounted = false;
     this.startStaticDataConnectionTimeOut();
@@ -544,7 +551,8 @@ class HotelsSearchScreen extends Component {
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
     rlog('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
-    
+    printCheckHotelDataCache();
+
     //TODO: @@@debug remove
 //     let asArray = []
 //     for (let i in this.hotelsSocketCacheMap) {
@@ -722,7 +730,7 @@ class HotelsSearchScreen extends Component {
         const count = data.content.length;
         const hotelsAll = data.content;
         checkHotelData(hotelsAll,'filter')
-
+        printCheckHotelDataCache();
         rlog('@@filter-on-server',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
 
         // parse data
@@ -804,18 +812,11 @@ class HotelsSearchScreen extends Component {
           _this.isAllPagesDone = true;
         }
         let hotels = data.content;
-        hotels.map( (item) => {
-          _this.hotelsStaticCacheMap[item.id] = item;
-          if (_this.isAllHotelsLoaded) {
-            const index = _this.hotelsIndicesByIdMap[item.id];
-            const itemInList = _this.hotelsAll[index];
-            if (itemInList) {
-              itemInList.hotelPhoto = item.hotelPhoto;
-            }
-          }
-        });
+        processStaticHotels(hotels, _this.hotelsStaticCacheMap, _this.hotelsIndicesByIdMap, _this.hotelsAll, _this.isAllHotelsLoaded);
         _this.pagesCached++;
+        printCheckHotelDataCache();
 
+        
         if (_this.isAllHotelsLoaded) {
           // this prevents slow static data to overwrite prices data
           //_this.listUpdateDataSource(_this.hotelsAll);
@@ -824,9 +825,6 @@ class HotelsSearchScreen extends Component {
         }
         _this.pagesLoaded++;
         
-        // log('static-hotels',`+${hotels.length} of ${_this.state.totalHotels} static hotels`, {hotels}, true)
-        checkHotelData(hotels,'static')
-
         const newState = {
           totalHotels: data.totalElements,
           totalPages: data.totalPages,
