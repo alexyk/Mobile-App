@@ -1,32 +1,8 @@
 import { processError, wlog } from "../../../config-debug";
 import { I18N_MAP } from './i18n';
+import { generateListItemKey } from "../HotelsSearch/utils";
 
 const MONTH_FORMAT = 'YYYY-MM';
-var ids = {
-  DAY_ID: 0,
-  DAYS_ROW_ID: 0,
-  MONTH_ID: 0
-}
-export function listItemKeyGen(prop, prefix) {
-  let id = ids[prop];
-  if (id == null) {
-    if (prop == null) {
-      wlog(`[Calendar::utils::listItemKeyGen] Name 'prop' is null - using 'NA' instead`)
-      prop = 'NA';
-    } else {
-      wlog(`[Calendar::utils::listItemKeyGen] Name '${prop}' not found in ids - creating it`)
-    }
-    ids[prop] = 0;
-  }
-  
-  id++;
-  if (id == Number.MAX_VALUE) {
-      id = 0;
-  }
-  ids[prop] = id;
-
-  return `${prefix}_${id}`;
-}
 
 /**
  * Returns initial days data (calendarData:Array) and initial marked data (calendarMarkedDays:Object)
@@ -50,7 +26,7 @@ export function generateInitialCalendarData(checkInMoment,checkOutMoment,today,m
           const dateClone = current.clone();
           const {days, markedDays, markedMonths} = createInitialCalendarData({},dateClone,checkInMoment,checkOutMoment,today,internalFormat)
           const asStr = dateClone.format(MONTH_FORMAT);
-          const id = listItemKeyGen('MONTH_ID', 'month');
+          const id = generateListItemKey('MONTH_ID', 'month');
           let month = {
               id,
               days,
@@ -249,7 +225,7 @@ export function calculateDayData(oldMarkedDays, date, checkInMoment, checkOutMom
     if (onlyMarked) {
         result = {marked};
     } else {
-        const id = listItemKeyGen('DAY_ID', 'day');
+        const id = generateListItemKey('DAY_ID', 'day');
         const text = date.date().toString();
         const day = {
             id,

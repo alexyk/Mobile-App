@@ -1,4 +1,5 @@
 import { StyleSheet } from 'react-native';
+import { getSafeTopOffset, getSafeBottomOffset } from '../../../../utils/designUtils';
 
 const styles = StyleSheet.create({
 
@@ -8,13 +9,20 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         backgroundColor: '#f0f1f3',
         alignItems: 'center',
-        justifyContent: 'flex-start'
+        justifyContent: 'flex-start',
+        marginBottom: getSafeBottomOffset()
     },
 
     topButtonContainer: {
-        zIndex: 1,
-        flexDirection: 'row',
-        justifyContent:'space-between',
+        left: 5,
+        top: 5,
+        position:'absolute',
+    },
+
+    backButton: {
+        padding: 3,
+        borderRadius: 50,
+        backgroundColor: '#0008'
     },
 
     scrollView: {

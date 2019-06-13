@@ -6,13 +6,17 @@ import {
 import FacilityView from '../../atoms/FacilityView';
 import styles from './styles';
 
+/**
+ * NOTES:
+ * Using index for item keys here is ok since data is static (won't change for the life of the component)
+ */
 class FacilitiesView extends Component {
 
     constructor(props) {
         super(props);
     }
 
-    renderFacilitties() {
+    _renderFacilitties() {
         const indents = [];
         for (let i = 0; i < this.props.data.length; i++) {
             const imgUrl = this.props.data[i].picture;
@@ -47,7 +51,7 @@ class FacilitiesView extends Component {
                                         item.picture != null &&
                                             (
                                                 // <FacilityView image={{ uri: imgHost + item.picture }} />
-                                                <FacilityView image={item.picture} isHome={this.props.isHome}/>
+                                                <FacilityView key={`view_${i}`}  image={item.picture} isHome={this.props.isHome}/>
                                             )
                                     )
                                 })
@@ -56,7 +60,7 @@ class FacilitiesView extends Component {
                         </View>
                     )
                 }
-                {/* {this.renderFacilitties()} */}
+                {/* {this._renderFacilitties()} */}
             </View>
         );
     }

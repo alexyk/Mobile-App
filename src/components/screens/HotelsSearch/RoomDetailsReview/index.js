@@ -19,6 +19,8 @@ import ConfirmBottomBar from '../../../atoms/ConfirmBottomBar'
 import LocPriceUpdateTimer from '../../../atoms/LocPriceUpdateTimer'
 import { imgHost } from '../../../../config'
 import styles from './styles';
+import { hotelSearchIsNative } from '../../../../config-settings';
+import { gotoWebview } from '../../utils';
 
 const SAFECHARGE_VAR = 'SCPaymentModeOn';
 const DEFAULT_CRYPTO_CURRENCY = 'EUR';
@@ -326,6 +328,15 @@ class RoomDetailsReview extends Component {
         });
     }
 
+    onConfirm = () => {
+        if (hotelSearchIsNative.step4Payment) {
+            this.handlePayWithLOC();
+        } else {
+            gotoWebview(this.state, this.props.navigation, {});
+        }
+    }
+
+
     handlePayWithLOC = () => {
         requester.getUserHasPendingBooking()
         .then(res => res.body).then(data => {
@@ -537,7 +548,7 @@ class RoomDetailsReview extends Component {
                     params={{ bookingId: this.state.bookingId }} 
                     daysDifference = {params.daysDifference}
                     titleBtn = {"Confirm and Pay"}
-                    onPress = {this.handlePayWithLOC}/>
+                    onPress = {this.onConfirm}/>
                 {/* <View style={styles.floatingBar}>
                     <View style={styles.detailsView}>
                         <View style={styles.pricePeriodWrapper}>

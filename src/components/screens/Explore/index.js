@@ -18,7 +18,6 @@ import lang from '../../../language';
 import { setCurrency } from '../../../redux/action/Currency';
 import { setDatesAndGuestsData } from '../../../redux/action/userInterface';
 import { userInstance } from '../../../utils/userInstance';
-import { isNative } from '../../../version';
 import LocRateButton from '../../atoms/LocRateButton';
 import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectMaterialDialog';
 import SearchBar from '../../molecules/SearchBar';
@@ -26,11 +25,9 @@ import DateAndGuestPicker from '../../organisms/DateAndGuestPicker';
 import { gotoWebview } from '../utils';
 import styles from './styles';
 import { formatDatesData } from '../Calendar/utils';
+import { hotelSearchIsNative } from '../../../config-settings';
 
 
-
-
-const isExploreSearchNative = isNative.explore; // false: webview version, true: native search version
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
 
 class Explore extends Component {
@@ -299,7 +296,7 @@ class Explore extends Component {
         const delayedFunction = () => {
             console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`);
             //Open new property screen that uses sock-js
-            if (isExploreSearchNative) {
+            if (hotelSearchIsNative.step1Results) {
                 if (this.state.isHotel) {
                     //console.log("this.state.regionId.", this.state.regionId);
                     if (this.state.regionId === "" || this.state.regionId === 0) {

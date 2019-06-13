@@ -2,7 +2,45 @@ import { Platform, Dimensions, PixelRatio } from 'react-native'
 import { rlogd } from '../config-debug';
 import { isFontScalingEnabled } from '../config-settings';
 
+// See https://mydevice.io/devices/ for device dimensions
+const X_WIDTH = 375;
+const X_HEIGHT = 812;
+const XSMAX_WIDTH = 414;
+const XSMAX_HEIGHT = 896;
+const PAD_WIDTH = 768;
+const PAD_HEIGHT = 1024;
+
+const { height: D_HEIGHT, width: D_WIDTH } = Dimensions.get('window');
+
 export const pixelRatio = PixelRatio.getPixelSizeForLayoutSize(100)/100;
+
+export const isIPhoneX = (
+  Platform.OS !== 'web'
+  || !(
+    Platform.OS === 'ios' &&
+    ((D_HEIGHT === X_HEIGHT && D_WIDTH === X_WIDTH) ||
+      (D_HEIGHT === X_WIDTH && D_WIDTH === X_HEIGHT)) ||
+    ((D_HEIGHT === XSMAX_HEIGHT && D_WIDTH === XSMAX_WIDTH) ||
+        (D_HEIGHT === XSMAX_WIDTH && D_WIDTH === XSMAX_HEIGHT))
+  )
+)
+
+export function getSafeTopOffset() {
+  if (isIPhoneX) {
+    return 44;
+  } else {
+    return 0;
+  }
+}
+
+
+export function getSafeBottomOffset() {
+  if (isIPhoneX) {
+    return 34;
+  } else {
+    return 0;
+  }
+}
 
 
 export function getFontSizeByFontScale(value) {

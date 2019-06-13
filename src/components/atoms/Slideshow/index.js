@@ -14,6 +14,7 @@ import {
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 import styles from './styles';
+import { generateListItemKey } from '../../screens/Calendar/utils';
 
 const reactNativePackage = require('react-native/package.json');
 const splitVersion = reactNativePackage.version.split('.');
@@ -72,7 +73,7 @@ class Slideshow extends Component {
     }
 
     _move(index) {
-        const isUpdating = index !== this._getPosition();
+        const isUpdating = (index !== this._getPosition());
         const x = this.state.width * index;
         if (majorVersion === 0 && minorVersion <= 19) {
             this._ref.scrollTo(0, x, true); // use old syntax
@@ -82,6 +83,7 @@ class Slideshow extends Component {
         this.setState({position: index});
         if (isUpdating && this.props.onPositionChanged) {
             this.props.onPositionChanged(index);
+            this.itemId = generateListItemKey('SLIDE_SHOW_ID');
         }
     }
 
@@ -156,12 +158,6 @@ class Slideshow extends Component {
         const height = this.props.height || this.state.height;
         const position = this._getPosition();
 
-        // generate authentic keys for components below
-        this.itemId += 3;
-        if (this.itemId >= Number.MAX_VALUE - 3) {
-            this.itemId = 0;
-        }
-
         return (
             <View style={[this.props.containerStyle, { height: height }]}>
                 {/* SECTION IMAGE */}
@@ -182,15 +178,15 @@ class Slideshow extends Component {
                             </View>
                         );
                         const imageComponent = (
-                            <View key={this.itemId = 0}>
-                            <Image
-                                source={imageObject}
-                                style={{height, width}}/>
+                            <View key={`image_${this.itemId}`}>
+                                <Image
+                                    source={imageObject}
+                                    style={{height, width}}/>
                                 {textComponent}
                             </View>
                         );
                         const imageComponentWithOverlay = (
-                            <View key={this.itemId+1} style={styles.containerImage}>
+                            <View key={`overlay_${this.itemId}`} style={styles.containerImage}>
                                 <View style={styles.overlay}>
                                     <Image
                                         source={imageObject}
@@ -202,7 +198,7 @@ class Slideshow extends Component {
                         if (this.props.onPress) {
                             return (
                                 <TouchableOpacity
-                                    key={this.itemId+2}
+                                    key={`press_${this.itemId}`}
                                     style={{height, width}}
                                     onPress={() => this.props.onPress({image, index})}
                                     delayPressIn={200}>
@@ -220,7 +216,7 @@ class Slideshow extends Component {
                     {this.props.dataSource.map((image, index) => {
                         return (
                             <TouchableOpacity
-                                key={this.itemId+3}
+                                key={`item_${index}_${this.itemId}`}
                                 onPress={() => { return this._move(index); }}
                                 style={[ [ styles.indicator, setIndicatorSize(this.props.indicatorSize), setIndicatorColor(this.props.indicatorColor) ],
                                     position === index && [ styles.indicatorSelected, setIndicatorColor(this.props.indicatorSelectedColor)]

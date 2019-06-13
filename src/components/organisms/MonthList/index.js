@@ -7,8 +7,8 @@ import Day from '../../atoms/Day';
 import { dayHeight } from '../../atoms/Day/styles';
 import Month from '../../molecules/Month';
 import { monthTitleHeight } from '../../molecules/Month/styles';
-import { listItemKeyGen } from '../../screens/Calendar/utils';
 import monthListStyles from './styles';
+import { generateListItemKey } from '../../screens/HotelsSearch/utils';
 
 
 export default class MonthList extends PureComponent {
@@ -139,7 +139,7 @@ export default class MonthList extends PureComponent {
             marked.isValid = (!marked.isEmpty);
         }
         if (id == null) {
-            id = listItemKeyGen('DAY_ID', 'day_na_');
+            id = generateListItemKey('DAY_ID', 'day_na_');
         }
 
         let dayProps = {
@@ -189,7 +189,7 @@ export default class MonthList extends PureComponent {
                 const startI =( 7*i );
                 const endI = ( 7*i + 7 );
                 const currentRow = (days.slice(startI, endI));
-                const rowId = listItemKeyGen('DAYS_ROW_ID', 'days_row');
+                const rowId = generateListItemKey('DAYS_ROW_ID', 'days_row');
                 
                 return this._renderDaysRow(currentRow, i, marked, rowId)
             })

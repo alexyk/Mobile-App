@@ -10,8 +10,6 @@ const styles = StyleSheet.create({
     },
 
     scrollView: {
-        position: 'absolute',
-        top: 100,
         left: 0,
         right: 0,
         bottom: 0,
@@ -20,7 +18,7 @@ const styles = StyleSheet.create({
     searchAreaView: {
         flex:1,
         backgroundColor: '#f0f1f3',
-        paddingTop: 40,
+        paddingTop: 10,
         paddingLeft: 15,
         paddingRight: 15
     },

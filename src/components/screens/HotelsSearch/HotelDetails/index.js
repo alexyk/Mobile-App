@@ -2,7 +2,8 @@ import {
     Dimensions,
     ScrollView,
     View,
-    TouchableOpacity
+    TouchableOpacity,
+    SafeAreaView
 } from 'react-native';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -13,10 +14,9 @@ import LocationView from '../../../atoms/LocationView';
 import BackButton from '../../../atoms/BackButton';
 import styles from './styles';
 import ImageCarousel from '../../../atoms/ImagePage';
+import { hotelSearchIsNative } from '../../../../config-settings';
+import { getSafeTopOffset } from '../../../../utils/designUtils';
 
-const dimensionWindows = Dimensions.get('window');
-const logoWidth = dimensionWindows.width;
-const logoHeight = logoWidth * 35 / 54;//eslint-disable-line
 
 class HotelDetails extends Component {
     static propTypes = {
@@ -53,9 +53,18 @@ class HotelDetails extends Component {
             latitude: params ? params.hotelFullDetails.latitude : 0.0,
             longitude: params ? params.hotelFullDetails.longitude : 0.0,
             hotelRatingStars: params ? params.hotelDetail.stars : 0,
-            daysDifference: params ? params.daysDifference : 1
+            daysDifference: params ? params.daysDifference : 1,
+            canLoadLocation: false
         }
     }
+
+
+    componentDidMount() {
+        // Temporary solution - improve loading time by delaying location
+        // TODO: Improve suggestion - provide an image (screenshot of map) rather than a map component
+        setTimeout(() => this.setState({canLoadLocation:true}), 1000);
+    }
+
 
     onMapTap() {
         this.props.navigation.navigate('MapFullScreen', {
@@ -74,95 +83,157 @@ class HotelDetails extends Component {
     }
 
     onBooking = (roomDetail) => {
-        // onRoomPress = (roomDetail) => {
-        //console.log("onRoomPress", roomDetail);
-        let hotelImg = this.state.hotel.hotelPhoto.url;
-        if (hotelImg === undefined || hotelImg === null) {
-            hotelImg = this.state.hotel.hotelPhoto;
+        if (hotelSearchIsNative.step3BookingDetails) {
+            // onRoomPress = (roomDetail) => {
+            //console.log("onRoomPress", roomDetail);
+            let hotelImg = this.state.hotel.hotelPhoto.url;
+            if (hotelImg === undefined || hotelImg === null) {
+                hotelImg = this.state.hotel.hotelPhoto;
+            }
+            this.props.navigation.navigate('GuestInfoForm', { 
+                roomDetail: roomDetail, 
+                guests: this.state.guests, 
+                price: ((roomDetail.roomsResults[0].price) * this.state.daysDifference).toFixed(2),
+                daysDifference: this.props.daysDifference,
+                hotelDetails: this.state.hotelFullDetails,
+                searchString: this.state.searchString,
+                hotelImg: hotelImg
+            });
+        } else {
+
         }
-        this.props.navigation.navigate('GuestInfoForm', { 
-            roomDetail: roomDetail, 
-            guests: this.state.guests, 
-            price: ((roomDetail.roomsResults[0].price) * this.state.daysDifference).toFixed(2),
-            daysDifference: this.props.daysDifference,
-            hotelDetails: this.state.hotelFullDetails,
-            searchString: this.state.searchString,
-            hotelImg: hotelImg
-        });
-        // }
+    } 
+
+    _renderBackButton() {
+        return (
+            <View style={styles.topButtonContainer}>
+                <BackButton onPress={this.onClose} isWhite style={styles.backButton} />
+            </View>
+        )
     }
+
+
+    _renderImages() {
+        const {width, height} = Dimensions.get('window');
+        const logoWidth = width;
+        const logoHeight = (height * 0.3 + getSafeTopOffset());
+
+        console.log('logo dim',{logoHeight,logoWidth})
+        return (
+            <View style={{ width: logoWidth, height: logoHeight }}>
+                <ImageCarousel
+                    delay={5000}
+                    style={styles.logoImage}
+                    width={logoWidth}
+                    height={logoHeight}
+                    indicatorSize={12.5}
+                    indicatorOffset={20}
+                    indicatorColor="#D87A61"
+                    images={this.state.dataSourcePreview}
+                />
+            </View>
+        )
+    }
+
+
+    _renderHotelDetails() {
+        const {
+            dataSourcePreview, hotel, mainAddress, description
+        } = this.state;
+
+        const { name, star } = hotel;
+
+        return (
+            <HotelDetailView
+                dataSourcePreview={dataSourcePreview}
+                title={name}
+                rateVal={star}
+                reviewNum={0}
+                address={mainAddress}
+                description={description}
+            />
+        )
+    }
+
+
+    _renderFacilities() {
+        return [
+            <FacilitiesView
+                key={'facility_view'}
+                style={styles.roomfacility}
+                data={this.state.hotelAmenities}
+                isHome={false}
+                onFacilityMore={this.onFacilityMore}
+            />,
+
+            <View key={'facility_separator1'} style={[styles.lineStyle, {
+                marginLeft: 20, marginRight: 20, marginTop: 15, marginBottom: 15
+            }]}
+            />
+	    ]
+    }
+
+    _renderAvailableRooms() {
+        return [
+            <AvailableRoomsView
+                key={'facility_rooms'}
+                id={`${this.state.hotel.id}`}
+                search={this.state.searchString}
+                onBooking={this.onBooking}
+                guests={this.state.guests}
+                hotelDetails={this.state.hotelFullDetails}
+                daysDifference={this.state.daysDifference}
+            />,
+
+            <View key={'facility_separator2'} style={[styles.lineStyle, {
+                marginLeft: 20, marginRight: 20, marginTop: 15, marginBottom: 15
+            }]}
+            />
+        ]
+    }
+
+
+    _renderLocation() {
+        if (this.state.canLoadLocation) {
+            return (
+                <TouchableOpacity activeOpacity={1} onPress={() => this.onMapTap()}>
+                    <LocationView
+                        location={`${this.state.mainAddress}, ${this.state.countryName}`}
+                        titleStyle={{ fontSize: 17 }}
+                        name={this.state.hotel.name}
+                        description={this.state.hotel.generalDescription}
+                        lat={this.state.latitude != null ? parseFloat(this.state.latitude) : 0.0}
+                        lon={this.state.longitude != null ? parseFloat(this.state.longitude) : 0.0}
+                        radius={200}
+                    />
+                </TouchableOpacity>
+            )
+        } else {
+            return null;
+        }
+    }
+
 
     render() {
         return (
             <View style={styles.container}>
                 <ScrollView style={styles.scrollView}>
-                    <View style={styles.topButtonContainer}>
-                        <BackButton style={styles.backButton} onPress={this.onClose} isWhite />
-                    </View>
                     <View style={styles.body}>
-                        <View style={{ width: logoWidth, height: logoHeight }}>
-                            <ImageCarousel
-                                delay={5000}
-                                style={styles.logoImage}
-                                width={logoWidth}
-                                height={logoHeight}
-                                indicatorSize={12.5}
-                                indicatorOffset={20}
-                                indicatorColor="#D87A61"
-                                images={this.state.dataSourcePreview}
-                            />
-                        </View>
+                        { this._renderImages() }
 
-                        <HotelDetailView
-                            dataSourcePreview={this.state.dataSourcePreview}
-                            title={this.state.hotel.name}
-                            rateVal={this.state.hotel.star}
-                            reviewNum={0}
-                            address={this.state.mainAddress}
-                            description={this.state.description}
-                        />
+                        { this._renderHotelDetails() }
 
-                        {/* { this.state.hotelAmenities.map
-                        (listing => <FacilityView image={require('../../../assets/Facilities/Homes/BathTub.png')}/>) } */}
+                        { this._renderFacilities() }
 
-                        <FacilitiesView
-                            style={styles.roomfacility}
-                            data={this.state.hotelAmenities}
-                            isHome={false}
-                            onFacilityMore={this.onFacilityMore}
-                        />
-                        <View style={[styles.lineStyle, {
-                            marginLeft: 20, marginRight: 20, marginTop: 15, marginBottom: 15
-                        }]}
-                        />
+                        { this._renderAvailableRooms() }
 
-                        <AvailableRoomsView
-                            id={this.state.hotel.id}
-                            search={this.state.searchString}
-                            onBooking={this.onBooking}
-                            guests={this.state.guests}
-                            hotelDetails={this.state.hotelFullDetails}
-                            daysDifference={this.state.daysDifference}
-                        />
+                        { this._renderLocation() }
 
-                        <View style={[styles.lineStyle, {
-                            marginLeft: 20, marginRight: 20, marginTop: 15, marginBottom: 15
-                        }]}
-                        />
-                        <TouchableOpacity activeOpacity={1} onPress={() => this.onMapTap()}>
-                            <LocationView
-                                location={`${this.state.mainAddress}, ${this.state.countryName}`}
-                                titleStyle={{ fontSize: 17 }}
-                                name={this.state.hotel.name}
-                                description={this.state.hotel.generalDescription}
-                                lat={this.state.latitude != null ? parseFloat(this.state.latitude) : 0.0}
-                                lon={this.state.longitude != null ? parseFloat(this.state.longitude) : 0.0}
-                                radius={200}
-                            />
-                        </TouchableOpacity>
                         <View style={{ marginBottom: 50 }} />
                     </View>
                 </ScrollView>
+                
+                { this._renderBackButton() }
             </View>
         );
     }

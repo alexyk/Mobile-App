@@ -127,7 +127,7 @@ export default function createOfflineRequester() {
 		startSocketConnection: (onData,_this) => {
       let arr = require('./offline-responses/fromSocket.json');
       try {
-        const tmp = offlinePacks[autoHotelSearchPlace].socket;
+        const tmp = offlinePacksHotels[autoHotelSearchPlace].socket;
         if (tmp) arr = tmp;
       } catch (e) {
         processError(`[offline::startSocketConnection] Error in getting offline pack: ${e.message}`, {error:e})

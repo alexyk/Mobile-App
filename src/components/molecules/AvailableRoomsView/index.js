@@ -17,6 +17,11 @@ import { RoomsXMLCurrency } from '../../../services/utilities/roomsXMLCurrency';
 import { CurrencyConverter } from '../../../services/utilities/currencyConverter'
 import styles from './styles';
 
+
+/**
+ * NOTES:
+ * Using index for item keys here is ok since data is static (won't change for the life of the component)
+ */
 class AvailableRoomsView extends Component {
     static propTypes = {
         id: PropTypes.string,
@@ -104,9 +109,10 @@ class AvailableRoomsView extends Component {
     
         return total;
     };
+    
 
-    renderRoom = (item) => {
-        //console.log("renderRoom", item);
+    _renderRoom = (item,index) => {
+        
         if (item.length > 0 && item[0].roomsResults) {
             let rowData = item[0];
             const fiat = this.getTotalPrice(rowData.roomsResults);
@@ -118,15 +124,15 @@ class AvailableRoomsView extends Component {
                 price = currencyExchangeRates && (CurrencyConverter.convert(currencyExchangeRates, RoomsXMLCurrency.get(), currency, fiat)).toFixed(2);
     
             return (
-                <TouchableOpacity onPress={() => {onBooking(rowData)}}>
+                <TouchableOpacity onPress={() => {onBooking(rowData)}} key={`room_${index}`} >
                     <CardView style={styles.listItem}
                         cardElevation={1.5}
                         cardMaxElevation={1.5}
                         cornerRadius={0}>
                         {
-                            rowData.roomsResults.map((room, roomIndex) => {
+                            rowData.roomsResults.map((room, rowIndex) => {
                                 return (
-                                    <Text style={styles.name} numberOfLines={1} ellipsizeMode ={'tail'}>{room.name + "(" + room.mealType + ")"}</Text>
+                                    <Text key={`row_${rowIndex}`} style={styles.name} numberOfLines={1} ellipsizeMode ={'tail'}>{room.name + "(" + room.mealType + ")"}</Text>
                                 );
                             })
                         }
@@ -154,7 +160,8 @@ class AvailableRoomsView extends Component {
         return null;
     }
 
-    renderLoader() {
+
+    _renderLoader() {
         return (
             <View style={{
                 flex: 1, flexDirection: 'row', justifyContent: 'center', marginBottom: 10
@@ -171,30 +178,24 @@ class AvailableRoomsView extends Component {
             <View style={styles.container}>
                 <Text style={styles.title}>Available Rooms</Text>
                 {
-                    !this.state.loading > 0 ? 
-                        <View>
-                            {
-                                rooms && rooms.length > 0 && 
-                                (
-                                    <View>
-                                        {
-                                            rooms.map((results, resultIndex) => {
-                                                return this.renderRoom(results);
-                                            })
-                                        }
-                                    </View>
-                                )
-                            }
-                        </View>
-                        
-    // <FlatList
-    // style={{ marginLeft: 0, marginRight: 0 }}
-    // keyExtractor={(item, index) => {index}}
-    // data={rooms}
-    // showsVeticalScrollIndicator={false}
-    // renderItem={this.renderRoom}/>
-                    :
-                        this.renderLoader()
+                    !this.state.loading > 0
+                        ? 
+                            <View>
+                                {
+                                    rooms && rooms.length > 0 && 
+                                    (
+                                        <View>
+                                            {
+                                                rooms.map((item, index) => {
+                                                    return this._renderRoom(item, index);
+                                                })
+                                            }
+                                        </View>
+                                    )
+                                }
+                            </View>
+                        :
+                            this._renderLoader()
                 }
             </View>
         );

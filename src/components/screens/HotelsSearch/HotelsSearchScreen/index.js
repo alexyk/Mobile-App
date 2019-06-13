@@ -41,7 +41,8 @@ import {
   HOTELS_STATIC_CONNECTION_TIMEOUT,
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
   HOTELS_MINIMUM_RESULTS,
-  autoGetAllStaticPages
+  autoGetAllStaticPages,
+  hotelSearchIsNative
 } from "../../../../config-settings";
 import { isOnline, rlog, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
@@ -98,7 +99,6 @@ import {
 } from './components'
 
 import stomp from "stomp-websocket-js";
-import { isNative } from "../../../../version";
 import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
 import { setSearch/*, setSearchFiltered*/ } from '../../../../redux/action/hotels'
 
@@ -633,9 +633,7 @@ class HotelsSearchScreen extends Component {
   }
 
   gotoHotelDetailsFromItemClick = (item, state, extraParams) => {
-    console.tron.logImportant('isNative',`isNative: ${isNative.hotelItem};`,{isNative})
-
-    if (isNative.hotelItem) {
+    if (hotelSearchIsNative.step2HotelDetails) {
       // log('here', `gotoHotelDetailsPageNative`,{item})
       this.gotoHotelDetailsPageNative(item)
     } else{
@@ -1082,7 +1080,7 @@ class HotelsSearchScreen extends Component {
     // console.log(`### [HotelsSearchScreen] {all:this.state.allElements});
 
     const isHotelDetails = this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS;
-    this.isWebviewHotelDetail = (isHotelDetails && !isNative.hotelItem)
+    this.isWebviewHotelDetail = (isHotelDetails && !hotelSearchIsNative.step2HotelDetails)
     // log('LTLoader/HotelSearch',`isLoading: ${this.state.isLoading} isApplyingFilter: ${this.props.isApplyingFilter} isList: ${isList} isMap: ${isMap}`,{props:this.props, state:this.state})
 
     return (

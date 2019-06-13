@@ -10,6 +10,39 @@ export const DISPLAY_MODE_RESULTS_AS_LIST = "mode_results_as_list";
 export const DISPLAY_MODE_RESULTS_AS_MAP = "mode_results_as_map";
 export const DISPLAY_MODE_HOTEL_DETAILS = "mode_hotel_details";
 
+
+var ids = {
+  DAY_ID: 0,
+  DAYS_ROW_ID: 0,
+  MONTH_ID: 0,
+  MAP_MARKER_ID: 0,
+  SLIDE_SHOW_ID: 0,
+  AVAILABLE_ROOMS_ID: 0
+}
+export function generateListItemKey(prop, prefix='', doReset=false) {
+  let id = ids[prop];
+  if (id == null) {
+    if (prop == null) {
+      wlog(`[Calendar::utils::generateListItemKey] Name 'prop' is null - using 'NA' instead`)
+      prop = 'NA';
+    } else {
+      wlog(`[Calendar::utils::generateListItemKey] Name '${prop}' not found in ids - creating it`)
+    }
+    ids[prop] = 0;
+  } else if (doReset) {
+    id = 0;
+  }
+  
+  id++;
+  if (id == Number.MAX_VALUE) {
+      id = 0;
+  }
+  ids[prop] = id;
+
+  return `${prefix}_${id}`;
+}
+
+
 export function createHotelSearchInitialState(params) {
   const startDate = moment().add(1, "day");
   const endDate = moment().add(2, "day");

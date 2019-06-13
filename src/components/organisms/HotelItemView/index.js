@@ -6,7 +6,7 @@ import Image from "react-native-remote-svg";
 import CardView from "react-native-cardview";
 import PropTypes from "prop-types";
 import { imgHost } from "../../../config";
-import { DEFAULT_HOTEL_PNG, showNumberOnHotelItem } from "../../../config-settings";
+import { DEFAULT_HOTEL_PNG, showNumberOnHotelItem, hotelSearchIsNative } from "../../../config-settings";
 import _ from "lodash";
 import FastImage from "react-native-fast-image";
 import { RoomsXMLCurrency } from "../../../services/utilities/roomsXMLCurrency";
@@ -15,7 +15,6 @@ import LocPrice from "../../atoms/LocPrice";
 
 import styles from "./styles";
 import lang from "../../../language";
-import { isNative } from "../../../version";
 
 
 class HotelItemView extends Component {
@@ -61,7 +60,7 @@ class HotelItemView extends Component {
     // console.log("[HotelItemView] On Press", item);
     // log('hotel-item', `On Press: image:${item.hotelPhoto.url} thumb:${item.thumbnail.url}`, {item})
 
-    if (isNative.hotelItem) {
+    if (hotelSearchIsNative.step2HotelDetails) {
       // native
       this.props.gotoHotelDetailsPage(item);
     } else {

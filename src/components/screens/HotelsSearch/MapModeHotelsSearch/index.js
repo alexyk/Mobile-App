@@ -12,8 +12,9 @@ import lang from '../../../../language';
 import { CurrencyConverter } from '../../../../services/utilities/currencyConverter';
 import { RoomsXMLCurrency } from '../../../../services/utilities/roomsXMLCurrency';
 import LocPrice from '../../../atoms/LocPrice';
-import { calculateCoordinatesGridPosition } from '../utils';
+import { calculateCoordinatesGridPosition, generateListItemKey } from '../utils';
 import styles from './styles';
+
 
 class MapModeHotelsSearch extends Component {
     _markers = [];
@@ -56,13 +57,6 @@ class MapModeHotelsSearch extends Component {
         //this.allMarkers = []
 
         this.itemId = 0;
-    }
-
-    increaseItemId() {
-        this.itemId++;
-        if (this.itemId == Number.MAX_VALUE) {
-            this.itemId = 0;
-        }
     }
 
     componentDidCatch(error, errorInfo) {
@@ -152,10 +146,9 @@ class MapModeHotelsSearch extends Component {
             try {
                 result = (
                     <Text style={styles.ratingsMap}>
-                        { arr.map((item,index) => <FontAwesome key={"star_"+this.itemId}>{Icons.starO}</FontAwesome>) }
+                        { arr.map((item,index) => <FontAwesome key={`star_${index}_${this.itemId}`}>{Icons.starO}</FontAwesome>) }
                     </Text>
                 )
-                this.increaseItemId();
             } catch (error) {
                 processError(`[MapModeHotelsSearch] Error rendering stars in callout: ${error.message}`,{error});
             }
@@ -304,7 +297,8 @@ class MapModeHotelsSearch extends Component {
         const {latitude, longitude} = data;
         const coordinates = {latitude, longitude};
         const selectedIndex = this.state.selectedMarkerIndex;
-        this.increaseItemId();
+        this.itemId = generateListItemKey('MAP_MARKER_ID');
+
         return (
             <Marker
                 image={selectedIndex == index  ? blue_marker : red_marker}
