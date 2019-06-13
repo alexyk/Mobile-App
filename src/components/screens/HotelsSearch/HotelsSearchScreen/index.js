@@ -120,7 +120,9 @@ class HotelsSearchScreen extends Component {
     this.pageLimit = this.PAGE_LIMIT;
     this.pagesLoaded = 0;
     this.pagesCached = 0;
+    this.pageSize = 10;
     this.isAllPagesDone = false;
+    this.totalElements = 0;
     this.isMinimumResultLoaded = false;
     this.isAllHotelsLoaded = false;
     this.isFirstLoad = true;
@@ -276,16 +278,15 @@ class HotelsSearchScreen extends Component {
     );
   }
 
-  getNextStaticPage(page=0) {
-    // log('static-page',`${this.isAllPagesDone ? 'SKIPPING loading' : 'Loading'} page ${page}, all pages: ${this.isAllPagesDone}`);
-
+  getNextStaticPage(page=0,elementsCount=10) {
+    
     if (this.isAllPagesDone) {
-      return
+      return;
     }
-
+        
     this.startStaticDataConnectionTimeOut();
     requester
-      .getStaticHotels(this.state.regionId,page)
+      .getStaticHotels(this.state.regionId, page, elementsCount)
       .then(this.onStaticData);
   }
 
@@ -309,7 +310,7 @@ class HotelsSearchScreen extends Component {
 
       // callback (after change state above)
       function() {
-        _this.getNextStaticPage(_this.pagesLoaded-1)
+        _this.getNextStaticPage(_this.pagesLoaded)
       }
     );
     //console.log("#hotel-search# 4.2/6 [HotelsSearchScreen] getStaticHotelsData");
@@ -550,7 +551,7 @@ class HotelsSearchScreen extends Component {
 
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
-    rlog('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
+    rlog('on-done-socket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
     printCheckHotelDataCache();
 
     //TODO: @@@debug remove
@@ -736,7 +737,7 @@ class HotelsSearchScreen extends Component {
         // parse data
         mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap)
         checkHotelData(hotelsAll,'filter-parsed')
-
+        printCheckHotelDataCache();
         // log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
 
         const oldHotels = this.hotelsAll;
@@ -795,22 +796,45 @@ class HotelsSearchScreen extends Component {
     }
   }
 
-  onStaticData(res) { 
-    if (!this || !this.listViewRef || this.isUnmounted) {
+  onStaticData(res) {
+    const isSkipping = (!this || !this.listViewRef || this.isUnmounted);
+
+    if (isSkipping) {
       console.warn(`[HotelsSearchScreen::onStaticData] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
       return;
     }
-
     const _this = this;
-    //console.log(` RESULT: ${res.success} `, {res})
     
     if (res.success) {
       _this.staticDataReceived = true;
       
       res.body.then(function(data) {
-        if (data.last) {
-          _this.isAllPagesDone = true;
+        // a shortcut to all results
+        if (autoGetAllStaticPages && _this.isFirstLoad) {
+          _this.isFirstLoad = false;
+          const newState = {
+            totalHotels: data.totalElements,
+            totalPages: data.totalPages,
+            displayMode: DISPLAY_MODE_RESULTS_AS_LIST
+          };
+          if (_this.isSocketDown) {
+            _this.startSocketConnection();
+          }
+          _this.setState(newState);
+          _this.pageSize = data.totalElements;
+          if (_this.pageSize > 1000) {
+            _this.pageSize = 1000;
+          } 
+          _this.getNextStaticPage(0, _this.pageSize);
+          return;
         }
+
+        _this.isAllPagesDone = data.last;
+        
+        if (_this.pagesCached == 0) {
+          _this.totalElements = data.totalElements;
+        }
+        
         let hotels = data.content;
         processStaticHotels(hotels, _this.hotelsStaticCacheMap, _this.hotelsIndicesByIdMap, _this.hotelsAll, _this.isAllHotelsLoaded);
         _this.pagesCached++;
@@ -837,20 +861,17 @@ class HotelsSearchScreen extends Component {
             _this.startSocketConnection();
           }
           newState.displayMode = DISPLAY_MODE_RESULTS_AS_LIST;
-        } else {
-          if (!_this.isAllPagesDone && _this.pagesLoaded < _this.INITIAL_PAGES) {
-            _this.getNextStaticPage(_this.pagesLoaded);
-          }
+        }
+        _this.setState(newState);
+
+        if ( autoGetAllStaticPages || (!_this.isAllPagesDone && _this.pagesLoaded < _this.INITIAL_PAGES) ) {
+          _this.getNextStaticPage(_this.pagesLoaded, _this.pageSize);
         }
 
-        _this.setState(newState);
       }); // res.body.then
     } else {
-      console.error(
-        "[HotelsSearchScreen] Could not fetch Static Data for hotels"
-      );
-      rlog('error',`Could not get hotels static data`,{res})
       this.listStartFetch([], 0);
+      processError(`[HotelsSearchScreen] Could not fetch Static Data for hotels`, {res})
     }
   }
 
@@ -883,43 +904,9 @@ class HotelsSearchScreen extends Component {
 
   // onFetch (page = 1, startFetch, abortFetch) {
   onFetchNewListViewData(page = 1, startFetch, abortFetch) {
-    //log('fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`)
-
-    if (this.isAllHotelsLoaded) {
-      // no getting static hotels data after everything is loaded (sockets done + initial filter applied)
-      return;
-    }
-
+    rlog('list-fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`);
     // Save these methods to use later in list....() methods (for example listStartFetch)
     this.listViewHelpers = { startFetch, abortFetch };
-
-    /* if (this.isFirstLoad) {
-      // do nothing if first fetch
-    } else  */{
-      try {
-        //console.log("### onFetch 0");
-        this.startStaticDataConnectionTimeOut();
-
-        if (this.state.isFilterResult) {
-          //console.log("### onFetch 2.1");
-          const strSearch = generateSearchString(this.state, this.props);
-          const strFilters = generateHotelFilterString(this.listViewRef.getPage(), this.state);
-          requester
-            .getLastSearchHotelResultsByFilter(strSearch, strFilters)
-            .then(this.onStaticData);
-        } else {
-          //console.log("### onFetch 1.1");
-          requester
-            .getStaticHotels(this.state.regionId, page - 1)
-            .then(this.onStaticData);
-        }
-      } catch (err) {
-        //console.log("### onFetch Error", err);
-        //console.log("onFetch--=- error  ", err);
-        this.listAbortFetch(); // manually stop the refresh or pagination if it encounters network error
-        processError(`[HotelsSearchScreen::onFetchNewListViewData] Error while requesting ${this.state.isFilterResult ? 'filtered static hotels' : 'static hotels'}: ${err.message}`, {error:err})
-      }
-    }
   }
 
   /**
