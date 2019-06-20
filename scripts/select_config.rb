@@ -28,19 +28,37 @@ configs["changes"]["stage"] = configs["changes"]["staging"]
 configs["changes"]["beta"] = configs["changes"]["prod"]
 native_cfg = {
   "name" => "native-config",
-  "file" => 'src/version.js',
+  "file" => 'src/config-settings.js',
   "changes" => {
     'native'   => [
-      {"regex": /const exploreIsNative.*/,    "target" => "const exploreIsNative = true;" },
-      {"regex": /const hotelitemIsNative.*/,  "target" =>"const hotelitemIsNative = true;"}
+      {"regex": /step1Results.*/, "target" => "step1Results: true," },
+      {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: true,"},
+      {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: true,"},
+      {"regex": /step4Payment.*/, "target" =>"step4Payment: true,"}
     ],
     'native1'   => [
-      {"regex": /const exploreIsNative.*/,    "target" => "const exploreIsNative = true;"   },
-      {"regex": /const hotelitemIsNative.*/,  "target" => "const hotelitemIsNative = false;"}
+      {"regex": /step1Results.*/, "target" => "step1Results: true," },
+      {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: false,"},
+      {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: false,"},
+      {"regex": /step4Payment.*/, "target" =>"step4Payment: false,"}
+    ],
+    'native2'   => [
+      {"regex": /step1Results.*/, "target" => "step1Results: true," },
+      {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: true,"},
+      {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: false,"},
+      {"regex": /step4Payment.*/, "target" =>"step4Payment: false,"}
+    ],
+    'native3'   => [
+      {"regex": /step1Results.*/, "target" => "step1Results: true," },
+      {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: true,"},
+      {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: true,"},
+      {"regex": /step4Payment.*/, "target" =>"step4Payment: false,"}
     ],
     'web'   => [
-      {"regex": /const exploreIsNative.*/,    "target" => "const exploreIsNative = false;"  },
-      {"regex": /const hotelitemIsNative.*/,  "target" => "const hotelitemIsNative = false;"}
+      {"regex": /step1Results.*/, "target" => "step1Results: false," },
+      {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: false,"},
+      {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: false,"},
+      {"regex": /step4Payment.*/, "target" =>"step4Payment: false,"}
     ],
   }
 }
