@@ -1,5 +1,6 @@
 import { handleActions } from 'redux-actions';
-import { setIsApplyingFilter, setDatesAndGuestsData
+import {
+  setIsApplyingFilter, setDatesAndGuestsData, setWebViewURL, setLoginDetails
 } from '../../action/userInterface';
 
 import moment from 'moment'
@@ -25,7 +26,12 @@ const {
   calendarData, calendarMarkedDays, calendarMarkedMonths
 } = generateInitialCalendarData(checkInMoment,checkOutMoment,today,minDate,maxDate,internalFormat,{});
 const initialState  = {
+  webViewURL: null,
   isApplyingFilter: false,
+  login: {
+    token: null,
+    email: null
+  },
   datesAndGuestsData: {
       today, minDate, maxDate, 
       calendarData, calendarMarkedDays, calendarMarkedMonths,
@@ -59,6 +65,20 @@ export default handleActions(
           ...state.datesAndGuestsData,
           ...payload
         }
+      };
+    },
+
+    [setWebViewURL]: (state, {payload}) => {
+      return {
+        ...state,
+        webViewURL: payload
+      };
+    },
+
+    [setLoginDetails]: (state, {payload}) => {
+      return {
+        ...state,
+        login: Object.assign({}, payload)
       };
     },
   },

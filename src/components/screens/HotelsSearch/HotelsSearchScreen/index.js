@@ -44,7 +44,7 @@ import {
   autoGetAllStaticPages,
   hotelSearchIsNative
 } from "../../../../config-settings";
-import { isOnline, rlog, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
+import { isOnline, rlog, processError, hotelsSearchSocketDebug, clog } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -100,7 +100,7 @@ import {
 
 import stomp from "stomp-websocket-js";
 import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
-import { setSearch/*, setSearchFiltered*/ } from '../../../../redux/action/hotels'
+import { setSearch, setSearchString } from '../../../../redux/action/hotels'
 
 let stompiOSClient = undefined;
 let stompAndroidClient = undefined;
@@ -151,8 +151,8 @@ class HotelsSearchScreen extends Component {
 
     // Bind functions to this,
     // thus optimizing performance - by using bind(this) instead of "=> function".
+    this._setSearchString = this._setSearchString.bind(this);
     this.gotoHotelDetailsPageNative = this.gotoHotelDetailsPageNative.bind(this);
-    this.saveState = this.saveState.bind(this);
     this.getNextStaticPage = this.getNextStaticPage.bind(this);
     this.unsubscribe = this.stopSocketConnection.bind(this);
     this.updateCoords = this.updateCoords.bind(this);
@@ -203,11 +203,8 @@ class HotelsSearchScreen extends Component {
 
     if (this.state.isHotel) {
       this.getStaticHotelsData();
+      this._setSearchString();
     }
-
-    // TODO: Figure out why is this call used
-    // It was initially called from the constructor body (why? how is it possible to work)
-    this.saveState();
   }
   
   componentWillMount() {
@@ -911,10 +908,9 @@ class HotelsSearchScreen extends Component {
    * TODO: Check if this can be removed
    * // see old code from before 2019-05-15 when it was cleaned by Alex K
    */
-  saveState() {
-    if (this.state.isHotel) {
-      this.searchString = generateSearchString(this.state, this.props);
-    }
+  _setSearchString() {
+    this.searchString = generateSearchString(this.state, this.props);
+    this.props.setSearchString(this.searchString);
   }
 
   gotoFilter = () => {
@@ -1122,6 +1118,7 @@ const mapStateToProps = state => {
   return {
     currency: state.currency.currency,
     isApplyingFilter: state.userInterface.isApplyingFilter,
+    searchString: state.hotels.searchString,
     searchResults: state.hotels.searchResults,
     datesAndGuestsData: state.userInterface.datesAndGuestsData,
     //searchResultsFiltered: state.hotels.searchResultsFiltered,
@@ -1130,6 +1127,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
   setSearch: bindActionCreators(setSearch, dispatch),
+  setSearchString: bindActionCreators(setSearchString, dispatch),
   //setSearchFiltered: bindActionCreators(setSearchFiltered, dispatch),
 })
 

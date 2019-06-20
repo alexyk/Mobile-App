@@ -1,6 +1,6 @@
 import { isMoment } from "moment";
 import { basePath } from "../../config";
-import { rlog } from "../../config-debug";
+import { clog } from "../../config-debug";
 
 
 export function validateObject(sourceData, props, index=-1, path='') {
@@ -80,8 +80,7 @@ export function validateObject(sourceData, props, index=-1, path='') {
 
   if (result.length > 0) {
     // remove last space
-    result = result.substr(0,result.length - space.length)
-	  //log('debug-in',`result: ${result} path: '${path}'  indx: ${index}, props: ${Object.keys(props)}`,{data:sourceData,props,path,index,result})
+    result = result.substr(0,result.length - space.length);
   }
 
 
@@ -89,13 +88,16 @@ export function validateObject(sourceData, props, index=-1, path='') {
 }
 
 export function generateSearchString(state, props) {
-  rlog('generate',`generateSearchString - state and props`, {state,props})
-
   let search = `?region=${state.regionId}`;
   search += `&currency=${props.currency}`;
   search += `&startDate=${state.checkInDateFormated}`;
   search += `&endDate=${state.checkOutDateFormated}`;
-  search += `&rooms=${state.roomsDummyData}`;
+  
+  clog(`state.roomsDummyData: ${state.roomsDummyData} (${typeof(state.roomsDummyData)})`)
+  if (state.roomsDummyData) {
+    search += `&rooms=${state.roomsDummyData}`;
+  }
+
   return search;
 }
 
@@ -120,7 +122,7 @@ export function generateWebviewInitialState(params, state = null) {
     checkInDateFormated,
     checkOutDateFormated,
     roomsDummyData,
-    currency: params.currency,
+    currency: params.currency ? params.currency : (state ? state.currency : null),
     email: params ? params.email : "",
     token: params ? params.token : "",
     propertyName: params ? params.propertyName : "",
@@ -133,15 +135,20 @@ export function generateWebviewInitialState(params, state = null) {
     showProgress: true
   };
 
-  const webViewUrl =
-    basePath +
-    generateWebviewUrl(
-      initialState,
-      roomsDummyData,
-      params && params.baseUrl ? params.baseUrl : null
-    );
+  const webViewUrl = basePath + (
+    params.webViewUrl
+      ?
+        params.webViewUrl
+      :
+        generateWebviewUrl(
+          initialState,
+          roomsDummyData,
+          params && params.baseUrl ? params.baseUrl : null
+        )
+  )
 
   initialState.webViewUrl = webViewUrl;
+  console.info(`[utils::generateWebviewInitialState] webViewUrl: ${webViewUrl}`, {webViewUrl})
 
   return initialState;
 }
@@ -159,7 +166,9 @@ export function generateWebviewUrl(initialState, rooms, baseUrl = null) {
     // hotels specific properties
     if (!result) result = baseHotelUrl;
     result += "region=" + initialState.regionId;
-    result += "&rooms=" + rooms;
+    if (rooms) {
+      result += "&rooms=" + rooms;
+    }
   } else {
     // homes specific properties
     if (!result) result = baseHomeUrl;
@@ -194,8 +203,11 @@ export function getWebviewExtraData(state, extraData = {}) {
   };
 }
 
-export function gotoWebview(state, navigation, extraData = {}) {
-  navigation.navigate("WebviewScreen", getWebviewExtraData(state, extraData));
+export function gotoWebview(state, navigation, extraData = {}, useCachedSearchString=true) {
+  navigation.navigate("WebviewScreen", {
+    ...getWebviewExtraData(state, extraData),
+    useCachedSearchString
+  });
 }
 
 

@@ -18,7 +18,7 @@ import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
-import { webviewDebugEnabled, clog, wlog } from '../../../config-debug';
+import { webviewDebugEnabled } from '../../../config-debug';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -36,7 +36,7 @@ class WebviewScreen extends Component {
     
     constructor(props) {
         super(props);
-        const { params } = this.props.navigation.state;
+        const { params } = props.navigation.state;
 
         // TODO: Figure out what is this for and how was it supposed to work  / commented on by Alex K, 2019-03-06
         // UUIDGenerator.getRandomUUID((uuid) => {
@@ -47,7 +47,9 @@ class WebviewScreen extends Component {
         const allParams = Object.assign({},params,{currency:props.currency});
         this.state = generateWebviewInitialState(allParams);
 
-        clog(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
+        if (params.useCachedSearchString) {
+            this.state.webViewUrl = props.allState.userInterface.webViewURL;
+        }
 
         // Fix for using WebView::onMessage
         this.patchPostMessageFunction = function() {
@@ -55,7 +57,7 @@ class WebviewScreen extends Component {
             var originalPostMessage = window.postMessage;
           
             var patchedPostMessage = function(message, targetOrigin, transfer) { 
-                log('Patched', `WebView post message`, {message,targetOrigin,transfer});
+                //clog('Patched', `WebView post message`, {message,targetOrigin,transfer});
                 
                 originalPostMessage(message, targetOrigin, transfer);
             };
@@ -207,7 +209,7 @@ class WebviewScreen extends Component {
     }
 
     onWebViewNavigationState(navState) {
-        log('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
+        //clog('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
 
         this.webViewRef.canGoBackAndroid = navState.canGoBack;
         this.setState({canGoForward:    navState.canGoForward});
@@ -260,7 +262,7 @@ class WebviewScreen extends Component {
         }
         
         if (this.webViewRef.ref == null) {
-            wlog('[WebView::renderDebug] this.webViewRef.ref is not set - not showing debug button')
+            //wlog('[WebView::renderDebug] this.webViewRef.ref is not set - not showing debug button')
             return null;
         }
 
@@ -279,38 +281,36 @@ class WebviewScreen extends Component {
         //console.log(`[WebView] Loading '${this.state.webViewUrl}'`)
 
         return (
-            <SafeAreaView style={styles.safeArea}>
-                <View style={styles.container}>
-                    <View style={styles.backButtonContainer}>
-                        <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
-                        {/* <Text style={styles.title}>{this.state.title}</Text> */}
-                        <Text style={styles.backText}>{'Modify search'}</Text>
-                        {this.renderDebug()}
-                    </View>
-
-                    <View style={styles.webviewContainer}>
-                        <WebView
-                            ref={(webViewRef) => { this.webViewRef.ref = webViewRef; }}
-                            onNavigationStateChange = {this.onWebViewNavigationState}
-                            onLoadStart = {this.onWebViewLoadStart}
-                            onLoadEnd   = {this.onWebViewLoadEnd}
-                            onMessage   = {this.onWebViewMessage}
-                            style       = {styles.webView}
-                            injectedJavaScript = {patchPostMessageJsCode}
-                            source = {{ uri: this.state.webViewUrl }}
-                            // javaScriptEnabled={true}
-                        />
-                    </View>
-
-                    <ProgressDialog
-                        visible={this.state.showProgress}
-                        title="Loading"
-                        message={this.state.message ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
-                        animationType="slide"
-                        activityIndicatorSize="large"
-                        activityIndicatorColor="black"/>
+            <View style={styles.container}>
+                <View style={styles.backButtonContainer}>
+                    <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
+                    {/* <Text style={styles.title}>{this.state.title}</Text> */}
+                    <Text style={styles.backText}>{'Modify search'}</Text>
+                    {this.renderDebug()}
                 </View>
-            </SafeAreaView>
+
+                <View style={styles.webviewContainer}>
+                    <WebView
+                        ref={(webViewRef) => { this.webViewRef.ref = webViewRef; }}
+                        onNavigationStateChange = {this.onWebViewNavigationState}
+                        onLoadStart = {this.onWebViewLoadStart}
+                        onLoadEnd   = {this.onWebViewLoadEnd}
+                        onMessage   = {this.onWebViewMessage}
+                        style       = {styles.webView}
+                        injectedJavaScript = {patchPostMessageJsCode}
+                        source = {{ uri: this.state.webViewUrl }}
+                        // javaScriptEnabled={true}
+                    />
+                </View>
+
+                <ProgressDialog
+                    visible={this.state.showProgress}
+                    title="Loading"
+                    message={this.state.message ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
+                    animationType="slide"
+                    activityIndicatorSize="large"
+                    activityIndicatorColor="black"/>
+            </View>
         );
     }
 }

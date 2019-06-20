@@ -2,8 +2,7 @@ import {
     Dimensions,
     ScrollView,
     View,
-    TouchableOpacity,
-    SafeAreaView
+    TouchableOpacity
 } from 'react-native';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -14,8 +13,10 @@ import LocationView from '../../../atoms/LocationView';
 import BackButton from '../../../atoms/BackButton';
 import styles from './styles';
 import ImageCarousel from '../../../atoms/ImagePage';
+import { connect } from 'react-redux';
 import { hotelSearchIsNative } from '../../../../config-settings';
 import { getSafeTopOffset } from '../../../../utils/designUtils';
+import { gotoWebview } from '../../utils';
 
 
 class HotelDetails extends Component {
@@ -100,7 +101,16 @@ class HotelDetails extends Component {
                 hotelImg: hotelImg
             });
         } else {
+            const {params} = this.props.navigation.state;
+            const { hotel, searchString } = this.state;
+            let webViewUrl = `mobile/hotels/listings/${hotel.id}${searchString}&quoteId=${roomDetail.quoteId}`
+            const { token, email } = this.props.datesAndGuestsData;
+            webViewUrl += `&authToken=${token}`;
+            webViewUrl += `&authEmail=${email}`;
+            
+            console.log('ROOM DETAIL',{state:this.state,props:this.props,params,webViewUrl,roomDetail,searchString,cache:this.props.datesAndGuestsData});
 
+            gotoWebview(this.state, this.props.navigation, {webViewUrl,message:'Processing booking ...'}, false);
         }
     } 
 
@@ -118,7 +128,7 @@ class HotelDetails extends Component {
         const logoWidth = width;
         const logoHeight = (height * 0.3 + getSafeTopOffset());
 
-        console.log('logo dim',{logoHeight,logoWidth})
+        //console.log('logo dim',{logoHeight,logoWidth})
         return (
             <View style={{ width: logoWidth, height: logoHeight }}>
                 <ImageCarousel
@@ -239,4 +249,10 @@ class HotelDetails extends Component {
     }
 }
 
-export default HotelDetails;
+let mapStateToProps = (state) => {
+    return {
+        datesAndGuestsData: state.userInterface.datesAndGuestsData,
+    };
+}
+
+export default connect(mapStateToProps)(HotelDetails);

@@ -26,6 +26,7 @@ import { gotoWebview } from '../utils';
 import styles from './styles';
 import { formatDatesData } from '../Calendar/utils';
 import { hotelSearchIsNative } from '../../../config-settings';
+import { setLoginDetails } from '../../../redux/action/userInterface';
 
 
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
@@ -63,7 +64,7 @@ class Explore extends Component {
             search: '',
             regionId: '',
             daysDifference: 1,
-            roomsDummyData: encodeURI(JSON.stringify(roomsData)),
+            roomsDummyData: JSON.stringify(roomsData),
             filter: {
                 showUnavailable: true, name: '', minPrice: 1, maxPrice: 5000, stars: [0, 1, 2, 3, 4, 5]
             },
@@ -81,22 +82,16 @@ class Explore extends Component {
             ...props.datesAndGuestsData
         };
 
-        // init dates
-        props.setDatesAndGuestsData({onConfirm: this.onDatesSelect})
         // this.props.actions.getCurrency(props.currency, false);//eslint-disable-line
-        Explore.self = this;
-
-        // this.testWS();
     }
 
 
     async componentWillMount() {
         const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
         const email_value = await AsyncStorage.getItem(`${domainPrefix}.auth.username`);
-        this.setState({
-            token: token_value,
-            email: email_value,
-        });
+        const newState = { token: token_value, email: email_value };
+        this.setState(newState);
+        this.props.setDatesAndGuestsData({onConfirm: this.onDatesSelect, ...newState});
 
         if (__DEV__) {
             if (autoHotelSearchFocus) this.searchBarRef.focus()
@@ -292,34 +287,63 @@ class Explore extends Component {
         // });
     }
 
+    _cacheLogin() {
+        const { token, email, isHotel, search } = this.state;
+        const extraParams = {
+            isHotel,
+            token: token,
+            email: email,
+            message: isHotel
+                ? `Looking for hotels in\n"${search}"`
+                : `Looking for homes in\n"${search}"`,
+            title: isHotel
+                ? lang.TEXT.SEARCH_HOTEL_RESULTS_TILE
+                : lang.TEXT.SEARCH_HOME_RESULTS_TILE
+        }
+
+        //TODO: When refactoring - move to login flow
+        this.props.setLoginDetails({token,email});
+
+        return extraParams
+    }
+
     gotoSearch() {
         const delayedFunction = () => {
-            console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`);
-            //Open new property screen that uses sock-js
+            const extraParams = this._cacheLogin()
+            console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`, {extraParams});
+
             if (hotelSearchIsNative.step1Results) {
-                if (this.state.isHotel) {
-                    //console.log("this.state.regionId.", this.state.regionId);
-                    if (this.state.regionId === "" || this.state.regionId === 0) {
+                const {
+                    token, email, isHotel, search, regionId, roomsDummyData, daysDifference,
+                    adults, guests, infants, children, childrenBool,
+                    checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated,
+                } = this.state;
+
+                if (isHotel) {
+                    // TODO: Cache these to redux and re-use
+
+                    if (regionId === "" || regionId === 0) {
                         this.refs.toast.show('Please input location to search hotels.', 2500);
                         return;
                     }
+
                     this.props.navigation.navigate('HotelsSearchScreen', {
-                        isHotel: this.state.isHotel,
-                        searchedCity: this.state.search,
-                        regionId: this.state.regionId,
-                        checkInDate: this.state.checkInDate,
-                        checkOutDate: this.state.checkOutDate,
-                        guests: this.state.guests,
-                        adults: this.state.adults,
-                        children: this.state.children,
-                        infants: this.state.infants,
-                        childrenBool: this.state.childrenBool,
-                        checkOutDateFormated: this.state.checkOutDateFormated,
-                        checkInDateFormated: this.state.checkInDateFormated,
-                        roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
-                        daysDifference: this.state.daysDifference,
-                        token: this.state.token,
-                        email: this.state.email,
+                        isHotel: isHotel,
+                        searchedCity: search,
+                        regionId: regionId,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        guests: guests,
+                        adults: adults,
+                        children: children,
+                        infants: infants,
+                        childrenBool: childrenBool,
+                        checkInDateFormated: checkInDateFormated,
+                        checkOutDateFormated: checkOutDateFormated,
+                        roomsDummyData: roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
+                        daysDifference: daysDifference,
+                        token: token,
+                        email: email,
                     });
                 }
                 else {
@@ -331,17 +355,17 @@ class Explore extends Component {
                     this.props.navigation.navigate('HomesSearchScreen', {
                         countryId: this.state.countryId,
                         home: this.state.value,
-                        checkInDate: this.state.checkInDate,
-                        checkOutDate: this.state.checkOutDate,
-                        guests: this.state.guests,
-                        adults: this.state.adults,
-                        children: this.state.children,
-                        infants: this.state.infants,
-                        childrenBool: this.state.childrenBool,
-                        checkOutDateFormated: this.state.checkOutDateFormated,
-                        checkInDateFormated: this.state.checkInDateFormated,
-                        roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
-                        daysDifference: this.state.daysDifference
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        guests: guests,
+                        adults: adults,
+                        children: children,
+                        infants: infants,
+                        childrenBool: childrenBool,
+                        checkOutDateFormated: checkOutDateFormated,
+                        checkInDateFormated: checkInDateFormated,
+                        roomsDummyData: roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
+                        daysDifference: daysDifference
                     });
                 }
             }
@@ -357,18 +381,6 @@ class Explore extends Component {
                 }
                 else {
                     const {props,state} = this;
-                    const extraParams = {
-                        token: state.token,
-                        email: state.email,
-                        message: this.state.isHotel
-                            ? `Looking for hotels in\n"${state.search}"`
-                            : `Looking for homes in\n"${state.search}"`,
-                        title: this.state.isHotel
-                            ? lang.TEXT.SEARCH_HOTEL_RESULTS_TILE
-                            : lang.TEXT.SEARCH_HOME_RESULTS_TILE,
-                        isHotel: this.state.isHotel
-                        
-                    }
                     gotoWebview(state, props.navigation, extraParams);
                 }
             }
@@ -728,6 +740,7 @@ let mapStateToProps = (state) => {
 
 const mapDispatchToProps = dispatch => ({
     setCurrency: bindActionCreators(setCurrency, dispatch),
+    setLoginDetails: bindActionCreators(setLoginDetails, dispatch),
     setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch),
 })
 

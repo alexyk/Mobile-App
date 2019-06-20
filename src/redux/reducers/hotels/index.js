@@ -1,7 +1,8 @@
 import { handleActions } from 'redux-actions';
-import { setSearch, setSearchFiltered } from '../../action/hotels';
+import { setSearch, setSearchFiltered, setSearchString } from '../../action/hotels';
 
 const initialState  = {
+  searchString: null,
   searchResults: [],
   searchResultsFiltered: [],
 };
@@ -12,6 +13,12 @@ export default handleActions(
       return {
         ...state,
         searchResults: payload
+      };
+    },
+    [setSearchString]: (state, {payload}) => {
+      return {
+        ...state,
+        searchString: payload
       };
     },
     [setSearchFiltered]: (state, {payload}) => {

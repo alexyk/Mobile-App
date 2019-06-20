@@ -90,7 +90,7 @@ export function createHotelSearchInitialState(params) {
     infants: 0,
     childrenBool: false,
     daysDifference: 1,
-    roomsDummyData: encodeURI(JSON.stringify(roomsData)),
+    roomsDummyData: JSON.stringify(roomsData),
 
     //filters
     isFilterResult: false,
