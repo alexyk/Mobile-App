@@ -47,6 +47,7 @@ class RoomDetailsReview extends Component {
             data: '',
             isLoading: false,
             cancelationDate: '',
+            isDisabled: true,
 
             safeChargeMode: false
         };
@@ -98,7 +99,8 @@ class RoomDetailsReview extends Component {
                                         bookingId: bookingId,
                                         hotelBooking: hotelBooking,
                                         booking: value,
-                                        data: data
+                                        data: data,
+                                        isDisabled: false
                                     }, () => {
                                         const { currencyExchangeRates } = that.props.exchangeRates;
                                         const fiatPriceRoomsXML = params.price;
@@ -420,7 +422,6 @@ class RoomDetailsReview extends Component {
                                 secureTextEntry={true}
                             />
                             <TouchableOpacity
-                                style={styles.confirmButton}
                                 onPress={this.payWithLocSingleWithdrawer}
                             >
                                 <Text style={styles.confirmButtonText}>Confirm</Text>
@@ -548,6 +549,7 @@ class RoomDetailsReview extends Component {
                     params={{ bookingId: this.state.bookingId }} 
                     daysDifference = {params.daysDifference}
                     titleBtn = {"Confirm and Pay"}
+                    isDisabled={this.state.isDisabled}
                     onPress = {this.onConfirm}/>
                 {/* <View style={styles.floatingBar}>
                     <View style={styles.detailsView}>

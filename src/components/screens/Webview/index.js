@@ -18,7 +18,7 @@ import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
-import { webviewDebugEnabled } from '../../../config-debug';
+import { webviewDebugEnabled, clog } from '../../../config-debug';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -50,6 +50,8 @@ class WebviewScreen extends Component {
         if (params.useCachedSearchString) {
             this.state.webViewUrl = props.allState.userInterface.webViewURL;
         }
+
+        clog(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
 
         // Fix for using WebView::onMessage
         this.patchPostMessageFunction = function() {
@@ -209,7 +211,7 @@ class WebviewScreen extends Component {
     }
 
     onWebViewNavigationState(navState) {
-        //clog('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
+        clog('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
 
         this.webViewRef.canGoBackAndroid = navState.canGoBack;
         this.setState({canGoForward:    navState.canGoForward});
@@ -278,7 +280,7 @@ class WebviewScreen extends Component {
     render() {
         const patchPostMessageJsCode = '(' + String(this.patchPostMessageFunction) + ')();';
 
-        //console.log(`[WebView] Loading '${this.state.webViewUrl}'`)
+        console.log(`### [WebView] Rendering '${this.state.webViewUrl}'`)
 
         return (
             <View style={styles.container}>

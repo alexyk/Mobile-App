@@ -87,16 +87,31 @@ export function validateObject(sourceData, props, index=-1, path='') {
   return result;
 }
 
-export function generateSearchString(state, props) {
+export function generateSearchStringFromAll(obj) {
+  let search = `?`;
+  for (let prop in obj) {
+    search += `&${prop}=${obj[prop]}`;
+  }
+
+  return search;
+}
+
+
+export function generateSearchString(state, props, doDecodeRooms=false) {
   let search = `?region=${state.regionId}`;
   search += `&currency=${props.currency}`;
   search += `&startDate=${state.checkInDateFormated}`;
   search += `&endDate=${state.checkOutDateFormated}`;
   
-  clog(`state.roomsDummyData: ${state.roomsDummyData} (${typeof(state.roomsDummyData)})`)
   if (state.roomsDummyData) {
-    search += `&rooms=${state.roomsDummyData}`;
+    if (doDecodeRooms) {
+      search += `&rooms=${decodeURI(state.roomsDummyData)}`;
+    } else {
+      search += `&rooms=${state.roomsDummyData}`;
+    }
   }
+
+  clog(`### [utils::gen search str] ${search}`)
 
   return search;
 }
@@ -166,8 +181,9 @@ export function generateWebviewUrl(initialState, rooms, baseUrl = null) {
     // hotels specific properties
     if (!result) result = baseHotelUrl;
     result += "region=" + initialState.regionId;
+
     if (rooms) {
-      result += "&rooms=" + rooms;
+      result += "&rooms=" + decodeURI(rooms);
     }
   } else {
     // homes specific properties
@@ -195,13 +211,14 @@ export function getWebviewExtraData(state, extraData = {}) {
     regionId: state.regionId,
     checkOutDateFormated: state.checkOutDateFormated,
     checkInDateFormated: state.checkInDateFormated,
-    roomsDummyData: state.roomsDummyData, //encodeURI(JSON.stringify(state.roomsData)),
+    roomsDummyData: state.roomsDummyData,
     email: state.email,
     token: state.token,
     search: state.search,
     ...extraData
   };
 }
+
 
 export function gotoWebview(state, navigation, extraData = {}, useCachedSearchString=true) {
   navigation.navigate("WebviewScreen", {
@@ -213,6 +230,15 @@ export function gotoWebview(state, navigation, extraData = {}, useCachedSearchSt
 
 export function isArray(value) {
   return (value instanceof Array)
+}
+
+
+export function stringifyRoomsData(roomsData) {
+  const result = encodeURI(
+    JSON.stringify( roomsData )
+  );
+
+  return result;
 }
 
 

@@ -39,7 +39,7 @@ class GuestInfoForm extends Component {
         for (var i = 0; i < this.props.navigation.state.params.guests; i++){
             if (i == 0) {
                 guests.push({
-                    key: i,
+                    key: `${i}`,
                     genderRepresentation: 'Mr',
                     firstName: firstName,
                     lastName: lastName
@@ -51,7 +51,7 @@ class GuestInfoForm extends Component {
             }
             else {
                 guests.push({
-                    key: i,
+                    key: `${i}`,
                     genderRepresentation: 'Mr',
                     firstName: '',
                     lastName: ''
@@ -171,7 +171,6 @@ class GuestInfoForm extends Component {
                     <Text style={styles.steps}>STEP 1 OF 2</Text>
                     <Text style={styles.heading}>Provide guest information</Text>
                     
-                    
                     <View style={styles.hotelInfoContainer}>
                         <View style={styles.hotelThumbView}>
                             <Image source={{uri: imgHost + imgURL}} style={styles.hotelThumb} />
@@ -231,17 +230,17 @@ class GuestInfoForm extends Component {
 }
 
 GuestInfoForm.defaultProps = {
-    hotelName: 'Test Hotel',
-    hotelAddress: 'Kensington road',
-    priceInUserCurreny : 457,
-    priceInLoc : 49.3,
-    quoteId: '249357191-0',
+    hotelName: '',
+    hotelAddress: '',
+    priceInUserCurreny : NaN,
+    priceInLoc : NaN,
+    quoteId: '',
     roomDetail:{},
     guests : 0,
     guestsArray: [
         {
             key: 0,
-            genderRepresentation: 'Mr',
+            genderRepresentation: '',
             firstName: '',
             lastName: ''
         },

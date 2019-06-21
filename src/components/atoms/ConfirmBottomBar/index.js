@@ -69,7 +69,12 @@ class ConfirmBottomBar extends Component {
     }
 
     render() {
-        const {currency, currencySign, exchangeRates, locPriceUpdateTimer, fiat, locAmount, quoteLocError, daysDifference, onPress, titleBtn} = this.props;
+        const {
+            currency, currencySign, exchangeRates, locPriceUpdateTimer, fiat, locAmount, quoteLocError, 
+            daysDifference, onPress, titleBtn, isDisabled
+        } = this.props;
+
+        const onPressFunc = (isDisabled ? ()=>{} : onPress);
 
         if (!this.isQuoteLocRendered && locAmount) {
             this.isQuoteLocRendered = true;
@@ -101,7 +106,7 @@ class ConfirmBottomBar extends Component {
                 </View>
                 
                 <View style={styles.nextButtonView}>
-                    <TouchableOpacity style={styles.nextButton} onPress={onPress}>
+                    <TouchableOpacity style={isDisabled ?  styles.nextButtonDisabled : styles.nextButton} onPress={onPressFunc}>
                         <Text style={styles.nextText}>{titleBtn}</Text>
                     </TouchableOpacity>
                 </View>
@@ -115,7 +120,8 @@ ConfirmBottomBar.propTypes = {
 };
 
 ConfirmBottomBar.defaultProps = {
-    onPress: () => {}
+    onPress: () => {},
+    isDisabled: true
 };
 
 let mapStateToProps = (state, ownProps) => {

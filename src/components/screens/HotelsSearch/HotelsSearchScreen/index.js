@@ -44,7 +44,7 @@ import {
   autoGetAllStaticPages,
   hotelSearchIsNative
 } from "../../../../config-settings";
-import { isOnline, rlog, processError, hotelsSearchSocketDebug, clog } from "../../../../config-debug";
+import { isOnline, rlog, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -115,7 +115,7 @@ class HotelsSearchScreen extends Component {
     console.disableYellowBox = true;
 
     const { params } = this.props.navigation.state; //eslint-disable-line
-    this.state = createHotelSearchInitialState(params);
+    this.state = createHotelSearchInitialState(params, props.datesAndGuestsData);
     
     this.pageLimit = this.PAGE_LIMIT;
     this.pagesLoaded = 0;
@@ -654,7 +654,6 @@ class HotelsSearchScreen extends Component {
           displayMode: DISPLAY_MODE_HOTEL_DETAILS,
         });
       } else {
-        //console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
 
         this.setState({ isLoading: true });
         requester
@@ -689,8 +688,6 @@ class HotelsSearchScreen extends Component {
 
   
   gotoHotelDetailsPageNative(item) {
-    //console.log("gotoHotelDetailsPageNative", item);
-
     requester.getHotelById(item.id, this.searchString.split("&")).then(res => {
       // here you set the response in to json
       res.body
@@ -701,9 +698,7 @@ class HotelsSearchScreen extends Component {
           }
           this.setState({ isLoading: false });
           this.props.navigation.navigate("HotelDetails", {
-            guests: this.state.guests,
             hotelDetail: item,
-            searchString: this.searchString,
             hotelFullDetails: data,
             dataSourcePreview: hotelPhotos,
             daysDifference: this.state.daysDifference
@@ -718,6 +713,10 @@ class HotelsSearchScreen extends Component {
 
   onFilteredData(res) {
     const _this = this;
+    if (!this || !(this instanceof HotelsSearchScreen) || this.isUnmounted) {
+      console.warn(`[HotelsSearchScreen] Skipping onFilteredData - screen seems unmounted`);
+      return;
+    }
 
     if (res.success) {
       res.body.then((data) => {
@@ -787,7 +786,17 @@ class HotelsSearchScreen extends Component {
       // //console.log('Search expired');
       this.props.setIsApplyingFilter(false)
       this.setState({error:lang.TEXT.SEARCH_HOTEL_FILTER_ERROR.replace('%1',res.message)})
-      console.error('[HotelsSearchScreen] Filter error',{res})
+      if (res.errors) {
+        res.errors.then((data) => {
+          let {message} = data;
+          if (!message) {
+            message = `${data}`;
+          }
+          processError(`[HotelsSearchScreen] Filter error: ${message}`,{res,data});
+        })
+      } else {
+        console.error('[HotelsSearchScreen] Filter error',{res})
+      }
     }
   }
 
@@ -1080,27 +1089,25 @@ class HotelsSearchScreen extends Component {
     // log('LTLoader/HotelSearch',`isLoading: ${this.state.isLoading} isApplyingFilter: ${this.props.isApplyingFilter} isList: ${isList} isMap: ${isMap}`,{props:this.props, state:this.state})
 
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          {this.renderWebViewBack()}
-          {this.renderBackButtonAndSearchField()}
-          {this.renderCalendarAndFilters()}
+      <View style={styles.container}>
+        {this.renderWebViewBack()}
+        {this.renderBackButtonAndSearchField()}
+        {this.renderCalendarAndFilters()}
 
-          <View style={styles.containerHotels}>
-            {this.renderHotelDetailsAsWebview()}
-            {this.renderResultsAsMap()}
-            {this.renderResultsAsList()}
-  
-            {this.renderMapButton()}
-            {this.renderPreloader()}
-          </View>
+        <View style={styles.containerHotels}>
+          {this.renderHotelDetailsAsWebview()}
+          {this.renderResultsAsMap()}
+          {this.renderResultsAsList()}
 
-          {this.renderFooter()}
-          {this.renderToast() }
-
-          {this.renderDebugWebview()}
-          {this.renderDebugMap()}
+          {this.renderMapButton()}
+          {this.renderPreloader()}
         </View>
+
+        {this.renderFooter()}
+        {this.renderToast() }
+
+        {this.renderDebugWebview()}
+        {this.renderDebugMap()}
 
         {/* <ProgressDialog
                       visible={this.state.isLoading}
@@ -1109,7 +1116,7 @@ class HotelsSearchScreen extends Component {
                       animationType="slide"
                       activityIndicatorSize="large"
                       activityIndicatorColor="black"/> */}
-      </SafeAreaView>
+      </View>
     );
   }
 }

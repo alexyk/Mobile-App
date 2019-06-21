@@ -5,6 +5,7 @@ import {
 
 import moment from 'moment'
 import { generateInitialCalendarData, formatDatesData } from '../../../components/screens/Calendar/utils';
+import { stringifyRoomsData } from '../../../components/screens/utils';
 
 const internalFormat = "YYYY-MM-DD";
 const inputDateFormat = 'DD/MM/YYYY';
@@ -40,6 +41,8 @@ const initialState  = {
       children: 0,
       infants: 0,
       childrenBool: false,
+      roomsDummyData: stringifyRoomsData( [ {adults: 2, children: []} ] ),
+      regionId: '',
       inputFormat: inputDateFormat,
       displayFormat: displayDateFormat,
       internalFormat,

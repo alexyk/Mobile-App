@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, Platform, Image } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import MapView, { Marker } from 'react-native-maps';
@@ -14,6 +14,7 @@ import { RoomsXMLCurrency } from '../../../../services/utilities/roomsXMLCurrenc
 import LocPrice from '../../../atoms/LocPrice';
 import { calculateCoordinatesGridPosition, generateListItemKey } from '../utils';
 import styles from './styles';
+import { DEFAULT_HOTEL_PNG } from '../../../../config-settings';
 
 
 class MapModeHotelsSearch extends Component {
@@ -96,47 +97,35 @@ class MapModeHotelsSearch extends Component {
                 ? thumbnail.url
                 : thumbnail
                     ? thumbnail
-                    : ''//DEFAULT_HOTEL_PNG
-        )        
+                    : DEFAULT_HOTEL_PNG
+        )
 
-        return(
-            <FastImage
-                style={{ width: 120, height: 90}}
-                source={{
-                    uri: thumbnailURL,
-                    priority: FastImage.priority.high,
-                }}
-                resizeMode={FastImage.resizeMode.cover}
-                // onLoad={e => console.log(e.nativeEvent.width, e.nativeEvent.height)}
-                // onError={e => console.log("errr", e)}
-                //onLoadEnd={e => {console.log("onLoadEnd"); that.selectedMarker.showCallout();}}
-            />
-        );
-        // if(Platform.OS === 'ios') {
-        //     return(
-        //         // <FastImage
-        //         //     style={{ width: 120, height: 90}}
-        //         //     source={{
-        //         //         uri: thumbnailURL,
-        //         //         priority: FastImage.priority.high,
-        //         //     }}
-        //         //     resizeMode={FastImage.resizeMode.cover}
-        //         // />
-        //         <Image
-        //             style={{ width: 120, height: 90}}
-        //             source={{uri: thumbnailURL}}
-        //             resizeMode={"cover"}
-        //         />
-        //     )
-        // } else {
-        //   return(
-        //     <WebView
-        //         style={{ width: 120, height: 90, marginLeft:-3.5, backgroundColor:'#fff'}}
-        //         source={{html: "<img src=" + thumbnailURL + " width='120'/>" }}
-        //         javaScriptEnabledAndroid={true}
-        //     />
-        //   )
-        // }
+        if (Platform.OS == 'android') {
+            return (
+                <Image 
+                    source={{uri: thumbnailURL}} 
+                    style={{ width: 120, height: 90, backgroundColor:'red'}}
+                    onLoadStart={e => console.log(`### [fast image] onLoadStart`,e)}
+                    onLoad={e => console.log(`###* [fast image] onLoad`,e)}
+                    onLoadEnd={e => console.log(`### [fast image] onLoadEnd`,e)}
+                    onProgress={e => console.log(`### [fast image] onProgress`,e)}
+                    onError={e => console.log("### fast image  - errr", e)}
+                />
+            )
+        } else {
+            return(
+                <FastImage
+                    style={{ width: 120, height: 90}}
+                    source={{
+                        // uri: thumbnailURL,
+                        uri: imgHost + DEFAULT_HOTEL_PNG,
+                        priority: FastImage.priority.high,
+                    }}
+                    resizeMode={FastImage.resizeMode.cover}
+                />
+            );
+        }
+
     }
 
     renderCalloutStars = ({stars}) => {
