@@ -116,7 +116,7 @@ export function generateSearchString(state, props, doDecodeRooms=false) {
   return search;
 }
 
-export function generateWebviewInitialState(params, state = null) {
+export function generateWebviewInitialState(params, state = null, skipWebViewURL = false) {
   if (state) {
     params = {
       ...params,
@@ -150,20 +150,27 @@ export function generateWebviewInitialState(params, state = null) {
     showProgress: true
   };
 
-  const webViewUrl = basePath + (
-    params.webViewUrl
-      ?
-        params.webViewUrl
-      :
-        generateWebviewUrl(
-          initialState,
-          roomsDummyData,
-          params && params.baseUrl ? params.baseUrl : null
-        )
-  )
-
-  initialState.webViewUrl = webViewUrl;
-  console.info(`[utils::generateWebviewInitialState] webViewUrl: ${webViewUrl}`, {webViewUrl})
+  if (skipWebViewURL) {
+    if (params.webViewUrl) {
+      initialState.webViewUrl = params.webViewUrl;
+    }
+  } else {
+    const webViewUrl = basePath + (
+      params.webViewUrl
+        ?
+          params.webViewUrl
+        :
+          generateWebviewUrl(
+            initialState,
+            roomsDummyData,
+            params && params.baseUrl ? params.baseUrl : null
+          )
+    )
+    
+    initialState.webViewUrl = webViewUrl;
+  }
+  
+  console.info(`[utils::generateWebviewInitialState] webViewUrl: ${initialState.webViewUrl}`, {webViewUrl:initialState.webViewUrl,initialState, params, state})
 
   return initialState;
 }
@@ -219,8 +226,8 @@ export function getWebviewExtraData(state, extraData = {}) {
   };
 }
 
-
-export function gotoWebview(state, navigation, extraData = {}, useCachedSearchString=true) {
+// TODO: Refactor this to use a simple & obvious params flow (examples: url, searchParams, cache)
+export function gotoWebview(state, navigation, extraData = {}, useCachedSearchString=false) {
   navigation.navigate("WebviewScreen", {
     ...getWebviewExtraData(state, extraData),
     useCachedSearchString

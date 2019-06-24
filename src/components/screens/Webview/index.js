@@ -18,7 +18,7 @@ import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
-import { webviewDebugEnabled, clog } from '../../../config-debug';
+import { webviewDebugEnabled, clog, rlog } from '../../../config-debug';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -45,13 +45,14 @@ class WebviewScreen extends Component {
         console.disableYellowBox = true;
 
         const allParams = Object.assign({},params,{currency:props.currency});
-        this.state = generateWebviewInitialState(allParams);
+        const skipWebViewURL = ( params.useCachedSearchString || params.webViewURL );
+        this.state = generateWebviewInitialState(allParams, null, skipWebViewURL);
 
         if (params.useCachedSearchString) {
             this.state.webViewUrl = props.allState.userInterface.webViewURL;
         }
 
-        clog(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
+        rlog('webview', `Constructor`, {params, props})
 
         // Fix for using WebView::onMessage
         this.patchPostMessageFunction = function() {
