@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import { commonText } from '../../../common.styles';
+import { getSafeTopOffset } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     safeArea: {
@@ -7,6 +8,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f1f3'
     },
     container: {
+        marginTop: getSafeTopOffset(),
         width: '100%',
         height: '100%',
         flexDirection: 'column',

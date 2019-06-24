@@ -17,10 +17,12 @@ import { setLocRateFiatAmount } from '../../../../redux/action/exchangeRates';
 
 import ConfirmBottomBar from '../../../atoms/ConfirmBottomBar'
 import LocPriceUpdateTimer from '../../../atoms/LocPriceUpdateTimer'
-import { imgHost } from '../../../../config'
+import { imgHost, basePath } from '../../../../config'
 import styles from './styles';
 import { hotelSearchIsNative } from '../../../../config-settings';
 import { gotoWebview } from '../../utils';
+import { rlog } from '../../../../config-debug';
+import StringUtils from '../../../../services/utilities/stringUtilities';
 
 const SAFECHARGE_VAR = 'SCPaymentModeOn';
 const DEFAULT_CRYPTO_CURRENCY = 'EUR';
@@ -47,6 +49,7 @@ class RoomDetailsReview extends Component {
             data: '',
             isLoading: false,
             cancelationDate: '',
+            isDisabled: true,
 
             safeChargeMode: false
         };
@@ -98,7 +101,8 @@ class RoomDetailsReview extends Component {
                                         bookingId: bookingId,
                                         hotelBooking: hotelBooking,
                                         booking: value,
-                                        data: data
+                                        data: data,
+                                        isDisabled: false
                                     }, () => {
                                         const { currencyExchangeRates } = that.props.exchangeRates;
                                         const fiatPriceRoomsXML = params.price;
@@ -123,7 +127,7 @@ class RoomDetailsReview extends Component {
                     if (errors.hasOwnProperty('RoomsXmlResponse')) {
                         if (errors['RoomsXmlResponse'].message.indexOf('QuoteNotAvailable:') !== -1) {
                             that.refs.toast.show(data.errors.RoomsXmlResponse.message, 5000, () => {
-                                that.props.navigation.navigation.pop(3);
+                                that.props.navigation.pop(3);
                             });
                         }
                     } else {
@@ -332,7 +336,18 @@ class RoomDetailsReview extends Component {
         if (hotelSearchIsNative.step4Payment) {
             this.handlePayWithLOC();
         } else {
-            gotoWebview(this.state, this.props.navigation, {});
+            const { bookingId, booking } = this.state;
+            const { searchString } = this.props.navigation.state.params;
+            const { id:hotelBookingId, hotelId } = this.state.data.booking.hotelBooking[0];
+            const { currency } = this.props;
+            const { token, email } = this.props.loginDetails;
+            const rooms = encodeURI(  JSON.stringify(booking.rooms)  );
+            const search = `${StringUtils.subBeforeIndexOf(searchString, '&rooms=', 7)}${rooms}&authToken=${token}&authEmail=${email}`;
+            const state = { currency, token, email, message: 'Loading payment page...' };
+            const extra = { webViewUrl: `${basePath}mobile/hotels/listings/book/${bookingId}/confirm${search}` };
+            // rlog('booking',`state of booking`, {thstate:this.state,props:this.props,state, hotelBookingId, hotelId, bookingId, search});
+            // rlog('booking',`state of booking`, {state, hotelBookingId, hotelId, bookingId, search});
+            gotoWebview(state, this.props.navigation, extra);
         }
     }
 
@@ -420,7 +435,6 @@ class RoomDetailsReview extends Component {
                                 secureTextEntry={true}
                             />
                             <TouchableOpacity
-                                style={styles.confirmButton}
                                 onPress={this.payWithLocSingleWithdrawer}
                             >
                                 <Text style={styles.confirmButtonText}>Confirm</Text>
@@ -548,6 +562,7 @@ class RoomDetailsReview extends Component {
                     params={{ bookingId: this.state.bookingId }} 
                     daysDifference = {params.daysDifference}
                     titleBtn = {"Confirm and Pay"}
+                    isDisabled={this.state.isDisabled}
                     onPress = {this.onConfirm}/>
                 {/* <View style={styles.floatingBar}>
                     <View style={styles.detailsView}>
@@ -628,6 +643,8 @@ let mapStateToProps = (state) => {
         isLocPriceWebsocketConnected: state.exchangerSocket.isLocPriceWebsocketConnected,
         locAmounts: state.locAmounts,
         exchangeRates: state.exchangeRates,
+
+        loginDetails: state.userInterface.login,
     };
 }
 

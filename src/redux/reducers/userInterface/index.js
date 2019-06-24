@@ -1,9 +1,11 @@
 import { handleActions } from 'redux-actions';
-import { setIsApplyingFilter, setDatesAndGuestsData
+import {
+  setIsApplyingFilter, setDatesAndGuestsData, setWebViewURL, setLoginDetails
 } from '../../action/userInterface';
 
 import moment from 'moment'
 import { generateInitialCalendarData, formatDatesData } from '../../../components/screens/Calendar/utils';
+import { stringifyRoomsData } from '../../../components/screens/utils';
 
 const internalFormat = "YYYY-MM-DD";
 const inputDateFormat = 'DD/MM/YYYY';
@@ -25,7 +27,12 @@ const {
   calendarData, calendarMarkedDays, calendarMarkedMonths
 } = generateInitialCalendarData(checkInMoment,checkOutMoment,today,minDate,maxDate,internalFormat,{});
 const initialState  = {
+  webViewURL: null,
   isApplyingFilter: false,
+  login: {
+    token: null,
+    email: null
+  },
   datesAndGuestsData: {
       today, minDate, maxDate, 
       calendarData, calendarMarkedDays, calendarMarkedMonths,
@@ -34,6 +41,8 @@ const initialState  = {
       children: 0,
       infants: 0,
       childrenBool: false,
+      roomsDummyData: stringifyRoomsData( [ {adults: 2, children: []} ] ),
+      regionId: '',
       inputFormat: inputDateFormat,
       displayFormat: displayDateFormat,
       internalFormat,
@@ -59,6 +68,20 @@ export default handleActions(
           ...state.datesAndGuestsData,
           ...payload
         }
+      };
+    },
+
+    [setWebViewURL]: (state, {payload}) => {
+      return {
+        ...state,
+        webViewURL: payload
+      };
+    },
+
+    [setLoginDetails]: (state, {payload}) => {
+      return {
+        ...state,
+        login: Object.assign({}, payload)
       };
     },
   },

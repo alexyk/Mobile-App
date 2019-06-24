@@ -1,6 +1,5 @@
 import { isMoment } from "moment";
 import { basePath } from "../../config";
-import { rlog } from "../../config-debug";
 
 
 export function validateObject(sourceData, props, index=-1, path='') {
@@ -80,26 +79,41 @@ export function validateObject(sourceData, props, index=-1, path='') {
 
   if (result.length > 0) {
     // remove last space
-    result = result.substr(0,result.length - space.length)
-	  //log('debug-in',`result: ${result} path: '${path}'  indx: ${index}, props: ${Object.keys(props)}`,{data:sourceData,props,path,index,result})
+    result = result.substr(0,result.length - space.length);
   }
 
 
   return result;
 }
 
-export function generateSearchString(state, props) {
-  rlog('generate',`generateSearchString - state and props`, {state,props})
+export function generateSearchStringFromAll(obj) {
+  let search = `?`;
+  for (let prop in obj) {
+    search += `&${prop}=${obj[prop]}`;
+  }
 
+  return search;
+}
+
+
+export function generateSearchString(state, props, doDecodeRooms=false) {
   let search = `?region=${state.regionId}`;
   search += `&currency=${props.currency}`;
   search += `&startDate=${state.checkInDateFormated}`;
   search += `&endDate=${state.checkOutDateFormated}`;
-  search += `&rooms=${state.roomsDummyData}`;
+  
+  if (state.roomsDummyData) {
+    if (doDecodeRooms) {
+      search += `&rooms=${decodeURI(state.roomsDummyData)}`;
+    } else {
+      search += `&rooms=${state.roomsDummyData}`;
+    }
+  }
+
   return search;
 }
 
-export function generateWebviewInitialState(params, state = null) {
+export function generateWebviewInitialState(params, state = null, skipWebViewURL = false) {
   if (state) {
     params = {
       ...params,
@@ -120,7 +134,7 @@ export function generateWebviewInitialState(params, state = null) {
     checkInDateFormated,
     checkOutDateFormated,
     roomsDummyData,
-    currency: params.currency,
+    currency: params.currency ? params.currency : (state ? state.currency : null),
     email: params ? params.email : "",
     token: params ? params.token : "",
     propertyName: params ? params.propertyName : "",
@@ -133,15 +147,27 @@ export function generateWebviewInitialState(params, state = null) {
     showProgress: true
   };
 
-  const webViewUrl =
-    basePath +
-    generateWebviewUrl(
-      initialState,
-      roomsDummyData,
-      params && params.baseUrl ? params.baseUrl : null
-    );
-
-  initialState.webViewUrl = webViewUrl;
+  if (skipWebViewURL) {
+    if (params.webViewUrl) {
+      initialState.webViewUrl = params.webViewUrl;
+    }
+  } else {
+    const webViewUrl = basePath + (
+      params.webViewUrl
+        ?
+          params.webViewUrl
+        :
+          generateWebviewUrl(
+            initialState,
+            roomsDummyData,
+            params && params.baseUrl ? params.baseUrl : null
+          )
+    )
+    
+    initialState.webViewUrl = webViewUrl;
+  }
+  
+  console.info(`[utils::generateWebviewInitialState] webViewUrl: ${initialState.webViewUrl}`, {webViewUrl:initialState.webViewUrl,initialState, params, state})
 
   return initialState;
 }
@@ -159,7 +185,10 @@ export function generateWebviewUrl(initialState, rooms, baseUrl = null) {
     // hotels specific properties
     if (!result) result = baseHotelUrl;
     result += "region=" + initialState.regionId;
-    result += "&rooms=" + rooms;
+
+    if (rooms) {
+      result += "&rooms=" + decodeURI(rooms);
+    }
   } else {
     // homes specific properties
     if (!result) result = baseHomeUrl;
@@ -186,7 +215,7 @@ export function getWebviewExtraData(state, extraData = {}) {
     regionId: state.regionId,
     checkOutDateFormated: state.checkOutDateFormated,
     checkInDateFormated: state.checkInDateFormated,
-    roomsDummyData: state.roomsDummyData, //encodeURI(JSON.stringify(state.roomsData)),
+    roomsDummyData: state.roomsDummyData,
     email: state.email,
     token: state.token,
     search: state.search,
@@ -194,13 +223,26 @@ export function getWebviewExtraData(state, extraData = {}) {
   };
 }
 
-export function gotoWebview(state, navigation, extraData = {}) {
-  navigation.navigate("WebviewScreen", getWebviewExtraData(state, extraData));
+// TODO: Refactor this to use a simple & obvious params flow (examples: url, searchParams, cache)
+export function gotoWebview(state, navigation, extraData = {}, useCachedSearchString=false) {
+  navigation.navigate("WebviewScreen", {
+    ...getWebviewExtraData(state, extraData),
+    useCachedSearchString
+  });
 }
 
 
 export function isArray(value) {
   return (value instanceof Array)
+}
+
+
+export function stringifyRoomsData(roomsData) {
+  const result = encodeURI(
+    JSON.stringify( roomsData )
+  );
+
+  return result;
 }
 
 

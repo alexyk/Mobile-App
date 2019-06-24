@@ -51,6 +51,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 16
     },
+    nextButtonDisabled: {
+        backgroundColor: 'grey',
+        alignSelf: 'stretch',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 16
+    },
     nextText: {
         color: 'white',
         fontSize: 18,

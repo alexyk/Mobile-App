@@ -43,7 +43,7 @@ export default class ImageCarousel extends Component {
         resultImage = { ...img, url };
       }
 
-      console.log(`[ImagePage] Image ${index}`, {from:img,to:resultImage})
+      //console.log(`[ImagePage] Image ${index}`, {from:img,to:resultImage})
 
       return resultImage;
     })
@@ -58,7 +58,7 @@ export default class ImageCarousel extends Component {
 
 
   componentDidCatch(error) {
-    console.warn(`[ImagePage] caught: ${error.message}, this: ${this}`,{error});
+    console.warn(`[ImagePage] caught: ${error.message}`,{error});
   }
 
 

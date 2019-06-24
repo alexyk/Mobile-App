@@ -3,7 +3,6 @@ import { getSafeTopOffset, getSafeBottomOffset } from '../../../../utils/designU
 
 const styles = StyleSheet.create({
 
-
     container: {
         flex: 1,
         flexDirection: 'column',
@@ -13,16 +12,18 @@ const styles = StyleSheet.create({
         marginBottom: getSafeBottomOffset()
     },
 
-    topButtonContainer: {
-        left: 5,
-        top: 5,
+    backButtonContainer: {
+        left: 0,
+        top: 0,
         position:'absolute',
     },
 
     backButton: {
         padding: 3,
         borderRadius: 50,
-        backgroundColor: '#0008'
+        backgroundColor: '#0008',
+        scaleX: 0.8,
+        scaleY: 0.8,
     },
 
     scrollView: {

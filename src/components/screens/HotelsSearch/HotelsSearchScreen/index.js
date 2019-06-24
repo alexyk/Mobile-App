@@ -100,7 +100,7 @@ import {
 
 import stomp from "stomp-websocket-js";
 import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
-import { setSearch/*, setSearchFiltered*/ } from '../../../../redux/action/hotels'
+import { setSearch, setSearchString } from '../../../../redux/action/hotels'
 
 let stompiOSClient = undefined;
 let stompAndroidClient = undefined;
@@ -115,7 +115,7 @@ class HotelsSearchScreen extends Component {
     console.disableYellowBox = true;
 
     const { params } = this.props.navigation.state; //eslint-disable-line
-    this.state = createHotelSearchInitialState(params);
+    this.state = createHotelSearchInitialState(params, props.datesAndGuestsData);
     
     this.pageLimit = this.PAGE_LIMIT;
     this.pagesLoaded = 0;
@@ -151,8 +151,8 @@ class HotelsSearchScreen extends Component {
 
     // Bind functions to this,
     // thus optimizing performance - by using bind(this) instead of "=> function".
+    this._setSearchString = this._setSearchString.bind(this);
     this.gotoHotelDetailsPageNative = this.gotoHotelDetailsPageNative.bind(this);
-    this.saveState = this.saveState.bind(this);
     this.getNextStaticPage = this.getNextStaticPage.bind(this);
     this.unsubscribe = this.stopSocketConnection.bind(this);
     this.updateCoords = this.updateCoords.bind(this);
@@ -203,11 +203,8 @@ class HotelsSearchScreen extends Component {
 
     if (this.state.isHotel) {
       this.getStaticHotelsData();
+      this._setSearchString();
     }
-
-    // TODO: Figure out why is this call used
-    // It was initially called from the constructor body (why? how is it possible to work)
-    this.saveState();
   }
   
   componentWillMount() {
@@ -657,7 +654,6 @@ class HotelsSearchScreen extends Component {
           displayMode: DISPLAY_MODE_HOTEL_DETAILS,
         });
       } else {
-        //console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
 
         this.setState({ isLoading: true });
         requester
@@ -692,8 +688,6 @@ class HotelsSearchScreen extends Component {
 
   
   gotoHotelDetailsPageNative(item) {
-    //console.log("gotoHotelDetailsPageNative", item);
-
     requester.getHotelById(item.id, this.searchString.split("&")).then(res => {
       // here you set the response in to json
       res.body
@@ -704,9 +698,7 @@ class HotelsSearchScreen extends Component {
           }
           this.setState({ isLoading: false });
           this.props.navigation.navigate("HotelDetails", {
-            guests: this.state.guests,
             hotelDetail: item,
-            searchString: this.searchString,
             hotelFullDetails: data,
             dataSourcePreview: hotelPhotos,
             daysDifference: this.state.daysDifference
@@ -721,6 +713,10 @@ class HotelsSearchScreen extends Component {
 
   onFilteredData(res) {
     const _this = this;
+    if (!this || !(this instanceof HotelsSearchScreen) || this.isUnmounted) {
+      console.warn(`[HotelsSearchScreen] Skipping onFilteredData - screen seems unmounted`);
+      return;
+    }
 
     if (res.success) {
       res.body.then((data) => {
@@ -790,7 +786,17 @@ class HotelsSearchScreen extends Component {
       // //console.log('Search expired');
       this.props.setIsApplyingFilter(false)
       this.setState({error:lang.TEXT.SEARCH_HOTEL_FILTER_ERROR.replace('%1',res.message)})
-      console.error('[HotelsSearchScreen] Filter error',{res})
+      if (res.errors) {
+        res.errors.then((data) => {
+          let {message} = data;
+          if (!message) {
+            message = `${data}`;
+          }
+          processError(`[HotelsSearchScreen] Filter error: ${message}`,{res,data});
+        })
+      } else {
+        console.error('[HotelsSearchScreen] Filter error',{res})
+      }
     }
   }
 
@@ -911,10 +917,9 @@ class HotelsSearchScreen extends Component {
    * TODO: Check if this can be removed
    * // see old code from before 2019-05-15 when it was cleaned by Alex K
    */
-  saveState() {
-    if (this.state.isHotel) {
-      this.searchString = generateSearchString(this.state, this.props);
-    }
+  _setSearchString() {
+    this.searchString = generateSearchString(this.state, this.props);
+    this.props.setSearchString(this.searchString);
   }
 
   gotoFilter = () => {
@@ -1084,27 +1089,25 @@ class HotelsSearchScreen extends Component {
     // log('LTLoader/HotelSearch',`isLoading: ${this.state.isLoading} isApplyingFilter: ${this.props.isApplyingFilter} isList: ${isList} isMap: ${isMap}`,{props:this.props, state:this.state})
 
     return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          {this.renderWebViewBack()}
-          {this.renderBackButtonAndSearchField()}
-          {this.renderCalendarAndFilters()}
+      <View style={styles.container}>
+        {this.renderWebViewBack()}
+        {this.renderBackButtonAndSearchField()}
+        {this.renderCalendarAndFilters()}
 
-          <View style={styles.containerHotels}>
-            {this.renderHotelDetailsAsWebview()}
-            {this.renderResultsAsMap()}
-            {this.renderResultsAsList()}
-  
-            {this.renderMapButton()}
-            {this.renderPreloader()}
-          </View>
+        <View style={styles.containerHotels}>
+          {this.renderHotelDetailsAsWebview()}
+          {this.renderResultsAsMap()}
+          {this.renderResultsAsList()}
 
-          {this.renderFooter()}
-          {this.renderToast() }
-
-          {this.renderDebugWebview()}
-          {this.renderDebugMap()}
+          {this.renderMapButton()}
+          {this.renderPreloader()}
         </View>
+
+        {this.renderFooter()}
+        {this.renderToast() }
+
+        {this.renderDebugWebview()}
+        {this.renderDebugMap()}
 
         {/* <ProgressDialog
                       visible={this.state.isLoading}
@@ -1113,7 +1116,7 @@ class HotelsSearchScreen extends Component {
                       animationType="slide"
                       activityIndicatorSize="large"
                       activityIndicatorColor="black"/> */}
-      </SafeAreaView>
+      </View>
     );
   }
 }
@@ -1122,6 +1125,7 @@ const mapStateToProps = state => {
   return {
     currency: state.currency.currency,
     isApplyingFilter: state.userInterface.isApplyingFilter,
+    searchString: state.hotels.searchString,
     searchResults: state.hotels.searchResults,
     datesAndGuestsData: state.userInterface.datesAndGuestsData,
     //searchResultsFiltered: state.hotels.searchResultsFiltered,
@@ -1130,6 +1134,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
   setSearch: bindActionCreators(setSearch, dispatch),
+  setSearchString: bindActionCreators(setSearchString, dispatch),
   //setSearchFiltered: bindActionCreators(setSearchFiltered, dispatch),
 })
 

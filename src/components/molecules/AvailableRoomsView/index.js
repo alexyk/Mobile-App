@@ -16,6 +16,7 @@ import LocPrice from '../../atoms/LocPrice'
 import { RoomsXMLCurrency } from '../../../services/utilities/roomsXMLCurrency';
 import { CurrencyConverter } from '../../../services/utilities/currencyConverter'
 import styles from './styles';
+import LTLoader from '../LTLoader';
 
 
 /**
@@ -162,14 +163,7 @@ class AvailableRoomsView extends Component {
 
 
     _renderLoader() {
-        return (
-            <View style={{
-                flex: 1, flexDirection: 'row', justifyContent: 'center', marginBottom: 10
-            }}
-            >
-                <Image style={{width:35, height:35}} source={require('../../../assets/loader.gif')}/>
-            </View>
-        );
+        return  <LTLoader isLockTripIcon opacity={'00'} style={{marginVertical:25}} />
     }
 
     render() {

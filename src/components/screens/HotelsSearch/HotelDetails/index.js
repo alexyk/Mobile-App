@@ -2,8 +2,7 @@ import {
     Dimensions,
     ScrollView,
     View,
-    TouchableOpacity,
-    SafeAreaView
+    TouchableOpacity
 } from 'react-native';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -14,8 +13,10 @@ import LocationView from '../../../atoms/LocationView';
 import BackButton from '../../../atoms/BackButton';
 import styles from './styles';
 import ImageCarousel from '../../../atoms/ImagePage';
+import { connect } from 'react-redux';
 import { hotelSearchIsNative } from '../../../../config-settings';
 import { getSafeTopOffset } from '../../../../utils/designUtils';
+import { gotoWebview, generateSearchString } from '../../utils';
 
 
 class HotelDetails extends Component {
@@ -30,6 +31,7 @@ class HotelDetails extends Component {
             navigate: () => { }
         }
     }
+    guests
 
     constructor(props) {
         super(props);
@@ -38,11 +40,11 @@ class HotelDetails extends Component {
         this.onFacilityMore = this.onFacilityMore.bind(this);
 
         const { params } = this.props.navigation.state;
+        const { searchString } = props;
+        const { guests } = props.datesAndGuestsData;
 
         this.state = {
             hotel: params ? params.hotelDetail : [],
-            guests: params ? params.guests : 0,
-            searchString: params ? params.searchString : '',
             hotelFullDetails: params ? params.hotelFullDetails : [],
             hotelAmenities: params ? params.hotelFullDetails.hotelAmenities : [],
             mainAddress: params ? params.hotelFullDetails.additionalInfo.mainAddress : '',
@@ -54,7 +56,8 @@ class HotelDetails extends Component {
             longitude: params ? params.hotelFullDetails.longitude : 0.0,
             hotelRatingStars: params ? params.hotelDetail.stars : 0,
             daysDifference: params ? params.daysDifference : 1,
-            canLoadLocation: false
+            canLoadLocation: false,
+            guests, searchString
         }
     }
 
@@ -62,7 +65,7 @@ class HotelDetails extends Component {
     componentDidMount() {
         // Temporary solution - improve loading time by delaying location
         // TODO: Improve suggestion - provide an image (screenshot of map) rather than a map component
-        setTimeout(() => this.setState({canLoadLocation:true}), 1000);
+        setTimeout(() => this.setState({canLoadLocation:true}), 3000);
     }
 
 
@@ -90,23 +93,40 @@ class HotelDetails extends Component {
             if (hotelImg === undefined || hotelImg === null) {
                 hotelImg = this.state.hotel.hotelPhoto;
             }
+            const {
+                guests, searchString, hotelFullDetails, daysDifference 
+            } = this.state;
             this.props.navigation.navigate('GuestInfoForm', { 
-                roomDetail: roomDetail, 
-                guests: this.state.guests, 
-                price: ((roomDetail.roomsResults[0].price) * this.state.daysDifference).toFixed(2),
-                daysDifference: this.props.daysDifference,
-                hotelDetails: this.state.hotelFullDetails,
-                searchString: this.state.searchString,
-                hotelImg: hotelImg
+                price: ((roomDetail.roomsResults[0].price) * daysDifference).toFixed(2),
+                hotelDetails: hotelFullDetails,
+                hotelImg: hotelImg,
+                roomDetail, guests, daysDifference, searchString
             });
         } else {
-
+            //const { params } = this.props.navigation.state;
+            //const { searchString } = this.props;
+            const { hotel } = this.state;
+            const { checkInDateFormated, checkOutDateFormated, roomsDummyData } = this.props.datesAndGuestsData;
+            const stateData = {
+                regionId,
+                checkInDateFormated, checkOutDateFormated, roomsDummyData
+            };
+            const search = generateSearchString(stateData,this.props,true);
+            let webViewUrl = `mobile/hotels/listings/${hotel.id}${search}&quoteId=${roomDetail.quoteId}`
+            const { token, email } = this.props.datesAndGuestsData;
+            webViewUrl += `&authToken=${token}`;
+            webViewUrl += `&authEmail=${email}`;
+            
+            //console.log('ROOM DETAIL',{state:this.state,props:this.props,params,webViewUrl,roomDetail,searchString,cache:this.props.datesAndGuestsData});
+            //console.log('### url - details',webViewUrl);
+            
+            gotoWebview(this.state, this.props.navigation, {webViewUrl,message:'Processing booking ...'}, false);
         }
     } 
 
     _renderBackButton() {
         return (
-            <View style={styles.topButtonContainer}>
+            <View style={styles.backButtonContainer}>
                 <BackButton onPress={this.onClose} isWhite style={styles.backButton} />
             </View>
         )
@@ -118,7 +138,7 @@ class HotelDetails extends Component {
         const logoWidth = width;
         const logoHeight = (height * 0.3 + getSafeTopOffset());
 
-        console.log('logo dim',{logoHeight,logoWidth})
+        //console.log('logo dim',{logoHeight,logoWidth})
         return (
             <View style={{ width: logoWidth, height: logoHeight }}>
                 <ImageCarousel
@@ -194,23 +214,20 @@ class HotelDetails extends Component {
 
 
     _renderLocation() {
-        if (this.state.canLoadLocation) {
-            return (
-                <TouchableOpacity activeOpacity={1} onPress={() => this.onMapTap()}>
-                    <LocationView
-                        location={`${this.state.mainAddress}, ${this.state.countryName}`}
-                        titleStyle={{ fontSize: 17 }}
-                        name={this.state.hotel.name}
-                        description={this.state.hotel.generalDescription}
-                        lat={this.state.latitude != null ? parseFloat(this.state.latitude) : 0.0}
-                        lon={this.state.longitude != null ? parseFloat(this.state.longitude) : 0.0}
-                        radius={200}
-                    />
-                </TouchableOpacity>
-            )
-        } else {
-            return null;
-        }
+        return (
+            <TouchableOpacity activeOpacity={1} onPress={() => this.onMapTap()}>
+                <LocationView
+                    location={`${this.state.mainAddress}, ${this.state.countryName}`}
+                    titleStyle={{ fontSize: 17 }}
+                    name={this.state.hotel.name}
+                    description={this.state.hotel.generalDescription}
+                    lat={this.state.latitude != null ? parseFloat(this.state.latitude) : 0.0}
+                    lon={this.state.longitude != null ? parseFloat(this.state.longitude) : 0.0}
+                    radius={200}
+                    isLoading={!this.state.canLoadLocation}
+                />
+            </TouchableOpacity>
+        )
     }
 
 
@@ -239,4 +256,12 @@ class HotelDetails extends Component {
     }
 }
 
-export default HotelDetails;
+let mapStateToProps = (state) => {
+    return {
+        datesAndGuestsData: state.userInterface.datesAndGuestsData,
+        searchString: state.hotels.searchString,
+        currency: state.currency.currency,
+    };
+}
+
+export default connect(mapStateToProps)(HotelDetails);

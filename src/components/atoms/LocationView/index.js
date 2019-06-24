@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import MapView from 'react-native-maps';
 import CardView from 'react-native-cardview';
 import styles from './styles';
+import LTLoader from '../../molecules/LTLoader';
 
 
 class LocationView extends Component {
@@ -19,6 +20,7 @@ class LocationView extends Component {
         lon: PropTypes.number.isRequired,
         radius: PropTypes.number.isRequired,
         name: PropTypes.string.isRequired,
+        isLoading: PropTypes.bool,
     };
 
     static defaultProps = {
@@ -30,6 +32,7 @@ class LocationView extends Component {
         lon: 0,
         radius: 200,
         name: '',
+        isLoading: false
     };
 
     calloutClick(){
@@ -54,47 +57,51 @@ class LocationView extends Component {
                     {this.props.transpotation != '' && (<Text style={styles.subdetail}>{this.props.transpotation}</Text>)}
                 </View>
                 
-                <CardView style={styles.topView}
-                    cardElevation={0.75}
-                    cardMaxElevation={.75}
-                    cornerRadius={0}>
-                    <View style={{flexDirection:'column'}}>
-                        <View style={styles.info}>
-                            <View style={styles.infoContainer}>
-                                {/* <Text style={styles.location}>{this.props.location}</Text> */}
-                                <Text style={styles.location}>{this.props.name}</Text>
-                                {/* <Text style={styles.description}>{this.props.description}</Text> */}
+                { this.props.isLoading
+                    ? <LTLoader opacity={'00'} isLockTripIcon style={{marginVertical:25}} />
+                    : (
+                    <CardView style={styles.topView}
+                        cardElevation={0.75}
+                        cardMaxElevation={.75}
+                        cornerRadius={0}>
+                        <View style={{flexDirection:'column'}}>
+                            <View style={styles.info}>
+                                <View style={styles.infoContainer}>
+                                    {/* <Text style={styles.location}>{this.props.location}</Text> */}
+                                    <Text style={styles.location}>{this.props.name}</Text>
+                                    {/* <Text style={styles.description}>{this.props.description}</Text> */}
+                                </View>
                             </View>
+                            <MapView
+                                zoomEnabled={false}
+                                pitchEnabled={false}
+                                scrollEnabled={false}
+                                rotateEnabled={false}
+                                style={styles.map}
+                                region={{
+                                latitude: this.props.lat,
+                                longitude: this.props.lon,
+                                latitudeDelta: 0.005,
+                                longitudeDelta: 0.005,
+                                }}
+                                debug={false}>
+                                <MapView.Marker
+                                    coordinate={{latitude: this.props.lat, longitude: this.props.lon}}
+                                    // title={this.props.name}
+                                    // description={this.props.hotelPrice}
+                                >
+                                </MapView.Marker>
+                                <MapView.Circle
+                                        center={{latitude: this.props.lat, longitude: this.props.lon}}
+                                        radius = { this.props.radius }
+                                        strokeWidth = { 1 }
+                                        strokeColor = { 'rgba(162,197,191,0.5)' }
+                                        fillColor = { 'rgba(162,197,191,0.5)' }
+                                />
+                            </MapView>
                         </View>
-                        <MapView
-                            zoomEnabled={false}
-                            pitchEnabled={false}
-                            scrollEnabled={false}
-                            rotateEnabled={false}
-                            style={styles.map}
-                            region={{
-                              latitude: this.props.lat,
-                              longitude: this.props.lon,
-                              latitudeDelta: 0.005,
-                              longitudeDelta: 0.005,
-                            }}
-                            debug={false}>
-                            <MapView.Marker
-                                coordinate={{latitude: this.props.lat, longitude: this.props.lon}}
-                                // title={this.props.name}
-                                // description={this.props.hotelPrice}
-                            >
-                            </MapView.Marker>
-                            <MapView.Circle
-                                    center={{latitude: this.props.lat, longitude: this.props.lon}}
-                                    radius = { this.props.radius }
-                                    strokeWidth = { 1 }
-                                    strokeColor = { 'rgba(162,197,191,0.5)' }
-                                    fillColor = { 'rgba(162,197,191,0.5)' }
-                            />
-                        </MapView>
-                    </View>
-                </CardView>
+                    </CardView>
+                )}
             </View>
         );
     }

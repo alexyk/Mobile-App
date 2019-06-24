@@ -39,7 +39,7 @@ jobs:
         - pod install
         - cd ..
       script:
-        - ./scripts/select_config.rb native1
+        - ./scripts/select_config.rb native3
         - ./scripts/build-ios.sh prod $var1 $app_ios_prod
         - git diff > ios_prod.diff
         - scp -o "StrictHostKeyChecking no" ios_prod.diff "$var_799cfba7:$dir2/"
@@ -121,7 +121,7 @@ jobs:
         - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2" &> /dev/null
         - npm install
       script:
-        - ./scripts/select_config.rb native1
+        - ./scripts/select_config.rb native3
         - ./scripts/build-android.sh prod $apk_prod
         - git diff > anrdoid_prod.diff
         - scp -o "StrictHostKeyChecking no" anrdoid_prod.diff "$var_799cfba7:$dir2/"

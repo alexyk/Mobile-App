@@ -8,6 +8,8 @@ export const hotelSearchIsNative = {
   step1Results: true,
   step2HotelDetails: true,
   step3BookingDetails: true,
+  step4Confirm: true,
+  step5Payment: false,
 };
 export const HOTELS_MINIMUM_RESULTS = 10;
 export const DEFAULT_HOTEL_PNG = "listings/images/listing_thumbnail_1529077862408_default.png";

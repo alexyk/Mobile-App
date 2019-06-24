@@ -1,7 +1,6 @@
 import moment from 'moment'
 
 import {log} from "./common-test-utils"
-import {clog} from "../src/config-debug"
 
 
 logd1 = (obj) => {
@@ -14,7 +13,7 @@ logd1 = (obj) => {
       res[p] = item;
     }
   }
-  logd(res)
+  log(res)
 }
 
 test('moment-playground', () => {
@@ -26,7 +25,7 @@ test('moment-playground', () => {
   const parsed = moment().utc()
   const diff = moment.duration(end.diff(start)).asDays();
 
-  logd({
+  log({
     local: varLocal.toString(),
     utc:varUTC.toString(),
     start:start.toString(),
@@ -54,7 +53,7 @@ test('moment-isBetween',() => {
     isBetween3_1:current3_1.isBetween(start,end),
   })
 
-  clog(now.format('YYYY-MM-DD'))
+  log(now.format('YYYY-MM-DD'))
   // Conclusion - at least 1ms is needed to make the difference
   // So it is not inBetweenOrEqual - it is inBetweenButNotEqual
 })

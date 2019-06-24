@@ -1,4 +1,4 @@
-import moment from "moment";
+
 import lodash from "lodash";
 import { validateObject, isObject, isNumber, isString, isArray } from '../utils'
 import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config-settings";
@@ -43,16 +43,12 @@ export function generateListItemKey(prop, prefix='', doReset=false) {
 }
 
 
-export function createHotelSearchInitialState(params) {
-  const startDate = moment().add(1, "day");
-  const endDate = moment().add(2, "day");
-
-  let roomsData = [
-    {
-      adults: 2,
-      children: []
-    }
-  ];
+export function createHotelSearchInitialState(params, reduxCache) {
+  const {
+    roomsDummyData,
+    guests, adults, children, infants, childrenBool,
+    checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated
+  } = reduxCache;
 
   let initialState = {
     isHotel: true,
@@ -79,18 +75,11 @@ export function createHotelSearchInitialState(params) {
 
     isLoading: true, // progress dialog
 
-    checkInDateFormated: startDate.format("DD/MM/YYYY").toString(),
-    checkOutDateFormated: endDate.format("DD/MM/YYYY").toString(),
-    checkInDate: startDate.format("ddd, DD MMM").toString(),
-    checkOutDate: endDate.format("ddd, DD MMM").toString(),
+    checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated,
 
-    guests: 2,
-    adults: 2,
-    children: 0,
-    infants: 0,
-    childrenBool: false,
+    guests, adults, children, infants, childrenBool,
     daysDifference: 1,
-    roomsDummyData: encodeURI(JSON.stringify(roomsData)),
+    roomsDummyData,
 
     //filters
     isFilterResult: false,
