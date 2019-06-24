@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, Platform, Image } from 'react-native';
+import { Text, View, Platform, WebView } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import MapView, { Marker } from 'react-native-maps';
@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 import blue_marker from '../../../../assets/blue_marker.png';
 import red_marker from '../../../../assets/red_marker.png';
 import { imgHost } from '../../../../config';
-import { processError, rlog, clog, telog, tslog } from '../../../../config-debug';
+import { processError, rlog, telog, tslog } from '../../../../config-debug';
 import lang from '../../../../language';
 import { CurrencyConverter } from '../../../../services/utilities/currencyConverter';
 import { RoomsXMLCurrency } from '../../../../services/utilities/roomsXMLCurrency';
@@ -102,14 +102,10 @@ class MapModeHotelsSearch extends Component {
 
         if (Platform.OS == 'android') {
             return (
-                <Image 
-                    source={{uri: thumbnailURL}} 
-                    style={{ width: 120, height: 90, backgroundColor:'red'}}
-                    onLoadStart={e => console.log(`### [fast image] onLoadStart`,e)}
-                    onLoad={e => console.log(`###* [fast image] onLoad`,e)}
-                    onLoadEnd={e => console.log(`### [fast image] onLoadEnd`,e)}
-                    onProgress={e => console.log(`### [fast image] onProgress`,e)}
-                    onError={e => console.log("### fast image  - errr", e)}
+                <WebView
+                    style={{ width: 120, height: 90, marginLeft:-3.5, backgroundColor:'#fff'}}
+                    source={{html: "<img src=" + thumbnailURL + " width='120'/>" }}
+                    javaScriptEnabledAndroid={true}
                 />
             )
         } else {
