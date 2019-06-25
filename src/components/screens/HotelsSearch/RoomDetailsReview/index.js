@@ -337,14 +337,19 @@ class RoomDetailsReview extends Component {
             this.handlePayWithLOC();
         } else {
             const { bookingId, booking } = this.state;
-            const { searchString } = this.props.navigation.state.params;
+            const { searchString, quoteId } = this.props.navigation.state.params;
             const { id:hotelBookingId, hotelId } = this.state.data.booking.hotelBooking[0];
             const { currency } = this.props;
             const { token, email } = this.props.loginDetails;
-            const rooms = encodeURI(  JSON.stringify(booking.rooms)  );
-            const search = `${StringUtils.subBeforeIndexOf(searchString, '&rooms=', 7)}${rooms}&authToken=${token}&authEmail=${email}`;
-            const state = { currency, token, email, message: 'Loading payment page...' };
-            const extra = { webViewUrl: `${basePath}mobile/hotels/listings/book/${bookingId}/confirm${search}` };
+            // const rooms = encodeURI(  JSON.stringify(booking.rooms)  );
+            const rooms = (  JSON.stringify(booking.rooms)  );
+            let search = StringUtils.subBeforeIndexOf(searchString, '&rooms=');
+            search += `&quoteId=${quoteId}&rooms=${rooms}&authToken=${token}&authEmail=${email}`;
+            const state = { currency, token, email };
+            const extra = {
+                webViewUrl: `mobile/hotels/listings/book/${bookingId}/confirm${search}`,
+                message: 'Preparing booking details ...'
+            };
             // rlog('booking',`state of booking`, {thstate:this.state,props:this.props,state, hotelBookingId, hotelId, bookingId, search});
             // rlog('booking',`state of booking`, {state, hotelBookingId, hotelId, bookingId, search});
             gotoWebview(state, this.props.navigation, extra);
