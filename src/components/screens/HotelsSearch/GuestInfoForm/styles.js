@@ -12,8 +12,8 @@ const styles = StyleSheet.create({
         marginBottom: 40
     },
     btn_backImage:{
-        height: 24,
-        width: 24,
+        height: 30,
+        width: 30,
         marginTop: 44,
         marginLeft: 16,
         marginBottom: 32

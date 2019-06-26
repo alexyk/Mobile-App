@@ -58,7 +58,6 @@ export function createHotelSearchInitialState(params, reduxCache) {
     hotelsInfo: [],
     hotelsInfoForMap: [],
     optimiseMapMarkers: true,
-    hotelsLoadedInList: 0,
     totalHotels: 0,
     totalPages: 0,
     pricesFromSocketValid: 0,
