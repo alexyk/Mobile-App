@@ -28,7 +28,7 @@ export const forceOffline                            = false;
 export const errorLevel = 0;
 
   // reactotron
-export const reactotronLoggingEnabled           = false;
+export const reactotronLoggingEnabled           = true;
 export const logConverterErrorToReactrotron     = false;
 export const showTypesInReactotronLog           = true;
 export const warnOnReactotronDisabledCalls      = false;

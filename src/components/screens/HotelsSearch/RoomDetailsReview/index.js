@@ -347,7 +347,8 @@ class RoomDetailsReview extends Component {
             const state = { currency, token, email };
             const extra = {
                 webViewUrl: `mobile/hotels/listings/book/${bookingId}/confirm${search}`,
-                message: 'Preparing booking payment ...'
+                message: 'Preparing booking payment ...',
+                backText: 'Back'
             };
             gotoWebview(state, this.props.navigation, extra);
         }

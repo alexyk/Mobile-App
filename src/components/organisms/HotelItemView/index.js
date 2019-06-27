@@ -134,7 +134,7 @@ class HotelItemView extends Component {
           <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
             {currencySign}
             {priceToFixed2}
-            {"   "}
+            {"  "}
           </Text>
           {/* <Text style={styles.costLoc} numberOfLines={1} ellipsizeMode="tail"> (LOC {parseFloat(price/locRate).toFixed(2)}) </Text> */}
           <LocPrice
@@ -142,7 +142,7 @@ class HotelItemView extends Component {
             fiat={fiatPrice}
             fromParentType={0}
           />
-          <Text style={styles.perNight}>{" per night"}</Text>
+          <Text style={styles.perNight}>{" / night"}</Text>
         </View>
       );
     } else {

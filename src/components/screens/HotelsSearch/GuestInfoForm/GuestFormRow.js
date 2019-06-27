@@ -86,6 +86,55 @@ export default class GuestFormRow extends Component {
         this.props.onTextDone(this.props.itemIndex, this.state.guestRecord);
     }
 
+    _renderGender() {
+        return (
+            <View style={styles.genderFlex}>
+                <View style={[styles.gender]}>
+
+                    <Picker 
+                        selectedValue={this.state.guest.genderRepresentation}
+                        style={{ height: '100%', width: '100%'}}
+                        itemStyle={{backgroundColor: '#fff', height: '100%', fontFamily: 'FuturaStd-Light', fontSize:17}}
+                        onValueChange={this.onValueChange}>
+                        <Picker.Item label="Mr" value="Mr" />
+                        <Picker.Item label="Mrs" value="Mrs" />
+                    </Picker>
+                </View>
+            </View>
+        )
+    }
+
+
+    _renderFirstName() {
+        return (
+            <View style={styles.firstNameFlex}>
+                <TextInput
+                    style={[styles.formField]}
+                    onChangeText={(text) => { this.props.onFirstNameChange(this.props.itemIndex, text), this.setState({ guest: { ...this.state.guest, firstName: text } }) }}
+                    placeholder={this.props.itemIndex == 0 ? "First Name" : "Optional"}
+                    underlineColorAndroid="#fff"
+                    value={this.state.guest.firstName}
+                />
+            </View>
+        )
+    }
+
+
+    _renderLastName() {
+        return (
+            <View style={styles.lastNameFlex}>
+                <TextInput
+                    style={styles.formField}
+                    onChangeText={(text) => { this.props.onLastNameChange(this.props.itemIndex, text), this.setState({ guest: { ...this.state.guest, lastName: text } }) }}
+                    placeholder={this.props.itemIndex == 0 ? "Last Name" : "Optional"}
+                    underlineColorAndroid="#fff"
+                    value={this.state.guest.lastName}
+                />
+            </View>
+        )
+    }
+
+
     render() {
         return (
             
@@ -93,39 +142,11 @@ export default class GuestFormRow extends Component {
 
                 {/* <ScrollView> */}
                     
-                    <Text style={styles.labelGuest}>Guest</Text>
+                <Text style={styles.labelGuest}>Guest</Text>
                 <View style={styles.inputFieldsView}>
-                    <View style={styles.genderFlex}>
-                        <View style={[styles.gender, styles.spaceRight]}>
-
-                            <Picker 
-                                selectedValue={this.state.guest.genderRepresentation}
-                                style={{ height: '100%', width: '100%'}}
-                                itemStyle={{backgroundColor: '#fff', height: '100%', fontFamily: 'FuturaStd-Light', fontSize:17}}
-                                onValueChange={this.onValueChange}>
-                                <Picker.Item label="Mr" value="Mr" />
-                                <Picker.Item label="Mrs" value="Mrs" />
-                            </Picker>
-                        </View>
-                    </View>
-                    <View style={styles.firstNameFlex}>
-                        <TextInput
-                            style={[styles.formField, styles.spaceRight]}
-                            onChangeText={(text) => { this.props.onFirstNameChange(this.props.itemIndex, text), this.setState({ guest: { ...this.state.guest, firstName: text } }) }}
-                            placeholder={this.props.itemIndex == 0 ? "First Name" : "Optional"}
-                            underlineColorAndroid="#fff"
-                            value={this.state.guest.firstName}
-                        />
-                    </View>
-                    <View style={styles.lastNameFlex}>
-                        <TextInput
-                            style={styles.formField}
-                            onChangeText={(text) => { this.props.onLastNameChange(this.props.itemIndex, text), this.setState({ guest: { ...this.state.guest, lastName: text } }) }}
-                            placeholder={this.props.itemIndex == 0 ? "Last Name" : "Optional"}
-                            underlineColorAndroid="#fff"
-                            value={this.state.guest.lastName}
-                        />
-                    </View>
+                    { this._renderGender() }
+                    { this._renderFirstName() }
+                    { this._renderLastName() }
                 </View>
                     {/* </KeyboardAvoidingView> */}
                 {/* </ScrollView> */}

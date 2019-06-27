@@ -47,6 +47,7 @@ class WebviewScreen extends Component {
         const allParams = Object.assign({},params,{currency:props.currency});
         const skipWebViewURL = ( params.useCachedSearchString || params.webViewURL );
         this.state = generateWebviewInitialState(allParams, null, skipWebViewURL);
+        this.state.params = params;
 
         if (params.useCachedSearchString) {
             this.state.webViewUrl = props.allState.userInterface.webViewURL;
@@ -280,6 +281,7 @@ class WebviewScreen extends Component {
 
     render() {
         const patchPostMessageJsCode = '(' + String(this.patchPostMessageFunction) + ')();';
+        const { backText } = this.state.params;
 
         console.log(`### [WebView] Rendering '${this.state.webViewUrl}'`)
 
@@ -288,7 +290,7 @@ class WebviewScreen extends Component {
                 <View style={styles.backButtonContainer}>
                     <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
                     {/* <Text style={styles.title}>{this.state.title}</Text> */}
-                    <Text style={styles.backText}>{'Modify search'}</Text>
+                    <Text style={styles.backText}>{backText ? backText : 'Modify search'}</Text>
                     {this.renderDebug()}
                 </View>
 

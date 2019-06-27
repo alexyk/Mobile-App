@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
 import {commonText} from '../../../../common.styles'
-import { getSafeTopOffset } from '../../../../utils/designUtils';
+import { getSafeTopOffset, getSafeBottomOffset } from '../../../../utils/designUtils';
 
 const dimensionWindows = Dimensions.get('window');
 const { width } = dimensionWindows;
@@ -10,8 +10,10 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         backgroundColor: '#f0f1f3',
-        marginTop: getSafeTopOffset()
+        marginTop: getSafeTopOffset(),
+        marginBottom: getSafeBottomOffset(),
     },
+
 
     searchAndPickerwarp:{
         display: 'flex',

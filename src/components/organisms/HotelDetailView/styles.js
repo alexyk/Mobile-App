@@ -1,4 +1,4 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
 
 const styles = StyleSheet.create({
     container: {
@@ -73,9 +73,10 @@ const styles = StyleSheet.create({
       color:'#000000'
     },
 
-    descriptionView: {
+    descriptionScrollView: {
         marginHorizontal: 10,
-        padding: 10,
+        marginVertical: 10,
+        height: 200
     },
 
     spaceText: {
@@ -89,6 +90,18 @@ const styles = StyleSheet.create({
         fontSize: 13,
         marginTop: -2,
     }
+});
+
+export const htmlViewStyleSheet = StyleSheet.create({
+    body: {
+        fontFamily: 'FuturaStd-Light',
+        textAlign: 'justify'
+    },
+    b: {
+        fontWeight: 'bold',
+        fontFamily: 'FuturaStd-Light'
+    }
+
 });
 
 export default styles;

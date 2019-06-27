@@ -76,17 +76,17 @@ const styles = StyleSheet.create({
         fontSize: 16
     },
     inputFieldsView: {
-        flexDirection: 'row',
+        flexDirection: 'column',
         marginTop: 10
     },
     genderFlex: {
         flex: 0.30
     },
     firstNameFlex: {
-        flex: 0.35
+        flex: 1
     },
     lastNameFlex: {
-        flex: 0.35
+        flex: 1
     },
     gender: {
         height: 50,
