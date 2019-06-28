@@ -44,6 +44,13 @@ const styles = StyleSheet.create({
         flex: 0.8,
         alignItems: 'center',
     },
+    nextButtonDisabled: {
+        backgroundColor: '#DA7B6177',
+        alignSelf: 'stretch',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 16
+    },
     nextButton: {
         backgroundColor: '#DA7B61',
         alignSelf: 'stretch',

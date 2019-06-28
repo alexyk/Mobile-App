@@ -103,7 +103,10 @@ class HotelDetailBottomBar extends Component {
     }
 
     render() {
-        const {currency, currencySign, exchangeRates, price, locAmount, daysDifference, onPress, titleBtn} = this.props;
+        const {
+            currency, currencySign, exchangeRates, price, locAmount, daysDifference, onPress, titleBtn,
+            isDisabled
+        } = this.props;
 
         let priceInCurrency = exchangeRates.currencyExchangeRates && CurrencyConverter.convert(exchangeRates.currencyExchangeRates, RoomsXMLCurrency.get(), currency, price);
 
@@ -116,7 +119,7 @@ class HotelDetailBottomBar extends Component {
                         <Text style={[styles.price, styles.fontFuturaMed]}>{currencySign} {priceInCurrency.toFixed(2)}</Text>
                         {
                             daysDifference == 1 ?
-                                (<Text style={[styles.period1, styles.fontFuturaStd]}> /per night</Text>)
+                                (<Text style={[styles.period1, styles.fontFuturaStd]}> / night</Text>)
                             :
                                 (<Text style={[styles.period1, styles.fontFuturaStd]}> for {daysDifference} nights</Text>)
                         }
@@ -125,7 +128,7 @@ class HotelDetailBottomBar extends Component {
                         <Text style={[styles.price, styles.fontFuturaStd]}>{locAmount} LOC</Text>
                         {
                             daysDifference == 1 ?
-                                (<Text style={[styles.period2, styles.fontFuturaStd]}> /per night</Text>)
+                                (<Text style={[styles.period2, styles.fontFuturaStd]}> / night</Text>)
                             :
                                 (<Text style={[styles.period2, styles.fontFuturaStd]}> for {daysDifference} nights</Text>)
 
@@ -134,7 +137,7 @@ class HotelDetailBottomBar extends Component {
                 </View>
                 
                 <View style={styles.nextButtonView}>
-                    <TouchableOpacity style={styles.nextButton} onPress={onPress}>
+                    <TouchableOpacity style={isDisabled ? styles.nextButtonDisabled : styles.nextButton} onPress={onPress}>
                         <Text style={styles.nextText}>{titleBtn}</Text>
                     </TouchableOpacity>
                 </View>
