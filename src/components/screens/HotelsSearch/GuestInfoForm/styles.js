@@ -79,9 +79,6 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         marginTop: 10
     },
-    genderFlex: {
-        flex: 0.30
-    },
     firstNameFlex: {
         flex: 1
     },
@@ -116,17 +113,44 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontFamily: 'FuturaStd-Light'
     },
-    genderText: {
-        fontSize: 14,
-        fontFamily: 'FuturaStd-Light'
-    },
     spaceRight: {
         marginRight: 10
     },
     guestInfoWrapper: {
         marginTop: 15,
         flex: 1
-    }
+    },
+    titleSelecterContainer:{
+        // paddingTop: 10,
+        // paddingRight: 17,
+        marginLeft: 8,
+        justifyContent: 'flex-end',  
+        alignItems: 'center',
+        width: 80,
+      }    
 });
 
 export default styles;
+export const titleSelectorStyles = StyleSheet.create({
+    inputIOS: {
+      height: 50,
+      fontSize: 16,
+      color: 'black',
+      alignSelf: 'flex-end',
+      justifyContent: 'flex-end',
+      alignItems: 'flex-start',
+      width: "100%",
+  //     backgroundColor: 'red'
+    },
+    inputAndroid: {
+      height: 50,
+      width: 70,
+      //fontSize: 16,
+      // color: 'black',
+      alignSelf: 'flex-end',
+      justifyContent: 'flex-end',
+      alignItems: 'flex-start',
+      width: "100%",
+  //     backgroundColor: 'red'
+    }
+  });

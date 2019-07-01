@@ -19,6 +19,7 @@ import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
 import { webviewDebugEnabled } from '../../../config-debug';
+import LTLoader from '../../molecules/LTLoader';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -112,7 +113,7 @@ class WebviewScreen extends Component {
             //console.log('[WebView] showContentWithDelay',_this)
 
             if (_this) {
-                _this.setState({showProgress: false});
+                _this.setState({isLoading: false});
             }
         }
         clearTimeout(this.timeout);
@@ -204,11 +205,11 @@ class WebviewScreen extends Component {
         );*/
 
         if (this.useDelay) {
-            if (this.state.showProgress) {
+            if (this.state.isLoading) {
                 this.showContentWithDelay(0.3);
             }
         } else {
-            this.setState({showProgress:false})
+            this.setState({isLoading:false})
         }
     }
 
@@ -281,7 +282,9 @@ class WebviewScreen extends Component {
 
     render() {
         const patchPostMessageJsCode = '(' + String(this.patchPostMessageFunction) + ')();';
+        const { isLoading, message, propertyName } = this.state;
         const { backText } = this.state.params;
+        const loaderText = (message != null ? message : `Getting details for: \n'${propertyName}'`)
 
         console.log(`### [WebView] Rendering '${this.state.webViewUrl}'`)
 
@@ -290,7 +293,7 @@ class WebviewScreen extends Component {
                 <View style={styles.backButtonContainer}>
                     <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
                     {/* <Text style={styles.title}>{this.state.title}</Text> */}
-                    <Text style={styles.backText}>{backText ? backText : 'Modify search'}</Text>
+                    <Text style={styles.backText}>{backText != null ? backText : 'Modify search'}</Text>
                     {this.renderDebug()}
                 </View>
 
@@ -308,13 +311,7 @@ class WebviewScreen extends Component {
                     />
                 </View>
 
-                <ProgressDialog
-                    visible={this.state.showProgress}
-                    title="Loading"
-                    message={this.state.message != null ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
-                    animationType="slide"
-                    activityIndicatorSize="large"
-                    activityIndicatorColor="black"/>
+                <LTLoader isLoading={isLoading} message={loaderText} style={{height:'90%', top:'10%'}} />
             </View>
         );
     }

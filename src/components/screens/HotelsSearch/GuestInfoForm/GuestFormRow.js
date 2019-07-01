@@ -1,8 +1,10 @@
-import { Picker, Text, TextInput, View } from 'react-native';
+import { Text, TextInput, View } from 'react-native';
 import React, { Component } from 'react';
+import RNPickerSelect from 'react-native-picker-select';
 
 import PropTypes from 'prop-types';
 import styles from './styles';
+import { orderbyPickerSelectStyles } from '../HotelFilters/styles';
 
 export default class GuestFormRow extends Component {
     static propTypes = {
@@ -16,7 +18,8 @@ export default class GuestFormRow extends Component {
         this.state = {
             title: 'Mr',
             firstName: '',
-            lastName: ''
+            lastName: '',
+            titleSelectItems: [{value:'Mr',label:'Mr'}, {value:'Mrs', label: 'Mrs'}]
         }
 
         this.onGenderChange = this.onGenderChange.bind(this);
@@ -32,17 +35,14 @@ export default class GuestFormRow extends Component {
 
     _renderGender() {
         return (
-            <View style={styles.genderFlex}>
-                <View style={[styles.gender]}>
-                    <Picker 
-                        selectedValue={this.state.title}
-                        style={{ height: '100%', width: '100%'}}
-                        itemStyle={{backgroundColor: '#fff', height: '100%', fontFamily: 'FuturaStd-Light', fontSize:17}}
-                        onValueChange={this.onGenderChange}>
-                        <Picker.Item label="Mr" value="Mr" />
-                        <Picker.Item label="Mrs" value="Mrs" />
-                    </Picker>
-                </View>
+            <View style={styles.titleSelecterContainer}>
+                <RNPickerSelect
+                    placeholder={{label:'', value:null}}
+                    style={orderbyPickerSelectStyles}
+                    value={this.state.title}
+                    items={this.state.titleSelectItems}
+                    onValueChange={this.onGenderChange}
+                />
             </View>
         )
     }

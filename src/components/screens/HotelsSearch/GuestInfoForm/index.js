@@ -238,7 +238,7 @@ class GuestInfoForm extends Component {
         const extra = {
             webViewUrl: `mobile/hotels/listings/book/${bookingId}/confirm${search}`,
             message: 'Preparing booking payment ...',
-            backText: 'Back'
+            backText: ''
         };
         gotoWebview(state, this.props.navigation, extra);
     }
@@ -370,7 +370,7 @@ class GuestInfoForm extends Component {
                 />
                 <BackButton onPress={() => {this.props.navigation.goBack()}} />
                 <Separator height={10} />
-                <BookingSteps items={['1. Provide Guest Information','2. Review Room Detail','3. Confirm and Pay']} selectedIndex={0} />
+                <BookingSteps items={['Guest Info', 'Choose Payment', 'Booking Details', 'Confirm and Pay']} selectedIndex={0} />
                 <Separator height={10} />
                 
                 <View style={styles.content}>

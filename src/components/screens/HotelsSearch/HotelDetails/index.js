@@ -16,7 +16,6 @@ import ImageCarousel from '../../../atoms/ImagePage';
 import { connect } from 'react-redux';
 import { hotelSearchIsNative } from '../../../../config-settings';
 import { getSafeTopOffset } from '../../../../utils/designUtils';
-import { gotoWebview, generateSearchString } from '../../utils';
 
 
 class HotelDetails extends Component {
@@ -103,26 +102,24 @@ class HotelDetails extends Component {
                 roomDetail, guests, daysDifference, searchString
             });
         } else {
-            //const { params } = this.props.navigation.state;
-            //const { searchString } = this.props;
-            const { hotel } = this.state;
-            const { checkInDateFormated, checkOutDateFormated, roomsDummyData } = this.props.datesAndGuestsData;
-            const stateData = {
-                regionId,
-                checkInDateFormated, checkOutDateFormated, roomsDummyData
-            };
-            const search = generateSearchString(stateData,this.props,true);
-            let webViewUrl = `mobile/hotels/listings/${hotel.id}${search}&quoteId=${roomDetail.quoteId}`
-            const { token, email } = this.props.datesAndGuestsData;
-            webViewUrl += `&authToken=${token}`;
-            webViewUrl += `&authEmail=${email}`;
-            
-            //console.log('ROOM DETAIL',{state:this.state,props:this.props,params,webViewUrl,roomDetail,searchString,cache:this.props.datesAndGuestsData});
-            //console.log('### url - details',webViewUrl);
-            
-            gotoWebview(this.state, this.props.navigation, {webViewUrl,message:'Processing booking ...'}, false);
+            // const { bookingId, searchString } = this.state;
+            // const { quoteId } = roomDetail;
+            // // const { currency } = this.props;
+            // const { token, email } = this.props.loginDetails;
+            // // const rooms = (  JSON.stringify(booking.rooms)  );
+            // // const search = StringUtils.subBeforeIndexOf(searchString, '&rooms=') +
+            // const search = searchString +
+            //     `&quoteId=${quoteId}&authToken=${token}&authEmail=${email}`;
+            // const state = { currency, token, email };
+            // const extra = {
+            //     webViewUrl: `mobile/hotels/listings/${bookingId}/confirm${search}`,
+            //     message: 'Preparing booking information ...',
+            //     backText: 'Back'
+            // };
+            // gotoWebview(state, this.props.navigation, extra);
         }
-    } 
+    }
+
 
     _renderBackButton() {
         return (
@@ -261,6 +258,7 @@ let mapStateToProps = (state) => {
         datesAndGuestsData: state.userInterface.datesAndGuestsData,
         searchString: state.hotels.searchString,
         currency: state.currency.currency,
+        loginDetails: state.userInterface.login
     };
 }
 

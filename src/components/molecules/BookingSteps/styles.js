@@ -16,10 +16,13 @@ export default StyleSheet.create({
 
 export const htmlViewStyleSheet = StyleSheet.create({
   body: {
-      fontFamily: 'FuturaStd-Light',
-      fontSize: 10
+    fontFamily: 'FuturaStd-Light',
+    fontSize: 10
   },
   b: {
-      fontWeight: 'bold'
+    fontWeight: 'bold'
+  },
+  grey: {
+    color: 'grey'
   }
 });
