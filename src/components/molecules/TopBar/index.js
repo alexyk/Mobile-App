@@ -3,7 +3,6 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import BackButton from '../../atoms/BackButton';
 import PropTypes from 'prop-types';
 import styles from './styles.js'
-import { rlog } from '../../../config-debug';
 
 
 export default class TopBar extends Component {
@@ -45,8 +44,6 @@ export default class TopBar extends Component {
 
 
   _renderRight(onPress, text, style) {
-    rlog(`---------`,`Topbar - Right: ${text}`,{onPress,text});
-
     return (
       (onPress != null && text)
       &&  <TouchableOpacity onPress={onPress} style={{ paddingRight: 10 }}>

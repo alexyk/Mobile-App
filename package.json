@@ -14,6 +14,7 @@
     "jest-react-native": "18.0.0",
     "react-test-renderer": "16.2.0",
     "redux-devtools-extension": "2.13.5",
+    "reactotron-react-native": "3.5.1",
     "redux-logger": "3.0.6"
   },
   "scripts": {
@@ -85,7 +86,6 @@
     "react-simple-dropdown": "3.2.0",
     "react-stomp": "3.2.0",
     "react-switch": "2.3.2",
-    "reactotron-react-native": "3.5.1",
     "redux": "3.7.2",
     "redux-actions": "2.6.1",
     "redux-thunk": "2.2.0",

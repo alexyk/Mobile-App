@@ -305,14 +305,14 @@ export const orderbyPickerSelectStyles = StyleSheet.create({
   },
   inputAndroid: {
     height: 50,
-    width: 120,
+    width: 70,
     //fontSize: 16,
     // color: 'black',
     alignSelf: 'flex-end',
     justifyContent: 'flex-end',
     alignItems: 'flex-start',
     width: "100%",
-//     backgroundColor: 'red'
+    backgroundColor: '#FFF1'
   }
 });
 

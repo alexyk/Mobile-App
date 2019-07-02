@@ -64,6 +64,7 @@ class GuestInfoForm extends Component {
 
         this.onFirstNameChange = this.onFirstNameChange.bind(this);
         this.onLastNameChange = this.onLastNameChange.bind(this);
+        this.onBackPress = this.onBackPress.bind(this);
     }
 
     componentWillMount() {
@@ -217,7 +218,6 @@ class GuestInfoForm extends Component {
             }
         }).catch((error) => {
             this.refs.toast.show("Unknown Error! Please try again.", 5000, () => {
-                console.log(`this`,this)
                 this.props.navigation.goBack();
             });
             processError(`[GuestInfoForm] Error in creating reservation level 1 - ${error.message}`, {error});
@@ -311,6 +311,11 @@ class GuestInfoForm extends Component {
     }
 
 
+    onBackPress() {
+        this.props.navigation.goBack();
+    }
+
+
     _renderHotelInfo(params) {
         const { hotelImg, hotelDetails } = params;
         const { name, additionalInfo } = hotelDetails;
@@ -370,7 +375,7 @@ class GuestInfoForm extends Component {
                     opacity={1.0}
                     textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                 />
-                <TopBar onBackPress={() => this.props.navigation.goBack()} />
+                <TopBar onBackPress={this.onBackPress} />
                 <Separator height={10} />
                 <BookingSteps items={['Guest Info', 'Choose Payment', 'Booking Details', 'Confirm and Pay']} selectedIndex={0} />
                 <Separator height={10} />
