@@ -73,10 +73,13 @@ const styles = StyleSheet.create({
       color:'#000000'
     },
 
+    descriptionScrollViewContainer: {
+        height: 210
+    },
+
     descriptionScrollView: {
         marginHorizontal: 10,
         marginVertical: 10,
-        height: 200
     },
 
     spaceText: {

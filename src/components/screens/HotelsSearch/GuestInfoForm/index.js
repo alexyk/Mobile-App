@@ -377,7 +377,7 @@ class GuestInfoForm extends Component {
                 />
                 <TopBar onBackPress={this.onBackPress} />
                 <Separator height={10} />
-                <BookingSteps items={['Guest Info', 'Choose Payment', 'Booking Details', 'Confirm and Pay']} selectedIndex={0} />
+                <BookingSteps items={['Guest Info', 'Choose Payment', 'Billing Info', 'Confirm and Pay']} selectedIndex={0} />
                 <Separator height={10} />
                 
                 <View style={styles.content}>

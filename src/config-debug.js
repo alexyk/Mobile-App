@@ -29,7 +29,7 @@ export const forceOffline                            = false;
 export const errorLevel = 0;
 
   // reactotron
-export const reactotronLoggingEnabled           = true;
+export const reactotronLoggingEnabled           = false;
 export const logConverterErrorToReactrotron     = false;
 export const showTypesInReactotronLog           = true;
 export const warnOnReactotronDisabledCalls      = false;
@@ -388,5 +388,5 @@ export function configureDebug() {
   configureConsole();
   
   // axios debug
-  try { require('locktrip-svc-layer').setServiceDebug(false); } catch (error) {console.error('Error while setting debug to axios-requester',{error})}
+  //try { require('locktrip-svc-layer').setServiceDebug(false); } catch (error) {console.error('Error while setting debug to axios-requester',{error})}
 }

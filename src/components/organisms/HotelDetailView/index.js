@@ -106,12 +106,14 @@ class HotelDetailView extends Component {
 
     _renderDescription() {
         return (
-            <ScrollView style={styles.descriptionScrollView}>
-                <HTMLView
-                    value={`<body>${this.props.description}</body>`}
-                    stylesheet={htmlViewStyleSheet}
-                />
-            </ScrollView>
+            <View style={styles.descriptionScrollViewContainer}>
+                <ScrollView style={styles.descriptionScrollView}>
+                    <HTMLView
+                        value={`<body>${this.props.description}</body>`}
+                        stylesheet={htmlViewStyleSheet}
+                    />
+                </ScrollView>
+            </View>
         )
     }
 
@@ -128,4 +130,4 @@ class HotelDetailView extends Component {
 
 export default HotelDetailView;
 
-//</View>Text style={styles.normalText}>{`${this.props.description}`.replace(/<(?:.|\n)*?>/gm, '')}</Text>
+//</ScrollView>Text style={styles.normalText}>{`${this.props.description}`.replace(/<(?:.|\n)*?>/gm, '')}</Text>

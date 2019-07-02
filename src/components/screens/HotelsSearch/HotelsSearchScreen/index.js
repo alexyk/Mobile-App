@@ -775,9 +775,9 @@ class HotelsSearchScreen extends Component {
                 _this.props.setIsApplyingFilter(false);
                 if (_this.isFirstFilter) {
                   _this.isFirstFilter = false;
-                }    
+                }
               }
-              setTimeout(func, 100)
+              setTimeout(func, 100);
             } else {
               if (_this.isFirstFilter) {
                 _this.isFirstFilter = false;

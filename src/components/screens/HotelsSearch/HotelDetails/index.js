@@ -231,21 +231,20 @@ class HotelDetails extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <ScrollView style={styles.scrollView}>
                     <View style={styles.body}>
                         { this._renderImages() }
 
                         { this._renderHotelDetails() }
 
-                        { this._renderFacilities() }
+                        <ScrollView style={styles.scrollView}>
+                            { this._renderFacilities() }
 
-                        { this._renderAvailableRooms() }
+                            { this._renderAvailableRooms() }
 
-                        { this._renderLocation() }
+                            { this._renderLocation() }
 
-                        <View style={{ marginBottom: 50 }} />
+                        </ScrollView>
                     </View>
-                </ScrollView>
                 
                 { this._renderBackButton() }
             </View>
