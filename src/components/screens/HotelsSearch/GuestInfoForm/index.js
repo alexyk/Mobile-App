@@ -15,7 +15,7 @@ import requester from '../../../../initDependencies';
 import { userInstance } from '../../../../utils/userInstance';
 import { imgHost } from '../../../../config'
 import { SC_NAME, DEFAULT_CRYPTO_CURRENCY } from '../../../../config-settings';
-import { processError, rlog, clog } from '../../../../config-debug';
+import { processError, rlog } from '../../../../config-debug';
 import { gotoWebview } from '../../utils';
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
@@ -25,9 +25,9 @@ import styles from './styles';
 import Toast from 'react-native-easy-toast';
 import HotelDetailBottomBar from '../../../atoms/HotelDetailBottomBar'
 import BookingSteps from '../../../molecules/BookingSteps';
-import BackButton from '../../../atoms/BackButton';
 import Separator from '../../../atoms/Separator';
 import StringUtils from '../../../../services/utilities/stringUtilities';
+import TopBar from '../../../molecules/TopBar';
 
 
 class GuestInfoForm extends Component {
@@ -238,7 +238,9 @@ class GuestInfoForm extends Component {
         const extra = {
             webViewUrl: `mobile/hotels/listings/book/${bookingId}/confirm${search}`,
             message: 'Preparing booking payment ...',
-            backText: ''
+            backText: '',
+            rightText: 'Hotel Details',
+            onRightPress: () => this.props.navigation.pop(2)
         };
         gotoWebview(state, this.props.navigation, extra);
     }
@@ -368,7 +370,7 @@ class GuestInfoForm extends Component {
                     opacity={1.0}
                     textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                 />
-                <BackButton onPress={() => {this.props.navigation.goBack()}} />
+                <TopBar onBackPress={() => this.props.navigation.goBack()} />
                 <Separator height={10} />
                 <BookingSteps items={['Guest Info', 'Choose Payment', 'Booking Details', 'Confirm and Pay']} selectedIndex={0} />
                 <Separator height={10} />

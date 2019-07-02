@@ -20,6 +20,7 @@ import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
 import { webviewDebugEnabled } from '../../../config-debug';
 import LTLoader from '../../molecules/LTLoader';
+import TopBar from '../../molecules/TopBar';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -260,8 +261,8 @@ class WebviewScreen extends Component {
         return false;
     }
 
-    renderDebug() {
-        if (!__DEV__ || !webviewDebugEnabled) {
+    _renderDebug() {
+       if (!__DEV__ || !webviewDebugEnabled) {
             // webview debug disabled in these cases
             return null;
         }
@@ -273,7 +274,7 @@ class WebviewScreen extends Component {
 
         return (
             <TouchableOpacity onPress={this.onDebugPress}>
-                <View style={{left:20, top:3, backgroundColor: '#777A', width: 130, borderRadius: 5}}>
+                <View style={{position:'absolute', left:20, top:3, backgroundColor: '#777A', width: 130, borderRadius: 5}}>
                     <Text style={{textAlign: 'center'}}>{"RELOAD WEBVIEW"}</Text>
                 </View>
             </TouchableOpacity>
@@ -283,19 +284,15 @@ class WebviewScreen extends Component {
     render() {
         const patchPostMessageJsCode = '(' + String(this.patchPostMessageFunction) + ')();';
         const { isLoading, message, propertyName } = this.state;
-        const { backText } = this.state.params;
+        const { backText, rightText, onRightPress } = this.state.params; // navigation params
         const loaderText = (message != null ? message : `Getting details for: \n'${propertyName}'`)
 
         console.log(`### [WebView] Rendering '${this.state.webViewUrl}'`)
 
         return (
             <View style={styles.container}>
-                <View style={styles.backButtonContainer}>
-                    <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
-                    {/* <Text style={styles.title}>{this.state.title}</Text> */}
-                    <Text style={styles.backText}>{backText != null ? backText : 'Modify search'}</Text>
-                    {this.renderDebug()}
-                </View>
+                
+                <TopBar onBackPress={this.onBackPress} backText={backText} onRightPress={onRightPress} rightText={rightText}  extraItems={[this._renderDebug()]} />
 
                 <View style={styles.webviewContainer}>
                     <WebView
