@@ -10,7 +10,9 @@ const styles = StyleSheet.create({
         width: '100%',
         backgroundColor: '#fff',
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        borderTopColor: '#7775',
+        borderTopWidth: 3
     },
     detailsView: {
         flex: 1,

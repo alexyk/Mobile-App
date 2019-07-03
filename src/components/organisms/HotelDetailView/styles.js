@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
 
     descriptionScrollViewContainer: {
         marginHorizontal: 10,
-        // marginVertical: 10,
+        marginVertical: 10,
         // height: 210
     },
 

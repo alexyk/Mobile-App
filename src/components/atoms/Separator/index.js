@@ -6,17 +6,19 @@ import PropTypes from 'prop-types';
 export default class Separator extends Component {
   static propTypes = {
     height: PropTypes.number.isRequired,
-    extraStyle: PropTypes.object
+    extraStyle: PropTypes.object,
+    isHR: PropTypes.bool
   }
   static defaultProps = {
     extraStyle: {}
 }
 
   render() {
-    const { height, extraStyle } = this.props;
+    const { height, extraStyle, isHR } = this.props;
+    const horizontalRuleStyle = (isHR ? {backgroundColor: '#000'} : {})
 
     return (
-      <View style={{width: "100%", height, ...extraStyle}} />
+      <View style={{width: "100%", height, ...horizontalRuleStyle, ...extraStyle}} />
     )
   }
 }

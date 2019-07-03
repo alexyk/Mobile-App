@@ -5,11 +5,15 @@ import RNPickerSelect from 'react-native-picker-select';
 import PropTypes from 'prop-types';
 import styles from './styles';
 import { orderbyPickerSelectStyles } from '../HotelFilters/styles';
+import { clog } from '../../../../config-debug';
+import Separator from '../../../atoms/Separator';
 
 export default class GuestFormRow extends Component {
     static propTypes = {
+        itemIndex: PropTypes.number,
         onFirstNameChange: PropTypes.func.isRequired,
         onLastNameChange: PropTypes.func.isRequired,
+        onGuestTitleUpdate: PropTypes.func.isRequired,
     }
 
     constructor(props) {
@@ -19,46 +23,55 @@ export default class GuestFormRow extends Component {
             title: 'Mr',
             firstName: '',
             lastName: '',
-            titleSelectItems: [{value:'Mr',label:'Mr'}, {value:'Mrs', label: 'Mrs'}]
+            titleSelectItems: [
+                {value:'Mr',    label:'Mr'  },
+                {value:'Mrs',   label:'Mrs' }
+            ]
         }
 
-        this.onGenderChange = this.onGenderChange.bind(this);
+        this._onGenderChange = this._onGenderChange.bind(this);
+        this._onChangeText = this._onChangeText.bind(this);
     }
     
     componentDidMount() {
         this.setState({ ...this.props.guest });
     }
 
-    onGenderChange = (value, index) => {
+    _onGenderChange(value, index) {
         this.setState({ title: value });
+
+        const { itemIndex, onGuestTitleUpdate } = this.props;
+        onGuestTitleUpdate(itemIndex, value);
+    }
+
+    _onChangeText(text) {
+        this.props.onFirstNameChange(this.props.itemIndex, text);
+        this.setState({ firstName: text });
     }
 
     _renderGender() {
         return (
-            <View style={styles.titleSelecterContainer}>
+            <View style={styles.titleContainer}>
                 <RNPickerSelect
                     placeholder={{label:'', value:null}}
                     style={orderbyPickerSelectStyles}
                     value={this.state.title}
                     items={this.state.titleSelectItems}
-                    onValueChange={this.onGenderChange}
+                    onValueChange={this._onGenderChange}
                 />
             </View>
         )
     }
 
     _renderFirstName() {
-        const { onFirstNameChange, itemIndex } = this.props;
+        const { itemIndex } = this.props;
         const { firstName } = this.state;
 
         return (
             <View style={styles.firstNameFlex}>
                 <TextInput
                     style={[styles.formField]}
-                    onChangeText={(text) => {
-                        onFirstNameChange(itemIndex, text);
-                        this.setState({ firstName: text });
-                    }}
+                    onChangeText={this._onChangeText}
                     placeholder={itemIndex == 0 ? "First Name" : "Optional"}
                     underlineColorAndroid="#fff"
                     value={firstName}
@@ -88,16 +101,18 @@ export default class GuestFormRow extends Component {
     }
 
     render() {
-        const key = this.props.guest.key;
-        const no = parseInt(key)+1;
+
+        const { itemIndex } = this.props;
+        const no = parseInt(itemIndex)+1;
 
         return (
             
-            <View style={styles.guestInfoWrapper} key={key}>
+            <View style={styles.guestInfoWrapper} key={`${itemIndex}`}>
 
                 {/* <ScrollView> */}
                     
                 <Text style={styles.labelGuest}>Guest {no}</Text>
+                <Separator isHR height={1} />
                 <View style={styles.inputFieldsView}>
                     { this._renderGender() }
                     { this._renderFirstName() }
@@ -105,8 +120,6 @@ export default class GuestFormRow extends Component {
                 </View>
                     {/* </KeyboardAvoidingView> */}
                 {/* </ScrollView> */}
-            
-               
                 
             </View>
         )

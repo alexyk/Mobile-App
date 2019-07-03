@@ -595,20 +595,27 @@ class HotelsSearchScreen extends Component {
 
 
   onBackButtonPress() {
-    switch (this.state.displayMode) {
-    
-      case DISPLAY_MODE_HOTEL_DETAILS:
-        this.setState({
-          displayMode: DISPLAY_MODE_RESULTS_AS_LIST,
-          isLoading: false,
-          selectedHotelData: null
-        });
-        break;
+    const { displayMode } = this.state;
+    console.log(`[onBackButtonPress] state: ${displayMode}`)
 
-      default:
-        this.props.navigation.goBack();
-        break;
-
+    if (hotelSearchIsNative.step2HotelDetails) {
+      this.props.navigation.goBack();
+    } else {
+      switch (displayMode) {
+      
+        case DISPLAY_MODE_HOTEL_DETAILS:
+          this.setState({
+            displayMode: DISPLAY_MODE_RESULTS_AS_LIST,
+            isLoading: false,
+            selectedHotelData: null
+          });
+          break;
+  
+        default:
+          this.props.navigation.goBack();
+          break;
+  
+      }
     }
 
     if (Platform.OS == 'android') {
@@ -634,11 +641,6 @@ class HotelsSearchScreen extends Component {
 
   gotoHotelDetailsFromItemClick = (item, state, extraParams) => {
     if (hotelSearchIsNative.step2HotelDetails) {
-      rlog('item-cleck-native', `gotoHotelDetailsPageNative`,{item});
-      this.setState({
-        selectedHotelData: item,
-        displayMode: DISPLAY_MODE_HOTEL_DETAILS,
-      });
       this.gotoHotelDetailsPageNative(item)
     } else{
       // log('here2', `goto Web-View`,{item})

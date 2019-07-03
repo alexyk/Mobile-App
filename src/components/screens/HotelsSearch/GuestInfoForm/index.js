@@ -16,7 +16,7 @@ import requester from '../../../../initDependencies';
 import { userInstance } from '../../../../utils/userInstance';
 import { imgHost } from '../../../../config'
 import { SC_NAME, DEFAULT_CRYPTO_CURRENCY } from '../../../../config-settings';
-import { processError, rlog } from '../../../../config-debug';
+import { processError, rlog, clog } from '../../../../config-debug';
 import { gotoWebview } from '../../utils';
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
 
@@ -29,22 +29,26 @@ import BookingSteps from '../../../molecules/BookingSteps';
 import Separator from '../../../atoms/Separator';
 import StringUtils from '../../../../services/utilities/stringUtilities';
 import TopBar from '../../../molecules/TopBar';
+import { setGuestData } from '../../../../redux/action/hotels';
+import lang from '../../../../language'
 
 
 class GuestInfoForm extends Component {
     constructor(props) {
         super(props);
         
+        const { guestData } = props; // retrieve from redux cache
         const { params } = props.navigation.state;
 
         // Save guests array for dynamic form generation
         this.state = {
             isLoading: true,
+            isConfirmed: false,
             scMode: false,
             buttonLabel: 'Proceed',
             
-            guests : [],
-            roomName: null,
+            guests : (guestData ? guestData.concat() : null),
+            roomType: 'loading ...',
             arrivalDate: null,
             leavingDate: null,
             cancelationDate: null,
@@ -56,24 +60,24 @@ class GuestInfoForm extends Component {
             data: null,
         };
 
-        this.bookingParams = null;
-        this.guestsCollection = [];
+        this._guestsCollection = [];
         const guestsCount = (params.guests);
         for (let i=0; i<guestsCount; i++) {
-            this.guestsCollection.push({title:'Mr', firstName:'', lastName: ''});
+            this._guestsCollection.push({title:'Mr', firstName:'', lastName: ''});
         }
 
-        this.onFirstNameChange = this.onFirstNameChange.bind(this);
-        this.onLastNameChange = this.onLastNameChange.bind(this);
-        this.onBackPress = this.onBackPress.bind(this);
-        this.onWebviewRightPress = this.onWebviewRightPress.bind(this);
+        this._onGuestTitleUpdate = this._onGuestTitleUpdate.bind(this);
+        this._onFirstNameChange = this._onFirstNameChange.bind(this);
+        this._onLastNameChange = this._onLastNameChange.bind(this);
+        this._onBackPress = this._onBackPress.bind(this);
+        this._onWebviewRightPress = this._onWebviewRightPress.bind(this);
     }
 
     componentWillMount() {
         this.prepareGuestsData();
         this.serviceRequestSCMode();
         if (Platform.OS == 'android') {
-            BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
+            BackHandler.addEventListener('hardwareBackPress', this._onBackPress);
         }
     }
 
@@ -84,42 +88,46 @@ class GuestInfoForm extends Component {
     componentWillUnmount() {
         WebsocketClient.startGrouping();
         if (Platform.OS == 'android') {
-            BackHandler.removeEventListener('hardwareBackPress', this.onBackPress);
+            BackHandler.removeEventListener('hardwareBackPress', this._onBackPress);
         }
     }
 
 
     async prepareGuestsData() {
-        let userFirstName = await userInstance.getFirstName();
-        let userLastName = await userInstance.getLastName();
-        // let userGender = await userInstance.getGender();
-
-        const { guests: guestsCount } = this.props.navigation.state.params;
-
+        const { guests } = this.state;
         var preparedGuests = [];
-        for (var i = 0; i < guestsCount; i++){
-            let firstName = '';
-            let lastName = '';
-            if (i == 0) {
-                if (userFirstName != null) firstName = userFirstName;
-                if (userLastName != null) lastName = userLastName;
+
+        if (guests != null) {
+            this._guestsCollection = guests.concat(); // retrieved from cache in constructor
+            this.setState({isLoading: false});
+        } else {
+            const { guests: guestsCount } = this.props.navigation.state.params;
+
+            let userFirstName = await userInstance.getFirstName();
+            let userLastName = await userInstance.getLastName();
+            // let userGender = await userInstance.getGender();
+
+            for (var i = 0; i < guestsCount; i++){
+                let firstName = '';
+                let lastName = '';
+                if (i == 0) {
+                    if (userFirstName != null) firstName = userFirstName;
+                    if (userLastName != null) lastName = userLastName;
+                }
+
+                preparedGuests.push({
+                    key: `${i}`,
+                    title: 'Mr',
+                    firstName,
+                    lastName
+                });
+
+                this._onFirstNameChange(i, firstName, true);
+                this._onLastNameChange(i, lastName, true);
             }
-
-            preparedGuests.push({
-                key: `${i}`,
-                title: 'Mr',
-                firstName,
-                lastName
-            });
-
-            this.onFirstNameChange(i, firstName);
-            this.onLastNameChange(i, lastName);
+            
+            this.setState({guests: preparedGuests, isLoading: false});
         }
-
-        
-        rlog(`'prepare-guests`,`Guests to state`, {guests: preparedGuests});
-
-        this.setState({guests: preparedGuests, isLoading: false});
     }
 
 
@@ -131,6 +139,13 @@ class GuestInfoForm extends Component {
                         this.setState({
                             scMode: (data.value === 'true')
                         });
+                        const params = this.props.navigation.state.params;
+                        const resParams = {
+                            currency: params.currency,
+                            quoteId: params.roomDetail.quoteId, 
+                            guestRecord: this._guestsCollection.concat()
+                        }
+                        this.serviceCreateReservation(resParams);
                     });
                 } else {
                     res.errors.then((error) => {
@@ -146,8 +161,7 @@ class GuestInfoForm extends Component {
         const value = {
             quoteId: params.quoteId,
             rooms: [{
-                adults: params.guestRecord
-                ,
+                adults: params.guestRecord,
                 'children': []
             }],
             'currency': params.currency
@@ -173,7 +187,7 @@ class GuestInfoForm extends Component {
                                         const endDate = moment(data.booking.hotelBooking[0].arrivalDate, 'YYYY-MM-DD');
                                         const leavingDate = moment(data.booking.hotelBooking[0].arrivalDate, 'YYYY-MM-DD').add(data.booking.hotelBooking[0].nights, 'days');
                                         this.setState({
-                                            roomName: data.booking.hotelBooking[0].room.roomType.text,
+                                            roomType: data.booking.hotelBooking[0].room.roomType.text,
                                             arrivalDate: endDate.format('DD MMM'),
                                             leavingDate: leavingDate.format('DD MMM'),
                                             cancelationDate: endDate.format('DD MMM YYYY'),
@@ -184,13 +198,13 @@ class GuestInfoForm extends Component {
                                             booking: value,
                                             data,
                                             isLoading: false,
+                                            isConfirmed: true,
                                             buttonLabel: 'Proceed'
                                         }, () => {
                                             const { currencyExchangeRates } = this.props.exchangeRates;
                                             const fiatPriceRoomsXML = params.price;
                                             const fiatPriceRoomsXMLInEur = currencyExchangeRates && CurrencyConverter.convert(currencyExchangeRates, RoomsXMLCurrency.get(), DEFAULT_CRYPTO_CURRENCY, fiatPriceRoomsXML);
                                             this.props.setLocRateFiatAmount(fiatPriceRoomsXMLInEur);
-                                            this.onReservationReady();
                                         });
                                         rlog('case 4')
                                     } else {
@@ -248,40 +262,45 @@ class GuestInfoForm extends Component {
             webViewUrl: `mobile/hotels/listings/book/${bookingId}/confirm${search}`,
             message: 'Preparing booking payment ...',
             backText: '',
-            rightText: 'Hotel Details',
-            onRightPress: this.onWebviewRightPress
+            rightText: "Back To Hotel Details",
+            onRightPress: this._onWebviewRightPress
         };
         gotoWebview(state, this.props.navigation, extra);
     }
 
 
-    onWebviewRightPress() {
+    _onWebviewRightPress() {
         this.props.navigation.pop(2);
     }
 
 
-    onFirstNameChange(...args){
-        let key=args[0],text=args[1];
+    _onGuestTitleUpdate(index, title) {
+        this._guestsCollection[index].title = title;
+        this.props.setGuestData(this._guestsCollection.concat());
+    }
 
-        rlog(`first-name`,`${key} -> ${text}`,{args})
 
+    _onFirstNameChange(key, text, isInit){
         if (text === "") {
             text = "Optional"
         }
         
-	    this.guestsCollection[key].firstName = text;
+        this._guestsCollection[key].firstName = text;
+        
+        if (!isInit) {
+            this.props.setGuestData(this._guestsCollection.concat());
+        }
     }
 
-    onLastNameChange(key,text){
+    _onLastNameChange(key, text, isInit=false) {
         if (text === "") {
             text = "Optional"
         }
-        this.guestsCollection[key].lastName = text;
-    }
+        this._guestsCollection[key].lastName = text;
 
-    onReservationReady() {
-        rlog('hello',`onReservationReady`,{bookingParams:this.bookingParams})
-        this.gotoWebViewPayment(this.bookingParams);
+        if (!isInit) {
+            this.props.setGuestData(this._guestsCollection.concat());
+        }
     }
 
     
@@ -291,16 +310,16 @@ class GuestInfoForm extends Component {
         }
         let isValid = true;
 
-        rlog(`guests`,`Guests ${this.guestsCollection.length}`, {guestsCollection:this.guestsCollection,stateGuests:this.state.guests});
+        clog(`guests`,`Guests ${this._guestsCollection.length}`, {guestsCollection:this._guestsCollection,stateGuests:this.state.guests});
 
-        for(let item of this.guestsCollection) {
+        for(let item of this._guestsCollection) {
             if (!hasLetter(item['firstName']) || !hasLetter(item['lastName'])) {
                 isValid = false;
                 break;
             }
         }
 
-        if (this.guestsCollection.length != this.state.guests.length){
+        if (this._guestsCollection.length != this.state.guests.length){
             this.refs.toast.show("Please enter details for all the guests", 2000);
         }
         else if (!isValid) {
@@ -308,25 +327,25 @@ class GuestInfoForm extends Component {
         }
         else {
             const params = this.props.navigation.state.params;
-            this.bookingParams = {
+            const bookingParams = {
                 roomDetails : params.roomDetail, 
-                quoteId: params.roomDetail.quoteId, 
-                hotelDetails: params.hotelDetails, 
+                hotelDetails: params.hotelDetails,
                 price: params.price, 
                 daysDifference: params.daysDifference,
-                guests: this.guestsCollection.length,
-                guestRecord: this.guestsCollection,
+                guests: this._guestsCollection.length,
+                quoteId: params.roomDetail.quoteId, 
+                guestRecord: this._guestsCollection.concat(),
                 searchString: params.searchString,
                 hotelImg: params.hotelImg
             };
-            //this.props.navigation.navigate('RoomDetailsReview', bookingParams);
-            this.serviceCreateReservation(this.bookingParams);
+            // this.props.navigation.navigate('RoomDetailsReview', params);
+            this.gotoWebViewPayment(bookingParams);
         }
         
     }
 
 
-    onBackPress() {
+    _onBackPress() {
         this.props.navigation.goBack();
         if (Platform.OS == 'android') {
             return true;
@@ -346,7 +365,55 @@ class GuestInfoForm extends Component {
                 </View>
                 <View style={styles.hotelInfoView}>
                     <Text style={styles.hotelName}>{name}</Text>
-                    <Text style={styles.hotelPlace}>{additionalInfo.mainAddress}</Text>
+                    <Text style={styles.hotelAddress}>{additionalInfo.mainAddress}</Text>
+                </View>
+            </View>
+        )
+    }
+
+
+    _renderRoomType() {
+        return (
+            <View style={styles.listItem}>
+                <View style={styles.listItemNameWrapper}>
+                    <Text style={styles.listItemText}>Room Type</Text>
+                </View>
+                <View style={styles.listItemValueWrapper}>
+                    <Text style={styles.valueText}>{this.state.roomType}</Text>
+                </View>
+            </View>
+        )
+    }
+
+
+    _renderDates() {
+        const { arrivalDate, leavingDate } = this.state;
+        const datesText = (
+            (arrivalDate != null && leavingDate != null)
+                ? `${arrivalDate} - ${leavingDate}`
+                : "loading ..."
+        )
+        return (
+            <View style={styles.listItem}>
+                <View style={styles.listItemNameWrapper}>
+                    <Text style={styles.listItemText}>Dates</Text>
+                </View>
+                <View style={styles.listItemValueWrapper}>
+                    <Text style={styles.valueText}>{datesText}</Text>
+                </View>
+            </View>
+        )
+    }
+
+
+    _renderGuestsCount(guestsCount) {
+        return (
+            <View style={styles.listItem}>
+                <View style={styles.listItemNameWrapper}>
+                    <Text style={styles.listItemText}>Guests</Text>
+                </View>
+                <View style={styles.listItemValueWrapper}>
+                    <Text style={styles.valueText}>{guestsCount}</Text>
                 </View>
             </View>
         )
@@ -354,7 +421,7 @@ class GuestInfoForm extends Component {
 
 
     _renderGuests() {
-        rlog('guests-render',`${this.state.guests.length} guests currently in state`, {guests:this.state.guests})
+        //clog('guests-render',`${this.state.guests.length} guests currently in state`, {guests:this.state.guests})
         return (
             <FlatList
                 style={styles.flatList}
@@ -366,8 +433,9 @@ class GuestInfoForm extends Component {
                         <GuestFormRow
                             guest={item}
                             itemIndex={index}
-                            onFirstNameChange={this.onFirstNameChange}
-                            onLastNameChange={this.onLastNameChange}
+                            onGuestTitleUpdate={this._onGuestTitleUpdate}
+                            onFirstNameChange={this._onFirstNameChange}
+                            onLastNameChange={this._onLastNameChange}
                         />
                     </KeyboardAvoidingView>
                 )}
@@ -378,7 +446,7 @@ class GuestInfoForm extends Component {
 
     render() {
         const { params }                    = this.props.navigation.state;
-        const { price, daysDifference }     = params;
+        const { price, daysDifference, guests:guestsCount } = params;
         const { buttonLabel, isLoading }    = this.state;
 
         return (
@@ -393,15 +461,20 @@ class GuestInfoForm extends Component {
                     opacity={1.0}
                     textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                 />
-                <TopBar onBackPress={this.onBackPress} />
+                <TopBar onBackPress={this._onBackPress} />
                 <Separator height={10} />
-                <BookingSteps items={['Guest Info', 'Choose Payment', 'Billing Info', 'Confirm and Pay']} selectedIndex={0} />
+                <BookingSteps items={lang.TEXT.BOOKING_STEPS} selectedIndex={0} />
                 <Separator height={10} />
                 
                 <View style={styles.content}>
                     <Text style={styles.heading}>Provide guest information</Text>
                     
                     { this._renderHotelInfo(params) }
+                    <Separator height={20} />
+                    { this._renderRoomType() }
+                    { this._renderDates() }
+                    { this._renderGuestsCount(guestsCount) }
+                    <Separator height={10} />
                     { this._renderGuests() }
                     
                 </View>
@@ -450,10 +523,12 @@ const mapStateToProps = (state) => {
         exchangeRates: state.exchangeRates,
 
         loginDetails: state.userInterface.login,
+        guestData: state.hotels.guestData,
     };
 }
 
 const mapDispatchToProps = dispatch => ({
     setLocRateFiatAmount : bindActionCreators(setLocRateFiatAmount , dispatch),
+    setGuestData : bindActionCreators(setGuestData , dispatch),
 })
 export default connect(mapStateToProps, mapDispatchToProps)(GuestInfoForm);

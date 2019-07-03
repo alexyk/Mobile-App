@@ -25,7 +25,8 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        paddingHorizontal: 20
+        paddingHorizontal: 20,
+        marginBottom: 90
     },
     heading: {
         color: 'black',
@@ -56,11 +57,11 @@ const styles = StyleSheet.create({
     hotelName: {
         color: 'black',
         fontFamily: 'FuturaStd-Medium',
-        fontSize: 16,
+        fontSize: 18,
     },
-    hotelPlace: {
+    hotelAddress: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: 14,
         color: '#54585b',
     },
     
@@ -73,17 +74,21 @@ const styles = StyleSheet.create({
     },
     labelGuest: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 16
+        fontSize: 16,
+        fontWeight: 'bold'
     },
     inputFieldsView: {
         flexDirection: 'column',
-        marginTop: 10
+        marginTop: 10,
+
     },
     firstNameFlex: {
-        flex: 1
+        flex: 1,
+        marginBottom: 5
     },
     lastNameFlex: {
-        flex: 1
+        flex: 1,
+        marginBottom: 5
     },
     gender: {
         height: 50,
@@ -118,16 +123,49 @@ const styles = StyleSheet.create({
     },
     guestInfoWrapper: {
         marginTop: 15,
+        marginBottom: 30,
         flex: 1
     },
-    titleSelecterContainer:{
-        // paddingTop: 10,
-        // paddingRight: 17,
+    titleContainer: {
         marginLeft: 8,
+        marginBottom: 5,
         justifyContent: 'flex-end',  
         alignItems: 'center',
         width: 80,
-      }    
+    },
+    listItem: {
+        width: "100%",
+        alignContent: 'center',
+        marginLeft: 0,
+        marginRight: 20,
+        borderBottomColor: '#e3e3e3',
+        borderBottomWidth: 1,
+        flexDirection: 'row',
+        paddingVertical: 5
+    },
+    listItemNameWrapper: {
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
+    },
+    listItemValueWrapper: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        alignContent:'center',
+        justifyContent:'flex-end',
+        flexWrap: 'wrap',
+    },
+    listItemText: {
+        fontFamily: 'FuturaStd-Light',
+        fontSize: 16,
+        color: '#777'
+    },
+    valueText: {
+        fontSize: 16,
+        fontFamily: 'FuturaStd-Light',
+        color: '#d97b61'
+    }, 
 });
 
 export default styles;
@@ -152,5 +190,5 @@ export const titleSelectorStyles = StyleSheet.create({
       alignItems: 'flex-start',
       width: "100%",
   //     backgroundColor: 'red'
-    }
+    },
   });
