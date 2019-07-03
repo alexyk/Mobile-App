@@ -2,7 +2,8 @@ import {
     Dimensions,
     ScrollView,
     View,
-    TouchableOpacity
+    TouchableOpacity,
+    Platform, BackHandler
 } from 'react-native';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -58,6 +59,22 @@ class HotelDetails extends Component {
             canLoadLocation: false,
             guests, searchString
         }
+
+        this.onBackButtonPress = this.onBackButtonPress.bind(this);
+    }
+
+
+    componentWillMount() {
+        if (Platform.OS == 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackButtonPress);
+        }
+    }
+
+
+    componentWillUnmount() {
+        if (Platform.OS == 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackButtonPress);
+        }
     }
 
 
@@ -65,6 +82,10 @@ class HotelDetails extends Component {
         // Temporary solution - improve loading time by delaying location
         // TODO: Improve suggestion - provide an image (screenshot of map) rather than a map component
         setTimeout(() => this.setState({canLoadLocation:true}), 3000);
+    }
+
+    onBackButtonPress() {
+        this.props.navigation.goBack();
     }
 
 
@@ -231,21 +252,21 @@ class HotelDetails extends Component {
     render() {
         return (
             <View style={styles.container}>
+                <ScrollView style={styles.scrollView}>
                     <View style={styles.body}>
                         { this._renderImages() }
 
                         { this._renderHotelDetails() }
 
-                        <ScrollView style={styles.scrollView}>
                             { this._renderFacilities() }
 
                             { this._renderAvailableRooms() }
 
                             { this._renderLocation() }
 
-                        </ScrollView>
                     </View>
                 
+                </ScrollView>
                 { this._renderBackButton() }
             </View>
         );

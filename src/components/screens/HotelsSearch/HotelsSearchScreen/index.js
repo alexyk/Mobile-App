@@ -156,6 +156,7 @@ class HotelsSearchScreen extends Component {
     this.getNextStaticPage = this.getNextStaticPage.bind(this);
     this.unsubscribe = this.stopSocketConnection.bind(this);
     this.updateCoords = this.updateCoords.bind(this);
+    this.onBackButtonPress = this.onBackButtonPress.bind(this)
     this.onDataFromSocket = this.onDataFromSocket.bind(this);
     this.onStaticData = this.onStaticData.bind(this);
     this.onFilteredData = this.onFilteredData.bind(this);
@@ -592,7 +593,8 @@ class HotelsSearchScreen extends Component {
     );
   };
 
-  onBackButtonPress = () => {
+
+  onBackButtonPress() {
     switch (this.state.displayMode) {
     
       case DISPLAY_MODE_HOTEL_DETAILS:
@@ -614,6 +616,7 @@ class HotelsSearchScreen extends Component {
     }
   };
 
+
   onToggleMapOrListResultsView() {
     const displayMode =
       this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST
@@ -631,7 +634,11 @@ class HotelsSearchScreen extends Component {
 
   gotoHotelDetailsFromItemClick = (item, state, extraParams) => {
     if (hotelSearchIsNative.step2HotelDetails) {
-      // log('here', `gotoHotelDetailsPageNative`,{item})
+      rlog('item-cleck-native', `gotoHotelDetailsPageNative`,{item});
+      this.setState({
+        selectedHotelData: item,
+        displayMode: DISPLAY_MODE_HOTEL_DETAILS,
+      });
       this.gotoHotelDetailsPageNative(item)
     } else{
       // log('here2', `goto Web-View`,{item})

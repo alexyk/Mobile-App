@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import {
-        Text,
-        View,
-        Dimensions,
-        ScrollView
-      } from 'react-native';
+    Text,
+    View,
+    Dimensions,
+    ScrollView
+} from 'react-native';
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types'
 import CardView from 'react-native-cardview'
@@ -107,12 +107,12 @@ class HotelDetailView extends Component {
     _renderDescription() {
         return (
             <View style={styles.descriptionScrollViewContainer}>
-                <ScrollView style={styles.descriptionScrollView}>
+                {/* <ScrollView style={styles.descriptionScrollView}> */}
                     <HTMLView
                         value={`<body>${this.props.description}</body>`}
                         stylesheet={htmlViewStyleSheet}
                     />
-                </ScrollView>
+                {/* </ScrollView> */}
             </View>
         )
     }

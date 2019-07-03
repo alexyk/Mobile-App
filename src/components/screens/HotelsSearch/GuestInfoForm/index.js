@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {
-    View, Text, FlatList, KeyboardAvoidingView
+    View, Text, FlatList, KeyboardAvoidingView, BackHandler,
+    Platform
 } from 'react-native';
 
 import PropTypes from 'prop-types';
@@ -65,11 +66,15 @@ class GuestInfoForm extends Component {
         this.onFirstNameChange = this.onFirstNameChange.bind(this);
         this.onLastNameChange = this.onLastNameChange.bind(this);
         this.onBackPress = this.onBackPress.bind(this);
+        this.onWebviewRightPress = this.onWebviewRightPress.bind(this);
     }
 
     componentWillMount() {
         this.prepareGuestsData();
         this.serviceRequestSCMode();
+        if (Platform.OS == 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
+        }
     }
 
     componentDidMount() {
@@ -78,7 +83,11 @@ class GuestInfoForm extends Component {
 
     componentWillUnmount() {
         WebsocketClient.startGrouping();
+        if (Platform.OS == 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackPress);
+        }
     }
+
 
     async prepareGuestsData() {
         let userFirstName = await userInstance.getFirstName();
@@ -240,10 +249,16 @@ class GuestInfoForm extends Component {
             message: 'Preparing booking payment ...',
             backText: '',
             rightText: 'Hotel Details',
-            onRightPress: () => this.props.navigation.pop(2)
+            onRightPress: this.onWebviewRightPress
         };
         gotoWebview(state, this.props.navigation, extra);
     }
+
+
+    onWebviewRightPress() {
+        this.props.navigation.pop(2);
+    }
+
 
     onFirstNameChange(...args){
         let key=args[0],text=args[1];
@@ -313,6 +328,9 @@ class GuestInfoForm extends Component {
 
     onBackPress() {
         this.props.navigation.goBack();
+        if (Platform.OS == 'android') {
+            return true;
+        }
     }
 
 

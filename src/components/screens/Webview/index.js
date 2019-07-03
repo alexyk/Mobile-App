@@ -7,14 +7,12 @@
  */
 
 import { 
-    BackHandler, Platform, View, WebView, Text, SafeAreaView, TouchableOpacity
+    BackHandler, Platform, View, WebView, Text, TouchableOpacity
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import BackButton from '../../atoms/BackButton';
 import styles from './styles';
-import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
@@ -91,7 +89,7 @@ class WebviewScreen extends Component {
 
     componentWillMount() {
         if (Platform.OS == 'android') {
-            BackHandler.addEventListener('hardwareBackPress', this.onAndroidBackPress);
+            BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
         }
     }
 
@@ -104,7 +102,7 @@ class WebviewScreen extends Component {
 
     componentWillUnmount() {
         if (Platform.OS == 'android') {
-            BackHandler.removeEventListener('hardwareBackPress', this.onAndroidBackPress);
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackPress);
         }
     }
 
@@ -154,6 +152,10 @@ class WebviewScreen extends Component {
         // } else {
             this.props.navigation.goBack();
         // }
+
+        if (Platform.OS == 'android') {
+            return true;
+        }
     }
 
     onForwardPress(event) {
@@ -249,17 +251,6 @@ class WebviewScreen extends Component {
         // console.log(`[${this.debug()}]@##@ onNavigationState`,{navState})
     }
 
-    onAndroidBackPress = () => {
-        /*
-        if (this.webViewRef.canGoBackAndroid && this.webViewRef.ref) {
-            this.webViewRef.ref.goBack();
-            this.setState({canGoForward:true})
-            return true;
-        } else if (!this.webViewRef.canGoBackAndroid && this.webViewRef.ref) {
-        }*/
-
-        return false;
-    }
 
     _renderDebug() {
        if (!__DEV__ || !webviewDebugEnabled) {
