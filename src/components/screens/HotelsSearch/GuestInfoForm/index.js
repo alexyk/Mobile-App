@@ -45,10 +45,11 @@ class GuestInfoForm extends Component {
             isLoading: true,
             isConfirmed: false,
             scMode: false,
-            buttonLabel: 'Proceed',
+            buttonLabel: 'Loading ...',
             
             guests : (guestData ? guestData.concat() : null),
-            roomType: 'loading ...',
+            roomType: lang.TEXT.WAITING_FOR_RESERVATION_CREATION,
+            datesText: lang.TEXT.WAITING_FOR_RESERVATION_CREATION,
             arrivalDate: null,
             leavingDate: null,
             cancelationDate: null,
@@ -60,12 +61,14 @@ class GuestInfoForm extends Component {
             data: null,
         };
 
+        this._bookingParams = null;
         this._guestsCollection = [];
         const guestsCount = (params.guests);
         for (let i=0; i<guestsCount; i++) {
             this._guestsCollection.push({title:'Mr', firstName:'', lastName: ''});
         }
 
+        this.serviceRequestSCMode = this.serviceRequestSCMode.bind(this);
         this._onGuestTitleUpdate = this._onGuestTitleUpdate.bind(this);
         this._onFirstNameChange = this._onFirstNameChange.bind(this);
         this._onLastNameChange = this._onLastNameChange.bind(this);
@@ -74,8 +77,11 @@ class GuestInfoForm extends Component {
     }
 
     componentWillMount() {
+        const { quoteId } = this.props.navigation.state.params.roomDetail;
+        const { currency } = this.props;
         this.prepareGuestsData();
-        this.serviceRequestSCMode();
+        this.serviceCreateReservation(quoteId, currency, this._guestsCollection.concat());
+
         if (Platform.OS == 'android') {
             BackHandler.addEventListener('hardwareBackPress', this._onBackPress);
         }
@@ -131,7 +137,7 @@ class GuestInfoForm extends Component {
     }
 
 
-    serviceRequestSCMode = () => {
+    serviceRequestSCMode() {
         requester.getConfigVarByName(SC_NAME)
             .then((res) => {
                 if (res.success) {
@@ -139,13 +145,13 @@ class GuestInfoForm extends Component {
                         this.setState({
                             scMode: (data.value === 'true')
                         });
-                        const params = this.props.navigation.state.params;
+                        const { currency } = this.props;
+                        const { quoteId } = this.props.navigation.state.params.roomDetail;
                         const resParams = {
-                            currency: params.currency,
-                            quoteId: params.roomDetail.quoteId, 
+                            quoteId, currency,
                             guestRecord: this._guestsCollection.concat()
                         }
-                        this.serviceCreateReservation(resParams);
+                        this.gotoWebViewPayment(resParams)
                     });
                 } else {
                     res.errors.then((error) => {
@@ -157,19 +163,21 @@ class GuestInfoForm extends Component {
     }
 
 
-    serviceCreateReservation(params) {
+    serviceCreateReservation(quoteId, currency, guestRecord) {
         const value = {
-            quoteId: params.quoteId,
+            quoteId, currency,
             rooms: [{
-                adults: params.guestRecord,
+                adults: guestRecord,
                 'children': []
             }],
-            'currency': params.currency
         };
-        this.setState({isLoading:true, buttonLabel: 'Processing ...'})
+        this.setState({isLoading:true, buttonLabel: 'Processing ...'});
+
+
+        clog(`Creating reservation`, value);
 
         requester.createReservation(value).then(res => {
-            if (res.success) {
+            if (res && res.success) {
                 rlog('case 1')
                 res.body.then(data => {
                     rlog('case 2')
@@ -248,10 +256,9 @@ class GuestInfoForm extends Component {
     }
 
 
-    gotoWebViewPayment(params) {
+    gotoWebViewPayment() {
+        const { searchString, quoteId } = this.props.navigation.state.params;
         const { bookingId, booking } = this.state;
-        const { searchString, quoteId } = params;
-        const { id:hotelBookingId, hotelId } = this.state.data.booking.hotelBooking[0];
         const { currency } = this.props;
         const { token, email } = this.props.loginDetails;
         const rooms = (  JSON.stringify(booking.rooms)  );
@@ -309,9 +316,9 @@ class GuestInfoForm extends Component {
             return;
         }
         let isValid = true;
+        this.setState({datesText: 'loading ...', roomType: 'loading ...', isLoading: true});
 
-        clog(`guests`,`Guests ${this._guestsCollection.length}`, {guestsCollection:this._guestsCollection,stateGuests:this.state.guests});
-
+    
         for(let item of this._guestsCollection) {
             if (!hasLetter(item['firstName']) || !hasLetter(item['lastName'])) {
                 isValid = false;
@@ -319,27 +326,14 @@ class GuestInfoForm extends Component {
             }
         }
 
-        if (this._guestsCollection.length != this.state.guests.length){
+        if (this._guestsCollection.length != this.state.guests.length) {
             this.refs.toast.show("Please enter details for all the guests", 2000);
         }
         else if (!isValid) {
             this.refs.toast.show("Names should be at least 1 characters long and contain only characters.", 2000);
         }
         else {
-            const params = this.props.navigation.state.params;
-            const bookingParams = {
-                roomDetails : params.roomDetail, 
-                hotelDetails: params.hotelDetails,
-                price: params.price, 
-                daysDifference: params.daysDifference,
-                guests: this._guestsCollection.length,
-                quoteId: params.roomDetail.quoteId, 
-                guestRecord: this._guestsCollection.concat(),
-                searchString: params.searchString,
-                hotelImg: params.hotelImg
-            };
-            // this.props.navigation.navigate('RoomDetailsReview', params);
-            this.gotoWebViewPayment(bookingParams);
+            this.serviceRequestSCMode()
         }
         
     }
@@ -387,11 +381,11 @@ class GuestInfoForm extends Component {
 
 
     _renderDates() {
-        const { arrivalDate, leavingDate } = this.state;
-        const datesText = (
+        const { arrivalDate, leavingDate, datesText } = this.state;
+        const text = (
             (arrivalDate != null && leavingDate != null)
                 ? `${arrivalDate} - ${leavingDate}`
-                : "loading ..."
+                : datesText
         )
         return (
             <View style={styles.listItem}>
@@ -399,7 +393,7 @@ class GuestInfoForm extends Component {
                     <Text style={styles.listItemText}>Dates</Text>
                 </View>
                 <View style={styles.listItemValueWrapper}>
-                    <Text style={styles.valueText}>{datesText}</Text>
+                    <Text style={styles.valueText}>{text}</Text>
                 </View>
             </View>
         )
@@ -445,9 +439,9 @@ class GuestInfoForm extends Component {
 
 
     render() {
-        const { params }                    = this.props.navigation.state;
+        const { params }                                    = this.props.navigation.state;
         const { price, daysDifference, guests:guestsCount } = params;
-        const { buttonLabel, isLoading }    = this.state;
+        const { buttonLabel, isLoading }                    = this.state;
 
         return (
             <View style={styles.container}>
@@ -532,3 +526,20 @@ const mapDispatchToProps = dispatch => ({
     setGuestData : bindActionCreators(setGuestData , dispatch),
 })
 export default connect(mapStateToProps, mapDispatchToProps)(GuestInfoForm);
+
+
+/*
+const params = this.props.navigation.state.params;
+            this._bookingParams = {
+                roomDetails : params.roomDetail, 
+                hotelDetails: params.hotelDetails,
+                price: params.price, 
+                daysDifference: params.daysDifference,
+                guests: this._guestsCollection.length,
+                quoteId: params.roomDetail.quoteId, 
+                guestRecord: this._guestsCollection.concat(),
+                searchString: params.searchString,
+                hotelImg: params.hotelImg
+            };
+            // this.props.navigation.navigate('RoomDetailsReview', params);
+            this.serviceCreateReservation(this._bookingParams);*/

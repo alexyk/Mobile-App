@@ -23,12 +23,6 @@ export default StyleSheet.create({
     backgroundColor: '#FFF8',
   },
 
-  backButton: {
-    margin: 5,
-    // marginLeft: 10,
-    // marginBottom: 40    
-  },
-
   text: {
     ...commonText,
     color: 'black',

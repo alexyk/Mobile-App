@@ -144,12 +144,12 @@ const styles = StyleSheet.create({
         paddingVertical: 5
     },
     listItemNameWrapper: {
-        flex: 1,
+        width: '35%',
         flexDirection: 'column',
         justifyContent: 'center',
     },
     listItemValueWrapper: {
-        flex: 1,
+        width: '65%',
         flexDirection: 'row',
         alignItems: 'center',
         alignContent:'center',

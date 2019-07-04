@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import BackButton from '../../atoms/BackButton';
 import PropTypes from 'prop-types';
 import styles from './styles.js'
@@ -26,9 +26,10 @@ export default class TopBar extends Component {
 
 
   _renderBack(onPress, text, style) {
+    const buttonStyle = StyleSheet.create({margin: 5,...style});
     return (
       <View style={styles.containerBack}>
-        <BackButton onPress={onPress} style={[styles.backButton,style]} imageStyle={styles.backButtonImage} />
+        <BackButton onPress={onPress} style={buttonStyle} imageStyle={styles.backButtonImage} />
         <Text style={styles.text}>{text != null ? text : ''}</Text>
       </View>
     )
