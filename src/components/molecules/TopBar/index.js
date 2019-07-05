@@ -22,14 +22,20 @@ export default class TopBar extends Component {
 
   constructor(props) {
     super(props);
+
+    this._preRenderBackButton(props); // optimise back button rendering
+  }
+
+  _preRenderBackButton(props) {
+    const { onBackPress, backStyle } = props;
+    this._backButtonRendered = <BackButton onPress={onBackPress} style={{margin: 5, ...backStyle}} imageStyle={styles.backButtonImage} />
   }
 
 
-  _renderBack(onPress, text, style) {
-    const buttonStyle = StyleSheet.create({margin: 5,...style});
+  _renderBack(text, style) {
     return (
       <View style={styles.containerBack}>
-        <BackButton onPress={onPress} style={buttonStyle} imageStyle={styles.backButtonImage} />
+        { this._backButtonRendered }
         <Text style={styles.text}>{text != null ? text : ''}</Text>
       </View>
     )
@@ -56,14 +62,14 @@ export default class TopBar extends Component {
 
   render() {
     const {
-      onBackPress, backText, backStyle, 
+      backText, 
       onRightPress, rightText, rightStyle,
       extraItems
     } = this.props;
 
     return (
       <View style={styles.container}>
-        { this._renderBack(onBackPress, backText, backStyle)      }
+        { this._renderBack(backText)      }
         { this._renderAdditionalItems(extraItems)                 }
         { this._renderRight(onRightPress, rightText, rightStyle)  }
       </View>
