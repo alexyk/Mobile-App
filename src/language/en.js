@@ -40,8 +40,7 @@ const TEXT = {
     SEARCH_HOTEL_ITEM_PRICE_NA: "Price unavailable",
     SEARCH_HOTEL_ITEM_PRICE_LOADING: "",
     BOOKING_STEPS: ['Guest Info', 'Confirm and Pay'],
-    NO_ROOMS: 'No rooms available. Please try a different search.',
-    WAITING_FOR_RESERVATION_CREATION: 'click proceed'
+    NO_ROOMS: 'No rooms available. Please try a different search.'
 }
 
 
