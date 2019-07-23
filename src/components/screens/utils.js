@@ -1,5 +1,6 @@
 import { isMoment } from "moment";
 import { basePath } from "../../config";
+import { StyleSheet } from "react-native";
 
 
 export function validateObject(sourceData, props, index=-1, path='') {
@@ -289,4 +290,16 @@ export function getObjectClassName(obj) {
     processError(`[screens::utils::getObjectClassName] Error: ${error.message}`,{error,obj});
   }
   return result;
+}
+
+export function styleToNumber(style) {
+  if (style == null) {
+    return null;
+  }
+
+  if (isNumber(style)) {
+    return style;
+  } else {
+    return StyleSheet.create({style}).style;
+  }
 }

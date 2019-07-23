@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import BackButton from '../../atoms/BackButton';
 import PropTypes from 'prop-types';
-import styles from './styles.js'
+import styles from './styles'
 
 
 export default class TopBar extends Component {

@@ -4,12 +4,17 @@ import PropTypes from 'prop-types';
 import Image from 'react-native-remote-svg';
 
 import styles from './styles';
+import { styleToNumber } from '../../screens/utils';
 
 const SVGButton = (props) => {
+    let extraStyle = styleToNumber(props.style);
+    let imageStyle = styleToNumber(props.imageStyle);
+
+
     return (
         <TouchableOpacity onPress={props.onPress}>
-            <View style={[styles.container, props.style]}>
-                <Image source={props.image} style={[styles.image,props.imageStyle]}/>
+            <View style={[styles.container, extraStyle]}>
+                <Image source={props.image} style={[styles.image,imageStyle]}/>
             </View>
         </TouchableOpacity>
     );
@@ -17,7 +22,7 @@ const SVGButton = (props) => {
 
 SVGButton.propTypes = {
     onPress: PropTypes.func,
-    style: PropTypes.number,
+    style: PropTypes.oneOfType([PropTypes.number, PropTypes.object]),
     imageStyle: PropTypes.number
 };
 

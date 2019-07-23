@@ -14,11 +14,12 @@ import { connect } from 'react-redux';
 
 import styles from './styles';
 
-import lang from '../../../language'
+import lang from '../../../language';
 import { generateWebviewInitialState } from '../utils';
 import { webviewDebugEnabled } from '../../../config-debug';
 import LTLoader from '../../molecules/LTLoader';
 import TopBar from '../../molecules/TopBar';
+
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -264,8 +265,8 @@ class WebviewScreen extends Component {
         }
 
         return (
-            <TouchableOpacity onPress={this.onDebugPress}>
-                <View style={{position:'absolute', left:20, top:3, backgroundColor: '#777A', width: 130, borderRadius: 5}}>
+            <TouchableOpacity key={'webview-debug'} onPress={this.onDebugPress}>
+                <View style={{backgroundColor: '#777A', width: 130, borderRadius: 5}}>
                     <Text style={{textAlign: 'center'}}>{"RELOAD WEBVIEW"}</Text>
                 </View>
             </TouchableOpacity>

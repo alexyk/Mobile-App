@@ -4,8 +4,8 @@ import { commonText } from '../../../common.styles';
 
 export default StyleSheet.create({
   container: {
-    flex: 0.11,
-    // width: "100%",
+    width: "100%",
+    height: "11%",
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -20,7 +20,7 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#FFF8',
+    backgroundColor: '#FFF0',
   },
 
   text: {
