@@ -627,13 +627,13 @@ class Explore extends Component {
                         <View style={styles.divsider} />
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
-                            <TouchableOpacity onPress={() => this.handlePopularCities(52612, 'London , United Kingdom')}
+                            <TouchableOpacity onPress={() => this.handlePopularCities(24979, 'London , United Kingdom')}
                                 style={styles.subViewPopularHotelsLeft}>
                                 <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
                                     source={require('../../../assets/home_images/london.png')} />
                             </TouchableOpacity>
 
-                            <TouchableOpacity onPress={() => this.handlePopularCities(18417, 'Madrid , Spain')}
+                            <TouchableOpacity onPress={() => this.handlePopularCities(17120, 'Madrid , Spain')}
                                 style={styles.subViewPopularHotelsRight}>
                                 <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
                                     source={require('../../../assets/home_images/Madrid.png')} />
@@ -642,13 +642,13 @@ class Explore extends Component {
 
                         <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginLeft:15, marginRight:15, marginBottom:10 }}>
 
-                            <TouchableOpacity onPress={() => this.handlePopularCities(16471, 'Paris , France')}
+                            <TouchableOpacity onPress={() => this.handlePopularCities(5290, 'Paris , France')}
                                 style={styles.subViewPopularHotelsLeft}>
                                 <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
                                     source={require('../../../assets/home_images/paris.png')} />
                             </TouchableOpacity>
 
-                            <TouchableOpacity onPress={() => this.handlePopularCities(15375, 'Sydney , Australia')}
+                            <TouchableOpacity onPress={() => this.handlePopularCities(602, 'Sydney , Australia')}
                                 style={styles.subViewPopularHotelsRight}>
                                 <Image style={styles.imageViewPopularHotels} resizeMode='stretch'
                                     source={require('../../../assets/home_images/Sydney.png')} />
