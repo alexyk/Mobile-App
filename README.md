@@ -1,10 +1,44 @@
 
 ## Table of Contents
 
-* [Requerements](#requirements)
-  * [Common](#common)
-  * [iOS](#ios)
-  * [Android](#android)
+- [Table of Contents](#table-of-contents)
+  - [Default information in README.md](#default-information-in-readmemd)
+- [Requirements to Run Mobile-App](#requirements-to-run-mobile-app)
+  - [Common](#common)
+    - [For Android](#for-android)
+    - [For iOS](#for-ios)
+- [Steps to Run](#steps-to-run)
+  - [Windows](#windows)
+  - [macOS](#macos)
+- [Debugging](#debugging)
+  - [Common](#common-1)
+  - [VSCode](#vscode)
+    - [Common](#common-2)
+    - [iOS](#ios)
+    - [Anrdoid](#anrdoid)
+- [Additional Requirements to Run E2E Tests](#additional-requirements-to-run-e2e-tests)
+  - [E2E on Android](#e2e-on-android)
+  - [E2E on iOS](#e2e-on-ios)
+- [Tools](#tools)
+  - [Scripts](#scripts)
+  - [Reactotron](#reactotron)
+  - [Staging and Continuous Integration](#staging-and-continuous-integration)
+- [---](#)
+- [---](#1)
+- [# Default Information](#default-information)
+- [Available Scripts](#available-scripts)
+  - [`npm start`](#npm-start)
+    - [`npm test`](#npm-test)
+    - [`npm run ios`](#npm-run-ios)
+    - [`npm run android`](#npm-run-android)
+      - [Using Android Studio's `adb`](#using-android-studios-adb)
+      - [Using Genymotion's `adb`](#using-genymotions-adb)
+- [Other](#other)
+  - [Writing and Running Tests](#writing-and-running-tests)
+  - [Adding Flow](#adding-flow)
+
+---
+### Default information in README.md
 * [Available Scripts](#available-scripts)
   * [npm run ios](#npm-run-ios)
   * [npm run android](#npm-run-android)
@@ -12,20 +46,93 @@
   * [Writing and Running Tests](#writing-and-running-tests)
   * [Adding Flow](#adding-flow)
 
-## Requirements for Running
-### Common
-  * `node 8.14.1` with `npm 6.4.1`
-### iOS
-  * `macOS 10.13 High Sierra` or higher
-  * `Homebrew` (http://brew.sh)
-  * `CocoaPods` (*brew install pods*)
-  * `Xcode 9.4.1`
-### Android
-  * `Java 1.8` (jdk 8)
-  * `Android Studio` *(optional)*
+## Requirements to Run Mobile-App
+### Common 
+  * `node 8.14.1` (with `npm 6.4.1`)  
+  <small>NodeJS version 8.15.x also is likely to work</small>
+  * ninja (for Android)  
+  <small>macOS - `brew install ninja`, Windows - instructions [here](https://github.com/rwols/CMakeBuilder/wiki/Ninja-for-Windows-Installation-Instructions)</small>
+  * react-native-cli
+  <small>npm install -g react-native-cli</small>
+#### For Android
+<small>(macOS and Windows)</small>  
+    * `Java 1.8` (jdk 8)  
+    * `Android Studio` *(optional)*
+#### For iOS
+<small>(macOS only)</small>  
+    * `macOS 10.13 High Sierra` or higher <small>(not tested on El Capitan and before)</small>  
+    * `Homebrew` - http://brew.sh  
+    * `CocoaPods` (`brew install pods`)  
+    * `Xcode 9.4.1`
 
----
+## Steps to Run
+### Windows
+  (1) `git clone git://github.com/LockTrip/Mobile-app.git`  
+  (2) `cd <project-folder>` for example `cd C:\projects\Mobile-App`  
+  (3) `npm install`  
+  (4) `react-native run-android` 
+### macOS
+(1) `git clone git://github.com/LockTrip/Mobile-app.git`  
+(2) `cd <project-folder>` for example `cd $HOME$/projects/Mobile-App`  
+(3) `npm install`  
+(4) `react-native run-ios` or `react-native run-android`
+
+## Debugging
+
+### Common
+(1) put ``debugger`` statement in code  
+(2) debug with "Debug JS Remotely" and a browser  
+  
+*_Note:_* To debug **WebView** or **mobile browser** - use:  
+- for iOS: *Safari/Develop/Simulator...* 
+- for Android: *Chrome/Remote device* and choose emulator/device
+
+### VSCode
+
+#### Common
+- Use VSCode breakpoints to or *"All expeptions"/"Uncaught exceptions"* to break into code  
+- If running any task before compilation (*preLaunchTask* in *launch.json*) - in VSCode Tasks - make sure to check Terminal view in VSCode if it needs input  
+- 
+
+
+#### iOS
+(1) VScode - use React Native run configurations to create one for iOS  
+(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator  
+(3) Reload while the footer of VSCode shows as orange  
+(4) Use VSCode *Debug Console* view to see console.log output
+
+#### Anrdoid
+(1) VScode - use React Native run configurations to create one for Anrdoid  
+(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator  
+(3) Reload while the footer of VSCode shows as orange  
+(4) Use logcat view in *Output* of VSCode to see console.log statements  
+
+## Additional Requirements to Run E2E Tests
+E2E tests (aka integration tests) are using `detox` (with Grey Box vs the common Black Box approach) with `mocha`.
+### E2E on Android
+ * ???
+### E2E on iOS
+<small>(macOS only)</small>
+  * `brew tap wix/brew`
+  * `brew install applesimutils`
  
+## Tools
+### Scripts
+Scripts are found at:
+* `scripts\windows` for Windows
+* `scripts/` for macOS
+
+### Reactotron
+  * To start on Windows (with Android):
+  1. Run `scripts\windows\reactotron-start.bat`
+  2. Start project with `react-native run-android`
+
+### Staging and Continuous Integration
+First application of CI is using Travis CI http://travis-ci.org.
+Later on to be applied in this branch.
+
+# Default Information
+---
 
 ## Available Scripts
 
@@ -89,7 +196,3 @@ Now you can run `npm run flow` (or `yarn flow`) to check the files for type erro
 You can optionally use a [plugin for your IDE or editor](https://flow.org/en/docs/editors/) for a better integrated experience.
 
 To learn more about Flow, check out [its documentation](https://flow.org/).
-
-
-BUILDING ISSUE FOR IOS 12, XCODE 10.1
-https://zivost.com/blog/xcode-10-causes-haywire-for-react-native-developers/
