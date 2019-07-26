@@ -38,7 +38,9 @@ const TEXT = {
     SEARCH_HOTEL_FILTER_ERROR: "Filter error",
     SEARCH_HOTEL_FILTERED_MSG: 'Filtering out hotels that are not available for your dates',
     SEARCH_HOTEL_ITEM_PRICE_NA: "Price unavailable",
-    SEARCH_HOTEL_ITEM_PRICE_LOADING: ""
+    SEARCH_HOTEL_ITEM_PRICE_LOADING: "",
+    BOOKING_STEPS: ['Guest Info', 'Confirm and Pay'],
+    NO_ROOMS: 'No rooms available. Please try a different search.'
 }
 
 

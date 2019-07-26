@@ -42,7 +42,7 @@ const LT_LOCAL      = "LOCAL";
 // ----------------------------
 //       CHOOSE CONFIG
 // ----------------------------
-export const LT_CFG = LT_PROD;
+export const LT_CFG = LT_DEV;
 
 
 switch (LT_CFG) {

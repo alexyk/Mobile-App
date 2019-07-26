@@ -10,7 +10,9 @@ const styles = StyleSheet.create({
         width: '100%',
         backgroundColor: '#fff',
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'center',
+        borderTopColor: '#7775',
+        borderTopWidth: 3
     },
     detailsView: {
         flex: 1,
@@ -43,6 +45,13 @@ const styles = StyleSheet.create({
     nextButtonView: {
         flex: 0.8,
         alignItems: 'center',
+    },
+    nextButtonDisabled: {
+        backgroundColor: '#DA7B6177',
+        alignSelf: 'stretch',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingVertical: 16
     },
     nextButton: {
         backgroundColor: '#DA7B61',

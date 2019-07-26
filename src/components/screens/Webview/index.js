@@ -7,18 +7,18 @@
  */
 
 import { 
-    BackHandler, Platform, View, WebView, Text, SafeAreaView, TouchableOpacity
+    BackHandler, Platform, View, WebView, Text, TouchableOpacity
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import BackButton from '../../atoms/BackButton';
 import styles from './styles';
-import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 
 import lang from '../../../language'
 import { generateWebviewInitialState } from '../utils';
-import { webviewDebugEnabled, clog, rlog } from '../../../config-debug';
+import { webviewDebugEnabled } from '../../../config-debug';
+import LTLoader from '../../molecules/LTLoader';
+import TopBar from '../../molecules/TopBar';
 
 class WebviewScreen extends Component {
     useDelay = true;
@@ -47,12 +47,13 @@ class WebviewScreen extends Component {
         const allParams = Object.assign({},params,{currency:props.currency});
         const skipWebViewURL = ( params.useCachedSearchString || params.webViewURL );
         this.state = generateWebviewInitialState(allParams, null, skipWebViewURL);
+        this.state.params = params;
 
         if (params.useCachedSearchString) {
             this.state.webViewUrl = props.allState.userInterface.webViewURL;
         }
 
-        rlog('webview', `Constructor`, {params, props})
+        //rlog('webview', `Constructor`, {params, props})
 
         // Fix for using WebView::onMessage
         this.patchPostMessageFunction = function() {
@@ -88,7 +89,7 @@ class WebviewScreen extends Component {
 
     componentWillMount() {
         if (Platform.OS == 'android') {
-            BackHandler.addEventListener('hardwareBackPress', this.onAndroidBackPress);
+            BackHandler.addEventListener('hardwareBackPress', this.onBackPress);
         }
     }
 
@@ -101,7 +102,7 @@ class WebviewScreen extends Component {
 
     componentWillUnmount() {
         if (Platform.OS == 'android') {
-            BackHandler.removeEventListener('hardwareBackPress', this.onAndroidBackPress);
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackPress);
         }
     }
 
@@ -111,7 +112,7 @@ class WebviewScreen extends Component {
             //console.log('[WebView] showContentWithDelay',_this)
 
             if (_this) {
-                _this.setState({showProgress: false});
+                _this.setState({isLoading: false});
             }
         }
         clearTimeout(this.timeout);
@@ -151,6 +152,10 @@ class WebviewScreen extends Component {
         // } else {
             this.props.navigation.goBack();
         // }
+
+        if (Platform.OS == 'android') {
+            return true;
+        }
     }
 
     onForwardPress(event) {
@@ -203,16 +208,16 @@ class WebviewScreen extends Component {
         );*/
 
         if (this.useDelay) {
-            if (this.state.showProgress) {
+            if (this.state.isLoading) {
                 this.showContentWithDelay(0.3);
             }
         } else {
-            this.setState({showProgress:false})
+            this.setState({isLoading:false})
         }
     }
 
     onWebViewNavigationState(navState) {
-        clog('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
+        // clog('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
 
         this.webViewRef.canGoBackAndroid = navState.canGoBack;
         this.setState({canGoForward:    navState.canGoForward});
@@ -246,20 +251,9 @@ class WebviewScreen extends Component {
         // console.log(`[${this.debug()}]@##@ onNavigationState`,{navState})
     }
 
-    onAndroidBackPress = () => {
-        /*
-        if (this.webViewRef.canGoBackAndroid && this.webViewRef.ref) {
-            this.webViewRef.ref.goBack();
-            this.setState({canGoForward:true})
-            return true;
-        } else if (!this.webViewRef.canGoBackAndroid && this.webViewRef.ref) {
-        }*/
 
-        return false;
-    }
-
-    renderDebug() {
-        if (!__DEV__ || !webviewDebugEnabled) {
+    _renderDebug() {
+       if (!__DEV__ || !webviewDebugEnabled) {
             // webview debug disabled in these cases
             return null;
         }
@@ -271,7 +265,7 @@ class WebviewScreen extends Component {
 
         return (
             <TouchableOpacity onPress={this.onDebugPress}>
-                <View style={{left:20, top:3, backgroundColor: '#777A', width: 130, borderRadius: 5}}>
+                <View style={{position:'absolute', left:20, top:3, backgroundColor: '#777A', width: 130, borderRadius: 5}}>
                     <Text style={{textAlign: 'center'}}>{"RELOAD WEBVIEW"}</Text>
                 </View>
             </TouchableOpacity>
@@ -280,17 +274,16 @@ class WebviewScreen extends Component {
 
     render() {
         const patchPostMessageJsCode = '(' + String(this.patchPostMessageFunction) + ')();';
+        const { isLoading, message, propertyName } = this.state;
+        const { backText, rightText, onRightPress } = this.state.params; // navigation params
+        const loaderText = (message != null ? message : `Getting details for: \n'${propertyName}'`)
 
         console.log(`### [WebView] Rendering '${this.state.webViewUrl}'`)
 
         return (
             <View style={styles.container}>
-                <View style={styles.backButtonContainer}>
-                    <BackButton onPress={this.onBackPress} style={styles.backButton} imageStyle={styles.backButtonImage} />
-                    {/* <Text style={styles.title}>{this.state.title}</Text> */}
-                    <Text style={styles.backText}>{'Modify search'}</Text>
-                    {this.renderDebug()}
-                </View>
+                
+                <TopBar onBackPress={this.onBackPress} backText={backText} onRightPress={onRightPress} rightText={rightText}  extraItems={[this._renderDebug()]} />
 
                 <View style={styles.webviewContainer}>
                     <WebView
@@ -306,13 +299,7 @@ class WebviewScreen extends Component {
                     />
                 </View>
 
-                <ProgressDialog
-                    visible={this.state.showProgress}
-                    title="Loading"
-                    message={this.state.message ? this.state.message : `Getting details for: \n'${this.state.propertyName}'`}
-                    animationType="slide"
-                    activityIndicatorSize="large"
-                    activityIndicatorColor="black"/>
+                <LTLoader isLoading={isLoading} message={loaderText} style={{height:'90%', top:'10%'}} />
             </View>
         );
     }

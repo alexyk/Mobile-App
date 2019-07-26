@@ -13,7 +13,7 @@ import {
   showBothMapAndListHotelSearch,
   showSimpleFooterHotelSearch,
 } from '../../../../config-settings'
-import { webviewDebugEnabled, hotelsSearchMapDebugEnabled } from '../../../../config-debug'
+import { webviewDebugEnabled, hotelsSearchMapDebugEnabled, processError } from '../../../../config-debug'
 
 import SearchBar from "../../../molecules/SearchBar";
 import LTLoader from "../../../molecules/LTLoader";

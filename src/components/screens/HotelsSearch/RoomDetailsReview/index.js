@@ -337,16 +337,19 @@ class RoomDetailsReview extends Component {
             this.handlePayWithLOC();
         } else {
             const { bookingId, booking } = this.state;
-            const { searchString } = this.props.navigation.state.params;
+            const { searchString, quoteId } = this.props.navigation.state.params;
             const { id:hotelBookingId, hotelId } = this.state.data.booking.hotelBooking[0];
             const { currency } = this.props;
             const { token, email } = this.props.loginDetails;
-            const rooms = encodeURI(  JSON.stringify(booking.rooms)  );
-            const search = `${StringUtils.subBeforeIndexOf(searchString, '&rooms=', 7)}${rooms}&authToken=${token}&authEmail=${email}`;
-            const state = { currency, token, email, message: 'Loading payment page...' };
-            const extra = { webViewUrl: `${basePath}mobile/hotels/listings/book/${bookingId}/confirm${search}` };
-            // rlog('booking',`state of booking`, {thstate:this.state,props:this.props,state, hotelBookingId, hotelId, bookingId, search});
-            // rlog('booking',`state of booking`, {state, hotelBookingId, hotelId, bookingId, search});
+            const rooms = (  JSON.stringify(booking.rooms)  );
+            const search = StringUtils.subBeforeIndexOf(searchString, '&rooms=') +
+                `&quoteId=${quoteId}&rooms=${rooms}&authToken=${token}&authEmail=${email}`;
+            const state = { currency, token, email };
+            const extra = {
+                webViewUrl: `mobile/hotels/listings/book/${bookingId}/confirm${search}`,
+                message: 'Preparing booking payment ...',
+                backText: 'Back'
+            };
             gotoWebview(state, this.props.navigation, extra);
         }
     }
@@ -389,6 +392,96 @@ class RoomDetailsReview extends Component {
     // Keys for flatlist
     _keyExtractor = (item, index) => item.key; //eslint-disable-line
 
+
+    _renderWalletModal() {
+        return (
+            <Modal
+                animationType="fade"
+                transparent={true}//eslint-disable-line
+                visible={this.state.modalVisible}
+                onRequestClose={() => {
+                }}
+            >
+                <View style={styles.modalView}>
+                    <View style={styles.popup}>
+                        <View style={styles.labelCloseView}>
+                            <Text style={styles.walletPasswordLabel}>Enter your wallet password</Text>
+                            <View style={styles.closeButtonView}>
+                                <TouchableOpacity
+                                    onPress={this.closeConfirmModal}
+                                >
+                                    <Image style={styles.closeButtonSvg}
+                                        source={require('../../../../../src/assets/png/close.png')} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        <TextInput
+                            style={styles.walletPasswordInput}
+                            onChangeText={walletPassword => this.setState({ password: walletPassword })}
+                            value={this.state.password}
+                            placeholder="Wallet password"
+                            underlineColorAndroid="rgba(0,0,0,0)"
+                            secureTextEntry={true}
+                        />
+                        <TouchableOpacity
+                            onPress={this.payWithLocSingleWithdrawer}
+                        >
+                            <Text style={styles.confirmButtonText}>Confirm</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        )
+    }
+
+    _renderModal(params) {
+        return (
+            <Modal
+                animationType="fade"
+                transparent={true}//eslint-disable-line
+                visible={this.state.cancellationView}
+                onRequestClose={() => {
+                }}
+            >
+                <View style={styles.modalView}>
+                    <View style={styles.popup}>
+                        <View style={styles.labelCloseView}>
+                            <Text style={styles.walletPasswordLabel}>Cancellation Condition</Text>
+                            <View style={styles.closeButtonView}>
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        this.setCancellationView(!this.state.cancellationView);
+                                    }}
+                                >
+                                    <Image style={styles.closeButtonSvg}
+                                        source={require('../../../../../src/assets/png/close.png')} />
+                                </TouchableOpacity>
+                            </View>
+                        </View>
+                        <View style={{flexDirection: 'column', marginTop: 10}}>
+                            <Text style={{ fontFamily: 'FuturaStd-Light'}}>Cancellation fee before {this.state.cancelationDate}</Text>
+                            <Text style={{ fontFamily: 'FuturaStd-Light' }}>{params.currency} 0.00 (0.0000 LOC)</Text>
+                        </View>
+                        <View style={{flexDirection: 'column', marginTop: 10}}>
+                            <Text style={{ fontFamily: 'FuturaStd-Light'}}>Cancel on {this.state.cancelationDate}</Text>
+                            <Text style={{ fontFamily: 'FuturaStd-Light' }}>{params.currency} {this.state.cancellationPrice} -
+                            ({this.state.cancellationPrice} LOC)</Text>
+                        </View>
+                        <TouchableOpacity
+                            style={styles.confirmButton}
+                            onPress={() => {
+                                this.setCancellationView(!this.state.cancellationView);
+                            }}
+                        >
+                            <Text style={styles.confirmButtonText}>OK</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        )
+    }
+
+
     render() {
         const { params } = this.props.navigation.state;
         const imgURL = params.hotelImg;
@@ -406,86 +499,12 @@ class RoomDetailsReview extends Component {
                     opacity={1.0}
                     textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                 />
-                <Modal
-                    animationType="fade"
-                    transparent={true}//eslint-disable-line
-                    visible={this.state.modalVisible}
-                    onRequestClose={() => {
-                    }}
-                >
-                    <View style={styles.modalView}>
-                        <View style={styles.popup}>
-                            <View style={styles.labelCloseView}>
-                                <Text style={styles.walletPasswordLabel}>Enter your wallet password</Text>
-                                <View style={styles.closeButtonView}>
-                                    <TouchableOpacity
-                                        onPress={this.closeConfirmModal}
-                                    >
-                                        <Image style={styles.closeButtonSvg}
-                                            source={require('../../../../../src/assets/png/close.png')} />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <TextInput
-                                style={styles.walletPasswordInput}
-                                onChangeText={walletPassword => this.setState({ password: walletPassword })}
-                                value={this.state.password}
-                                placeholder="Wallet password"
-                                underlineColorAndroid="rgba(0,0,0,0)"
-                                secureTextEntry={true}
-                            />
-                            <TouchableOpacity
-                                onPress={this.payWithLocSingleWithdrawer}
-                            >
-                                <Text style={styles.confirmButtonText}>Confirm</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </Modal>
+                
+                { this._renderWalletModal() }
                 {/* Cancellation Fee Button View start */}
-                <Modal
-                    animationType="fade"
-                    transparent={true}//eslint-disable-line
-                    visible={this.state.cancellationView}
-                    onRequestClose={() => {
-                    }}
-                >
-                    <View style={styles.modalView}>
-                        <View style={styles.popup}>
-                            <View style={styles.labelCloseView}>
-                                <Text style={styles.walletPasswordLabel}>Cancellation Condition</Text>
-                                <View style={styles.closeButtonView}>
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            this.setCancellationView(!this.state.cancellationView);
-                                        }}
-                                    >
-                                        <Image style={styles.closeButtonSvg}
-                                            source={require('../../../../../src/assets/png/close.png')} />
-                                    </TouchableOpacity>
-                                </View>
-                            </View>
-                            <View style={{flexDirection: 'column', marginTop: 10}}>
-                                <Text style={{ fontFamily: 'FuturaStd-Light'}}>Cancellation fee before {this.state.cancelationDate}</Text>
-                                <Text style={{ fontFamily: 'FuturaStd-Light' }}>{params.currency} 0.00 (0.0000 LOC)</Text>
-                            </View>
-                            <View style={{flexDirection: 'column', marginTop: 10}}>
-                                <Text style={{ fontFamily: 'FuturaStd-Light'}}>Cancel on {this.state.cancelationDate}</Text>
-                                <Text style={{ fontFamily: 'FuturaStd-Light' }}>{params.currency} {this.state.cancellationPrice} -
-                                ({this.state.cancellationPrice} LOC)</Text>
-                            </View>
-                            <TouchableOpacity
-                                style={styles.confirmButton}
-                                onPress={() => {
-                                    this.setCancellationView(!this.state.cancellationView);
-                                }}
-                            >
-                                <Text style={styles.confirmButtonText}>OK</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </Modal>
+                { this._renderModal(params) }
                 {/* Cancellation Fee Button View end */}
+
                 <ScrollView>
                     {/* Back Button */}
                     <TouchableOpacity onPress={() => {

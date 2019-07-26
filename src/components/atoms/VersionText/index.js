@@ -84,13 +84,10 @@ class VersionText extends PureComponent {
 
 
   _renderText(value) {
-    console.log("(1) Text value: ${value}", { value });
-
     let result = (
       <Text style={this.state.textStyle}>{value.map(item => item)}</Text>
     );
 
-    console.log("(2) Text value: ${value}", { value, result });
     return result;
   }
 

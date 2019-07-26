@@ -1,6 +1,5 @@
 import { isMoment } from "moment";
 import { basePath } from "../../config";
-import { clog } from "../../config-debug";
 
 
 export function validateObject(sourceData, props, index=-1, path='') {
@@ -110,8 +109,6 @@ export function generateSearchString(state, props, doDecodeRooms=false) {
       search += `&rooms=${state.roomsDummyData}`;
     }
   }
-
-  clog(`### [utils::gen search str] ${search}`)
 
   return search;
 }

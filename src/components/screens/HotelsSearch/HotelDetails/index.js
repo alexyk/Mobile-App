@@ -2,7 +2,8 @@ import {
     Dimensions,
     ScrollView,
     View,
-    TouchableOpacity
+    TouchableOpacity,
+    Platform, BackHandler
 } from 'react-native';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -16,8 +17,6 @@ import ImageCarousel from '../../../atoms/ImagePage';
 import { connect } from 'react-redux';
 import { hotelSearchIsNative } from '../../../../config-settings';
 import { getSafeTopOffset } from '../../../../utils/designUtils';
-import { gotoWebview, generateSearchString } from '../../utils';
-import { clog } from '../../../../config-debug';
 
 
 class HotelDetails extends Component {
@@ -60,6 +59,22 @@ class HotelDetails extends Component {
             canLoadLocation: false,
             guests, searchString
         }
+
+        this.onBackButtonPress = this.onBackButtonPress.bind(this);
+    }
+
+
+    componentWillMount() {
+        if (Platform.OS == 'android') {
+            BackHandler.addEventListener('hardwareBackPress', this.onBackButtonPress);
+        }
+    }
+
+
+    componentWillUnmount() {
+        if (Platform.OS == 'android') {
+            BackHandler.removeEventListener('hardwareBackPress', this.onBackButtonPress);
+        }
     }
 
 
@@ -67,6 +82,10 @@ class HotelDetails extends Component {
         // Temporary solution - improve loading time by delaying location
         // TODO: Improve suggestion - provide an image (screenshot of map) rather than a map component
         setTimeout(() => this.setState({canLoadLocation:true}), 3000);
+    }
+
+    onBackButtonPress() {
+        this.props.navigation.goBack();
     }
 
 
@@ -104,29 +123,24 @@ class HotelDetails extends Component {
                 roomDetail, guests, daysDifference, searchString
             });
         } else {
-            const { params } = this.props.navigation.state;
-            const { searchString } = this.props;
-            const { hotel } = this.state;
-            const { checkInDateFormated, checkOutDateFormated, roomsDummyData } = this.props.datesAndGuestsData;
-            
-
-            clog(`### [details] `, {state:this.state,props:this.props})
-            const stateData = {
-                regionId,
-                checkInDateFormated, checkOutDateFormated, roomsDummyData
-            };
-            const search = generateSearchString(stateData,this.props,true);
-            let webViewUrl = `mobile/hotels/listings/${hotel.id}${search}&quoteId=${roomDetail.quoteId}`
-            const { token, email } = this.props.datesAndGuestsData;
-            webViewUrl += `&authToken=${token}`;
-            webViewUrl += `&authEmail=${email}`;
-            
-            console.log('ROOM DETAIL',{state:this.state,props:this.props,params,webViewUrl,roomDetail,searchString,cache:this.props.datesAndGuestsData});
-            console.log('### url - details',webViewUrl);
-            
-            gotoWebview(this.state, this.props.navigation, {webViewUrl,message:'Processing booking ...'}, false);
+            // const { bookingId, searchString } = this.state;
+            // const { quoteId } = roomDetail;
+            // // const { currency } = this.props;
+            // const { token, email } = this.props.loginDetails;
+            // // const rooms = (  JSON.stringify(booking.rooms)  );
+            // // const search = StringUtils.subBeforeIndexOf(searchString, '&rooms=') +
+            // const search = searchString +
+            //     `&quoteId=${quoteId}&authToken=${token}&authEmail=${email}`;
+            // const state = { currency, token, email };
+            // const extra = {
+            //     webViewUrl: `mobile/hotels/listings/${bookingId}/confirm${search}`,
+            //     message: 'Preparing booking information ...',
+            //     backText: 'Back'
+            // };
+            // gotoWebview(state, this.props.navigation, extra);
         }
-    } 
+    }
+
 
     _renderBackButton() {
         return (
@@ -244,16 +258,15 @@ class HotelDetails extends Component {
 
                         { this._renderHotelDetails() }
 
-                        { this._renderFacilities() }
+                            { this._renderFacilities() }
 
-                        { this._renderAvailableRooms() }
+                            { this._renderAvailableRooms() }
 
-                        { this._renderLocation() }
+                            { this._renderLocation() }
 
-                        <View style={{ marginBottom: 50 }} />
                     </View>
-                </ScrollView>
                 
+                </ScrollView>
                 { this._renderBackButton() }
             </View>
         );
@@ -265,6 +278,7 @@ let mapStateToProps = (state) => {
         datesAndGuestsData: state.userInterface.datesAndGuestsData,
         searchString: state.hotels.searchString,
         currency: state.currency.currency,
+        loginDetails: state.userInterface.login
     };
 }
 

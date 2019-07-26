@@ -17,6 +17,8 @@ import { RoomsXMLCurrency } from '../../../services/utilities/roomsXMLCurrency';
 import { CurrencyConverter } from '../../../services/utilities/currencyConverter'
 import styles from './styles';
 import LTLoader from '../LTLoader';
+import { commonText } from '../../../common.styles';
+import lang from '../../../language';
 
 
 /**
@@ -47,7 +49,7 @@ class AvailableRoomsView extends Component {
         // const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
         this.state = {
             rooms: [],//ds.cloneWithRows([]),
-            loading: true
+            isLoading: true
         };
 
         //console.log ("AvailableRoomsView", props);
@@ -60,7 +62,7 @@ class AvailableRoomsView extends Component {
             if (res.success) {
                 res.body.then(data => {
                     // const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-                    // this.setState({ rooms: ds.cloneWithRows(this.sortArray(data, 'price')), loading: false });
+                    // this.setState({ rooms: ds.cloneWithRows(this.sortArray(data, 'price')), isLoading: false });
                     
                     let roomsResults = [];
                     const rooms = data;
@@ -88,7 +90,7 @@ class AvailableRoomsView extends Component {
                         }
                         roomsResults = roomsResults.sort((x, y) => this.getTotalPrice(x[0].roomsResults) > this.getTotalPrice(y[0].roomsResults) ? 1 : -1);
                       }
-                      this.setState({ rooms: roomsResults, loading: false });
+                      this.setState({ rooms: roomsResults, isLoading: false });
                 });
             } else {
                 res.errors.then(data => {
@@ -166,30 +168,42 @@ class AvailableRoomsView extends Component {
         return  <LTLoader isLockTripIcon opacity={'00'} style={{marginVertical:25}} />
     }
 
+
+    _renderRooms() {
+        const { rooms } = this.state;
+
+        if (rooms == null || rooms.length == 0) {
+            return (
+                <Text style={{...commonText, width: '100%', textAlign: 'center',marginVertical: 10, color:'grey'}}>{lang.TEXT.NO_ROOMS}</Text>
+            )
+        } else {
+            return (
+                <View>
+                    {
+                        <View>
+                            {
+                                rooms.map((item, index) => {
+                                    return this._renderRoom(item, index);
+                                })
+                            }
+                        </View>
+                    }
+                </View>
+            )            
+        }
+    }
+
+
+
     render() {
-        const {rooms} = this.state;
         return (
             <View style={styles.container}>
                 <Text style={styles.title}>Available Rooms</Text>
                 {
-                    !this.state.loading > 0
-                        ? 
-                            <View>
-                                {
-                                    rooms && rooms.length > 0 && 
-                                    (
-                                        <View>
-                                            {
-                                                rooms.map((item, index) => {
-                                                    return this._renderRoom(item, index);
-                                                })
-                                            }
-                                        </View>
-                                    )
-                                }
-                            </View>
-                        :
-                            this._renderLoader()
+                    this.state.isLoading
+                        ? this._renderLoader()
+                        : this._renderRooms()
+                            
                 }
             </View>
         );

@@ -21,7 +21,7 @@ export const I18N_MAP = {
             save: 'Done',
             clear: 'Clear'
         },
-        date: 'DD MMM'
+        date: 'ddd, DD MMM'
     },
     jp: {
         w: ['', '月', '火', '水', '木', '金', '土', '日'],

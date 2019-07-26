@@ -15,9 +15,8 @@ const { height: D_HEIGHT, width: D_WIDTH } = Dimensions.get('window');
 export const pixelRatio = PixelRatio.getPixelSizeForLayoutSize(100)/100;
 
 export const isIPhoneX = (
-  Platform.OS !== 'web'
-  || !(
-    Platform.OS === 'ios' &&
+  Platform.OS === 'ios'
+  && (
     ((D_HEIGHT === X_HEIGHT && D_WIDTH === X_WIDTH) ||
       (D_HEIGHT === X_WIDTH && D_WIDTH === X_HEIGHT)) ||
     ((D_HEIGHT === XSMAX_HEIGHT && D_WIDTH === XSMAX_WIDTH) ||
@@ -29,7 +28,7 @@ export function getSafeTopOffset() {
   if (isIPhoneX) {
     return 44;
   } else {
-    return 0;
+    return 25;
   }
 }
 

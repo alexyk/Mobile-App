@@ -34,36 +34,25 @@ native_cfg = {
       {"regex": /step1Results.*/, "target" => "step1Results: true," },
       {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: true,"},
       {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: true,"},
-      {"regex": /step4Confirm.*/, "target" =>"step4Confirm: true,"},
-      {"regex": /step5Payment.*/, "target" =>"step5Payment: true,"}
+      {"regex": /step4Payment.*/, "target" =>"step4Confirm: true,"}
     ],
     'native1'   => [
       {"regex": /step1Results.*/, "target" => "step1Results: true," },
       {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: false,"},
       {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: false,"},
-      {"regex": /step4Confirm.*/, "target" =>"step4Confirm: false,"},
-      {"regex": /step5Payment.*/, "target" =>"step5Payment: false,"}
+      {"regex": /step4Payment.*/, "target" =>"step4Confirm: false,"}
     ],
     'native2'   => [
       {"regex": /step1Results.*/, "target" => "step1Results: true," },
       {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: true,"},
       {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: false,"},
-      {"regex": /step4Confirm.*/, "target" =>"step4Confirm: false,"},
-      {"regex": /step5Payment.*/, "target" =>"step5Payment: false,"}
+      {"regex": /step4Payment.*/, "target" =>"step4Confirm: false,"}
     ],
     'native3'   => [
       {"regex": /step1Results.*/, "target" => "step1Results: true," },
       {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: true,"},
       {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: true,"},
-      {"regex": /step4Confirm.*/, "target" =>"step4Confirm: false,"},
-      {"regex": /step5Payment.*/, "target" =>"step5Payment: false,"}
-    ],
-    'native4'   => [
-      {"regex": /step1Results.*/, "target" => "step1Results: true," },
-      {"regex": /step2HotelDetails.*/, "target" =>"step2HotelDetails: true,"},
-      {"regex": /step3BookingDetails.*/, "target" =>"step3BookingDetails: true,"},
-      {"regex": /step4Confirm.*/, "target" =>"step4Confirm: true,"},
-      {"regex": /step5Payment.*/, "target" =>"step5Payment: false,"}
+      {"regex": /step4Payment.*/, "target" =>"step4Confirm: false,"}
     ],
     'web'   => [
       {"regex": /step1Results.*/, "target" => "step1Results: false," },

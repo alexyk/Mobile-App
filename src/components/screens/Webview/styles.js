@@ -1,14 +1,9 @@
 import { StyleSheet } from 'react-native';
 import { commonText } from '../../../common.styles';
-import { getSafeTopOffset } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: '#f0f1f3'
-    },
     container: {
-        marginTop: getSafeTopOffset(),
+        marginTop: 0,
         width: '100%',
         height: '100%',
         flexDirection: 'column',
@@ -18,8 +13,7 @@ const styles = StyleSheet.create({
         flex: 0.89,
     },
     backButton: {
-        marginLeft: 10,
-        // backgroundColor: 'pink',
+        margin: 5,
     },
     backButtonImage: {
         // backgroundColor: 'yellow',

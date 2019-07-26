@@ -2,6 +2,7 @@ import { isObject, isString, getObjectClassName, isSymbol } from './components/s
 import lodash from 'lodash';
 import { isMoment } from 'moment';
 
+
 /** 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * FORCE modes - possible in RELEASE                               *
@@ -56,7 +57,7 @@ export const autoLoginInOfflineMode             = true;
     // hotels search
 export const autoHotelSearch                    = false;
 export const autoHotelSearchFocus               = false;
-export const autoHotelSearchPlace               = 'london'
+export const autoHotelSearchPlace               = 'sofia'
     // homes search
 export const autoHomeSearch                     = false;
 export const autoHomeSearchPlace                = 'uk1'
@@ -381,8 +382,11 @@ export function rlog(tag, description, data, isImportant = false) {
   console.tron.display(params)
 }
 
-export function configureDebug() {
-  configureReactotron()
-  configureConsole()
 
+export function configureDebug() {
+  configureReactotron();
+  configureConsole();
+  
+  // axios debug
+  //try { require('locktrip-svc-layer').setServiceDebug(false); } catch (error) {console.error('Error while setting debug to axios-requester',{error})}
 }

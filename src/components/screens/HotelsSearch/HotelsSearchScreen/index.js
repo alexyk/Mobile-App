@@ -156,6 +156,7 @@ class HotelsSearchScreen extends Component {
     this.getNextStaticPage = this.getNextStaticPage.bind(this);
     this.unsubscribe = this.stopSocketConnection.bind(this);
     this.updateCoords = this.updateCoords.bind(this);
+    this.onBackButtonPress = this.onBackButtonPress.bind(this)
     this.onDataFromSocket = this.onDataFromSocket.bind(this);
     this.onStaticData = this.onStaticData.bind(this);
     this.onFilteredData = this.onFilteredData.bind(this);
@@ -592,27 +593,36 @@ class HotelsSearchScreen extends Component {
     );
   };
 
-  onBackButtonPress = () => {
-    switch (this.state.displayMode) {
-    
-      case DISPLAY_MODE_HOTEL_DETAILS:
-        this.setState({
-          displayMode: DISPLAY_MODE_RESULTS_AS_LIST,
-          isLoading: false,
-          selectedHotelData: null
-        });
-        break;
 
-      default:
-        this.props.navigation.goBack();
-        break;
+  onBackButtonPress() {
+    const { displayMode } = this.state;
+    console.log(`[onBackButtonPress] state: ${displayMode}`)
 
+    if (hotelSearchIsNative.step2HotelDetails) {
+      this.props.navigation.goBack();
+    } else {
+      switch (displayMode) {
+      
+        case DISPLAY_MODE_HOTEL_DETAILS:
+          this.setState({
+            displayMode: DISPLAY_MODE_RESULTS_AS_LIST,
+            isLoading: false,
+            selectedHotelData: null
+          });
+          break;
+  
+        default:
+          this.props.navigation.goBack();
+          break;
+  
+      }
     }
 
     if (Platform.OS == 'android') {
       return true;
     }
   };
+
 
   onToggleMapOrListResultsView() {
     const displayMode =
@@ -631,7 +641,6 @@ class HotelsSearchScreen extends Component {
 
   gotoHotelDetailsFromItemClick = (item, state, extraParams) => {
     if (hotelSearchIsNative.step2HotelDetails) {
-      // log('here', `gotoHotelDetailsPageNative`,{item})
       this.gotoHotelDetailsPageNative(item)
     } else{
       // log('here2', `goto Web-View`,{item})
@@ -773,11 +782,15 @@ class HotelsSearchScreen extends Component {
                 _this.filtersCallback()
                 _this.filtersCallback = null;
                 _this.props.setIsApplyingFilter(false);
+                if (_this.isFirstFilter) {
+                  _this.isFirstFilter = false;
+                }
               }
-              setTimeout(func, 100)
-            }
-            if (_this.isFirstFilter) {
-              _this.isFirstFilter = false;
+              setTimeout(func, 100);
+            } else {
+              if (_this.isFirstFilter) {
+                _this.isFirstFilter = false;
+              }
             }
           }
         )

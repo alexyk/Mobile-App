@@ -58,7 +58,7 @@ export default class ImageCarousel extends Component {
 
 
   componentDidCatch(error) {
-    console.warn(`[ImagePage] caught: ${error.message}`,{error});
+    //console.warn(`[ImagePage] caught: ${error.message}`,{error});
   }
 
 
