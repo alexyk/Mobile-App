@@ -70,7 +70,7 @@ class Login extends Component {
         this.setState({ showProgress: true });
 
         requester.login(user, null).then(res => {
-            console.log("requester.login", res);
+            //console.log("requester.login", res);
             this.setState({ showProgress: false });
             if (res.success) {
                 res.body.then(data => {
@@ -91,7 +91,7 @@ class Login extends Component {
             } else {
                 res.errors.then(data => {
                     const { errors } = data;
-                    console.log("error", errors);
+                    //console.log("error", errors);
                     if (errors.hasOwnProperty('CountryNull')) {
                         this.setState({ locationDialogVisible: true });
                     }
@@ -102,7 +102,7 @@ class Login extends Component {
                         Object.keys(errors).forEach((key) => {
                             if (typeof key !== 'function') {
                                 // Toast.showWithGravity(errors[key].message, Toast.SHORT, Toast.BOTTOM);
-                                console.log('Error logging in  :', errors[key].message);
+                                //console.log('Error logging in  :', errors[key].message);
                                 alert(errors[key].message);
                             }
                         });
@@ -113,7 +113,7 @@ class Login extends Component {
         .catch(err => {
             this.setState({ showProgress: false });
             alert('Cannot login, Please check network connection.');
-            console.log(err);
+            //console.log(err);
         });
 
     }
@@ -208,7 +208,7 @@ class Login extends Component {
                         visible = { this.state.locationDialogVisible }
                         okLabel = { 'OK' }
                         onOk = { countryID => {
-                            console.log("select country", countryID);
+                            //console.log("select country", countryID);
                             this.setState({ locationDialogVisible: false });
                             this.handleLogin(countryID);
                         }}
@@ -223,7 +223,7 @@ class Login extends Component {
                             this.setState({ verificationDialogVisible: false });
                         }}
                         onOk = { (emailToken) => {
-                            console.log("email verify", emailToken);
+                            //console.log("email verify", emailToken);
                             this.setState({ verificationDialogVisible: false });
                             this.handleLogin(null, emailToken);
                         }}

@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
         color: '#000',
         fontSize: 22,
         fontFamily: 'FuturaStd-Light',
+        marginTop: 5,
         marginLeft: 20
     },
 

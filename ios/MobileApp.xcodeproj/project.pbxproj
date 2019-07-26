@@ -24,6 +24,7 @@
 		469D81A22051E4B400C506F6 /* FontAwesome.otf in Resources */ = {isa = PBXBuildFile; fileRef = 469D817B2051E4B400C506F6 /* FontAwesome.otf */; };
 		46A6F58F204F4FBC00BF95D4 /* libRCTSplashScreen.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 46A6F553204F4C6700BF95D4 /* libRCTSplashScreen.a */; };
 		46A6F597204F86F200BF95D4 /* splash.png in Resources */ = {isa = PBXBuildFile; fileRef = 46A6F596204F86F200BF95D4 /* splash.png */; };
+		5A55FDEA222E8A39003DEB4B /* SimpleLineIcons.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 5A55FDBB222E8A39003DEB4B /* SimpleLineIcons.ttf */; };
 		832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 832341B51AAA6A8300B99B32 /* libRCTText.a */; };
 		84000E4621D089EA000CD1D3 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		84000E7C21D08A65000CD1D3 /* libFastImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84000E7B21D08A5F000CD1D3 /* libFastImage.a */; };
@@ -407,6 +408,7 @@
 		469D817B2051E4B400C506F6 /* FontAwesome.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = FontAwesome.otf; sourceTree = "<group>"; };
 		46A6F540204F4C6700BF95D4 /* RCTSplashScreen.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTSplashScreen.xcodeproj; path = "../node_modules/react-native-smart-splash-screen/ios/RCTSplashScreen/RCTSplashScreen.xcodeproj"; sourceTree = "<group>"; };
 		46A6F596204F86F200BF95D4 /* splash.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = splash.png; path = AppIcon.appiconset/splash.png; sourceTree = "<group>"; };
+		5A55FDBB222E8A39003DEB4B /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = SimpleLineIcons.ttf; path = "../../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
 		5B85C65B26FA94B6C4D54728 /* libPods-MobileApp.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-MobileApp.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
@@ -600,6 +602,7 @@
 				469D817B2051E4B400C506F6 /* FontAwesome.otf */,
 				4687A9E120525437000F3A9D /* FuturaStd-Light.otf */,
 				840DF33120D59754005853D1 /* FuturaStd-Medium.otf */,
+				5A55FDBB222E8A39003DEB4B /* SimpleLineIcons.ttf */,
 			);
 			path = Fonts;
 			sourceTree = "<group>";
@@ -1274,6 +1277,7 @@
 				8425DB9F215A9EFF00FD60FB /* FontAwesome.ttf in Resources */,
 				8425DB9C215A9EFF00FD60FB /* Entypo.ttf in Resources */,
 				8425DBA2215A9EFF00FD60FB /* FontAwesome5_Solid.ttf in Resources */,
+				5A55FDEA222E8A39003DEB4B /* SimpleLineIcons.ttf in Resources */,
 				8425DBA4215A9EFF00FD60FB /* Ionicons.ttf in Resources */,
 				8425DBA5215A9EFF00FD60FB /* MaterialCommunityIcons.ttf in Resources */,
 				4687AA0820525437000F3A9D /* FuturaStd-Light.otf in Resources */,
@@ -1388,7 +1392,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = c.om.locktrip;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.locktrip.Mobile-App";
 				PRODUCT_NAME = MobileApp;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1423,7 +1427,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = c.om.locktrip;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.locktrip.Mobile-App";
 				PRODUCT_NAME = MobileApp;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				TARGETED_DEVICE_FAMILY = "1,2";

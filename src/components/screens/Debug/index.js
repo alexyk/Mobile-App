@@ -217,7 +217,7 @@ class Explore extends Component {
         super(props);
         console.disableYellowBox = true;
         const { params } = this.props.navigation.state;
-        console.log(params.regionId);
+        //console.log(params.regionId);
         this.state.regionId = params.regionId;
         this.state.currency = params ? params.currency : 'EUR';
         this.state.currencyIcon = params ? params.currencyIcon : Icons.euro;
@@ -270,10 +270,10 @@ class Explore extends Component {
         requester.getHotelById(this.state.hotelId, searchTermParams).then(res => {
             res.body.then(data => {
                 this.setState({ hotelJson: data });
-                console.log(data);
+                //console.log(data);
                 this.props.navigation.navigate('HotelDetails', { guests: 2, hotelDetail: data, urlForService: urlForService, locRate: this.state.locPrice, currencyIcon: Icons.usd });
             }).catch(err => {
-                console.log(err);
+                //console.log(err);
             });
         });
     }

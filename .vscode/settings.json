@@ -3,5 +3,23 @@
     "eslint.enable": false,
     "git.ignoreLimitWarning": true,
     "java.configuration.updateBuildConfiguration": "interactive",
-    "editor.tabSize": 2
-}
+    "react-native.ios.runArguments.simulator": ["--simulator", "iPhone X"],
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/*.pcm*": true,
+        "**/*.plist": true,
+        "**/*.png": true,
+        "**/*.jpg": true,
+        "**/*.svg": true,
+        "**/*.h": true,
+        "**/*.h*": true,
+        "**/*.d": true,
+        "**/*.o": true,
+        "**/*.dia": true,
+        "**/*.framework": true,
+        "**/.vscode": true
+    }

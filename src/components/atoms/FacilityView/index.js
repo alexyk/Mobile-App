@@ -58,7 +58,7 @@ const FacilityView = (props) => {
         const slash = path.lastIndexOf("/");
         const dot = path.lastIndexOf(".");
         const name = path.substring(slash + 1, dot);
-        console.log("imgFacility", name);
+        //console.log("imgFacility", name);
         if (props.isHome) {
             if (name === "air_conditioning") {
                 imgFacility = home_air_conditioning;
@@ -181,7 +181,7 @@ const FacilityView = (props) => {
             }
         }
     }
-    console.log("imgFacility", imgFacility);
+    //console.log("imgFacility", imgFacility);
     // console.log("imgFacility", home_air_conditioning);
     return (
         <View style={[styles.container, props.style]}>

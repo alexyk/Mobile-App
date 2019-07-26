@@ -25,7 +25,7 @@ const logoHeight = logoWidth * 35 / 54;//eslint-disable-line
 class HomeDetails extends Component {
     constructor(props) {
         super(props);
-        console.log("param", props.navigation.state.params);
+        //console.log("param", props.navigation.state.params);
     }
 
     onClose = () => {

@@ -26,9 +26,6 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
     },
 
-    closeButton: {
-    },
-
     gender: {
         position:'absolute',
         top:0,
@@ -50,10 +47,6 @@ const styles = StyleSheet.create({
         marginTop: 40,
         marginLeft: 20,
         height: 24,
-    },
-
-    closeButton: {
-        zIndex: 1,
     },
 
     body: {

@@ -14,13 +14,13 @@ const currencyInfo = {
 //         requester.getCurrencyRates().then(res => {
 //             res.body.then(currencyExchangeRates => {
 //                 //this.props.dispatch(setCurrencyExchangeRates(currencyExchangeRates));
-//                 console.log("currencyExchangeRates", currencyExchangeRates);
+//                 //console.log("currencyExchangeRates", currencyExchangeRates);
 //             });
 //         });
 
 //         requester.getLocRateByCurrency(currency).then(res => {
 //             res.body.then(data => {
-//                 console.log("action getCurrency data", data);
+//                 //console.log("action getCurrency data", data);
 //                 let locPrice = 0;
 //                 if (currency == 'EUR') {
 //                     locPrice = data[0].price_eur;
@@ -33,7 +33,7 @@ const currencyInfo = {
 //                 }
 //                 dispatch(setLocRate({locRate:locPrice}));
 //             }).catch(err => {
-//                 console.log("getCurrency error", err);
+//                 //console.log("getCurrency error", err);
 //             });
 //         });
 //     }

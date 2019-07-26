@@ -31,12 +31,12 @@ class CreateWallet extends Component {
     }
 
     componentWillUpdate() {
-        console.log("CreateWallet - componentWillUpdate");
+        //console.log("CreateWallet - componentWillUpdate");
     }
 
     componentDidMount() {
         //this.animate();
-        console.log("CreateWallet - componentDidMount");
+        //console.log("CreateWallet - componentDidMount");
     }
 
     animate() {
@@ -97,7 +97,7 @@ class CreateWallet extends Component {
                     this.stopAnimation();
                     this.setState({ progress: 1});
                     setTimeout(() => {
-                        console.log(wallet);
+                        //console.log(wallet);
                         AsyncStorage.setItem('walletAddress', wallet.address);
                         AsyncStorage.setItem('walletMnemonic', wallet.mnemonic);
                         const walletJson = JSON.stringify(wallet.jsonFile);
@@ -109,14 +109,14 @@ class CreateWallet extends Component {
                 .catch(err => {
                     this.setState({ showProgress: false });
                     Toast.showWithGravity('Cannot create wallet, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-                    console.log(err);
+                    //console.log(err);
                 });
             }, 500);
 
         } catch (error) {
             this.setState({ showProgress: false });
             Toast.showWithGravity('Cannot create wallet, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-            console.log(error);
+            //console.log(error);
         }
     }
 

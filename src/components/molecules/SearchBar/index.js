@@ -4,7 +4,6 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import PropTypes from 'prop-types';
 import styles from './styles';
 
-
 class SearchBar extends Component {
     static propTypes = {
         onLeftPress: PropTypes.func,
@@ -51,11 +50,17 @@ class SearchBar extends Component {
     }
 
     render() {
+        let {onTextEnter} = this.props;
+        if (onTextEnter == null) {
+            onTextEnter = () => { if (__DEV__) console.log('[SearchBar] Text Entered')};
+        }
+
         return (
             <View style={[styles.container]}>
                 { this.renderLeftButton() }
 
                 <TextInput
+                    onSubmitEditing={(event) => onTextEnter(event)}
                     ref={(i) => { this.input = i; }}
                     underlineColorAndroid="#ffffff"
                     style={this.props.editable? styles.input : styles.input_disable}

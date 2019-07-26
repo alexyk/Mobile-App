@@ -1,6 +1,6 @@
 import { StyleSheet, Dimensions } from 'react-native';
-const dimensionWindows = Dimensions.get('window');
 
+const dimensionWindows = Dimensions.get('window');
 const avatarWidth = dimensionWindows.width;
 const avatarHeight = avatarWidth * 30 / 55;
 
@@ -28,9 +28,6 @@ const styles = StyleSheet.create({
 
     titleConatiner: {
         flexDirection: 'row',
-    },
-
-    closeButton: {
     },
 
     title: {

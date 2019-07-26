@@ -1,4 +1,5 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import { getSafeTopOffset } from '../../../utils/designUtils';
 const { width } = Dimensions.get('screen');
 const dimensionWindows = Dimensions.get('window');
 
@@ -6,12 +7,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: '#f0f1f3'
+        backgroundColor: '#f0f1f3',
+        marginTop: getSafeTopOffset()
     },
 
     scrollView: {
-        position: 'absolute',
-        top: 100,
         left: 0,
         right: 0,
         bottom: 0,
@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     searchAreaView: {
         flex:1,
         backgroundColor: '#f0f1f3',
-        paddingTop: 40,
+        paddingTop: 0,
         paddingLeft: 15,
         paddingRight: 15
     },

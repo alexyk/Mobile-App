@@ -29,7 +29,7 @@ class HomeDetailBottomBar extends Component {
         if (exchangeRates.currencyExchangeRates) {
             fiatInEur = exchangeRates.currencyExchangeRates && CurrencyConverter.convert(exchangeRates.currencyExchangeRates, currencyCode, RoomsXMLCurrency.get(), price);
         
-            console.log("HomeDetailBottomBar WebsocketClient.sendMessage0", fiatInEur);
+            //console.log("HomeDetailBottomBar WebsocketClient.sendMessage0", fiatInEur);
             WebsocketClient.sendMessage(fiatInEur, null, { fiatAmount: fiatInEur }, true);
             isLocPriceRendered = true;
         }
@@ -44,7 +44,7 @@ class HomeDetailBottomBar extends Component {
         if (this.isStop) {
             return;
         }
-        console.log("HomeDetailBottomBar  componentWillReceiveProps");
+        //console.log("HomeDetailBottomBar  componentWillReceiveProps");
         if (nextProps.isLocPriceWebsocketConnected &&
             nextProps.isLocPriceWebsocketConnected !== this.props.isLocPriceWebsocketConnected) {
             WebsocketClient.sendMessage(this.state.fiatInEur, null, { fiatAmount: this.state.fiatInEur }, true);
@@ -71,7 +71,7 @@ class HomeDetailBottomBar extends Component {
     
     
     componentWillUnmount() {
-        console.log("LocPrice - componentWillUnmount", this.state.fiatInEur);
+        //console.log("LocPrice - componentWillUnmount", this.state.fiatInEur);
         WebsocketClient.sendMessage(this.state.fiatInEur, 'unsubscribe', null, true);
         if (this.props.locAmount) {
             removeLocAmount(this.state.fiatInEur);
@@ -87,16 +87,16 @@ class HomeDetailBottomBar extends Component {
         if (isLocPriceWebsocketConnected && !HomeDetailBottomBar.self.state.isLocPriceRendered) {
             HomeDetailBottomBar.self.state.isLocPriceRendered = true;
             WebsocketClient.sendMessage(HomeDetailBottomBar.self.state.fiatInEur, null, { fiatAmount: HomeDetailBottomBar.self.state.fiatInEur }, true);
-            console.log("HomeDetailBottomBar - _didFocus", HomeDetailBottomBar.self.props, HomeDetailBottomBar.self.state.fiatInEur);
+            //console.log("HomeDetailBottomBar - _didFocus", HomeDetailBottomBar.self.props, HomeDetailBottomBar.self.state.fiatInEur);
         }
         HomeDetailBottomBar.self.isStop = false;
     }
 
     _willBlur() {
-        console.log("HomeDetailBottomBar - _willBlur");
+        //console.log("HomeDetailBottomBar - _willBlur");
         const {isLocPriceWebsocketConnected} = HomeDetailBottomBar.self.props;
         if (isLocPriceWebsocketConnected && HomeDetailBottomBar.self.state.isLocPriceRendered) {
-            console.log("HomeDetailBottomBar - _willBlur", HomeDetailBottomBar.self.props, HomeDetailBottomBar.self.state.isLocPriceRendered, HomeDetailBottomBar.self.state.fiatInEur);
+            //console.log("HomeDetailBottomBar - _willBlur", HomeDetailBottomBar.self.props, HomeDetailBottomBar.self.state.isLocPriceRendered, HomeDetailBottomBar.self.state.fiatInEur);
             WebsocketClient.sendMessage(HomeDetailBottomBar.self.state.fiatInEur, 'unsubscribe', null, true);
             HomeDetailBottomBar.self.state.isLocPriceRendered = false;
         }

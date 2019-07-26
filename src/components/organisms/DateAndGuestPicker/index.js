@@ -1,41 +1,45 @@
-import React, { Component } from 'react';
-import { Text, TouchableOpacity, View, Image } from 'react-native';
 import PropTypes from 'prop-types';
-import styles from './styles';
+import React, { Component } from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import { withNavigation } from 'react-navigation';
-import Icon from 'react-native-vector-icons/SimpleLineIcons';
+import { autoCalendar } from '../../../config-debug';
+import styles from './styles';
 
 
 class DateAndGuestPicker extends Component {
     constructor(props) {
         super(props);
-        console.log("DateAndGuestPicker", props);
     }
 
-    onSettings = () => {
-        this.props.gotoSettings();
+    componentDidMount() {
+        // detach from current code execution (smoother animation)
+        if (__DEV__ && autoCalendar) setTimeout(() => this.onCalendar());
+    }
+
+    onFilter = () => {
+        // detach from current code execution - avoiding button lock
+        setTimeout(() => this.props.gotoFilter());
     }
 
     onGuests = () => {
-        this.props.gotoGuests();
+        // detach from current code execution - avoiding button lock
+        setTimeout(() => this.props.gotoGuests());
     }
 
     onSearch = () => {
-        this.props.gotoSearch();
+        // detach from current code execution - avoiding button lock
+        setTimeout(() => this.props.gotoSearch());
     }
 
     onCancel = () => {
-        this.props.gotoCancel();
+        // detach from current code execution - avoiding button lock
+        setTimeout(() => this.props.gotoCancel());
     }
 
     onCalendar = () => {
-        this.props.navigation.navigate('CalendarScreen', {
-            startDate: this.props.checkInDateFormated,
-            endDate: this.props.checkOutDateFormated,
-            format_input: "DD/MM/YYYY",
-            format_display: "ddd, DD MMM",
-            onConfirm: this.props.onDatesSelect
-        });
+        // detach from current code execution - avoiding button lock
+        setTimeout(() => this.props.navigation.navigate('CalendarScreen'));
     }
 
     render() {
@@ -43,33 +47,39 @@ class DateAndGuestPicker extends Component {
             checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable
         } = this.props;
 
+        const checkInDateText = (checkInDate || 'Select Date')
+        const checkOutDateText = (checkOutDate  || '------')
+
+        const isCalendarDisabled = (disabled || this.props.onDatesSelect == null);
+        const isGuestsDisabled = (disabled || this.props.gotoGuests == null);
+
         return (
             <View style={styles.container}>
                 <View style={styles.pickerRow}>
                     <View style={{flex:1}}>
                         <TouchableOpacity
-                            onPress={this.onCalendar}
+                            onPress={isCalendarDisabled ? null : this.onCalendar}
                             style={checkInDate && checkOutDate ? styles.datesPickerViewComplete : styles.datesPickerViewIncomplete}
-                            disabled={disabled}>
+                            disabled={isCalendarDisabled}>
                             <View style={styles.datePickerView}>
-                                <Text style={disabled ? styles.label_disabled : styles.label}>Check In</Text>
-                                <Text style={styles.value}>{ checkInDate || 'Select Date' }</Text>
+                                <Text style={isCalendarDisabled ? styles.label_disabled : styles.label}>Check In</Text>
+                                <Text style={styles.value}>{ checkInDateText }</Text>
                             </View>
 
                             <View style={styles.separator} />
 
                             <View style={styles.datePickerView}>
-                                <Text style={disabled ? styles.label_disabled : styles.label}>Check Out</Text>
-                                <Text style={styles.value}>{ checkOutDate || '------' }</Text>
+                                <Text style={isCalendarDisabled ? styles.label_disabled : styles.label}>Check Out</Text>
+                                <Text style={styles.value}>{ checkOutDateText }</Text>
                             </View>
                         </TouchableOpacity>
                     </View>
 
                     <TouchableOpacity
-                        onPress={this.onGuests}
-                        disabled={disabled}>
+                        onPress={isGuestsDisabled ? null : this.onGuests}
+                        disabled={isGuestsDisabled}>
                         <View style={adults + children + infants ? styles.guestPickerViewComplete : styles.guestPickerViewIncomplete}>
-                            <Text style={disabled ? styles.label_disabled : styles.label}>Guests</Text>
+                            <Text style={isGuestsDisabled ? styles.label_disabled : styles.label}>Guests</Text>
                             <Text style={styles.value}>{ adults + children + infants || '-' }</Text>
                         </View>
                     </TouchableOpacity>
@@ -78,9 +88,9 @@ class DateAndGuestPicker extends Component {
                             (
                                 <TouchableOpacity
                                     disabled={disabled}
-                                    onPress={this.onSettings}>
+                                    onPress={this.onFilter}>
                                     <View style={styles.optionsPickerViewIncomplete}>
-                                        <Icon name={"settings"} size={28} color={disabled?'#d9d9d9':"#565656"}/>
+                                        <Icon name={"filter-list"} size={28} color={disabled?'#d9d9d9':"#565656"}/>
                                     </View>
                                 </TouchableOpacity>
                             )
@@ -105,14 +115,14 @@ class DateAndGuestPicker extends Component {
 DateAndGuestPicker.propTypes = {
     checkInDate: PropTypes.string.isRequired,
     checkOutDate: PropTypes.string.isRequired,
-    onDatesSelect: PropTypes.func.isRequired,
+    onDatesSelect: PropTypes.func,
     adults: PropTypes.number.isRequired,
     children: PropTypes.number.isRequired,
     infants: PropTypes.number.isRequired,
     gotoSearch: PropTypes.func.isRequired,
     gotoCancel: PropTypes.func.isRequired,
-    gotoGuests: PropTypes.func.isRequired,
-    gotoSettings : PropTypes.func.isRequired,
+    gotoGuests: PropTypes.func,
+    gotoFilter : PropTypes.func.isRequired,
     showSearchButton : PropTypes.bool.isRequired,
     showCancelButton : PropTypes.bool.isRequired,
     disabled: PropTypes.bool.isRequired,
@@ -122,14 +132,14 @@ DateAndGuestPicker.propTypes = {
 DateAndGuestPicker.defaultProps = {
     checkInDate: '',
     checkOutDate: '',
-    onDatesSelect: ()=>{},
+    onDatesSelect: null,
     adults: 2,
     children: 0,
     infants: 0, 
     gotoSearch: ()=>{},
     gotoCancel: ()=>{},
-    gotoGuests: ()=>{},
-    gotoSettings: ()=>{},
+    gotoGuests: null,
+    gotoFilter: ()=>{},
     showSearchButton: false,
     showCancelButton : false,
     disabled: false,

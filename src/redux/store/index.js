@@ -4,8 +4,22 @@ import thunk from 'redux-thunk';
 import appReducers from '../reducers';
 import { middleware } from '../../routing'
 import { logger } from 'redux-logger'
+import {
+    reduxConsoleLoggingEnabled, reduxConsoleCollapsedLogging, reduxReactotronLoggingEnabled
+} from '../../config-debug'
 
-const middlewares = [thunk, middleware, logger];
+let middlewares = [thunk, middleware];
+if (__DEV__ && reduxConsoleLoggingEnabled) {
+    if (reduxConsoleCollapsedLogging) {
+        const loggerCollapsed = require('redux-logger').createLogger({
+            collapsed: (getState, action, logEntry) => true
+        });                
+        middlewares.push(loggerCollapsed)
+    } else {
+        middlewares.push(logger)
+    }
+
+}
 
 const enchancer = composeWithDevTools({
     serialize: true,                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
@@ -19,7 +33,12 @@ const enchancer = composeWithDevTools({
     }
 })(applyMiddleware(...middlewares));
 
-let store = createStore(appReducers, enchancer); // eslint-disable-line
+let store;
+if (console.tron.createStore && reduxReactotronLoggingEnabled) {
+ store = console.tron.createStore(appReducers, enchancer); // eslint-disable-line
+} else {
+ store = createStore(appReducers, enchancer); // eslint-disable-line
+}
   
 // if (module.hot) {
 //     // Enable Webpack hot module replacement for reducers

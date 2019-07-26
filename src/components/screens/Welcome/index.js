@@ -17,6 +17,7 @@ import { domainPrefix, basePath } from '../../../config';
 import requester from '../../../initDependencies';
 import styles from './styles';
 import LoginLocationDialog from '../../atoms/LoginLocationDialog'
+import VersionText from '../../atoms/VersionText'
 
 import SplashScreen from 'react-native-smart-splash-screen';
 const FBSDK = require('react-native-fbsdk');
@@ -35,7 +36,7 @@ class Welcome extends Component {
     }
 
     componentDidMount() {
-        console.log("AppLoading - componentDidMount")
+        //console.log("AppLoading - componentDidMount")
         SplashScreen.close({
             animationType: SplashScreen.animationType.scale,
             duration: 0,
@@ -44,7 +45,7 @@ class Welcome extends Component {
     }
 
     tryLogin(countryID = null) {
-        console.log("fb info", this.fbInfo);
+        //console.log("fb info", this.fbInfo);
         this.setState({ showProgress: true });
         if (this.fbInfo.email != null) {
             const user = { 
@@ -58,9 +59,9 @@ class Welcome extends Component {
                 this.setState({ showProgress: false });
                 // if (countryID != null) {
                 if (res.success) {
-                    console.log("Success");
+                    //console.log("Success");
                     res.body.then(data => {
-                        console.log(data);
+                        //console.log(data);
                         AsyncStorage.setItem(`${domainPrefix}.auth.locktrip`, data.Authorization);
                         // TODO: Get first name + last name from response included with Authorization token (Backend)
                         AsyncStorage.setItem(`${domainPrefix}.auth.username`, this.fbInfo.email);
@@ -83,7 +84,7 @@ class Welcome extends Component {
                                         Welcome.self.tryRegister();
                                     }
                                     // alert(errors[key].message);
-                                    console.log('Error logging in  :', errors[key].message);
+                                    //console.log('Error logging in  :', errors[key].message);
                                 }
                             });
                         }
@@ -94,7 +95,7 @@ class Welcome extends Component {
             .catch(err => {
                 this.setState({ showProgress: false });
                 alert('Cannot login, Please check network connection.');
-                console.log(err);
+                //console.log(err);
             });
         }
         else {
@@ -105,14 +106,14 @@ class Welcome extends Component {
             if (countryID != null) {
                 user.country = countryID;
             }
-            console.log("uerer-------------", user);
+            //console.log("uerer-------------", user);
             requester.login(user, null).then(res => {
-                console.log("login by auth_id", res);
+                //console.log("login by auth_id", res);
                 this.setState({ showProgress: false });
                 if (res.success) {
-                    console.log("Success");
+                    //console.log("Success");
                     res.body.then(data => {
-                        console.log(data);
+                        //console.log(data);
                         AsyncStorage.setItem(`${domainPrefix}.auth.locktrip`, data.Authorization);
                         // // TODO: Get first name + last name from response included with Authorization token (Backend)
                         // AsyncStorage.setItem(`${domainPrefix}.auth.username`, fbInfo.email);
@@ -135,7 +136,7 @@ class Welcome extends Component {
                                         Welcome.self.tryRegister();
                                     }
                                     // alert(errors[key].message);
-                                    console.log('Error logging in  :', errors[key].message);
+                                    //console.log('Error logging in  :', errors[key].message);
                                 }
                             });
                         }
@@ -145,7 +146,7 @@ class Welcome extends Component {
             .catch(err => {
                 this.setState({ showProgress: false });
                 alert('Cannot login, Please check network connection.');
-                console.log(err);
+                //console.log(err);
             });
         }
     }
@@ -290,13 +291,18 @@ class Welcome extends Component {
 
                 <GetStartedImage />
 
+                <VersionText color={'white'} size={10} 
+                    style={{bottom: "11%", position: 'absolute'}} 
+                    textStyle={{marginHorizontal: 30}}
+                />
+
                 <LoginLocationDialog
                     countries = { this.props.countries }
                     title = { 'Select Currency' }
                     visible = { this.state.locationDialogVisible }
                     okLabel = { 'OK' }
                     onOk = { countryID => {
-                        console.log("select country", countryID);
+                        //console.log("select country", countryID);
                         this.setState({ locationDialogVisible: false });
                         this.tryLogin(countryID);
                     }}

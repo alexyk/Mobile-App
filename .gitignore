@@ -73,3 +73,4 @@ build/
 */.externalNativeBuild/*
 
 Pods/
+.vscode/.react

@@ -1,902 +1,1142 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { Text, ScrollView, TouchableOpacity, View, Platform, NativeModules, DeviceEventEmitter, Dimensions } from 'react-native';
+/**
+ * Hotels search results are loaded like this
+ * 
+ * ==== Variant 2 - quicker search results (when 30 prices loaded) ====
+ * ==== (using footer in simple mode - one simple text field) ====
+ * 1) onStaticData
+ *    This is the initial load of static hotel data (name,description,image)
+ *    5 pages are initially loaded
+ 
+ * 2) onDataFromSocket
+ *    Loading prices from socket and updating hotel search
+ *    Shown in footer: "N matches" (renderFooter)
+ * 
+ * 3) onDoneSocket
+ *    All prices loaded - start filtering (no update in list)
+ * 
+ * 4) onFilteredData
+ *    Filtering results - removing hotels unavailable. Currently this flow differs from Web-App as
+ *    it is using getInfoForMap thus loading all results (not page by page as does the Web-App)
+ * 
+ */
+import React, { Component } from "react";
+import { SafeAreaView, BackHandler } from "react-native";
+import { connect } from "react-redux";
+import { bindActionCreators } from "redux";
+import {
+  View,
+  Platform,
+  NativeModules,
+  DeviceEventEmitter,
+} from "react-native";
 
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 
-import { imgHost } from '../../../../config';
-import SearchBar from '../../../molecules/SearchBar';
-import DateAndGuestPicker from '../../../organisms/DateAndGuestPicker';
-import requester from '../../../../initDependencies';
+import {
+  imgHost,
+  socketHost,
+} from "../../../../config";
+import {
+  showNumberOnHotelItem,
+  HOTELS_SOCKET_CONNECTION_TIMEOUT,
+  HOTELS_STATIC_CONNECTION_TIMEOUT,
+  HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
+  HOTELS_MINIMUM_RESULTS,
+  autoGetAllStaticPages,
+  hotelSearchIsNative
+} from "../../../../config-settings";
+import { isOnline, rlog, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
+import requester from "../../../../initDependencies";
 
-import UUIDGenerator from 'react-native-uuid-generator';
-import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
-import _ from 'lodash';
-import moment from 'moment';
+import UUIDGenerator from "react-native-uuid-generator";
 
-import { TabView } from 'react-native-tab-view';
+import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
+import lang from "../../../../language";
 
-import ListModeHotelsSearch from '../ListModeHotelsSearch'
-import MapModeHotelsSearch from '../MapModeHotelsSearch'
-import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
+import styles from "./styles";
 
-import styles from './styles';
+import {
+  createHotelSearchInitialState,
+  generateFilterInitialData,
+  generateHotelFilterString,
+  applyHotelsSearchFilter,
+  processFilteredHotels,
+  hotelsTemporaryFilterAndSort,
+  mergeAllHotelData,
+  parseSocketHotelData,
+  DISPLAY_MODE_NONE,
+  DISPLAY_MODE_SEARCHING,
+  DISPLAY_MODE_RESULTS_AS_LIST,
+  DISPLAY_MODE_RESULTS_AS_MAP,
+  DISPLAY_MODE_HOTEL_DETAILS,
+  checkHotelData,
+  processStaticHotels,
+  checkHotelDataPrepare,
+  printCheckHotelDataCache
+} from "../utils"
 
-const { width, height } = Dimensions.get('window')
-const androidStomp = NativeModules.StompModule;
-const stomp = require('stomp-websocket-js');
+import {
+  generateSearchString,
+  generateWebviewInitialState,
+} from "../../utils"
 
-const clientRef = undefined;
-let countIos;
+import {
+  renderWebViewBack,
+  renderBackButtonAndSearchField,
+  renderCalendarAndFilters,
+  renderHotelDetailsAsWebview,
+  renderResultsAsList,
+  renderListItem,
+  renderPaginationFetchingView,
+  renderPaginationWaitingView,
+  renderPaginationAllLoadedView,
+  renderResultsAsMap,
+  renderMapButton,
+  renderFooter,
+  renderPreloader,
+  renderToast,
+  renderDebugWebview,
+  renderDebugMap
+} from './components'
+
+import stomp from "stomp-websocket-js";
+import { setIsApplyingFilter } from '../../../../redux/action/userInterface'
+import { setSearch, setSearchString } from '../../../../redux/action/hotels'
+
+let stompiOSClient = undefined;
+let stompAndroidClient = undefined;
 
 class HotelsSearchScreen extends Component {
-    hotelsInfoById = [];
-    previousState = {};
-    constructor(props) {
-        super(props);
-        console.disableYellowBox = true;
+  PAGE_LIMIT = 10;
+  INITIAL_PAGES = 5;
 
-        const startDate = moment()
-            .add(1, 'day');
-        const endDate = moment()
-            .add(2, 'day');
-        
-        let roomsData = [{
-            adults: 2,
-            children: []
-        }];
+  constructor(props) {
+    super(props);
+    console.log("#hotel-search# 2.1/6  HotelSearchScreen constructor START");
+    console.disableYellowBox = true;
 
-        this.state = {
-            isFilterResult: false,
-            search: '',
-            cities: [],
-
-            isHotel: true,
-            regionId : '',
-
-            hotelsInfo : [],
-            allElements: false,
-            isMAP : -1,
-            initialLat: 42.698334,
-            initialLon: 23.319941,
-            
-            checkInDateFormated: startDate.format('DD/MM/YYYY').toString(),
-            checkOutDateFormated: endDate.format('DD/MM/YYYY').toString(),
-            checkInDate: startDate.format('ddd, DD MMM').toString(),
-            checkOutDate: endDate.format('ddd, DD MMM').toString(),
-
-            guests: 2,
-            adults: 2,
-            children: 0,
-            infants: 0,
-            childrenBool: false,
-            daysDifference: 1,
-            roomsDummyData: encodeURI(JSON.stringify(roomsData)),
-            //filters
-            showUnAvailable: false,
-            nameFilter: '',
-            selectedRating: [false, false, false, false, false],
-            orderBy: 'rank,desc',
-            priceRange: [1, 5000],
-
-            editable: false,
-
-            isNewSearch: false,
-
-            index: 0,
-            routes: [
-                { key: 'list', title: 'List Mode' },
-                { key: 'map', title: 'Map Mode' },
-            ],
-        };
-        const { params } = this.props.navigation.state;//eslint-disable-line
-
-        if (params) {
-            this.state.isHotel = params.isHotel;
-            this.state.search = params.searchedCity;
-            this.state.regionId = params.regionId;
-            this.state.checkInDate = params.checkInDate;
-            this.state.checkInDateFormated = params.checkInDateFormated;
-            this.state.checkOutDate = params.checkOutDate;
-            this.state.checkOutDateFormated = params.checkOutDateFormated;
-
-            this.state.guests = params.guests;
-            this.state.adults = params.adults;
-            this.state.children = params.children;
-            this.state.infants = params.infants;
-            this.state.childrenBool = params.childrenBool;
-
-            this.state.roomsDummyData = params.roomsDummyData;
-            this.state.daysDifference = params.daysDifference;
-        }
-
-        this.saveState();
-    }
-
-    componentWillMount() {
-        if(this.state.isHotel) {
-            this.getHotels();
-        }
-
-        WebsocketClient.startGrouping();
-    }
-
-    componentWillUnmount() {
-        this.unsubscribe();
-
-        WebsocketClient.stopGrouping();
-    }
-
-    getHotels() {
-        if (this.listView != undefined && this.listView != null) {
-            this.listView.initListView();
-        }
-        this.hotelsInfoById = [];
-        this.setState({
-            isMAP: -1, 
-            hotelsInfo : [],
-            allElements: false, 
-            editable: false
-        }, () => {
-            requester.getStaticHotels(this.state.regionId).then(res => {
-                res.body.then(data => {
-                    const { content } = data;
-                    content.forEach(l => {
-                        if (this.hotelsInfoById[l.id]) {
-                            l.price = this.hotelsInfoById[l.id].price;
-                        }
-                    });
+    const { params } = this.props.navigation.state; //eslint-disable-line
+    this.state = createHotelSearchInitialState(params, props.datesAndGuestsData);
     
-                    console.log("getStaticHotels", content);
-                    const hotels = content;
-                    this.listView.onFirstLoad(hotels, false);
-                    this.getHotelsInfoBySocket();
-                });
-            });
-        });
+    this.pageLimit = this.PAGE_LIMIT;
+    this.pagesLoaded = 0;
+    this.pagesCached = 0;
+    this.pageSize = 10;
+    this.isAllPagesDone = false;
+    this.totalElements = 0;
+    this.isMinimumResultLoaded = false;
+    this.isAllHotelsLoaded = false;
+    this.isFirstLoad = true;
+    this.isFirstFilter = true;
+    this.isFilterFromUI = false;
+    this.isSocketDown = true;
+    this.isUnmounted = true;
+    this.validSocketPrices = 0;
+    this.staticDataReceived = false;
+    this.lastSocketUpdateTime = 0;
+    this.hotelsAll = [];              // cache for using as filter source
+    this.hotelsIndicesByIdMap = null; // see getStaticHotelsData() for populating this one
+    this.hotelsStaticCacheMap = {}; // cache for static data (requester.getStaticHotels) 
+    this.hotelsSocketCacheMap = {}; // cache for hotels from socket, that are not present on screen (were not fetched by scrolling down the list)
+    this.priceMin = 5000;
+    this.priceMax = 0;
+
+    this.listViewHelpers = {}; // startFetch & abortFetch (see UltimateListView docs - react-native-ultimate-listview)
+    this.webViewRef = null;
+
+    this.socketTimeoutId = -1;
+    this.staticTimeoutId = -1;
+    
+    this.filtersCallback = null;
+    this.isWebviewHotelDetail = false
+
+    // Bind functions to this,
+    // thus optimizing performance - by using bind(this) instead of "=> function".
+    this._setSearchString = this._setSearchString.bind(this);
+    this.gotoHotelDetailsPageNative = this.gotoHotelDetailsPageNative.bind(this);
+    this.getNextStaticPage = this.getNextStaticPage.bind(this);
+    this.unsubscribe = this.stopSocketConnection.bind(this);
+    this.updateCoords = this.updateCoords.bind(this);
+    this.onDataFromSocket = this.onDataFromSocket.bind(this);
+    this.onStaticData = this.onStaticData.bind(this);
+    this.onFilteredData = this.onFilteredData.bind(this);
+    this.onFetchNewListViewData = this.onFetchNewListViewData.bind(this);
+    this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(this);
+
+    // render functions
+    this.renderWebViewBack = renderWebViewBack.bind(this)
+    this.renderBackButtonAndSearchField = renderBackButtonAndSearchField.bind(this)
+    this.renderCalendarAndFilters = renderCalendarAndFilters.bind(this)
+    this.renderHotelDetailsAsWebview = renderHotelDetailsAsWebview.bind(this)
+    this.renderResultsAsList = renderResultsAsList.bind(this)
+    this.renderListItem = renderListItem.bind(this);
+    this.renderPaginationFetchingView = renderPaginationFetchingView.bind(this)
+    this.renderPaginationWaitingView = renderPaginationWaitingView.bind(this)
+    this.renderPaginationAllLoadedView = renderPaginationAllLoadedView.bind(this)
+    this.renderResultsAsMap = renderResultsAsMap.bind(this)
+    this.renderMapButton = renderMapButton.bind(this)
+    this.renderFooter = renderFooter.bind(this)
+    this.renderPreloader = renderPreloader.bind(this)
+    this.renderToast = renderToast.bind(this)
+    this.renderDebugWebview = renderDebugWebview.bind(this)
+    this.renderDebugMap = renderDebugMap.bind(this)
+
+
+    //TODO: @@debug - remove
+    console.log("#hotel-search# 2.2/6 HotelSearchScreen constructor END");
+    this.renderTimes = 0;
+    this.renderItemTimes = 0;
+  }
+
+
+  componentDidCatch(error, errorInfo) {
+    processError(`[HotelsSearchScreen] Error in component: ${error.message}`, {error,errorInfo});
+  }
+
+
+  componentDidMount() {
+    console.log("#hotel-search# 3/6 HotelSearchScreen componentDidMount START");
+    checkHotelDataPrepare();
+
+    this.isUnmounted = false;
+    this.startStaticDataConnectionTimeOut();
+    this.startSocketDataConnectionTimeOut();
+
+    if (this.state.isHotel) {
+      this.getStaticHotelsData();
+      this._setSearchString();
+    }
+  }
+  
+  componentWillMount() {
+    if (Platform.OS == 'android') {
+      BackHandler.addEventListener('hardwareBackPress', this.onBackButtonPress);
+    }
+  }
+
+  componentWillUnmount() {
+    this.isUnmounted = true;
+    this.isSocketDown = true;
+
+    clearTimeout(this.socketTimeoutId);
+    clearTimeout(this.staticTimeoutId);
+
+    this.stopSocketConnection();
+
+    if (Platform.OS == 'android') {
+      BackHandler.removeEventListener('hardwareBackPress', this.onBackButtonPress);
+    }
+  }
+
+  startSocketDataConnectionTimeOut() {
+    //log({name:'SOCKET',preview:`Starting Socket connection timeout, ${isOnline?'online':'offline'}`,important:true})
+    if (!isOnline) return;
+
+    const _this = this;
+    const funcSocketTimeout = function() {
+      if (_this.validSocketPrices == 0  && _this && !_this.isUnmounted) {
+        _this.setState({ isSocketTimeout: true });
+      }
+      //log('SOCKET',`Socket connection timeout DONE, valid socket prices: ${_this.validSocketPrices}`,null,true)
+    };
+    if (this && !this.isUnmounted) {
+      this.setState({ isSocketTimeout: false });
     }
 
-    async getHotelsInfoBySocket() {
-        this.uuid = await UUIDGenerator.getRandomUUID();
+    if (this.socketTimeoutId > -1) {
+      clearTimeout(this.socketTimeoutId);
+      this.socketTimeoutId = -1;
+    }
+    this.socketTimeoutId = setTimeout(
+      funcSocketTimeout,
+      1000 * HOTELS_SOCKET_CONNECTION_TIMEOUT
+    );
+  }
 
-        if (Platform.OS === 'ios') {
-            this.stompIos();
-        } else if (Platform.OS === 'android') {
-            this.stompAndroid();
-        }
+  startStaticDataConnectionTimeOut() {
+    const _this = this;
+    const funcStaticHotelsTimeout = function() {
+      if (!_this.staticDataReceived && _this && !_this.isUnmounted) {
+        _this.setState({ isStaticTimeout: true });
+      }
+    };
+
+    this.staticDataReceived = false;
+    if (this && !this.isUnmounted) {
+      this.setState({ isStaticTimeout: false });
     }
 
-    unsubscribe = () => {
-        if (Platform.OS === 'ios') {
-        } 
-        else if (Platform.OS === 'android') {
-            DeviceEventEmitter.removeAllListeners("onStompConnect");
-            DeviceEventEmitter.removeAllListeners("onStompError");
-            DeviceEventEmitter.removeAllListeners("onStompMessage");
+    if (this.staticTimeoutId > -1) {
+      clearTimeout(this.staticTimeoutId);
+      this.staticTimeoutId = -1;
+    }
+    this.staticTimeoutId = setTimeout(
+      funcStaticHotelsTimeout,
+      1000 * HOTELS_STATIC_CONNECTION_TIMEOUT
+    );
+  }
 
-            androidStomp.close();
-        }
+  getNextStaticPage(page=0,elementsCount=10) {
+    
+    if (this.isAllPagesDone) {
+      return;
+    }
+        
+    this.startStaticDataConnectionTimeOut();
+    requester
+      .getStaticHotels(this.state.regionId, page, elementsCount)
+      .then(this.onStaticData);
+  }
+
+  getStaticHotelsData() {
+    console.log("#hotel-search# 4.1/6 [HotelsSearchScreen] getStaticHotelsData");
+
+    this.hotelsIndicesByIdMap = {};
+    const _this = this;
+
+    this.setState(
+      // change state function
+      function(prevState, updatedProps) {
+        //console.log('SET_STATE 1', {prevState,updatedProps})
+        return {
+          displayMode: (prevState.displayMode == DISPLAY_MODE_NONE ? DISPLAY_MODE_SEARCHING : prevState.displayMode),
+          hotelsInfo: [],
+          allElements: false,
+          editable: false
+        };
+      },
+
+      // callback (after change state above)
+      function() {
+        _this.getNextStaticPage(_this.pagesLoaded)
+      }
+    );
+    //console.log("#hotel-search# 4.2/6 [HotelsSearchScreen] getStaticHotelsData");
+  }
+
+  // TODO: Inspect this flow - and create a component to implement it
+  async startSocketConnection() {
+    rlog('socket',`startSocketConnection`);
+
+    this.isSocketDown = false;
+
+    if (isOnline) {
+      this.uuid = await UUIDGenerator.getRandomUUID();
+
+      // common code
+      WebsocketClient.startGrouping();
+
+      if (Platform.OS === "ios") {
+        this.stompiOSConnect();
+      } else if (Platform.OS === "android") {
+        this.stompAndroidConnect();
+      }
+    } else {
+    	requester.startSocketConnection(this.onDataFromSocket, this)
+    }
+  }
+
+  // TODO: Inspect this flow - and create a component to implement it
+  stopSocketConnection(removeListeners = true) {
+  	if (!isOnline) return;
+  	
+    // common code
+    if (removeListeners) {
+      WebsocketClient.stopGrouping();
+      this.isSocketDown = true;
     }
 
-    stompAndroid() {
-        console.log("stompAndroid -------------");
-        // console.log("stompAndroid---------------", this.uuid, this.searchString);
-        const message = "{\"uuid\":\"" + this.uuid + "\",\"query\":\"" + this.searchString + "\"}";
-        const destination = "search/" + this.uuid;
-
+    // platform specific
+    if (Platform.OS === "ios") {
+      // TODO: Figure out why this is null sometimes
+      if (stompiOSClient) {
+        stompiOSClient.disconnect();
+      }
+    } else if (Platform.OS === "android") {
+      if (removeListeners) {
         DeviceEventEmitter.removeAllListeners("onStompConnect");
-        DeviceEventEmitter.addListener("onStompConnect", () => {
-            console.log("onStompConnect -------------");
-        });
-        
         DeviceEventEmitter.removeAllListeners("onStompError");
-        DeviceEventEmitter.addListener("onStompError", ({type, message}) => {
-            console.log("onStompError -------------", type, message);
-        });
-
         DeviceEventEmitter.removeAllListeners("onStompMessage");
-        DeviceEventEmitter.addListener("onStompMessage", ({message}) => (
-            this.handleAndroidSingleHotel(message)
-        ));
+      }
 
-        androidStomp.getData(message, destination);
+      if (stompAndroidClient) {
+        stompAndroidClient.close();
+      }
     }
 
-    handleAndroidSingleHotel(message) {
-        if (this.state.isMAP == -1 && this.state.hotelsInfo.length > 0) {
-            this.setState({
-                isMAP: 0, 
-                initialLat: parseFloat(this.state.hotelsInfo[0].lat), 
-                initialLon: parseFloat(this.state.hotelsInfo[0].lon)
-            });
-        }
-        try {
-            console.log("jsonHotel ---", message);
-            const jsonHotel = JSON.parse(message);
-            if (jsonHotel.hasOwnProperty('allElements')) {
-                if (jsonHotel.allElements) {
-                    this.setState({ allElements: true, editable: true});
-                    if (this.listView) {
-                        this.listView.onDoneSocket();
-                    }
-                    androidStomp.close();
-                }
-            } else {
-                this.hotelsInfoById[jsonHotel.id] = jsonHotel;
-                this.state.hotelsInfo = [...this.state.hotelsInfo, jsonHotel];
+    // stompAndroidClient = null;
+    // stompiOSClient = null;
+  }
 
-                //if (this.listView != null && (this.state.hotelsInfo.length < this.listView.getRows().length || this.state.hotelsInfo.length % 20 === 0)) {
-                    // this.setState(prevState => ({
-                    //     hotelsInfo: [...prevState.hotelsInfo, jsonHotel]
-                    // }));
-                    //this.state.hotelsInfo = [...this.state.hotelsInfo, jsonHotel];
-                    //this.setState({refresh: this.state.hotelsInfo.length})
+  stompiOSConnect() {
+    const headers = { "content-length": false };
+    const data = { uuid: this.uuid, query: this.searchString };
 
-                if (this.state.isMAP === 1 && this.mapView != null && this.state.hotelsInfo.length % 20 === 0) {
-                    this.mapView.refresh(this.state.hotelsInfo);
-                }
-                else {
-                    //this.state.hotelsInfo = [...this.state.hotelsInfo, jsonHotel];
-                }
+    //console.log("stompiOSConnect ---------------");
+    rlog('socket',`stompiOSConnect`,{socketHost,data,headers});
+    
+    stompiOSClient = stomp.client(socketHost);
+    stompiOSClient.debug = (hotelsSearchSocketDebug
+      ? (msg) => rlog('debug-socket', `${msg.substr(0,30)}` , {msg})
+      : null
+    );
+    stompiOSClient.connect(
+      {},
+      frame => {
+        stompiOSClient.subscribe(`search/${this.uuid}`, this.onDataFromSocket);
+        stompiOSClient.send( "search", headers, JSON.stringify(data));
+      },
+      error => {
+        stompiOSClient.disconnect();
+        this.setState({ isLoading: false });
+      }
+    );
+  }
 
-                if (this.listView != null) {
-                    const index = this.listView.getIndex(jsonHotel.id);
-                    if (index !== -1) {
-                        this.listView.upgradePrice(index, this.hotelsInfoById[jsonHotel.id].price)
-                    }
-                }
+  stompAndroidConnect() {
+    stompAndroidClient = NativeModules.StompModule;
 
-            }
-        } catch (e) {
-            console.log("handleAndroidSingleHotel2222---", message, e);
-            // Error
-        }
+    //console.log("stompAndroid -------------");
+    //console.log("stompAndroid---------------", this.uuid, this.searchString);
+    const message =
+      '{"uuid":"' + this.uuid + '","query":"' + this.searchString + '"}';
+    const destination = "search/" + this.uuid;
+
+    DeviceEventEmitter.removeAllListeners("onStompConnect");
+    DeviceEventEmitter.addListener("onStompConnect", () => {
+      //console.log("onStompConnect -------------");
+    });
+
+    DeviceEventEmitter.removeAllListeners("onStompError");
+    DeviceEventEmitter.addListener("onStompError", ({ type, message }) => {
+      //console.log("onStompError -------------", type, message);
+    });
+
+    DeviceEventEmitter.removeAllListeners("onStompMessage");
+    DeviceEventEmitter.addListener("onStompMessage", ({ message }) => {
+      // console.warn('stomp message', message);
+      // TODO: (low priority) Solve this difference between iOS and Android
+      return this.onDataFromSocket({ body: message });
+    });
+
+    stompAndroidClient.getData(message, destination);
+  }
+
+  onDataFromSocket(data) {
+    // log('socket-data',`onDataFromSocket ${data.body}`, {data})
+    
+    if (!this || !this.listViewRef || this.isUnmounted) {
+      console.warn(`[HotelsSearchScreen::onDataFromSocket] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
+      return;
     }
 
-    onCancel = () => {
-        this.props.navigation.goBack();
-    }
+    console.time('*** onDataFromSocket')
 
-    switchMode = () => {
-        if (this.state.isMAP == 0) {
-            this.setState({
-                isMAP: 1,
-                index: 1,
-            });
-        }
-        else {
-            this.setState({
-                isMAP: 0,
-                index: 0,
-            });
-        }
-    }
 
-    gotoHotelDetailsPageByList = (item) => {
-        // console.log("gotoHotelDetailsPage", item, this.searchString.substring(1), this.searchString.substring(1).split('&'));
+    const { body } = data;
+    
+    try {
+      const parsedData = JSON.parse(body);
+
+      // restart timeout (thus also clean red styling of footer)
+      if (this.state.isSocketTimeout) {
+        this.startSocketDataConnectionTimeOut();
+      }
+
+      if (parsedData.hasOwnProperty("allElements")) {
+        // TODO: @@debug - remove
+        // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
+
+        if (parsedData.allElements) {
+          this.setState({
+            allElements: true,
+            editable: true,
+            pricesFromSocketValid: this.validSocketPrices
+          });
+          this.onDoneSocket(parsedData);
+        }
+      } else {
+        const hotelData = parsedData;
+        const {id} = hotelData;
+        const staticHotelData = this.hotelsStaticCacheMap[id];
         
-        if (item.price == null || item.price == undefined) {
-            return;
-        }
+        checkHotelData(hotelData,'socket-orig')
 
-        this.setState({isLoadingHotelDetails: true});
-        requester.getHotelById(item.id, this.searchString.split('&')).then((res) => {
-            console.log("requester.getHotelById", res);
+        // Safe parse hotelData
+        let initialCoord;
+        let parsedResult;
+        try {
+          parsedResult = parseSocketHotelData(hotelData,staticHotelData);
+        } catch (parseError) {
+          parsedResult = null;
+          processError(`[HotelsSearchScreen] Parse error: ${parseError.message}`,{error:parseError,parsedResult});
+        }
+        const {hotelData: parsedHotelData, initialCoord: coord} = (parsedResult ? parsedResult : {});
+        let {price} = parsedHotelData;
+        if (parsedResult) {
+          if (coord) {
+            initialCoord = coord;
+          }
+          this.hotelsSocketCacheMap[id] = parsedHotelData;
+          checkHotelData(parsedHotelData,'socket-parsed');
+        }
+        //log('socket-data',`onDataFromSocket ${id}, price-parced:${price} price-raw:${hotelData.price}`, {hotelData,parsedHotelData})
+
+        if (!isNaN(price)) {
+          // update socket prices loaded in footer
+          this.validSocketPrices++;
+          this.hotelsAll.push(parsedHotelData)
+
+          let newState = {};
+          if (this.state.initialLat == null && this.state.initialLon == null && initialCoord) {
+            newState = {...initialCoord};
+          }
+    
+          // At intervals of HOTELS_SOCKET_CONNECTION_UPDATE_TICK seconds
+          // refresh prices in footer and list prices loaded so far:
+          const currentTime = new Date().getTime();
+          const limitTime = this.lastSocketUpdateTime + HOTELS_SOCKET_CONNECTION_UPDATE_TICK * 1000;
+          if (!this.lastSocketUpdateTime || limitTime < currentTime) {
+            this.lastSocketUpdateTime = currentTime;
+
+            // optimise execution with delaying some parts
+            const delayedFunc = () => {
+              newState = {...newState, ...this.onSocketUpdateTick()};
+              // log('state-update',`onDataFromSocket`,{newState,oldState:this.state,initialCoord})//, ${Object.keys(newState).map(key => `${key}:${newState[key]}`)}`, {newState, all:this.hotelsAll, socket:this.hotelsSocketCacheMap, static:this.hotelsStaticCacheMap})
+              this.setState(newState);
+            }
+            setTimeout(delayedFunc, 100)
+          }
+        } else {
+          // skip processing hotel data from socket without price
+          //console.log('skipping hotel data from socket without price', hotelData)
+        }
+      }
+    } catch (error) {
+      processError(`[HotelsSearchScreen] Error while processing in onDataFromSocket: ${error.message}`, {error})
+    }
+
+    console.timeEnd('*** onDataFromSocket')
+  }
+
+
+  /**
+   * Executes on every HOTELS_SOCKET_CONNECTION_UPDATE_TICK seconds
+   * @returns (Object) The result contains any state updates that should happen
+   */
+  onSocketUpdateTick() {
+    console.time('*** onSocketUpdateTick')
+
+    const pricesFromSocketValid = this.validSocketPrices;
+    const hotelsToRender  = hotelsTemporaryFilterAndSort(this.hotelsAll)
+    let preloaderIsLoading = true;
+    if (hotelsToRender.length >= HOTELS_MINIMUM_RESULTS) {
+      this.isMinimumResultLoaded = true;
+      preloaderIsLoading = false;
+    }
+
+    this.listStartFetch(hotelsToRender, this.pageLimit);
+    // log('list-refresh-footer',`[old state] ${prevState.hotelsInfo.length} / ${prevState.hotelsInfoForMap.length} [new state] ${result.hotelsInfo.length} / ${result.hotelsInfoForMap.length}`)
+    
+    console.timeEnd('*** onSocketUpdateTick')
+
+    return {
+      isLoading: preloaderIsLoading,
+      hotelsInfoForMap: hotelsToRender,
+      pricesFromSocketValid
+    }
+  }
+
+  onDoneSocket = data => {
+    console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
+    rlog('on-done-socket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
+    printCheckHotelDataCache();
+
+    //TODO: @@@debug remove
+//     let asArray = []
+//     for (let i in this.hotelsSocketCacheMap) {
+//     	if (! isNaN(i)) {
+//     		asArray.push(this.hotelsSocketCacheMap[i])
+//     	}
+//     }
+    //log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{orig:this.hotelsSocketCacheMap.orig,parsed:this.hotelsSocketCacheMap},true)
+    //  log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{asArray},true)
+
+    this.stopSocketConnection(false);
+
+    // if (this.pageLimit > data.totalElements) {
+      // this.listSetPageLimit(data.totalElements);
+    // }
+    this.setState((prevState) => ({
+        pricesFromSocket: data.totalElements,
+      }),
+      () => {
+        // this.listSetPageLimit(this.state.totalHotels)
+        //log({name:'SOCKET',preview:`onDoneSocket`,important:true,value:{data,state:this.state,props:this.props}})
+        this.isAllHotelsLoaded = false;
+        this.props.setIsApplyingFilter(true);
+        this.setState({ isDoneSocket: true, isLoading: false });
+
+        // get first filtered results from server - showing unavailable as well
+        this.updateFilter(generateFilterInitialData(true, this.state),false)
+        // then with UI filtering remove unavailable
+        this.filtersCallback =  () => {
+          if (this && this.listViewRef) {
+            this.updateFilter(generateFilterInitialData(false, this.state), true)
+            const priceRange = [this.priceMin,this.priceMax];
+            this.setState({priceRange,priceRangeSelected: priceRange})
+          } else {
+            console.warn('[HotelsSearchScreen::filtersCallback] this.listViewRef seems null - is screen unmounted?',{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})
+          }
+        }
+      }
+    );
+  };
+
+  onBackButtonPress = () => {
+    switch (this.state.displayMode) {
+    
+      case DISPLAY_MODE_HOTEL_DETAILS:
+        this.setState({
+          displayMode: DISPLAY_MODE_RESULTS_AS_LIST,
+          isLoading: false,
+          selectedHotelData: null
+        });
+        break;
+
+      default:
+        this.props.navigation.goBack();
+        break;
+
+    }
+
+    if (Platform.OS == 'android') {
+      return true;
+    }
+  };
+
+  onToggleMapOrListResultsView() {
+    const displayMode =
+      this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST
+        ? DISPLAY_MODE_RESULTS_AS_MAP
+        : DISPLAY_MODE_RESULTS_AS_LIST;
+
+    // this.isFirstLoad = true;
+    //console.log(`[HotelsSearchScreen] displayMode: ${this.state.displayMode}`)
+
+    // Change display mode with delay 
+    // to prevent button from staying semi-transparent
+    const func = () => {if (this) this.setState({ displayMode })};
+    setTimeout(func, 100);
+  }
+
+  gotoHotelDetailsFromItemClick = (item, state, extraParams) => {
+    if (hotelSearchIsNative.step2HotelDetails) {
+      // log('here', `gotoHotelDetailsPageNative`,{item})
+      this.gotoHotelDetailsPageNative(item)
+    } else{
+      // log('here2', `goto Web-View`,{item})
+      if (state && extraParams) {
+        // webview inside
+        let initialState = generateWebviewInitialState(extraParams, state);
+
+        rlog('item-click',`url: ${initialState.webViewUrl}`)
+        /*console.log(`[HotelsSearchScreen] Loading hotel info`, {
+          initialState,
+          extraParams,
+          item,
+          state
+        });*/
+
+        this.setState({
+          isLoading: true,
+          webViewUrl: initialState.webViewUrl,
+          selectedHotelData: item,
+          displayMode: DISPLAY_MODE_HOTEL_DETAILS,
+        });
+      } else {
+
+        this.setState({ isLoading: true });
+        requester
+          .getHotelById(item.id, this.searchString.split("&"))
+          .then(res => {
+            //console.log("requester.getHotelById", res);
             // here you set the response in to json
-            res.body.then((data) => {
+            res.body
+              .then(data => {
                 console.log("requester.getHotelById data", data);
                 const hotelPhotos = [];
                 for (let i = 0; i < data.hotelPhotos.length; i++) {
-                    hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
+                  hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
                 }
-                this.setState({
-                    isLoadingHotelDetails: false
+                this.setState({ isLoading: false });
+                this.props.navigation.navigate("HotelDetails", {
+                  guests: this.state.guests,
+                  hotelDetail: item,
+                  searchString: this.searchString,
+                  hotelFullDetails: data,
+                  dataSourcePreview: hotelPhotos,
+                  daysDifference: this.state.daysDifference
                 });
-                this.props.navigation.navigate('HotelDetails', {
-                    guests: this.state.guests,
-                    hotelDetail: item,
-                    searchString: this.searchString,
-                    hotelFullDetails: data,
-                    dataSourcePreview: hotelPhotos,
-                    daysDifference: this.state.daysDifference
-                });
-            }).catch((err) => {
-                console.log(err);
-            });
+              })
+              .catch(err => {
+                //console.log(err);
+              });
+          });
+      }
+    }
+  };
+
+  
+  gotoHotelDetailsPageNative(item) {
+    requester.getHotelById(item.id, this.searchString.split("&")).then(res => {
+      // here you set the response in to json
+      res.body
+        .then(data => {
+          const hotelPhotos = [];
+          for (let i = 0; i < data.hotelPhotos.length; i++) {
+            hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
+          }
+          this.setState({ isLoading: false });
+          this.props.navigation.navigate("HotelDetails", {
+            hotelDetail: item,
+            hotelFullDetails: data,
+            dataSourcePreview: hotelPhotos,
+            daysDifference: this.state.daysDifference
+          });
+        })
+        .catch(err => {
+          //console.log(err);
         });
+    });
+  }
+
+
+  onFilteredData(res) {
+    const _this = this;
+    if (!this || !(this instanceof HotelsSearchScreen) || this.isUnmounted) {
+      console.warn(`[HotelsSearchScreen] Skipping onFilteredData - screen seems unmounted`);
+      return;
     }
 
-    gotoHotelDetailsPageByMap = (item) => {
-        console.log("gotoHotelDetailsPageByMap", item);
+    if (res.success) {
+      res.body.then((data) => {
+        // not used so far
+        // const isCacheExpired = data.isCacheExpired;
+        const count = data.content.length;
+        const hotelsAll = data.content;
+        checkHotelData(hotelsAll,'filter')
+        printCheckHotelDataCache();
+        rlog('@@filter-on-server',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
+
+        // parse data
+        mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap)
+        checkHotelData(hotelsAll,'filter-parsed')
+        printCheckHotelDataCache();
+        // log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
+
+        const oldHotels = this.hotelsAll;
+        if (this.isFirstFilter) {
+          // caching to:
+            // an immediately available var
+          this.hotelsAll = hotelsAll;
+            // Redux
+          this.props.setSearch(hotelsAll);
+        }
+
+        // pagination of list component (renderResultsAsList)
+        this.listSetPageLimit(count, this.PAGE_LIMIT);
         
-        if (item.price == null || item.price == undefined) {
-            return;
-        }
+        // log('filtered-hotels',`before processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax})
+        const {priceMin,priceMax,newIdsMap} = processFilteredHotels(hotelsAll, oldHotels, this.hotelsIndicesByIdMap, this.priceMin, this.priceMax)
+        this.priceMin = priceMin;
+        this.priceMax = priceMax;
+        this.hotelsIndicesByIdMap = newIdsMap;        
+        // log('filtered-hotels',`after processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax,fromSocket:this.hotelsSocketCacheMap})
 
-        this.setState({isLoadingHotelDetails: true});
-        requester.getHotelById(item.id, this.searchString.split('&')).then((res) => {
-            // here you set the response in to json
-            res.body.then((data) => {
-                const hotelPhotos = [];
-                for (let i = 0; i < data.hotelPhotos.length; i++) {
-                    hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
-                }
-                this.setState({
-                    isLoadingHotelDetails: false
-                });
-                this.props.navigation.navigate('HotelDetails', {
-                    guests: this.state.guests,
-                    hotelDetail: item,
-                    searchString: this.searchString,
-                    hotelFullDetails: data,
-                    dataSourcePreview: hotelPhotos,
-                    daysDifference: this.state.daysDifference
-                });
-            }).catch((err) => {
-                console.log(err);
-            });
-        });
-    }
-
-    onFetch = (page = 1, startFetch, abortFetch) => {
-        console.log("onFetch", page);
-        try {
-            if (!this.state.isFilterResult) {
-                requester.getStaticHotels(this.state.regionId, page - 1).then(res => {
-                    res.body.then(data => {
-                        const listings = data.content;
-                        listings.forEach(l => {
-                            if (this.hotelsInfoById[l.id]) {
-                                l.price = this.hotelsInfoById[l.id].price;
-                            }
-                        });
-                        const hotels = listings;
-                        console.log("onFetch--=- res  ", hotels);
-                
-                        startFetch(hotels, hotels.length, false)
-                    });
-                });
+        // update state with new hotels
+        this.setState(
+          // state update
+          (prevState) => {
+            this.listUpdateDataSource(hotelsAll);
+            const newState = {
+              hotelsInfo: hotelsAll,
+              hotelsInfoForMap: hotelsAll,
+              totalHotels: count,
+              isLoading: false
             }
-            else {
-                const strSearch = this.getSearchString();
-                const strFilters = this.getFilterString(this.listView.getPage());
-
-                requester.getLastSearchHotelResultsByFilter(strSearch, strFilters).then((res) => {
-                    if (res.success) {
-                        res.body.then((data) => {
-                            const hotels = data.content
-                            // if (this.isCacheExpired) {
-                            //     this.setState({
-                            //         hotelsInfo: [...this.state.hotelsInfo, ...hotels]
-                            //     });
-                            // }
-                            startFetch(hotels, hotels.length, true)
-                        });
-                    } 
-                    else {
-                        startFetch([], 0, true)
-                      // console.log('Search expired');
-                    }
-                });
+            return newState;
+          },
+          // callback after state update
+          () => {
+            if (_this.filtersCallback) {
+              const func = () => {
+                _this.filtersCallback()
+                _this.filtersCallback = null;
+                _this.props.setIsApplyingFilter(false);
+              }
+              setTimeout(func, 100)
             }
-            
-        } catch (err) {
-            console.log("onFetch--=- error  ", err);
-            abortFetch() // manually stop the refresh or pagination if it encounters network error
-        //   console.log(err)
-        }
+            if (_this.isFirstFilter) {
+              _this.isFirstFilter = false;
+            }
+          }
+        )
+      });
+    } else {
+      // //console.log('Search expired');
+      this.props.setIsApplyingFilter(false)
+      this.setState({error:lang.TEXT.SEARCH_HOTEL_FILTER_ERROR.replace('%1',res.message)})
+      if (res.errors) {
+        res.errors.then((data) => {
+          let {message} = data;
+          if (!message) {
+            message = `${data}`;
+          }
+          processError(`[HotelsSearchScreen] Filter error: ${message}`,{res,data});
+        })
+      } else {
+        console.error('[HotelsSearchScreen] Filter error',{res})
+      }
     }
+  }
 
-    onSearchHandler = (value) => {
-        this.setState({ search: value });
-        if (value === '') {
-            this.setState({ cities: [] });
-        } else {
-            requester.getRegionsBySearchParameter([`query=${value}`]).then(res => {
-                res.body.then(data => {
-                    if (this.state.search != '') {
-                        this.setState({ cities: data });
-                    }
-                });
-            });
-        }
+  onStaticData(res) {
+    const isSkipping = (!this || !this.listViewRef || this.isUnmounted);
+
+    if (isSkipping) {
+      console.warn(`[HotelsSearchScreen::onStaticData] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
+      return;
     }
-
-    gotoGuests = () => {
-        this.props.navigation.navigate('GuestsScreen', {
-            guests: this.state.guests,
-            adults: this.state.adults,
-            children: this.state.children,
-            infants: this.state.infants,
-            updateData: this.updateData,
-            childrenBool: this.state.childrenBool
-        });
-    }
-
-    gotoSearch = () => {
-        this.setState({isFilterResult: false, isMAP: 0, index: 0}, () => {
-            this.saveState();
-
-            this.getHotels();
-        });
-    }
-
-    gotoCancel = () => {
-        let baseInfo = {};
-        baseInfo['adults'] = this.previousState.adults;
-        baseInfo['children'] = [];
-        for (let i = 0; i < this.previousState.children.children; i ++) {
-            baseInfo['children'].push({"age": 0});
-        }
-        let roomsData = [baseInfo];
-        let roomsDummyData = encodeURI(JSON.stringify(roomsData));
-
-        this.setState({
-            search: this.previousState.search,
-            regionId: this.previousState.regionId,
-
-            checkInDate: this.previousState.checkInDate,
-            checkInDateFormated: this.previousState.checkInDateFormated,
-            checkOutDate: this.previousState.checkOutDate,
-            checkOutDateFormated: this.previousState.checkOutDateFormated,
-            daysDifference: this.previousState.daysDifference,
-
-            adults: this.previousState.adults,
-            children: this.previousState.children,
-            infants: this.previousState.infants,
-            guests: this.previousState.guests,
-            childrenBool: this.previousState.childrenBool,
-            roomsDummyData: roomsDummyData,
-            
-            isNewSearch: false,
-        });
-    }
-
-    handleAutocompleteSelect = (id, name) => {
-        if (this.previousState.regionId != id) {
-            this.setState({
-                cities: [],
-                search: name,
-                regionId: id,
-                isNewSearch: true
-            });
-        }
-        else {
-            this.setState({
-                cities: [],
-                search: name,
-                regionId: id
-            });
-        }
-
-
-    }
-
+    const _this = this;
     
-    onDatesSelect = ({ startDate, endDate, startMoment, endMoment }) => {
-        const start = moment(startDate, 'ddd, DD MMM');
-        const end = moment(endDate, 'ddd, DD MMM');
-        this.setState({
-            daysDifference: moment.duration(end.diff(start)).asDays(),
-            checkInDate: startDate,
-            checkOutDate: endDate,
-            checkInDateFormated: startMoment.format('DD/MM/YYYY'),
-            checkOutDateFormated: endMoment.format('DD/MM/YYYY'),
-            isNewSearch: true
-        });
-    }
+    if (res.success) {
+      _this.staticDataReceived = true;
+      
+      res.body.then(function(data) {
+        // a shortcut to all results
+        if (autoGetAllStaticPages && _this.isFirstLoad) {
+          _this.isFirstLoad = false;
+          const newState = {
+            totalHotels: data.totalElements,
+            totalPages: data.totalPages,
+            displayMode: DISPLAY_MODE_RESULTS_AS_LIST
+          };
+          if (_this.isSocketDown) {
+            _this.startSocketConnection();
+          }
+          _this.setState(newState);
+          _this.pageSize = data.totalElements;
+          if (_this.pageSize > 1000) {
+            _this.pageSize = 1000;
+          } 
+          _this.getNextStaticPage(0, _this.pageSize);
+          return;
+        }
 
-    updateData = (data) => {
-        if (this.state.adults === data.adults
-                && this.state.children === data.children
-                && this.state.infants === data.infants
-                && this.state.childrenBool === data.childrenBool) {
-            return;
+        _this.isAllPagesDone = data.last;
+        
+        if (_this.pagesCached == 0) {
+          _this.totalElements = data.totalElements;
         }
         
-        let baseInfo = {};
-        baseInfo['adults'] = data.adults;
-        baseInfo['children'] = [];
-        for (let i = 0; i < data.children; i ++) {
-            baseInfo['children'].push({"age": 0});
+        let hotels = data.content;
+        processStaticHotels(hotels, _this.hotelsStaticCacheMap, _this.hotelsIndicesByIdMap, _this.hotelsAll, _this.isAllHotelsLoaded);
+        _this.pagesCached++;
+        printCheckHotelDataCache();
+
+        
+        if (_this.isAllHotelsLoaded) {
+          // this prevents slow static data to overwrite prices data
+          //_this.listUpdateDataSource(_this.hotelsAll);
+          console.warn(`[HotelsSearchScreen] Skipping static data - page ${_this.pagesCached} (loaded: ${_this.pagesLoaded})`);
+          return;
         }
-        let roomsData = [baseInfo];
-        let roomsDummyData = encodeURI(JSON.stringify(roomsData));
-
-        this.setState({
-            adults: data.adults,
-            children: data.children,
-            infants: data.infants,
-            guests: data.adults + data.children + data.infants,
-            childrenBool: data.childrenBool,
-            roomsDummyData: roomsDummyData,
-            isNewSearch: true
-        });
-    }
-
-    saveState = () => {
-        this.setState({
-            //filters
-            showUnAvailable: false,
-            nameFilter: '',
-            selectedRating: [false, false, false, false, false],
-            orderBy: 'rank,desc',
-            priceRange: [1, 5000],
-            
-            isNewSearch: false,
-        });
-
-        this.previousState.search = this.state.search;
-        this.previousState.regionId = this.state.regionId;
-
-        this.previousState.checkInDate = this.state.checkInDate;
-        this.previousState.checkInDateFormated = this.state.checkInDateFormated;
-        this.previousState.checkOutDate = this.state.checkOutDate;
-        this.previousState.checkOutDateFormated = this.state.checkOutDateFormated;
-        this.previousState.daysDifference = this.state.daysDifference;
-
-        this.previousState.adults = this.state.adults;
-        this.previousState.children = this.state.children;
-        this.previousState.infants = this.state.infants;
-        this.previousState.guests = this.state.guests;
-        this.previousState.childrenBool = this.state.childrenBool;
-
-        if (this.state.isHotel) {
-            this.searchString = this.getSearchString();
-                // '?region='+this.state.regionId
-                // +'&currency='+this.state.currency
-                // +'&startDate='+this.state.checkInDateFormated
-                // +'&endDate='+this.state.checkOutDateFormated
-                // +'&rooms='+this.state.roomsDummyData; //eslint-disable-line
-        }
-    }
-
-    gotoSettings = () => {
-        if (this.state.allElements) {
-            if (this.state.isHotel) {
-                this.props.navigation.navigate('HotelFilterScreen', {
-                    isHotelSelected: true,
-                    updateFilter: this.updateFilter,
-                    selectedRating: this.state.selectedRating,
-                    showUnAvailable: this.state.showUnAvailable,
-                    hotelName: this.state.nameFilter
-                });
-            }
-        }
-    }
-
-    getSearchString = () => {
-        let search = `?region=${this.state.regionId}`;
-        search += `&currency=${this.props.currency}`;
-        search += `&startDate=${this.state.checkInDateFormated}`;
-        search += `&endDate=${this.state.checkOutDateFormated}`;
-        search += `&rooms=${this.state.roomsDummyData}`;
-        return search;
-    }
-
-    mapStars(stars) {
-        let hasStars = false;
-        const mappedStars = [];
-        stars.forEach((s) => {
-            if (s) {
-                hasStars = true;
-            }
-        });
-
-        if (!hasStars) {
-            for (let i = 0; i <= 5; i++) {
-                mappedStars.push(i);
-            }
-        } else {
-            mappedStars.push(0);
-            stars.forEach((s, i) => {
-                if (s) {
-                    mappedStars.push(i + 1);
-                }
-            });
-        }
-
-        return mappedStars;
-    }
-
-    getFilterString = (page) => {
-        const filtersObj = {
-            showUnavailable: this.state.showUnAvailable,
-            name: this.state.nameFilter,
-            minPrice: this.state.priceRange[0],
-            maxPrice: this.state.priceRange[1],
-            stars: this.mapStars(this.state.selectedRating)
+        _this.pagesLoaded++;
+        
+        const newState = {
+          totalHotels: data.totalElements,
+          totalPages: data.totalPages,
         };
 
-        // const page = page;//this.listView.getPage();
-        const sort = this.state.orderBy;
-        const pagination = `&page=${page}&sort=${sort}`;
+        // start socket connection if first static load
+        if (_this.isFirstLoad) {
+          _this.isFirstLoad = false;
+          if (_this.isSocketDown) {
+            _this.startSocketConnection();
+          }
+          newState.displayMode = DISPLAY_MODE_RESULTS_AS_LIST;
+        }
+        _this.setState(newState);
+
+        if ( autoGetAllStaticPages || (!_this.isAllPagesDone && _this.pagesLoaded < _this.INITIAL_PAGES) ) {
+          _this.getNextStaticPage(_this.pagesLoaded, _this.pageSize);
+        }
+
+      }); // res.body.then
+    } else {
+      this.listStartFetch([], 0);
+      processError(`[HotelsSearchScreen] Could not fetch Static Data for hotels`, {res})
+    }
+  }
+
+  listAbortFetch() {
+    this.listViewHelpers.abortFetch();
+  }
+
+  listStartFetch(dataArray, pageLimit) {
+    //log('list-startFetch',`data: ${dataArray.length}, pageLimit: ${pageLimit}`,{dataArray,pageLimit,hotelsAll:this.hotelsAll,state:this.state});
+
+    this.listViewHelpers.startFetch(dataArray, pageLimit)
+  }
+
+  listUpdateDataSource(data) {
+    //log('list-updateData',`listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {hotels: this.state.hotelsInfo,hotelsForMap: this.state.hotelsInfoForMap,props:this.props,data});
+
+  	console.time('*** HotelsSearchScreen::listUpdateDataSource()')
+    this.listViewRef.updateDataSource(data)
+  	console.timeEnd('*** HotelsSearchScreen::listUpdateDataSource()')
+  }
+
+  listSetPageLimit(value, fallbackValue=this.PAGE_LIMIT) {
+    //log('hotel-search',`[ listSetPageLimit ] value: ${value}`);
+    if (value < fallbackValue) {
+      this.pageLimit = value;
+    } else {
+      this.pageLimit = fallbackValue;
+    }
+  }
+
+  // onFetch (page = 1, startFetch, abortFetch) {
+  onFetchNewListViewData(page = 1, startFetch, abortFetch) {
+    rlog('list-fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`);
+    // Save these methods to use later in list....() methods (for example listStartFetch)
+    this.listViewHelpers = { startFetch, abortFetch };
+  }
+
+  /**
+   * TODO: Check if this can be removed
+   * // see old code from before 2019-05-15 when it was cleaned by Alex K
+   */
+  _setSearchString() {
+    this.searchString = generateSearchString(this.state, this.props);
+    this.props.setSearchString(this.searchString);
+  }
+
+  gotoFilter = () => {
+    console.time('*** HotelsSearchScreen::gotoFilter()')
+
+    // log('HotelsSearchScreen','gotoFilter', {props:this.props, state: this.state})
+    rlog('HotelsSearchScreen',`gotoFilter  isLoading: ${this.state.isLoading} isFiltering: ${this.props.isApplyingFilter}`, {props:this.props, state: this.state})
+
+    if (this.state.isLoading || this.props.isApplyingFilter) {
+      //log('[HotelsSearch] gotoFilter::toast', {state:this.state, props:this.props})
+      this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTER_NA, 3000);
+    } else 
+    {
+      if (this.state.allElements) {
+        if (this.state.isHotel) {
+          this.props.navigation.navigate("HotelFilterScreen", {
+            isHotelSelected: true,
+            updateFilter: this.updateFilter,
+            selectedRating: this.state.selectedRating,
+            showUnAvailable: this.state.showUnAvailable,
+            nameFilter: this.state.nameFilter,
+            orderBy: this.state.orderBy,
+            priceRange: this.state.priceRange,
+            priceRangeSelected: this.state.priceRangeSelected
+          });
+        }
+      }
+    }
+    console.timeEnd('*** HotelsSearchScreen::gotoFilter()')
+  };
+
+  updateCoords(coords) {
+    this.setState({
+      initialLat: coords.initialLat,
+      initialLon: coords.initialLon
+    })
+  }
+
+  updateFilter = (data, fromUI=false) => {
+    console.time('*** HotelsSearchScreen::updateFilter()')
+    const filterParams = {
+      isFilterResult: true,
+      showUnAvailable: data.showUnAvailable,
+      nameFilter: data.nameFilter,
+      selectedRating: data.selectedRating,
+      orderBy: data.orderBy,
+    }
+
+    this.setState({
+      error: null,
+      ...filterParams
+    })
+
+    this.props.setIsApplyingFilter(true);
+    this.isFilterFromUI = fromUI;
     
-        let filters = `&filters=${encodeURI(JSON.stringify(filtersObj))}` + pagination; //eslint-disable-line
-        
-        return filters;
-    }
+    if (fromUI) {
+      // filter in UI
+      filterParams.priceRange = data.priceRange
 
-    updateFilter = (data) => {
-        console.log("updateFilter", data);
-        
-        if (this.listView != undefined && this.listView != null) {
-            this.listView.initListView();
+      const hotelsAll = this.hotelsAll;
+      const filtered = applyHotelsSearchFilter(hotelsAll, filterParams);
+      const count = filtered.length;
+      //this.props.setSearchFiltered(filtered)
+      
+      rlog('@@filter-fromUI',`Filtered from UI: ${count} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams},true);
+      checkHotelData(filtered,'filter-fromUI')
+
+      // add no
+      this.hotelsIndicesByIdMap = {};
+      if (showNumberOnHotelItem) {
+        filtered.forEach((item,index) => {
+          item.no = index + 1;
+          this.hotelsIndicesByIdMap[item.id] = index;
+          return item;
+        })
+      }
+      
+      this.listSetPageLimit(this.state.totalHotels, this.PAGE_LIMIT);
+      this.listUpdateDataSource(filtered)
+      this.setState({
+        hotelsInfo: filtered,
+        hotelsInfoForMap: filtered,
+        priceRangeSelected: data.priceRange,
+        totalHotels: count
+      })
+
+      this.props.setIsApplyingFilter(false)
+      if (!this.isAllHotelsLoaded) {
+        this.isAllHotelsLoaded = true;
+      }
+    } else {
+      this.isFilterFromUI = false;
+      // filter on server
+      filterParams.priceRange = (data.priceRange[0] > data.priceRange[1]
+          ? [0,50000]
+          : [data.priceRange[0], data.priceRange[1]]
+      )
+
+      this.setState(
+        // change state (object in this case)
+        filterParams,
+        // callback (after change state above)
+        function() {
+          const search = generateSearchString(this.state, this.props);
+          const filters = generateHotelFilterString(-1, this.state);
+          ////console.log("search --- filters", search, filters);
+          this.fetchFilteredResults(search, filters);
         }
-
-        if (this.mapView != undefined && this.mapView != null) {
-            this.mapView.initMapView();
-        }
-        
-        this.setState({
-            isFilterResult: true,
-            showUnAvailable: data.showUnAvailable,
-            nameFilter: data.hotelName,
-            selectedRating: data.selectedRating,
-            orderBy: data.priceSort,
-            priceRange: data.sliderValue,
-            hotelsInfo: []
-        }, () => {
-            // this.applyFilters();
-
-            const search = this.getSearchString();
-            const filters = this.getFilterString(0);
-            console.log("search --- filters", search, filters);
-            this.fetchFilteredResults(search, filters);
-        });
+      );
     }
+    console.timeEnd('*** HotelsSearchScreen::updateFilter()')
+  };
 
-    fetchFilteredResults = (strSearch, strFilters) => {
-        let searchMap = strSearch + strFilters;
-        //searchMap = searchMap.replace(/%22/g, '"');
-        console.log("fetchFilteredResults query", searchMap);
-        //searchMap = '?region=15664&currency=USD&startDate=21/11/2018&endDate=22/11/2018&rooms=%5B%7B"adults":2,"children":%5B%5D%7D%5D&filters=%7B"showUnavailable":true,"name":"","minPrice":1,"maxPrice":5000,"stars":%5B0,1,2,3,4,5%5D%7D&page=0&sort=rank,desc';
-
-        requester.getLastSearchHotelResultsByFilter(strSearch, strFilters).then((res) => {
-            if (res.success) {
-                res.body.then((data) => {
-                    console.log("fetchFilteredResults", data);
-                    this.listView.onFirstLoad(data.content, true);
-                    requester.getMapInfo(searchMap).then(res => {
-                        res.body.then(dataMap => {
-                            console.log ("getMapInfo", dataMap);
-                            const isCacheExpired = dataMap.isCacheExpired;
-                            if (!isCacheExpired) {
-                                this.setState({
-                                    hotelsInfo: dataMap.content, 
-                                    initialLat: parseFloat(dataMap.content[0].latitude), 
-                                    initialLon: parseFloat(dataMap.content[0].longitude)
-                                });
-                            }
-                            else {
-                                this.setState({
-                                    hotelsInfo: data.content, 
-                                    initialLat: parseFloat(data.content[0].latitude), 
-                                    initialLon: parseFloat(data.content[0].longitude)
-                                });
-                            }
-                        });
-                    });
-                });
-            } 
-            else {
-                // console.log('Search expired');
-            }
-        });
-        
-
-    }
-
-    renderHotelTopView() {
-        return (
-            <View style={styles.SearchAndPickerwarp}>
-                <View style={styles.searchAreaView}>
-                    <SearchBar
-                        autoCorrect={false}
-                        value={this.state.search}
-                        onChangeText={this.onSearchHandler}
-                        placeholder="Discover your next experience"
-                        placeholderTextColor="#bdbdbd"
-                        leftIcon="arrow-back"
-                        onLeftPress={this.onCancel}
-                        editable={this.state.editable}
-                    />
-                </View>
-            </View>
-        );
-    }
-
-    renderAutocomplete() {
-        const nCities = this.state.cities.length;
-        if (nCities > 0) {
-            return (
-                <ScrollView
-                    style={{
-                        marginLeft: 15,
-                        marginRight: 15,
-                        minHeight: 100,
-                        zIndex: 99,
-                    }}
-                >
-                    {
-                        this.state.cities.map((result, i) => { //eslint-disable-line
-                            return (//eslint-disable-line
-                                <TouchableOpacity
-                                    key={result.id}
-                                    style={i == nCities - 1 ? [styles.autocompleteTextWrapper, {borderBottomWidth: 1, elevation: 1}] : styles.autocompleteTextWrapper}
-                                    onPress={() => this.handleAutocompleteSelect(result.id, result.query)}
-                                >
-                                    <Text style={styles.autocompleteText}>{result.query}</Text>
-                                </TouchableOpacity>
-                            );//eslint-disable-line
-                        })
-                    }
-                </ScrollView>
-            );
-        } else {//eslint-disable-line
-            return null;//eslint-disable-line
-        }
-    }
-
-    renderFilterBar() {
-        return (
-            <View style={this.state.isNewSearch ?  {height:190, width:'100%'} : {height:70, width:'100%'}}>
-                <DateAndGuestPicker
-                    checkInDate={this.state.checkInDate}
-                    checkOutDate={this.state.checkOutDate}
-                    checkInDateFormated={this.state.checkInDateFormated}
-                    checkOutDateFormated={this.state.checkOutDateFormated}
-                    adults={this.state.adults}
-                    children={this.state.children}
-                    infants={this.state.infants}
-                    guests={this.state.guests}
-                    gotoGuests={this.gotoGuests}
-                    gotoSearch={this.gotoSearch}
-                    gotoCancel={this.gotoCancel}
-                    onDatesSelect={this.onDatesSelect}
-                    gotoSettings={this.gotoSettings}
-                    disabled={!this.state.editable}
-                    showSearchButton={this.state.isNewSearch}
-                    showCancelButton={this.state.isNewSearch}
-                    isFilterable={true}
-                />
-            </View>
-        );
-    }
-
-    renderTabBar = () => {
-        return (
-          <View style={styles.tabBar}>
-          </View>
-        );
-    };
-
-    renderScene = ({ route }) => {
-        switch (route.key) {
-            case 'list':
-                return <ListModeHotelsSearch 
-                            navigation = {this.props.navigation}
-                            ref = {ref => this.listView = ref}
-                            allElements = {this.state.allElements}
-                            daysDifference = {this.state.daysDifference}
-                            onFetch = {this.onFetch}
-                            gotoHotelDetailsPage = {this.gotoHotelDetailsPageByList} />;
-            case 'map':
-                return <MapModeHotelsSearch
-                            ref={ref => 
-                                {
-                                    if (!!ref) {
-                                        this.mapView = ref.getWrappedInstance()
-                                    }
-                                }
-                            }
-                            isFilterResult = {this.state.isFilterResult}
-                            initialLat = {this.state.initialLat}
-                            initialLon = {this.state.initialLon}
-                            daysDifference = {this.state.daysDifference}
-                            hotelsInfo = {this.state.hotelsInfo}
-                            gotoHotelDetailsPage = {this.gotoHotelDetailsPageByMap} />;
-            default:
-                return null;
-        }
-    }
-
-    render() {
-        return (
-            <View style={styles.container}>
-                {this.renderHotelTopView()}
-                {this.renderAutocomplete()}
-                <View style={{position: 'absolute', top: 100, left: 0, right: 0, bottom: 0, width:'100%'}}>
-                    {this.renderFilterBar()}
-                    <View style={styles.containerHotels}>
-                        {/* {
-                            this.state.isMAP == 1 && this.renderMap()
-                        } */}
-                        <TabView
-                            navigationState={this.state}
-                            renderTabBar={this.renderTabBar}
-                            renderScene={this.renderScene}
-                            onIndexChange={index => this.setState({ index })}
-                            initialLayout={{ width: width }}
-                            swipeEnabled={false}
-                            animationEnabled={false}
-                        />
-                        {/* <UltimateListView
-                            ref = {ref => this.listView = ref}
-                            isDoneSocket = {this.state.allElements}
-                            key = {'list'} // this is important to distinguish different FlatList, default is numColumns
-                            onFetch = {this.onFetch}
-                            keyExtractor = {(item, index) => `${index} - ${item}`} // this is required when you are using FlatList
-                            firstLoader = { false }
-                            refreshable = { false }
-                            item = {this.renderItem} // this takes three params (item, index, separator)
-                            numColumns = {1} // to use grid layout, simply set gridColumn > 1
-                            paginationFetchingView = {this.renderPaginationFetchingView}
-                            paginationWaitingView = {this.renderPaginationWaitingView}
-                            paginationAllLoadedView = {this.renderPaginationAllLoadedView}
-                        /> */}
-                        {
-                            this.state.isMAP != -1 &&
-                                <TouchableOpacity onPress={this.switchMode} style={styles.switchButton}>
-                                    <FontAwesome style={styles.icon}>{this.state.isMAP == 0? Icons.mapMarker : Icons.listUl}</FontAwesome>
-                                </TouchableOpacity>
-                        }
-                    </View>
-                </View>
-                <ProgressDialog
-                    visible={this.state.isLoadingHotelDetails}
-                    title="Please Wait"
-                    message="Loading..."
-                    animationType="slide"
-                    activityIndicatorSize="large"
-                    activityIndicatorColor="black"/>
-            </View>
-        );
-    }
-
-    stompIos() {
-        countIos = 0;
-        clientRef = stomp.client('wss://beta.locktrip.com/socket');
-        clientRef.connect({}, (frame) => {
-            var headers = {'content-length': false};
-            clientRef.subscribe(`search/${this.uuid}`, this.handleReceiveSingleHotel);
-            clientRef.send("search",
-                headers,
-                JSON.stringify({uuid: this.uuid, query : searchString})
-            )
-        }, (error) => {
-            clientRef.disconnect();
-            this.setState({
-                isLoading: false,
-            });
-        });
-    }
+  fetchFilteredResults = (strSearch, strFilters) => {
+    // get all results instead of only first page
     
-    handleReceiveSingleHotel(message) {
-        if (countIos === 0) {
-            this.applyFilters(false);
-        }
-        countIos = 1;
-        const response = JSON.parse(message.body);
-        if (response.hasOwnProperty('allElements')) {
-            if (response.allElements) {         
-                if (clientRef) {
-                    clientRef.disconnect();
-                }
-            }
-        } else {
-            this.setState(prevState => ({
-                listingsMap: [...prevState.listingsMap, response]
-            }));
-        }
-    }
+    // requester methods:
+    
+    // (1) getLastSearchHotelResultsByFilter(strSearch, strFilters)
+    //    - this one returns a filtered last search page only
+    // Example:
+    //    requester
+    //      .getLastSearchHotelResultsByFilter(strSearch, strFilters)
+    //      .then(this.onFilteredData);
+
+    // (2) getMapInfo(strSearch+strFilters)
+    //    - this one returns all search results filtered
+    // Example:
+    //    requester
+    //      .getMapInfo( strSearch + strFilters )
+    //      .then(this.onFilteredData);
+
+
+    requester
+      // .getLastSearchHotelResultsByFilter(strSearch, strFilters)
+      .getMapInfo( strSearch + strFilters )
+      .then(this.onFilteredData);
+  };
+
+  onWebViewLoadStart() {
+    console.log("[HotelsSearchScreen] Webview load started");
+  }
+
+  onWebViewLoadEnd() {
+    console.log("[HotelsSearchScreen] Webview loaded");
+    const func = () => this.setState({ isLoading: false });
+    setTimeout(func, 3000)
+  }
+
+  onWebViewNavigationState(navState) {
+    // console.log("[HotelsSearchScreen] Webview nav state");
+    console.log('WEB-VIEW',`onWebViewNavigationState(): ${this.state.webViewUrl}`, {url:this.state.webViewUrl})
+    // log('WEB-VIEW',`onWebViewNavigationState(): ${this.state.webViewUrl}`, {url:this.state.webViewUrl})
+  }
+
+  render() {
+    // TODO: @@debug - remove this
+    // this.renderTimes++;
+    //if (this.renderTimes <= 20)
+    // console.log(`#hotel-search# 6/6 HotelSearchScreen render #${this.renderTimes}`);
+
+    // console.log(`### [HotelsSearchScreen] {all:this.state.allElements});
+
+    const isHotelDetails = this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS;
+    this.isWebviewHotelDetail = (isHotelDetails && !hotelSearchIsNative.step2HotelDetails)
+    // log('LTLoader/HotelSearch',`isLoading: ${this.state.isLoading} isApplyingFilter: ${this.props.isApplyingFilter} isList: ${isList} isMap: ${isMap}`,{props:this.props, state:this.state})
+
+    return (
+      <View style={styles.container}>
+        {this.renderWebViewBack()}
+        {this.renderBackButtonAndSearchField()}
+        {this.renderCalendarAndFilters()}
+
+        <View style={styles.containerHotels}>
+          {this.renderHotelDetailsAsWebview()}
+          {this.renderResultsAsMap()}
+          {this.renderResultsAsList()}
+
+          {this.renderMapButton()}
+          {this.renderPreloader()}
+        </View>
+
+        {this.renderFooter()}
+        {this.renderToast() }
+
+        {this.renderDebugWebview()}
+        {this.renderDebugMap()}
+
+        {/* <ProgressDialog
+                      visible={this.state.isLoading}
+                      title="Please Wait"
+                      message="Loading..."
+                      animationType="slide"
+                      activityIndicatorSize="large"
+                      activityIndicatorColor="black"/> */}
+      </View>
+    );
+  }
 }
 
-let mapStateToProps = (state) => {
-    return {
-        currency: state.currency.currency
-    };
-}
-export default connect(mapStateToProps, null)(HotelsSearchScreen);
+const mapStateToProps = state => {
+  return {
+    currency: state.currency.currency,
+    isApplyingFilter: state.userInterface.isApplyingFilter,
+    searchString: state.hotels.searchString,
+    searchResults: state.hotels.searchResults,
+    datesAndGuestsData: state.userInterface.datesAndGuestsData,
+    //searchResultsFiltered: state.hotels.searchResultsFiltered,
+  };
+};
+const mapDispatchToProps = dispatch => ({
+  setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
+  setSearch: bindActionCreators(setSearch, dispatch),
+  setSearchString: bindActionCreators(setSearchString, dispatch),
+  //setSearchFiltered: bindActionCreators(setSearchFiltered, dispatch),
+})
 
-// export default withNavigation(Property);
+
+export default connect(mapStateToProps, mapDispatchToProps)(HotelsSearchScreen);

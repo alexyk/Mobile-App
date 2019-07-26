@@ -76,7 +76,7 @@ class HomeReview extends Component {
     }
 
     gotoConfirm = () => {
-        console.log("gotoConfirm", this.state.guests);
+        //console.log("gotoConfirm", this.state.guests);
         if (this.state.guests == 0) {
             this.refs.toast.show('Please Select Guest Number.', 1500);
             return;
@@ -102,7 +102,7 @@ class HomeReview extends Component {
 
     render() {
         const { params } = this.props.navigation.state;
-        console.log("HomeReview-------", params);
+        //console.log("HomeReview-------", params);
 
         const { currencyCode } = params;
         // const { exchangeRates, currency } = this.props;

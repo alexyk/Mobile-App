@@ -1,0 +1,24 @@
+[	
+	{
+		"id": 12769,
+		"name": "Scandic Aalborg City (Formerly First Hotel Europa)",
+		"price": 144.84,
+		"star": 4,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2868932671270488-80566.png"
+		},
+		"latitude": 57.044004220233,
+		"longitude": 9.9129992723465
+	},
+	{
+		"id": 14766,
+		"name": "Scandic",
+		"price": 146.65,
+		"star": 3,
+		"thumbnail": {
+			"url": "hotels/images/img-2-2875459882871223-88663.png"
+		},
+		"latitude": 57.020703721547,
+		"longitude": 9.96477663517
+	}
+]

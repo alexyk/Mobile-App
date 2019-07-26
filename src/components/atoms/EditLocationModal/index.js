@@ -112,7 +112,7 @@ class EditLocationModal extends Component {
         if (hasCountryState) {
             requester.getStates(value.id).then(res => {
                 res.body.then(data => {
-                    console.log("countryStates", data);
+                    //console.log("countryStates", data);
                     this.setCountryStates(data);
                 });
             });
@@ -133,7 +133,7 @@ class EditLocationModal extends Component {
     //     if (hasCountryState) {
     //         requester.getStates(value.id).then(res => {
     //             res.body.then(data => {
-    //                 console.log("countryStates", data);
+    //                 //console.log("countryStates", data);
     //                 this.setCountryStates(data);
     //             });
     //         });
@@ -156,7 +156,7 @@ class EditLocationModal extends Component {
     //     //         }
     //     //     });
     //     // }).catch(err => {
-    //     //     console.log('error: ', err);
+    //     //     //console.log('error: ', err);
     //     // });
     // }
 

@@ -13,7 +13,7 @@ class MapMarker extends React.Component {
 
     componentWillReceiveProps(nextProps) {
         if (!this.state.initialized) {
-            console.log('initialization');            
+            //console.log('initialization');            
             this.setState({initialized: true});
         }
         else {
@@ -21,12 +21,12 @@ class MapMarker extends React.Component {
             if (nextProps.selected) {
                 // If the nextProps.selected props id equals the this event id then selected else non-selected.
                 if (nextProps.selected.id === nextProps.event.id) {
-                    console.log('SELECTED: ' + JSON.stringify(nextProps.selected));
+                    //console.log('SELECTED: ' + JSON.stringify(nextProps.selected));
                     // set staae to active
                     this.setState({
                         active: true
                     });
-                    console.log(interestIconsSelected[nextProps.event.interest[0]]);
+                    //console.log(interestIconsSelected[nextProps.event.interest[0]]);
                 } else {
                     // set state to not active
                     // console.log('NON-SELECTED: ' + JSON.stringify(nextProps.event));   
@@ -44,7 +44,7 @@ class MapMarker extends React.Component {
     }
 
     onSelect(){
-        console.log("seeleeeccttt");
+        //console.log("seeleeeccttt");
     }
  
     renderIcon() {

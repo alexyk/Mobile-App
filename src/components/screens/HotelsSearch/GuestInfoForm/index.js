@@ -31,7 +31,7 @@ class GuestInfoForm extends Component {
         };
     }
     async componentWillMount() {
-        console.log("GuestInfoForm componentWillMount", this.props.navigation.state.params.guests);
+        // console.log("GuestInfoForm componentWillMount", this.props.navigation.state.params.guests);
         let firstName = await userInstance.getFirstName();
         let lastName = await userInstance.getLastName();
 
@@ -39,7 +39,7 @@ class GuestInfoForm extends Component {
         for (var i = 0; i < this.props.navigation.state.params.guests; i++){
             if (i == 0) {
                 guests.push({
-                    key: i,
+                    key: `${i}`,
                     genderRepresentation: 'Mr',
                     firstName: firstName,
                     lastName: lastName
@@ -51,7 +51,7 @@ class GuestInfoForm extends Component {
             }
             else {
                 guests.push({
-                    key: i,
+                    key: `${i}`,
                     genderRepresentation: 'Mr',
                     firstName: '',
                     lastName: ''
@@ -66,7 +66,7 @@ class GuestInfoForm extends Component {
     }
 
     componentDidMount() {
-        console.log("----------------------componentDidMount");
+        //console.log("----------------------componentDidMount");
         WebsocketClient.stopGrouping();
     }
 
@@ -75,7 +75,7 @@ class GuestInfoForm extends Component {
     }
 
     handleFirstName(key,text){
-        console.log('firstName----', key, text);
+        //console.log('firstName----', key, text);
 
         if (text === "") {
             text = "Optional"
@@ -87,7 +87,7 @@ class GuestInfoForm extends Component {
     }
 
     handleLastName(key,text){
-        console.log('lastName----', key, text);
+        //console.log('lastName----', key, text);
         if (text === "") {
             text = "Optional"
         }
@@ -148,7 +148,7 @@ class GuestInfoForm extends Component {
 
     render() {
         const {params} = this.props.navigation.state
-        console.log("GuestInfoForm", params);
+        //console.log("GuestInfoForm", params);
         const imgURL = params.hotelImg;
         return (
             <View style={styles.container}>
@@ -170,7 +170,6 @@ class GuestInfoForm extends Component {
                 <View style={styles.content}>
                     <Text style={styles.steps}>STEP 1 OF 2</Text>
                     <Text style={styles.heading}>Provide guest information</Text>
-                    
                     
                     <View style={styles.hotelInfoContainer}>
                         <View style={styles.hotelThumbView}>
@@ -231,17 +230,17 @@ class GuestInfoForm extends Component {
 }
 
 GuestInfoForm.defaultProps = {
-    hotelName: 'Test Hotel',
-    hotelAddress: 'Kensington road',
-    priceInUserCurreny : 457,
-    priceInLoc : 49.3,
-    quoteId: '249357191-0',
+    hotelName: '',
+    hotelAddress: '',
+    priceInUserCurreny : NaN,
+    priceInLoc : NaN,
+    quoteId: '',
     roomDetail:{},
     guests : 0,
     guestsArray: [
         {
             key: 0,
-            genderRepresentation: 'Mr',
+            genderRepresentation: '',
             firstName: '',
             lastName: ''
         },

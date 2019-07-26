@@ -105,7 +105,7 @@ class WalletKeywordValidation extends Component {
             const { params } = this.props.navigation.state;
             const {navigate} = this.props.navigation;
             let user = params;
-            console.log("onClickAccept", user);
+            //console.log("onClickAccept", user);
             
             this.setState({ showProgress: true });
             requester.getUserInfo()
@@ -127,7 +127,7 @@ class WalletKeywordValidation extends Component {
                 userInfo.jsonFile = params.walletJson;
         
                 requester.updateUserInfo(userInfo, null).then(res => {
-                    console.log("save wallet ----------", res);
+                    //console.log("save wallet ----------", res);
                     this.setState({ showProgress: false });
                     if (res.success) {
                         userInstance.setLocAddress(params.walletAddress);
@@ -138,7 +138,7 @@ class WalletKeywordValidation extends Component {
                     res.errors.then(e => {
                         this.setState({ showProgress: false });
                         Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-                        console.log(err);
+                        //console.log(err);
                     });
                     }
         
@@ -158,20 +158,20 @@ class WalletKeywordValidation extends Component {
 
             // this.setState({ showProgress: true });
             // requester.register(user, null).then(res => {
-            //     console.log("register ----------", res);
+            //     //console.log("register ----------", res);
             //         this.setState({ showProgress: false });
             //         if (res.success) {
-            //             console.log("Error");
-            //             console.log(res);
+            //             //console.log("Error");
+            //             //console.log(res);
             //             navigate('CongratsWallet')
             //         } else {
-            //             console.log("Error");
+            //             //console.log("Error");
             //             res.errors.then(data => {
             //                 const { errors } = data;
             //                 Object.keys(errors).forEach((key) => {
             //                     if (typeof key !== 'function') {
             //                         Toast.showWithGravity(errors[key].message, Toast.SHORT, Toast.BOTTOM);
-            //                         console.log('Error logging in:', errors[key].message);
+            //                         //console.log('Error logging in:', errors[key].message);
             //                     }
             //                 });
             //             });
@@ -180,7 +180,7 @@ class WalletKeywordValidation extends Component {
             //     .catch(err => {
             //         this.setState({ showProgress: false });
             //         Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-            //         console.log(err);
+            //         //console.log(err);
             //     });
         }
         else {

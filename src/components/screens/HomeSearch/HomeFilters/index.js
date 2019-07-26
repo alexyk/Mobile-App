@@ -12,7 +12,7 @@ export default class HomeFilters extends Component {
 
         const { params } = this.props.navigation.state;
 
-        console.log(params);
+        //console.log(params);
         this.state = {
             cities: params.cities,
             properties: params.properties,
@@ -68,7 +68,7 @@ export default class HomeFilters extends Component {
     }
 
     render() {
-        console.log("state", this.state);
+        //console.log("state", this.state);
         const { params } = this.props.navigation.state;
         return (
             <View style={styles.container}>
@@ -182,8 +182,8 @@ export default class HomeFilters extends Component {
             }
         }
         
-        console.log(this.state.rooms);
-        this.props.navigation.navigate('PropertyScreen', {
+        //console.log(this.state.rooms);
+        this.props.navigation.navigate('WebviewScreen', {
             searchedCity: params.search, 
             searchedCityId: 72, 
             checkInDate : params.checkInDate, 

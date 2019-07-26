@@ -46,7 +46,9 @@ class ReviewHouse extends Component {
 
         return (
             <View style={styles.container}>
-                <BackButton onPress={this.onClose}/>
+                <BackButton onPress={this.onClose}
+                    style={{marginLeft:10, marginTop: 10}}
+                />
 
                 <ReviewTitle
                     text="Review your trip details"

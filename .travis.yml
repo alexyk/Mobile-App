@@ -1,94 +1,160 @@
 os: osx
 osx_image: xcode9.3
+language: node_js
+node_js:
+  - 8.14.1
 
 stages:
-  - build ios
-  - build android
+  - name: build ios
+    if: branch IN (master, staging, dev)
+  - name: build android
+    if: branch IN (master, staging, dev)
 
 jobs:
   include:
     - stage: build ios
-      language: node_js
-      node_js:
-        - 8.14.1
-      env: app_ios=MobileApp.app_$TRAVIS_JOB_NUMBER.zip
+      env:
+        - app_ios_prod=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.zip" && tmp=${tmp//\//-} && echo $tmp)
+        - app_ios_staging=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.zip" && tmp=${tmp//\//-} && echo $tmp)
+        - app_ios_dev=$(tmp="MobileApp.app_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_dev.zip" && tmp=${tmp//\//-} && echo $tmp)
+        - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER && echo $tmp)
+        - dir2=$dir1/logs_ios
+        - core_sim_log=$HOME/Library/Logs/CoreSimulator/CoreSimulator.log
+        - msg=$(git log --pretty="format:%s" -1)
       before_install:
-       - echo -n "Starting " > info.txt
-       - date >> info.txt
-       - date
-       - ls -l
-      install:
-        - npm install
-        - cd ios
-        - pod install
-        - cd ..
-      script:
-        - |
-          xcodebuild \
-            -workspace ios/MobileApp.xcworkspace \
-            -scheme MobileApp \
-            -configuration Release \
-            -sdk iphonesimulator \
-            -derivedDataPath ios/build \
-            -quiet
-      after_success:
-        - cd $var1
-        - ls -lahtO
-        - pwd
-        - zip -qr $app_ios MobileApp.app
-        - ls -lh *zip
-        - cd $TRAVIS_BUILD_DIR
-      after_script:
-        - date
-        - pwd
-        - ls -lahtO
-        - find ios/build/ -type d -maxdepth 5 | grep MobileApp.app
-        - curl https://api.travis-ci.com/v3/job/$TRAVIS_BUILD_ID/log.txt -o travis-ci_output.txt
-        - "echo \"branch: $TRAVIS_BRANCH\" >> info.txt"
-        - "echo \"build dir: $TRAVIS_BUILD_DIR\" >> info.txt"
-        - "echo \"commit: $TRAVIS_COMMIT\" >> info.txt"
-        - "echo \"Variables:\" >> info"
-        - set >> info.txt
-        - "echo -n \"Ending \" >> info.txt"
+        - echo -n "Starting " > info.txt
         - date >> info.txt
-        - ls -lahtO
         - date
-
-    - stage: build android
-      language: android
-      jdk: oraclejdk8
-      env: app_android=MobileApp_$TRAVIS_JOB_NUMBER_$TRAVIS_BRANCH.apk
-      android:
-        components:
-          - build-tools-27.0.3
-          - android-27
-      before_install:
-        - date
+        - ./scripts/travis_version.rb "src/version.js" "$TRAVIS_JOB_NUMBER" "$TRAVIS_BRANCH"
+        - cat src/version.js
         - openssl aes-256-cbc -K $encrypted_acf840ecd253_key -iv $encrypted_acf840ecd253_iv -in deploy_key.enc -out deploy_key -d
-        - which java
-        - java -version
         - ls -l
       install:
         - eval "$(ssh-agent -s)"
         - chmod 600 ./deploy_key
         - ssh-add ./deploy_key
-        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $var3/$TRAVIS_BUILD_NUMBER"
+        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2" &> /dev/null
+        - npm install
+        - cd ios
+        - pod install
+        - cd ..
+      script:
+        - ./scripts/select_config.rb native3
+        - ./scripts/build-ios.sh prod $var1 $app_ios_prod
+        - git diff > ios_prod.diff
+        - scp -o "StrictHostKeyChecking no" ios_prod.diff "$var_799cfba7:$dir2/"
+        - ./scripts/build-ios.sh staging $var1 $app_ios_staging
+        - git diff > ios_staging.diff
+        - scp -o "StrictHostKeyChecking no" ios_staging.diff "$var_799cfba7:$dir2/"
+        - ./scripts/build-ios.sh dev $var1 $app_ios_dev
+        - git diff > ios_dev.diff
+        - scp -o "StrictHostKeyChecking no" ios_dev.diff "$var_799cfba7:$dir2/"
+        - ls -laht
+      after_success:
+        - ls -lahtO
+        - ls -lh *zip
+        - scp -o "StrictHostKeyChecking no" $app_ios_prod "$var_799cfba7:$dir1" &> /dev/null
+        - scp -o "StrictHostKeyChecking no" $app_ios_staging "$var_799cfba7:$dir1" &> /dev/null
+        - scp -o "StrictHostKeyChecking no" $app_ios_dev "$var_799cfba7:$dir1" &> /dev/null
+      after_script:
+        - pwd
+        - ls -lahtO
+        - find ios/build/ -type d -maxdepth 5 | grep MobileApp.app
+        - scp -o "StrictHostKeyChecking no" $core_sim_log "$var_799cfba7:$dir2/"
+        - date
+        - "echo \"branch: $TRAVIS_BRANCH\" >> info.txt"
+        - "echo \"build dir: $TRAVIS_BUILD_DIR\" >> info.txt"
+        - "echo \"commit: $TRAVIS_COMMIT\" >> info.txt"
+        - "echo commit message: $msg >> info.txt"
+        - "echo; echo >> info.txt"
+        - "echo && echo \"Variables:\" && echo >> info.txt"
+        - "echo \"------------------------------------------\" >> info.txt"
+        - set >> info.txt
+        - "echo \"------------------------------------------\" >> info.txt"
+        - "echo; echo >> info.txt"
+        - "echo -n \"Ending at \" >> info.txt"
+        - date >> info.txt
+        - df -h >> info.txt
+        - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$dir1/info_ios.txt"  &> /dev/null
+        - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
+        - scp -o "StrictHostKeyChecking no" travis_$TRAVIS_JOB_NUMBER.log "$var_799cfba7:$dir2"
+        - scp -o "StrictHostKeyChecking no" $log_file "$var_799cfba7:$dir1"
+
+    - stage: build android
+      env: 
+        - apk_prod=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_prod.apk" && tmp=${tmp//\//-} && echo $tmp)
+        - apk_staging=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_staging.apk" && tmp=${tmp//\//-} && echo $tmp)
+        - apk_dev=$(tmp="MobileApp_"$TRAVIS_JOB_NUMBER"_"$TRAVIS_BRANCH"_dev.apk" && tmp=${tmp//\//-} && echo $tmp)
+        - dir1=$(tmp1=$TRAVIS_BRANCH && tmp1=${tmp1//\//-} && tmp=$var3"/"$tmp1"/"$TRAVIS_BUILD_NUMBER && echo $tmp)
+        - dir2=$dir1/logs_android
+        - msg=$(git log --pretty="format:%s" -1)
+      android:
+        components:
+          - build-tools-27.0.3
+          - android-27
+      before_install:
+        - echo -n "Starting " > info.txt
+        - date >> info.txt
+        - date
+        - ./scripts/travis_version.rb "src/version.js" "$TRAVIS_JOB_NUMBER" "$TRAVIS_BRANCH"
+        - cat src/version.js
+        - openssl aes-256-cbc -K $encrypted_acf840ecd253_key -iv $encrypted_acf840ecd253_iv -in deploy_key.enc -out deploy_key -d
+        - which java
+        - java -version
+        - ls -l
+      install:
+        - wget https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-mac.zip  &> /dev/null
+        - unzip ninja-mac.zip  &> /dev/null
+        - mv ninja /usr/local/bin
+        - wget https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip &> /dev/null
+        - unzip sdk-tools-darwin-4333796.zip &> /dev/null
+        - mkdir ~/android
+        - mv tools ~/android/
+        - export ANDROID_HOME=~/android/
+        - export PATH=$PATH:$ANDROID_HOME/tools/bin
+        - yes | sdkmanager --licenses  &> /dev/null
+        - sdkmanager "ndk-bundle"  &> /dev/null
+        - sdkmanager "platforms;android-28"  &> /dev/null
+        - eval "$(ssh-agent -s)"
+        - chmod 600 ./deploy_key
+        - ssh-add ./deploy_key
+        - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2" &> /dev/null
         - npm install
       script:
-        - cd android
-        - ./gradlew assembleRelease
+        - ./scripts/select_config.rb native3
+        - ./scripts/build-android.sh prod $apk_prod
+        - git diff > anrdoid_prod.diff
+        - scp -o "StrictHostKeyChecking no" anrdoid_prod.diff "$var_799cfba7:$dir2/"
+        - ./scripts/build-android.sh staging $apk_staging
+        - git diff > anrdoid_staging.diff
+        - scp -o "StrictHostKeyChecking no" anrdoid_staging.diff "$var_799cfba7:$dir2/"
+        - ./scripts/build-android.sh dev $apk_dev
+        - git diff > anrdoid_dev.diff
+        - scp -o "StrictHostKeyChecking no" anrdoid_dev.diff "$var_799cfba7:$dir2/"
       after_success:
-        - zip -qr $app_ios $var1
-        - ls -lh *zip
-        - scp -o "StrictHostKeyChecking no" $android_apk "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/$app_android"
-        - scp -o "StrictHostKeyChecking no" $android_out "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"$app_android"_output.json"
+        - ls -lh *apk
+        - scp -o "StrictHostKeyChecking no" $apk_prod "$var_799cfba7:$dir1" &> /dev/null
+        - scp -o "StrictHostKeyChecking no" $apk_staging "$var_799cfba7:$dir1" &> /dev/null
+        - scp -o "StrictHostKeyChecking no" $apk_dev "$var_799cfba7:$dir1" &> /dev/null
       after_script:
         - date
         - ls -lahtO
-        - ls -lahtOR $HOME > files_android.txt
         - find android/app/outputs/apk/ -type f | grep apk
-        - scp -o "StrictHostKeyChecking no" $log_file "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"
-        - scp -o "StrictHostKeyChecking no" files_android.txt "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"
-        - curl https://api.travis-ci.com/v3/job/$TRAVIS_BUILD_ID/log.txt -o travis-ci_output.txt
-        - scp -o "StrictHostKeyChecking no" travis-ci_output.txt "$var_799cfba7:$var3/$TRAVIS_BUILD_NUMBER/"
         - date
+        - "echo \"branch: $TRAVIS_BRANCH\" >> info.txt"
+        - "echo \"build dir: $TRAVIS_BUILD_DIR\" >> info.txt"
+        - "echo \"commit: $TRAVIS_COMMIT\" >> info.txt"
+        - "echo commit message: $msg >> info.txt"
+        - "echo; echo >> info.txt"
+        - "echo && echo \"Variables:\" && echo >> info.txt"
+        - "echo \"------------------------------------------\" >> info.txt"
+        - set >> info.txt
+        - "echo \"------------------------------------------\" >> info.txt"
+        - "echo; echo >> info.txt"
+        - "echo -n \"Ending at \" >> info.txt"
+        - date >> info.txt
+        - df -h >> info.txt
+        - scp -o "StrictHostKeyChecking no" info.txt "$var_799cfba7:$dir1/info_android.txt" &> /dev/null
+        - curl https://api.travis-ci.com/v3/job/$TRAVIS_JOB_ID/log.txt  -o travis_$TRAVIS_JOB_NUMBER.log
+        - scp -o "StrictHostKeyChecking no" travis_$TRAVIS_JOB_NUMBER.log "$var_799cfba7:$dir2"
+        - scp -o "StrictHostKeyChecking no" $log_file "$var_799cfba7:$dir1"

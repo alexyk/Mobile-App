@@ -1,4 +1,7 @@
 import { StyleSheet, Dimensions } from 'react-native';
+import {commonText} from '../../../../common.styles'
+import { getSafeTopOffset } from '../../../../utils/designUtils';
+
 const dimensionWindows = Dimensions.get('window');
 const { width } = dimensionWindows;
 
@@ -6,20 +9,19 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: '#f0f1f3'
+        backgroundColor: '#f0f1f3',
+        marginTop: getSafeTopOffset()
     },
 
-    SearchAndPickerwarp:{
+    searchAndPickerwarp:{
         display: 'flex',
         flexDirection: 'row'
     },
     
     searchAreaView: {
-        //width: '68%',
-       // height: 105,
-       flex:1,
+        flex:1,
         backgroundColor: '#f0f1f3',
-        paddingTop: 40,
+        paddingTop: 0,
         paddingLeft: 15,
         paddingRight: 15
     },
@@ -72,6 +74,14 @@ const styles = StyleSheet.create({
     containerHotels:{
         marginTop: 2,
         flex: 1,
+    },
+    backText: {
+        ...commonText,
+        color: 'black',
+        marginTop: 35,
+        marginLeft: 10,
+        fontSize: 14,
+        // backgroundColor: 'red',
     },
     
     switchButton: {

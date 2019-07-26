@@ -1,31 +1,35 @@
-import {
-    AsyncStorage,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text, 
-    TouchableOpacity,
-    View
-} from 'react-native';
+import moment from 'moment';
 import React, { Component } from 'react';
+import {
+    AsyncStorage, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet,
+    Text, TouchableOpacity, View
+} from 'react-native';
+import Toast from 'react-native-easy-toast'; //eslint-disable-line
+import RNPickerSelect from 'react-native-picker-select'; //eslint-disable-line
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import moment from 'moment';
-
-import DateAndGuestPicker from '../../organisms/DateAndGuestPicker';
-import RNPickerSelect from 'react-native-picker-select';//eslint-disable-line
-import SearchBar from '../../molecules/SearchBar';
-import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { domainPrefix } from '../../../config';
+import {
+    autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace,
+    isOnline, processError, ilog, clog
+} from '../../../config-debug';
 import requester from '../../../initDependencies';
-import styles from './styles';
+import lang from '../../../language';
+import { setCurrency } from '../../../redux/action/Currency';
+import { setDatesAndGuestsData } from '../../../redux/action/userInterface';
 import { userInstance } from '../../../utils/userInstance';
+import LocRateButton from '../../atoms/LocRateButton';
 import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectMaterialDialog';
+import SearchBar from '../../molecules/SearchBar';
+import DateAndGuestPicker from '../../organisms/DateAndGuestPicker';
+import { gotoWebview, stringifyRoomsData } from '../utils';
+import styles from './styles';
+import { formatDatesData } from '../Calendar/utils';
+import { hotelSearchIsNative } from '../../../config-settings';
+import { setLoginDetails } from '../../../redux/action/userInterface';
+import { getSafeTopOffset } from '../../../utils/designUtils';
 
-import LocRateButton from '../../atoms/LocRateButton'
-import { setCurrency } from '../../../redux/action/Currency'
 
-const shouldBeNative = false; // false: webview version, true: native search version
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
 
 class Explore extends Component {
@@ -33,28 +37,16 @@ class Explore extends Component {
     constructor(props) {
         super(props);
 
-        const startDate = moment()
-            .add(1, 'day');
-        const endDate = moment()
-            .add(2, 'day');
-
         this.onChangeHandler = this.onChangeHandler.bind(this);
         this.updateData = this.updateData.bind(this);
-        this.updateFilter = this.updateFilter.bind(this);
         this.gotoGuests = this.gotoGuests.bind(this);
-        this.gotoSettings = this.gotoSettings.bind(this);
         this.gotoSearch = this.gotoSearch.bind(this);
         this.renderAutocomplete = this.renderAutocomplete.bind(this);
         this.handleAutocompleteSelect = this.handleAutocompleteSelect.bind(this);
         this.handlePopularCities = this.handlePopularCities.bind(this);
         this.onDatesSelect = this.onDatesSelect.bind(this);
         this.onSearchHandler = this.onSearchHandler.bind(this);
-        this.showToast = this.showToast.bind(this);
-
-        let roomsData = [{
-            adults: 2,
-            children: []
-        }];
+        this.onSearchEnterKey = this.onSearchEnterKey.bind(this);
 
         this.state = {
             isHotel: true,
@@ -65,16 +57,8 @@ class Explore extends Component {
             cities: [],
             search: '',
             regionId: '',
-            checkInDate: startDate.format('ddd, DD MMM').toString(),
-            checkInDateFormated: startDate.format('DD/MM/YYYY').toString(),
             daysDifference: 1,
-            checkOutDate: endDate.format('ddd, DD MMM').toString(),
-            checkOutDateFormated: endDate.format('DD/MM/YYYY').toString(),
-            guests: 2,
-            adults: 2,
-            children: 0,
-            infants: 0,
-            roomsDummyData: encodeURI(JSON.stringify(roomsData)),
+            roomsDummyData: props.datesAndGuestsData.roomsDummyData,
             filter: {
                 showUnavailable: true, name: '', minPrice: 1, maxPrice: 5000, stars: [0, 1, 2, 3, 4, 5]
             },
@@ -83,34 +67,33 @@ class Explore extends Component {
                 bedrooms: 0,
                 bathrooms: 0
             },
-            childrenBool: false,
             currency: props.currency,//eslint-disable-line
             currencySign: props.currencySign,//eslint-disable-line
             email: '',
             token: '',
             countriesLoaded: false,
             currencySelectionVisible: false,
+            ...props.datesAndGuestsData
         };
-        // this.props.actions.getCurrency(props.currency, false);//eslint-disable-line
-        Explore.self = this;
 
-        // this.testWS();
+        // this.props.actions.getCurrency(props.currency, false);//eslint-disable-line
     }
 
 
     async componentWillMount() {
         const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
         const email_value = await AsyncStorage.getItem(`${domainPrefix}.auth.username`);
-        this.setState({
-            token: token_value,
-            email: email_value,
-        });
+        const newState = { token: token_value, email: email_value };
+        this.setState(newState);
+        this.props.setDatesAndGuestsData({onConfirm: this.onDatesSelect, ...newState});
 
-        console.log('componentWillMount', token_value, email_value);
+        if (__DEV__) {
+            if (autoHotelSearchFocus) this.searchBarRef.focus()
+        }
+
         // Below line gives null cannot be casted to string error on ios please look into it
         requester.getUserInfo().then((res) => {
             res.body.then((data) => {
-                console.log('componentWillMount', data);
                 if (email_value == undefined || email_value == null || email_value == "") {
                     AsyncStorage.setItem(`${domainPrefix}.auth.username`, data.email);
                     this.setState({
@@ -119,7 +102,7 @@ class Explore extends Component {
                 }
                 userInstance.setUserData(data);
             }).catch((err) => {
-                console.log('componentWillMount', err);
+                //console.log('componentWillMount', err);
             });
         });
         this.setCountriesInfo();
@@ -127,6 +110,14 @@ class Explore extends Component {
 
     async componentDidMount() {
         console.disableYellowBox = true;
+
+        // enable automatic search
+        if (__DEV__ && autoHotelSearch) {
+            setTimeout(() => {this.onSearchHandler(autoHotelSearchPlace)}, 100)
+            if (!isOnline) {
+                setTimeout(() => this.gotoSearch(), 300)
+            }
+        }
     }
 
     componentDidUpdate(prevProps) {
@@ -140,6 +131,10 @@ class Explore extends Component {
         if (countries != prevProps.countries) {
             this.setCountriesInfo();
         }
+
+        if (__DEV__ && autoHotelSearchFocus && this.searchBarRef) {
+            this.searchBarRef.focus()
+        }
     }
 
     // componentWillUnmount() {
@@ -147,7 +142,7 @@ class Explore extends Component {
     // }
 
     setCountriesInfo() {
-        countryArr = [];
+        let countryArr = [];
         this.props.countries.map((item, i) => {
             countryArr.push({
                 label: item.name,
@@ -162,30 +157,38 @@ class Explore extends Component {
         });
     }
 
-    showToast() {
-        this.refs.toast.show('This feature is not enabled yet in the current alpha version.', 1500);
-    }
-
     onChangeHandler(property) {
         return (value) => {
             this.setState({ [property]: value });
         };
     }
 
-    onDatesSelect({ startDate, endDate, startMoment, endMoment }) {
-        console.log("onDatesSelect", startDate, endDate);
-        const year = (new Date()).getFullYear();
-        const start = moment(startDate, 'ddd, DD MMM');
-        const end = moment(endDate, 'ddd, DD MMM');
-        this.setState({
-            daysDifference: moment.duration(end.diff(start)).asDays(),
-            checkInDate: startDate,
-            checkOutDate: endDate,
-            checkInDateFormated: startMoment.format('DD/MM/YYYY'),
-            checkOutDateFormated: endMoment.format('DD/MM/YYYY'),
-        });
+    onDatesSelect(inputData) {
+        try {
+            const { checkInMoment, checkOutMoment, inputFormat, today } = inputData;
+            const daysDifference = checkOutMoment.diff(checkInMoment,'days');
+            const formattedDates = formatDatesData(today.year(), checkInMoment, checkOutMoment, inputFormat);
+            const newState = { ...formattedDates, daysDifference };
+            const newCache = { ...inputData, ...formattedDates };
+
+            ilog(`[explore] onDateSelect`,{newState, newCache, inputData, formattedDates})
+
+            // detach from current code execution - for smooth transition of screens
+            setTimeout(() => this.setState(newState));
+            setTimeout(() => this.props.setDatesAndGuestsData(newCache));
+        } catch (error) {
+            processError(`[Explore::onDateSelect] Error while setting date: ${error.message}`,{error});
+        }
     }
     
+    onSearchEnterKey(event) {
+        // auto search on enter (done) key from keyboard
+        if (__DEV__ && this.state.cities.length > 0) {
+            const {id, query} = this.state.cities[0];
+            this.handleAutocompleteSelect(id, query, this.gotoSearch);
+        }
+    }
+
     onSearchHandler(value) {
         this.setState({ search: value });
         if (value === '') {
@@ -194,7 +197,22 @@ class Explore extends Component {
             requester.getRegionsBySearchParameter([`query=${value}`]).then(res => {
                 res.body.then(data => {
                     if (this.state.search != '') {
-                        this.setState({ cities: data });
+                        this.setState(
+                            { cities: data },
+                            () => {
+                                // enable automatic search
+                                if (__DEV__ && autoHotelSearch) {
+                                    setTimeout(() => {
+                                            const {id, query} = data[0];
+                                            //logd('citites','citites',{data,id,query})
+                                            this.handlePopularCities(id, query);
+                                            setTimeout(() => this.gotoSearch(), 100)
+                                        },
+                                        500
+                                    )
+                                }
+                            }  
+                        );                        
                     }
                 });
             });
@@ -202,159 +220,165 @@ class Explore extends Component {
     }
 
     onValueChange = (value) => {
-        console.log(value);
-        console.log(this.state.loc);
+        //console.log(value);
+        //console.log(this.state.loc);
     };
 
     updateData(data) {
-        let baseInfo = {};
-        baseInfo['adults'] = data.adults;
-        baseInfo['children'] = [];
-        for (let i = 0; i < data.children; i ++) {
-            baseInfo['children'].push({"age": 0});
-        }
-        let roomsData = [baseInfo];
-        let roomsDummyData = encodeURI(JSON.stringify(roomsData));
+        clog('[Explore] Update guests', {data})
 
-        this.setState({
+        let roomsData = {};
+        roomsData['adults'] = data.adults;
+        roomsData['children'] = [];
+        for (let i = 0; i < data.children; i ++) {
+            roomsData['children'].push({"age": 0});
+        }
+        let roomsDummyData = stringifyRoomsData( [roomsData] );
+
+        const newState = {
             adults: data.adults,
             children: data.children,
             infants: data.infants,
             guests: data.adults + data.children + data.infants,
             childrenBool: data.childrenBool,
             roomsDummyData: roomsDummyData
-        });
+        };
+        this.setState(newState);
+        this.props.setDatesAndGuestsData(newState);
     }
 
-    updateFilter(data) {
-        // this.setState({
-        //     isHotelSelected: data.isHotelSelected,
-        //     count: data.count
-        // });
-    }
 
     gotoGuests() {
         this.props.navigation.navigate('GuestsScreen', {
-            guests: this.state.guests,
-            adults: this.state.adults,
-            children: this.state.children,
-            infants: this.state.infants,
             updateData: this.updateData,
-            childrenBool: this.state.childrenBool
         });
     }
 
-    gotoSettings() {
-        // this.props.navigation.navigate('FilterScreen', {
-        //     isHotelSelected: this.state.isHotel,
-        //     count: this.state.count,
-        //     updateFilter: this.updateFilter,
-        //     searchedCity: this.state.search,
-        //     searchedCityId: 72,
-        //     checkInDate: this.state.checkInDate,
-        //     checkOutDate: this.state.checkOutDate,
-        //     guests: this.state.guests,
-        //     adults: this.state.adults,
-        //     children: this.state.children,
-        //     regionId: this.state.regionId,
-        //     currency: this.state.currency,
-        //     checkOutDateFormated: this.state.checkOutDateFormated,
-        //     checkInDateFormated: this.state.checkInDateFormated,
-        //     roomsDummyData: this.state.roomsDummyData//encodeURI(JSON.stringify())
-        // });
+
+    _cacheLoginAndRegion() {
+        const { token, email, isHotel, search } = this.state;
+        const extraParams = {
+            isHotel,
+            token: token,
+            email: email,
+            message: isHotel
+                ? `Looking for hotels in\n"${search}"`
+                : `Looking for homes in\n"${search}"`,
+            title: isHotel
+                ? lang.TEXT.SEARCH_HOTEL_RESULTS_TILE
+                : lang.TEXT.SEARCH_HOME_RESULTS_TILE
+        }
+
+        //TODO: When refactoring - move to login flow
+        this.props.setLoginDetails({token,email});
+        this.props.setDatesAndGuestsData({regionId: this.state.regionId});
+
+        return extraParams
     }
 
     gotoSearch() {
-        console.log("gotoSearch", this.state.checkOutDateFormated, this.state.checkInDateFormated);
-        //Open new property screen that uses sock-js
-        if (shouldBeNative){
-            if (this.state.isHotel) {
-                console.log("this.state.regionId.", this.state.regionId);
-                if (this.state.regionId === "" || this.state.regionId === 0) {
-                    this.refs.toast.show('Please input location to search hotels.', 2500);
-                    return;
+        const delayedFunction = () => {
+            const extraParams = this._cacheLoginAndRegion()
+            console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`, {extraParams});
+
+            if (hotelSearchIsNative.step1Results) {
+                const {
+                    token, email, isHotel, search, regionId, roomsDummyData, daysDifference,
+                    adults, guests, infants, children, childrenBool,
+                    checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated,
+                } = this.state;
+
+                if (isHotel) {
+                    // TODO: Cache these to redux and re-use
+
+                    if (regionId === "" || regionId === 0) {
+                        this.refs.toast.show('Please input location to search hotels.', 2500);
+                        return;
+                    }
+
+                    this.props.navigation.navigate('HotelsSearchScreen', {
+                        isHotel: isHotel,
+                        searchedCity: search,
+                        regionId: regionId,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        guests: guests,
+                        adults: adults,
+                        children: children,
+                        infants: infants,
+                        childrenBool: childrenBool,
+                        checkInDateFormated: checkInDateFormated,
+                        checkOutDateFormated: checkOutDateFormated,
+                        roomsDummyData: roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
+                        daysDifference: daysDifference,
+                        token: token,
+                        email: email,
+                    });
                 }
-                this.props.navigation.navigate('HotelsSearchScreen', {
-                    isHotel: this.state.isHotel,
-                    searchedCity: this.state.search,
-                    regionId: this.state.regionId,
-                    checkInDate: this.state.checkInDate,
-                    checkOutDate: this.state.checkOutDate,
-                    guests: this.state.guests,
-                    adults: this.state.adults,
-                    children: this.state.children,
-                    infants: this.state.infants,
-                    childrenBool: this.state.childrenBool,
-                    checkOutDateFormated: this.state.checkOutDateFormated,
-                    checkInDateFormated: this.state.checkInDateFormated,
-                    roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
-                    daysDifference: this.state.daysDifference,
-                });
+                else {
+                    //console.log("this.state.value.", this.state.value);
+                    if (this.state.value === '' || this.state.value === 0) {
+                        this.refs.toast.show('Please select country to book home.', 2500);
+                        return;
+                    }
+                    this.props.navigation.navigate('HomesSearchScreen', {
+                        countryId: this.state.countryId,
+                        home: this.state.value,
+                        checkInDate: checkInDate,
+                        checkOutDate: checkOutDate,
+                        guests: guests,
+                        adults: adults,
+                        children: children,
+                        infants: infants,
+                        childrenBool: childrenBool,
+                        checkOutDateFormated: checkOutDateFormated,
+                        checkInDateFormated: checkInDateFormated,
+                        roomsDummyData: roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
+                        daysDifference: daysDifference
+                    });
+                }
             }
             else {
-                console.log("this.state.value.", this.state.value);
-                if (this.state.value === '' || this.state.value === 0) {
+                if (this.state.isHotel && this.state.regionId == '') {
+                    //Empty location
+                    this.refs.toast.show('Please input location to search hotels.', 2500);
+                    this.setState({ search: '' });
+                }
+                else if (!this.state.isHotel && this.state.value === '') {
                     this.refs.toast.show('Please select country to book home.', 2500);
                     return;
                 }
-                this.props.navigation.navigate('HomesSearchScreen', {
-                    countryId: this.state.countryId,
-                    home: this.state.value,
-                    checkInDate: this.state.checkInDate,
-                    checkOutDate: this.state.checkOutDate,
-                    guests: this.state.guests,
-                    adults: this.state.adults,
-                    children: this.state.children,
-                    infants: this.state.infants,
-                    childrenBool: this.state.childrenBool,
-                    checkOutDateFormated: this.state.checkOutDateFormated,
-                    checkInDateFormated: this.state.checkInDateFormated,
-                    roomsDummyData: this.state.roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
-                    daysDifference: this.state.daysDifference
-                });
+                else {
+                    const {props,state} = this;
+                    gotoWebview(state, props.navigation, extraParams);
+                }
             }
         }
-        else {
-            if (this.state.isHotel && this.state.regionId == '') {
-                //Empty location
-                this.refs.toast.show('Please input location to search hotels.', 2500);
-                this.setState({ search: '' });
-            }
-            else if (!this.state.isHotel && this.state.value === '') {
-                this.refs.toast.show('Please select country to book home.', 2500);
-                return;
-            }
-            else {
-                this.props.navigation.navigate('PropertyScreen', {
-                    isHotelSelected: this.state.isHotel,
-                    guests: this.state.guests,
-                    countryId: this.state.countryId,
-                    regionId: this.state.regionId,
-                    checkOutDateFormated: this.state.checkOutDateFormated,
-                    checkInDateFormated: this.state.checkInDateFormated,
-                    roomsDummyData: this.state.roomsDummyData,//encodeURI(JSON.stringify(this.state.roomsData)),
-                    email: this.state.email,
-                    token: this.state.token
-                });
-            }
-        }
+
+        // leave execution time for animation and search button release
+        setTimeout(delayedFunction, 100);
     }
 
-    handleAutocompleteSelect(id, name) {
+    handleAutocompleteSelect(id, name, callback=null) {
         this.setState({
-            cities: [],
-            search: name,
-            regionId: id
-        });
+                cities: [],
+                search: name,
+                regionId: id
+            },
+            () => (callback ? callback() : null) // execute callback after setting state - for dev needs mostly if calling this on Enter key in __DEV__
+        );
     }
 
     handlePopularCities(id, name) {
-        this.setState({
-            cities: [],
-            search: name,
-            regionId: id,
-            isHotel: true
-        });
+        this.setState(
+            () => ({
+                cities: [],
+                search: name,
+                regionId: id,
+                isHotel: true
+            }),
+            () => Keyboard.dismiss()
+        );
     }
 
     renderAutocomplete() {
@@ -363,6 +387,8 @@ class Explore extends Component {
             return (
                 <ScrollView
                     style={{
+                        position: 'absolute',
+                        top: getSafeTopOffset() + 7,
                         marginLeft: 15,
                         marginRight: 15,
                         minHeight: 100,
@@ -394,6 +420,8 @@ class Explore extends Component {
             <View style={styles.SearchAndPickerwarp}>
                 <View style={styles.searchAreaView}>
                     <SearchBar
+                        ref={(searchBar) => this.searchBarRef = searchBar}
+                        onTextEnter={this.onSearchEnterKey}
                         autoCorrect={false}
                         value={this.state.search}
                         onChangeText={this.onSearchHandler}
@@ -408,6 +436,16 @@ class Explore extends Component {
     }
 
     renderHomeTopView() {
+        if (__DEV__ && autoHomeSearch) {
+            setTimeout(() =>
+                this.setState({
+                    countryId: 1,
+                    countryName: 'Fake Name',
+                    value: 100,
+                }, () => this.gotoSearch()),
+                100
+            );
+        }
         return (
             //Home
             <View style={styles.SearchAndPickerwarp}>
@@ -508,11 +546,34 @@ class Explore extends Component {
         )
     }
 
-    render() {
+    renderDateAndGuestsPicker() {
         const {
-            checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated, guests
-        } = this.state;
+            guests, infants, children, adults,
+            startDateText, endDateText
+        } = this.props.datesAndGuestsData;
 
+        return (
+            <View style={styles.scrollViewContentMain}>
+                <DateAndGuestPicker
+                    checkInDate={startDateText}
+                    checkOutDate={endDateText}
+                    adults={adults}
+                    children={children}
+                    guests={guests}
+                    infants={infants}
+                    gotoGuests={this.gotoGuests}
+                    gotoSearch={this.gotoSearch}
+                    onDatesSelect={this.onDatesSelect}
+                    gotoSettings={this.gotoSettings}
+                    showSearchButton={true}
+                    disabled={false}
+                    isFilterable={false}
+                />
+            </View>
+        )
+    }
+
+    render() {
         return (
             <View style={styles.container}>
                 <Toast
@@ -525,30 +586,13 @@ class Explore extends Component {
                     opacity={1.0}
                     textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                 />
+
                 {this.state.isHotel ? this.renderHotelTopView() : this.renderHomeTopView()}
                 {this.renderAutocomplete()}
 
                 <ScrollView  style={styles.scrollView} automaticallyAdjustContentInsets={true}>
 
-                    <View style={styles.scrollViewContentMain}>
-                        <DateAndGuestPicker
-                            checkInDate={checkInDate}
-                            checkOutDate={checkOutDate}
-                            checkInDateFormated={checkInDateFormated}
-                            checkOutDateFormated={checkOutDateFormated}
-                            adults={this.state.adults}
-                            children={this.state.children}
-                            guests={this.state.guests}
-                            infants={this.state.infants}
-                            gotoGuests={this.gotoGuests}
-                            gotoSearch={this.gotoSearch}
-                            onDatesSelect={this.onDatesSelect}
-                            gotoSettings={this.gotoSettings}
-                            showSearchButton={true}
-                            disabled={false}
-                            isFilterable={false}
-                        />
-                    </View>
+                    { this.renderDateAndGuestsPicker() }
 
                     <Text style={[styles.scrollViewTitles, { marginBottom: 10, marginTop: 5 }]}>Discover</Text>
 
@@ -611,20 +655,10 @@ class Explore extends Component {
                             </TouchableOpacity>
                         </View>
 
-                        {/* <TouchableOpacity onPress={this.showToast}>
-                            <View style={styles.searchButtonView}>
-                                <Text style={styles.searchButtonText}>Show All</Text>
-                            </View>
-                        </TouchableOpacity> */}
-
                         <View style={styles.bottomView}>
                             <Image style={styles.bottomViewText} resizeMode='stretch'
                                 source={require('../../../assets/texthome.png')} />
-                            {/* <TouchableOpacity onPress={this.showToast} style={styles.getStartedButtonView}>
-                                <View >
-                                    <Text style={styles.searchButtonText}>Get Started</Text>
-                                </View>
-                            </TouchableOpacity> */}
+
                             <Image style={styles.bottomViewBanner} resizeMode='stretch'
                                 source={require('../../../../src/assets/vector.png')} />
                         </View>
@@ -640,7 +674,6 @@ class Explore extends Component {
                     visible = { this.state.currencySelectionVisible }
                     onCancel = { () =>this.setState({ currencySelectionVisible: false }) }
                     onOk = { result => {
-                        console.log("select country", result);
                         this.setState({ currencySelectionVisible: false });
                         this.props.setCurrency({currency: result.selectedItem.label});
                         // this.props.actions.getCurrency(result.selectedItem.label);
@@ -669,11 +702,14 @@ let mapStateToProps = (state) => {
         currency: state.currency.currency,
         currencySign: state.currency.currencySign,
         countries: state.country.countries,
+        datesAndGuestsData: state.userInterface.datesAndGuestsData,
     };
 }
 
 const mapDispatchToProps = dispatch => ({
     setCurrency: bindActionCreators(setCurrency, dispatch),
+    setLoginDetails: bindActionCreators(setLoginDetails, dispatch),
+    setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Explore);

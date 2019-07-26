@@ -1,18 +1,15 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import moment from 'moment';
-
-import {
-    View,
-    Text,
-    TouchableHighlight
-} from 'react-native';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { Text, TouchableHighlight, View } from 'react-native';
 import styles from './styles';
+
 
 export default class Day extends Component {
     static propTypes = {
         onChoose: PropTypes.func,
-        date: PropTypes.instanceOf(moment),
+        // date: PropTypes.oneOfType([PropTypes.string]),
+        date: PropTypes.oneOfType([PropTypes.instanceOf(moment)]),
         color: PropTypes.shape({
             mainColor: PropTypes.string,
             subColor: PropTypes.string,
@@ -34,71 +31,59 @@ export default class Day extends Component {
 
     constructor(props) {
         super(props);
-        this.chooseDay = this.chooseDay.bind(this);
-        this.statusCheck = this.statusCheck.bind(this);
-        this.statusCheck();
+        
+        this.chooseDay = this.chooseDay.bind(this);        
     }
 
     shouldComponentUpdate(nextProps) {
-        const prevStatus = this.isFocus;
-        const nextStatus = this.statusCheck(nextProps);
-        if (prevStatus || nextStatus) return true;
-        return false;
-    }
-    statusCheck(props) {
-        const {
-            startDate,
-            endDate,
-            today,
-            date = null,
-            minDate,
-            maxDate,
-            empty
-        } = props || this.props;
-        this.isToday = today.isSame(date, 'd');
-        this.isValid = date &&
-      (date >= minDate || date.isSame(minDate, 'd')) &&
-      (date <= maxDate || date.isSame(maxDate, 'd'));
-        this.isMid = ((date > startDate) && (date < endDate)) ||
-      (!date && empty >= startDate && empty <= endDate);
-        this.isStart = date && date.isSame(startDate, 'd');
-        this.isStartPart = this.isStart && endDate;
-        this.isEnd = date && date.isSame(endDate, 'd');
-        this.isFocus = this.isMid || this.isStart || this.isEnd;
-        return this.isFocus;
+        return (nextProps.shouldUpdate == true);
     }
 
     chooseDay() {
-        this.props.onChoose(this.props.date);
+        if (this.props.isValid) {
+            // detach from current code execution (smoother animation and no button lock)
+            setTimeout(() => this.props.onChoose(this.props.date));
+        }
     }
+
     render() {
-        const {
-            date,
-            color
+        
+        if (this.props.isEmpty) {
+            return <View style={styles.dayContainer} />
+        }
+        
+        const { color, text, id,
+            isMid, isStartPart, isEnd, isValid, isFocus, isToday
         } = this.props;
-        const text = date ? date.date() : '';
+
+
         const mainColor = { color: color.mainColor };
         const subColor = { color: color.subColor };
         const subBack = { backgroundColor: color.primaryColor };
+
+        let stylesCollection = [styles.dayContainer];
+        if (isMid) stylesCollection.push(subBack);
+        if (isStartPart) stylesCollection.push(styles.startContainer);
+        if (isEnd) stylesCollection.push(styles.endContainer);
+        if (isStartPart || isEnd) stylesCollection.push(subBack);
+
         return (
             <View
-                style={[
-                    styles.dayContainer,
-                    this.isMid && subBack,
-                    this.isStartPart && styles.startContainer,
-                    this.isEnd && styles.endContainer,
-                    (this.isStartPart || this.isEnd) && subBack
-                ]}
+                style={stylesCollection}
+                key={`day_view_${id}`}
             >
-                {this.isValid ?
+                {isValid
+                ?
                     <TouchableHighlight
-                        style={[styles.day, this.isToday && styles.today, this.isFocus && subBack]}
+                        style={[styles.day, isToday && styles.today, isFocus && subBack]}
                         underlayColor="rgba(255, 255, 255, 0.35)"
                         onPress={this.chooseDay}
+                        key={`day_valid_${id}`}
                     >
-                        <Text style={[styles.dayText, subColor, this.isFocus && mainColor]}>{text}</Text>
-                    </TouchableHighlight> :
-                    <View style={[styles.day, this.isToday && styles.today]}>
+                        <Text style={[styles.dayText, subColor, isFocus && mainColor]}>{text}</Text>
+                    </TouchableHighlight>
+                :
+                    <View style={[styles.day, isToday && styles.today]} key={`day_invalid_${id}`}> 
                         <Text style={styles.dayTextDisabled}>{text}</Text>
                     </View>
                 }

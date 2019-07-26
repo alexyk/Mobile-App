@@ -36,7 +36,7 @@ class LocPrice extends Component {
     }
 
 	componentDidMount() {
-        console.log("LocPrice - componentDidMount");
+        //console.log("LocPrice - componentDidMount");
 		// this.list = [
 		// 	this.props.navigation.addListener('didFocus', 
         //     payload => {
@@ -49,7 +49,7 @@ class LocPrice extends Component {
 	}
     
     componentWillReceiveProps(nextProps) {
-        console.log("LOC Price componentWillReceiveProps");
+        //console.log("LOC Price componentWillReceiveProps");
         if (nextProps.isLocPriceWebsocketConnected &&
             nextProps.isLocPriceWebsocketConnected !== this.props.isLocPriceWebsocketConnected) {
             WebsocketClient.sendMessage(this.state.fiatInEur, null, { fiatAmount: this.state.fiatInEur });
@@ -67,8 +67,8 @@ class LocPrice extends Component {
     }
     
     componentWillUnmount() {
-        console.log("LocPrice - componentWillUnmount");
-        console.log("LocPrice - componentWillUnmount", this.state.fiatInEur);
+        //console.log("LocPrice - componentWillUnmount");
+        //console.log("LocPrice - componentWillUnmount", this.state.fiatInEur);
         WebsocketClient.sendMessage(this.state.fiatInEur, 'unsubscribe');
         if (this.props.locAmount) {
             removeLocAmount(this.state.fiatInEur);
@@ -80,7 +80,7 @@ class LocPrice extends Component {
     }
 
     render() {
-        console.log("LOC Price render");
+        // console.log("LOC Price render");
         const {locAmount, hasBacket} = this.props;
 
         return (

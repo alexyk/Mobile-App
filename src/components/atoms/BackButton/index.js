@@ -1,14 +1,21 @@
-import React, { Component } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import React from 'react';
 import PropTypes from 'prop-types';
-import Image from 'react-native-remote-svg';
 import SVGButton from '../SVGButton'
-import styles from './styles';
 
-const BackButton = (props) => {
+const BackButton = function(props) {
+    let image = '';
+    if (props.isWhite) {
+        image = require('../../../assets/png/arrow-back-white.png');
+    } else {
+        image = require('../../../assets/png/arrow-back.png');
+    }
+
     return (
-        <SVGButton style={styles.BackButton} image={require('../../../assets/png/arrow-back.png')} onPress={props.onPress}/>
+        <SVGButton 
+            style={props.style}
+            imageStyle={props.imageStyle}
+            image={image}
+            onPress={props.onPress}/>
     );
 }
 

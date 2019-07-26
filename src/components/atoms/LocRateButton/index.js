@@ -17,7 +17,7 @@ class LocRateButton extends Component {
     isStop = false;
     constructor(props) {
         super(props);
-        console.log("LocRateButton - constructor", props);
+        // console.log("LocRateButton - constructor", props);
         LocRateButton.self = this;
     }
 
@@ -52,7 +52,7 @@ class LocRateButton extends Component {
     }
       
     _didFocus() {
-        console.log("LocRateButton - _didFocus", LocRateButton.self.props);
+        // console.log("LocRateButton - _didFocus", LocRateButton.self.props);
         const {isLocPriceWebsocketConnected, exchangeRates} = LocRateButton.self.props;
         if (isLocPriceWebsocketConnected && !LocRateButton.self.isSendMessage) {
             LocRateButton.self.isSendMessage = true;
@@ -62,7 +62,7 @@ class LocRateButton extends Component {
     }
 
     _willBlur() {
-        console.log("LocRateButton - _willBlur", LocRateButton.self.props, LocRateButton.self.isSendMessage);
+        // console.log("LocRateButton - _willBlur", LocRateButton.self.props, LocRateButton.self.isSendMessage);
         const {isLocPriceWebsocketConnected, exchangeRates} = LocRateButton.self.props;
         if (isLocPriceWebsocketConnected && LocRateButton.self.isSendMessage) {
             WebsocketClient.sendMessage(exchangeRates.locRateFiatAmount, 'unsubscribe');

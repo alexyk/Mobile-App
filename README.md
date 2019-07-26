@@ -15,7 +15,7 @@
   - [VSCode](#vscode)
     - [Common](#common-2)
     - [iOS](#ios)
-    - [Anrdoid](#anrdoid)
+    - [Android](#android)
 - [Additional Requirements to Run E2E Tests](#additional-requirements-to-run-e2e-tests)
   - [E2E on Android](#e2e-on-android)
   - [E2E on iOS](#e2e-on-ios)
@@ -23,8 +23,6 @@
   - [Scripts](#scripts)
   - [Reactotron](#reactotron)
   - [Staging and Continuous Integration](#staging-and-continuous-integration)
-- [---](#)
-- [---](#1)
 - [# Default Information](#default-information)
 - [Available Scripts](#available-scripts)
   - [`npm start`](#npm-start)
@@ -37,14 +35,19 @@
   - [Writing and Running Tests](#writing-and-running-tests)
   - [Adding Flow](#adding-flow)
 
----
+___
 ### Default information in README.md
-* [Available Scripts](#available-scripts)
-  * [npm run ios](#npm-run-ios)
-  * [npm run android](#npm-run-android)
-* [Other](#other)
-  * [Writing and Running Tests](#writing-and-running-tests)
-  * [Adding Flow](#adding-flow)
+- [Default Information](#default-information)
+  - [Available Scripts](#available-scripts)
+    - [`npm start`](#npm-start)
+      - [`npm test`](#npm-test)
+      - [`npm run ios`](#npm-run-ios)
+      - [`npm run android`](#npm-run-android)
+        - [Using Android Studio's `adb`](#using-android-studios-adb)
+        - [Using Genymotion's `adb`](#using-genymotions-adb)
+  - [Other](#other)
+    - [Writing and Running Tests](#writing-and-running-tests)
+    - [Adding Flow](#adding-flow)
 
 ## Requirements to Run Mobile-App
 ### Common 
@@ -52,12 +55,11 @@
   <small>NodeJS version 8.15.x also is likely to work</small>
   * ninja (for Android)  
   <small>macOS - `brew install ninja`, Windows - instructions [here](https://github.com/rwols/CMakeBuilder/wiki/Ninja-for-Windows-Installation-Instructions)</small>
-  * react-native-cli
-  <small>npm install -g react-native-cli</small>
+  * react-native-cli `npm install -g react-native-cli`
 #### For Android
 <small>(macOS and Windows)</small>  
     * `Java 1.8` (jdk 8)  
-    * `Android Studio` *(optional)*
+    * `Android Studio` or manual installation if SDK and platform tools (look at how to setup an Android project with gradle)
 #### For iOS
 <small>(macOS only)</small>  
     * `macOS 10.13 High Sierra` or higher <small>(not tested on El Capitan and before)</small>  
@@ -92,20 +94,21 @@
 #### Common
 - Use VSCode breakpoints to or *"All expeptions"/"Uncaught exceptions"* to break into code  
 - If running any task before compilation (*preLaunchTask* in *launch.json*) - in VSCode Tasks - make sure to check Terminal view in VSCode if it needs input  
-- 
+- Use VScode *Output/React native...* views to see any issues with building the app before installing on device, simulator or emulator  
+*_Tip:_* Use "Attach to packager" and to skip recompiling the app with xcodebuild  
 
 
 #### iOS
 (1) VScode - use React Native run configurations to create one for iOS  
-(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator  
+(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator (shake it to see Debug menu with this option)  
 (3) Reload while the footer of VSCode shows as orange  
 (4) Use VSCode *Debug Console* view to see console.log output
 
-#### Anrdoid
+#### Android
 (1) VScode - use React Native run configurations to create one for Anrdoid  
-(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator  
+(2) When starting - make sure to have "Debug JS Remotely" *ON* from the device/emulator (shake it to see Debug menu with this option)  
 (3) Reload while the footer of VSCode shows as orange  
-(4) Use logcat view in *Output* of VSCode to see console.log statements  
+(4) Use *Debug Console* or *Output/LogCat...* view to see console.log statements  
 
 ## Additional Requirements to Run E2E Tests
 E2E tests (aka integration tests) are using `detox` (with Grey Box vs the common Black Box approach) with `mocha`.
@@ -131,8 +134,9 @@ Scripts are found at:
 First application of CI is using Travis CI http://travis-ci.org.
 Later on to be applied in this branch.
 
+____
+
 # Default Information
----
 
 ## Available Scripts
 

@@ -22,7 +22,7 @@ export default handleActions(
         },
 
         [setLocRateFiatAmount]: (state, {payload}) => {
-            console.log("setLocRateFiatAmount---------", payload);
+            //console.log("setLocRateFiatAmount---------", payload);
             return { ...state, locRateFiatAmount: payload};
         },
     },

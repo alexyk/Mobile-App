@@ -28,7 +28,7 @@ const styles = StyleSheet.create({
 
     rateText:{
         fontFamily: 'FuturaStd-Light',
-        fontSize:9,
+        fontSize:12,
         paddingLeft:10,
         paddingRight:10,
         color:'#898c8d',
@@ -36,7 +36,7 @@ const styles = StyleSheet.create({
 
     addressText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:10,
+        fontSize:13,
         paddingTop:3,
         paddingBottom:2,
         paddingLeft:10,
@@ -61,13 +61,13 @@ const styles = StyleSheet.create({
 
     normalText:{
         fontFamily: 'FuturaStd-Light',
-        fontSize:12,
+        fontSize:14,
         lineHeight: 20,
     },
 
     smallTitle:{
       fontFamily: 'futura',
-      fontSize:12,
+      fontSize:14,
       marginTop:5,
       lineHeight: 20,
       color:'#000000'
@@ -80,13 +80,13 @@ const styles = StyleSheet.create({
 
     spaceText: {
         fontFamily: 'FuturaStd-Light',
-        fontSize:10,
+        fontSize:13,
         lineHeight: 20,
     },
 
     readmore: {
         fontFamily: 'FuturaStd-Light',
-        fontSize: 10,
+        fontSize: 13,
         marginTop: -2,
     }
 });

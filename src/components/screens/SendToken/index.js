@@ -105,7 +105,7 @@ class SendToken extends Component {
                             alert(x);
                         } 
                         else {
-                            console.log(x);
+                            //console.log(x);
                         }
                     }, 1000)
                 });

@@ -28,7 +28,7 @@ export default StyleSheet.create({
         marginTop:28,
         marginLeft:15,
         marginRight:15,
-        paddingHorizontal:slashLength / 2,
+        paddingHorizontal:slashLength / 4,
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
@@ -85,7 +85,7 @@ export default StyleSheet.create({
         flex: 1,
         borderTopWidth: 3,
         borderColor: '#d6d7da',
-        paddingHorizontal:15
+        paddingHorizontal:0
     },
     btn: {
         height: 90,

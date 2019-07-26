@@ -107,7 +107,7 @@ class SimpleUserProfile extends Component {
                 image = { uri: imgHost + this.state.image }
             }
         }
-        console.log("simple profile image", image);
+        //console.log("simple profile image", image);
 
         return (
             <View style={styles.container}>

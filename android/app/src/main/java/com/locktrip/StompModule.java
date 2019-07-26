@@ -43,7 +43,7 @@ public class StompModule extends ReactContextBaseJavaModule {
     StompSession _session = null;
     StompSession.Subscription _lastSubscription = null;
 
-    String _url = "wss://beta.locktrip.com/socket";
+    String _url = "";
     String _message = "";
     String _destination = "";
 

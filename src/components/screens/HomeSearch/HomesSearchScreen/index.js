@@ -1,26 +1,20 @@
-import React, { Component } from 'react';
-import { connect } from 'react-redux';
-import { StyleSheet, Text,  TouchableOpacity, View, Dimensions } from 'react-native';
-
-import Image from 'react-native-remote-svg';
-import { DotIndicator } from 'react-native-indicators';
-import _ from 'lodash';
 import moment from 'moment';
-import RNPickerSelect from 'react-native-picker-select';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import React, { Component } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-easy-toast';
-
+import RNPickerSelect from 'react-native-picker-select';
+import { UltimateListView } from 'react-native-ultimate-listview';
+import Icon from 'react-native-vector-icons/MaterialIcons';
+import { connect } from 'react-redux';
+import { imgHost } from '../../../../config';
+import { processError, rlog } from '../../../../config-debug';
+import requester from '../../../../initDependencies';
+import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
+import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import DateAndGuestPicker from '../../../organisms/DateAndGuestPicker';
 import HomeItemView from '../../../organisms/HomeItemView';
-import requester from '../../../../initDependencies';
-import { UltimateListView } from '../../../../../library/UltimateListView';
-import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
-import { imgHost } from '../../../../config';
-import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
-
 import styles from './styles';
 
-const { width, height } = Dimensions.get('window')
 
 class HomesSearchScreen extends Component {
     isFilterResult = false;
@@ -115,8 +109,8 @@ class HomesSearchScreen extends Component {
     }
 
     setCountriesInfo() {
-        console.log("setCountriesInfo");
-        countryArr = [];
+        //console.log("setCountriesInfo");
+        let countryArr = [];
         this.props.countries.map((item, i) => {
             countryArr.push({
                 'label': item.name,
@@ -130,9 +124,9 @@ class HomesSearchScreen extends Component {
     }
 
     getHomes() {
-        if (this.listView != undefined && this.listView != null) {
+        /*if (this.listView != undefined && this.listView != null) {
             this.listView.initListView();
-        }
+        }*/
         let searchTerms = [];
         searchTerms.push(`countryId=${this.state.countryId}`);
         searchTerms.push(`startDate=${this.state.checkInDateFormated}`);
@@ -148,18 +142,20 @@ class HomesSearchScreen extends Component {
             searchTerms.push(`propertyTypes=${this.state.propertyTypesToggled}`);
         }
         searchTerms.push(`page=0`);
-        console.log("searchTerms", searchTerms);
+        //console.log("searchTerms", searchTerms);
 
         requester.getListingsByFilter(searchTerms).then(res => {
+            rlog('homes-1',"requester.getListingsByFilter", {searchTerms,res},true);
+
             res.body.then(data => {
-                console.log("requester.getListingsByFilter", data);
+                rlog('homes-2',"requester.getListingsByFilter", {data},true);
 
                 if (this.isFilterResult) {
                     this.setState({
                         // listings: data.filteredListings.content,
                         totalPages: data.filteredListings.totalPages
                     }, () => {
-                        this.listView.onFirstLoad(data.filteredListings.content, false);
+                        this.listView.updateDataSource(data.filteredListings.content);
                     });
                 }
                 else {
@@ -169,7 +165,7 @@ class HomesSearchScreen extends Component {
                         cities: data.cities,
                         propertyTypes: data.types
                     }, () => {
-                        this.listView.onFirstLoad(data.filteredListings.content, false);
+                        this.listView.updateDataSource(data.filteredListings.content);
                     });
                 }
             });
@@ -177,7 +173,7 @@ class HomesSearchScreen extends Component {
     }
     
     onFetch = async (page = 1, startFetch, abortFetch) => {
-        console.log("onFetch", page);
+        //console.log("onFetch", page);
         try {
             if (page < this.state.totalPages) {
                 let searchTerms = [];
@@ -194,10 +190,10 @@ class HomesSearchScreen extends Component {
                     searchTerms.push(`propertyTypes=${this.state.propertyTypesToggled}`);
                 }
                 searchTerms.push(`page=${page - 1}`);
-                console.log("onFetch - searchTerms", searchTerms);
+                //console.log("onFetch - searchTerms", searchTerms);
 
                 requester.getListingsByFilter(searchTerms).then(res => {
-                    console.log("onFetch - requester.getListingsByFilter", res);
+                    //console.log("onFetch - requester.getListingsByFilter", res);
                     res.body.then(data => {
                         startFetch(data.filteredListings.content, data.filteredListings.content.length, false);
                     });
@@ -210,6 +206,7 @@ class HomesSearchScreen extends Component {
         } catch (err) {
             startFetch([], 0, false);
             abortFetch(); 
+            processError('[HomesSearchScreen] onFetch: ${err.message}',{error:err})
         }
     }
 
@@ -328,7 +325,7 @@ class HomesSearchScreen extends Component {
         });
     }
 
-    gotoSettings = () => {
+    gotoFilter = () => {
         if (this.state.cities == null || this.state.cities.length == 0) {
             return;
         }
@@ -341,13 +338,13 @@ class HomesSearchScreen extends Component {
     }
 
     updateFilter = (data) => {
-        console.log("updateFilter", data);
+        //console.log("updateFilter", data);
         
         this.isFilterResult = true;
         
-        if (this.listView != undefined && this.listView != null) {
-            this.listView.initListView();
-        }
+        // if (this.listView != undefined && this.listView != null) {
+        //     this.listView.initListView();
+        // }
         
         this.setState({
             cities: data.cities,
@@ -397,11 +394,11 @@ class HomesSearchScreen extends Component {
     }
 
     gotoHomeDetailPage = async (home) => {
-        console.log (" home ---", home);
+        //console.log (" home ---", home);
         this.setState({isLoadingDetails: true});
         try {
             const resListing = await requester.getListing(home.id);
-            console.log("requester.getListing",resListing);
+            //console.log("requester.getListing",resListing);
             if (resListing.success === false) {
                 this.setState({isLoadingDetails: false}, () => {
                     this.refs.toast.show('Sorry, Cannot get home details.', 1500);
@@ -411,7 +408,7 @@ class HomesSearchScreen extends Component {
             const data = await resListing.body;
             const checks = this.calculateCheckInOuts(data);
         
-            console.log("resListing", data, checks);
+            //console.log("resListing", data, checks);
 
             const DAY_INTERVAL = 365;
 
@@ -423,19 +420,19 @@ class HomesSearchScreen extends Component {
                 `toCode=${this.props.currency}`,
                 `size=${DAY_INTERVAL}`];
         
-            console.log("searchTermMap", searchTermMap);
+            //console.log("searchTermMap", searchTermMap);
 
             const resCalendar =  await requester.getCalendarByListingIdAndDateRange(searchTermMap);
-            console.log("resCalendar", resCalendar);
+            //console.log("resCalendar", resCalendar);
             const dataCalendar = await resCalendar.body;
-            console.log("dataCalendar", dataCalendar);
+            //console.log("dataCalendar", dataCalendar);
             let calendar = dataCalendar.content;
             const resRoomDetails = await requester.getHomeBookingDetails(home.id);
             const roomDetails = await resRoomDetails.body;
 
             let nights = this.state.daysDifference;
             
-            console.log("123123", data, checks, calendar, roomDetails, nights);
+            //console.log("123123", data, checks, calendar, roomDetails, nights);
 
             const homePhotos = [];
             for (let i = 0; i < data.pictures.length; i++) {
@@ -479,14 +476,18 @@ class HomesSearchScreen extends Component {
         )
     }
 
-    renderPaginationFetchingView = () => (
+    renderPaginationFetchingView = () => {
+        return <View/>;
+        /*return (
         <View style={{width, height:height - 160, justifyContent: 'center', alignItems: 'center'}}>
             <Image style={{width:50, height:50}} source={require('../../../../assets/loader.gif')}/>
         </View>
-    )
+        )*/
+    }
     
     renderPaginationWaitingView = () => {
-        return (
+        return <View/>;
+        /*return (
             <View style={
                 {
                     flex: 0,
@@ -499,7 +500,7 @@ class HomesSearchScreen extends Component {
             }>
                 <DotIndicator color='#d97b61' count={3} size={9} animationDuration={777}/>
             </View>
-        )
+        )*/
     }
 
     renderPaginationAllLoadedView = () => {
@@ -521,6 +522,7 @@ class HomesSearchScreen extends Component {
                     </TouchableOpacity>
                     <View style={styles.pickerWrapHomes}>
                         <RNPickerSelect
+                            disabled={true}
                             items={this.state.countries}
                             placeholder={{
                                 label: 'Choose a location',
@@ -559,14 +561,13 @@ class HomesSearchScreen extends Component {
                     children={this.state.children}
                     infants={this.state.infants}
                     guests={this.state.guests}
-                    gotoGuests={this.gotoGuests}
                     gotoSearch={this.gotoSearch}
                     gotoCancel={this.gotoCancel}
-                    onDatesSelect={this.onDatesSelect}
-                    gotoSettings={this.gotoSettings}
+                    gotoFilter={this.gotoFilter}
                     showSearchButton={this.state.isNewSearch}
                     showCancelButton={this.state.isNewSearch}
-                    isFilterable={true}
+                    isFilterable={false}
+                    disabled={true}
                 />
             </View>
         );

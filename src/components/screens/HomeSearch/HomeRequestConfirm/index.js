@@ -101,14 +101,14 @@ class HomeRequestConfirm extends Component {
         };
 
         requester.requestBooking(requestInfo).then(res => {
-            console.log("ressss----", res);
+            //console.log("ressss----", res);
             if (!res.success) {
                 res.errors.then(e => {
                     this.refs.toast.show(e.message, 2500);
                 });
             } else {
                 res.body.then(data => {
-                    console.log("requester.requestBooking", requester.requestBooking);
+                    //console.log("requester.requestBooking", requester.requestBooking);
                     if (data.success) {
                         this.props.navigation.pop(5);
                         //this.props.history.push('/profile/trips/homes');

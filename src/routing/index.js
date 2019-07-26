@@ -60,7 +60,7 @@ import ReviewSend from '../components/screens/Booking/ReviewSend';
 import ReviewTrip from '../components/screens/Booking/ReviewTrip';
 import RequestAccepted from '../components/screens/Booking/RequestAccepted';
 
-import PropertyScreen from '../components/screens/Property';
+import WebviewScreen from '../components/screens/Webview';
 import Filters from '../components/screens/Filters';
 import AvailableRoomsView from '../components/molecules/AvailableRoomsView'
 import UserProfile from '../components/screens/UserProfile';
@@ -134,7 +134,7 @@ const RootNavigator = createStackNavigator(
         CalendarScreen: {screen: Calendar},
         RoomDetailsReview: { screen: RoomDetailsReview},
         GuestInfoForm: { screen: GuestInfoForm},
-        PropertyScreen: {screen: PropertyScreen},
+        WebviewScreen: {screen: WebviewScreen},
         PropertyList : {screen: PropertyList},
         HotelDetails:{ screen: HotelDetails},
         PropertyFacilitesScreen: { screen: PropertyFacilites },
@@ -201,7 +201,7 @@ class ReduxNavigation extends PureComponent {
     onBackPress = () => {
          const { dispatch, state } = this.props;
         if (state.index === 0) {
-            console.log("exit-------");
+            //console.log("exit-------");
             this.setState({ visibleConfirmDialog: true });
             return true;
         }
@@ -211,9 +211,9 @@ class ReduxNavigation extends PureComponent {
     };
 
     onConfirmOk = () => {
-        console.log("onConfirmOk ---");
+        //console.log("onConfirmOk ---");
         this.setState({ visibleConfirmDialog: false }, () => {
-            console.log("onConfirmOk ---123123123");
+            //console.log("onConfirmOk ---123123123");
             BackHandler.exitApp();
             // const { dispatch } = this.props;
             // dispatch(NavigationActions.back());

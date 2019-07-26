@@ -151,7 +151,7 @@ class CreditCard extends Component {
         //console.log('property>>>>>>>>>>>>>>wwwwwwwwww',property)
         return (value) => {
             this.setState({ [property]: value });
-            console.log('property>>>>>>>>>>>>>>',value)
+            //console.log('property>>>>>>>>>>>>>>',value)
         };
     }
      onClickSave() {
@@ -168,7 +168,7 @@ class CreditCard extends Component {
         //             const { errors } = response;
         //             Object.keys(errors).forEach((key) => {
         //                 if (typeof key !== 'function') {
-        //                     console.log('Error saving card:', errors[key].message);
+        //                     //console.log('Error saving card:', errors[key].message);
         //                 }
         //             });
         //         });

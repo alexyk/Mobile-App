@@ -36,12 +36,12 @@ class Terms extends Component {
         let user = params;
         user['image'] = PUBLIC_URL + "images/default.png";
 
-        console.log(user);
+        //console.log(user);
 
         this.setState({ showProgress: true });
         requester.register(user, null).then(res => {
             this.setState({ showProgress: false });
-            console.log(res);
+            //console.log(res);
             if (res.success) {
                 navigate('CongratulationRegister')
             } else {
@@ -50,7 +50,7 @@ class Terms extends Component {
                     Object.keys(errors).forEach((key) => {
                         if (typeof key !== 'function') {
                             Toast.showWithGravity(errors[key].message, Toast.SHORT, Toast.BOTTOM);
-                            console.log('Error logging in:', errors[key].message);
+                            //console.log('Error logging in:', errors[key].message);
                         }
                     });
                 });
@@ -59,13 +59,13 @@ class Terms extends Component {
         .catch(err => {
             this.setState({ showProgress: false });
             Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-            console.log(err);
+            //console.log(err);
         });
     }
 
     render() {
         const { params } = this.props.navigation.state;
-        console.log("Terms params", params);
+        //console.log("Terms params", params);
         return (
             <View style={styles.container}>
                 <StatusBar

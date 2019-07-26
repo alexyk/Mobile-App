@@ -40,7 +40,7 @@ class CreateAccount extends Component {
         this.animationTime = 150; // time for switch to slide from one end to the other
         
         const { params } = this.props.navigation.state;
-        console.log("CreateAccount", params);
+        //console.log("CreateAccount", params);
         if (params != undefined && params != null) {
             this.state.firstName = params.firstName;
             this.state.lastName = params.lastName;
@@ -106,7 +106,7 @@ class CreateAccount extends Component {
     }
 
     onCountrySelected = (value) => {
-        console.log("onCountrySelected", value);
+        //console.log("onCountrySelected", value);
         const hasCountryState = this.hasCountryState(value);
         this.setState({
             // countryId: value.id,
@@ -120,7 +120,7 @@ class CreateAccount extends Component {
         if (hasCountryState) {
             requester.getStates(value.id).then(res => {
                 res.body.then(data => {
-                    console.log("countryStates", data);
+                    //console.log("countryStates", data);
                     this.setCountryStates(data);
                 });
             });
@@ -128,7 +128,7 @@ class CreateAccount extends Component {
     }
 
     goToNextScreen() {
-        console.log("state", this.state);
+        //console.log("state", this.state);
         if (this.state.hasCountryState && (this.state.countryState == undefined || this.state.countryState == '')) {
             Toast.showWithGravity('Please Select State of Country.', Toast.SHORT, Toast.BOTTOM);
             return;

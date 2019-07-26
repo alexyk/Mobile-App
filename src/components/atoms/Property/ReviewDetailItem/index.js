@@ -24,7 +24,7 @@ class ReviewDetailItem extends Component {
             exchangeRates,
             currency
         } = this.props
-        console.log("ReviewDetailItem ---", this.props);
+        //console.log("ReviewDetailItem ---", this.props);
 
         const defaultPrice = CurrencyConverter.convert(exchangeRates.currencyExchangeRates, currencyCode, currency, fiat);
 

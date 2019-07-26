@@ -1,7 +1,10 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet, Dimensions, Platform } from 'react-native';
+import { commonText } from '../../../common.styles'
+
 const dimensions = Dimensions.get('window');
 const imageHeight = Math.round(dimensions.width * 0.25);
 const imageWidth = Math.round(dimensions.width * 0.32);
+
 const styles = StyleSheet.create({
     
     card: {
@@ -12,6 +15,7 @@ const styles = StyleSheet.create({
         marginBottom: 7.5,
         paddingRight: 10,
         height: imageHeight,
+        borderRadius: 15,
         backgroundColor: 'white',    
     },
     popularHotelsImage: {
@@ -25,6 +29,21 @@ const styles = StyleSheet.create({
         top: 5,
         right: 5
     },
+    index: {
+        position: 'absolute',
+        borderRadius: 15,
+        paddingHorizontal: 7,
+        paddingTop: 5,
+        paddingBottom: (Platform.OS == 'android' ? 5 : 2),
+        backgroundColor: "#a3c5c050",
+        bottom: 33,
+        right: 0
+    },
+    indexText: {
+        ...commonText,
+        fontSize: 14,
+        color: "#FFFFFF",
+    },
     favoriteIcon: {
         height: 20,
         width: 20
@@ -33,12 +52,12 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     placeName: {
+        ...commonText,
         marginTop: 8,
         marginLeft: 8,
         fontSize: 18,
         color: 'black',
         fontWeight: '100',
-        fontFamily: 'FuturaStd-Medium',
     },
     aboutPlaceView: {
         marginLeft: 8,
@@ -46,17 +65,17 @@ const styles = StyleSheet.create({
         marginTop: 4
     },
     placeReviewText: {
-        fontFamily: 'FuturaStd-Light',
+        ...commonText,
         fontSize: 12,
         color: '#aeaeae'
     },
     placeReviewNumber: {
-        fontFamily: 'FuturaStd-Light',
+        ...commonText,
         fontSize: 12,
         color: '#aeaeae'
     },
     totalReviews: {
-        fontFamily: 'FuturaStd-Light',
+        ...commonText,
         fontSize: 12,
         color: '#aeaeae'
     },
@@ -72,18 +91,21 @@ const styles = StyleSheet.create({
         alignItems: 'flex-end',
     },
     cost: {
+        ...commonText,
         color: 'black',
-        fontSize: 17,
-        fontFamily: 'FuturaStd-Medium'
+        fontSize: 12,
+        textAlign: 'right',
+        width: "100%"
     },
     costLoc: {
+        ...commonText,
         color: 'black',
-        fontSize: 13,
-        fontFamily: 'FuturaStd-Medium'
+        fontSize: 12,
+        marginLeft: 5
     },
     perNight: {
-        fontSize: 10,
-        fontFamily: 'FuturaStd-Light',
+        ...commonText,
+        fontSize: 12,
         color: 'black',
     },
     star: {

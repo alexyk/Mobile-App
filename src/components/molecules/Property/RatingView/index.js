@@ -74,7 +74,7 @@ class RatingView extends Component {
     }
 
     _handleTextReady = () => {
-        console.log('ready!');
+        //console.log('ready!');
     }
 
     render() {

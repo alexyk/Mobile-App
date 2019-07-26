@@ -11,6 +11,7 @@ import { bindActionCreators } from 'redux';
 import { getCountries } from '../../redux/action/Country'
 import { getCurrencyRates, getLocRate } from '../../redux/action/exchangeRates'
 import { socketHost, ROOMS_XML_CURRENCY } from '../../config';
+import { processError, autoLoginInOfflineMode, ilog } from '../../config-debug';
 
 const androidStomp = NativeModules.StompModule;
 
@@ -25,7 +26,7 @@ class AppLoading extends Component {
 
     constructor(props) {
         super(props);
-        console.log("AppLoading - constructor")
+        //console.log("AppLoading - constructor")
         this.props.getCountries();
         this.props.getCurrencyRates();
         this.props.getLocRate(ROOMS_XML_CURRENCY);
@@ -33,26 +34,38 @@ class AppLoading extends Component {
     }
 
     async componentDidMount() {
-        console.log("AppLoading - componentDidMount")
+        //console.log("AppLoading - componentDidMount")
     }
 
     // Fetch the token from storage then navigate to our appropriate place
     bootstrapAsync = async () => {
-        console.log("AppLoading - bootstrapAsync")
+        //console.log("AppLoading - bootstrapAsync")
         let currency = await AsyncStorage.getItem('currency');
 
         if (currency != undefined && currency != null) {
-            console.log("currency--------------", currency);
+            //console.log("currency--------------", currency);
             this.props.setCurrency({currency});
             // this.props.navigation.dispatch(setCurrency({currency}));
         }
 
-        console.log("currency", currency);
+        //console.log("currency", currency);
 
+        // TODO: Fix double caching? Is this outside of Redux cache?
         const keys = await AsyncStorage.getAllKeys();
         const isLoggedIn = keys.includes(`${domainPrefix}.auth.locktrip`) &&
                         keys.includes(`${domainPrefix}.auth.username`);
 
+        // enable auto login on reload
+        if (__DEV__ && !isLoggedIn  && autoLoginInOfflineMode) {
+            ilog(`[AppLoading] Auto logging in - please reload the app to take effect`)
+            AsyncStorage.multiSet([
+                    [`${domainPrefix}.auth.locktrip`,'oa*erh$oaeksnrtmok'],
+                    [`${domainPrefix}.auth.username`,'theUserName']
+                ], (...args)=>processError('error setting auth.username/locktrip',{args})
+            )
+        }
+
+        // TODO: Fix hidden stompjs code - put it in one place, visible and readable
         if (Platform.OS === 'ios') {
         } else if (Platform.OS === 'android') {
             androidStomp.connect(socketHost);

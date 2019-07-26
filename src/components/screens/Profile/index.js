@@ -67,7 +67,7 @@ class Profile extends Component {
     }
 
     onRefresh = async () => {
-        console.log("onRefresh ---------------");
+        //console.log("onRefresh ---------------");
 
         if (this.state.walletAddress === null || this.state.walletAddress === '') {
             
@@ -134,7 +134,7 @@ class Profile extends Component {
     onSendToken = () => {
         const { locBalance, walletAddress, ethBalance } = this.state;
         const {navigate} = this.props.navigation;
-        console.log("walletAddress ----", walletAddress);
+        //console.log("walletAddress ----", walletAddress);
         if (walletAddress === undefined || walletAddress === null || walletAddress === "") {
             this.refs.toast.show('Please create LOC wallet before send token.', 1500);
             return;
@@ -146,8 +146,8 @@ class Profile extends Component {
         const { navigate } = this.props.navigation;
         const { currency, locBalance, walletAddress, ethBalance } = this.state;
 
-        console.log("profile walletAddress: ", walletAddress);
-        console.log("profile currency: ", currency);
+        //console.log("profile walletAddress: ", walletAddress);
+        //console.log("profile currency: ", currency);
 
         return (
             <View style={styles.container}>
@@ -205,6 +205,7 @@ class Profile extends Component {
                             <Text style={styles.navItemText}>Log Out</Text>
                         </TouchableOpacity>
                     </View>
+
                 </ScrollView>
 
                 <SingleSelectMaterialDialog
@@ -213,7 +214,7 @@ class Profile extends Component {
                     visible = { this.state.currencySelectionVisible }
                     onCancel = { () =>this.setState({ currencySelectionVisible: false }) }
                     onOk = { result => {
-                        console.log("select country", result);
+                        //console.log("select country", result);
                         this.setState({ currencySelectionVisible: false });
                         this.props.setCurrency({currency: result.selectedItem.label});
                         // this.props.actions.getCurrency(result.selectedItem.label);

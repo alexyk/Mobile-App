@@ -9,6 +9,8 @@ import { CurrencyConverter } from '../../../services/utilities/currencyConverter
 
 import styles from './styles';
 
+import VersionText from '../../atoms/VersionText'
+
 const DEFAULT_CRYPTO_CURRENCY = 'EUR';
 
 class ProfileWalletCard extends Component {
@@ -35,6 +37,11 @@ class ProfileWalletCard extends Component {
 
         return (
             <View style={styles.cardBox}>
+                <VersionText color={'white'} size={9} 
+                    style={{position: 'absolute', backgroundColor: 'transparent', top: 10}}
+                    textStyle={{textAlign: 'right'}}
+                />
+
                 <Image
                     source={require('../../../assets/splash.png')}
                     style={styles.logo} />
@@ -60,6 +67,7 @@ class ProfileWalletCard extends Component {
                         </TouchableOpacity>
                     )
                 }
+
             </View>
         );
     }
