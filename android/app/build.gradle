@@ -162,6 +162,7 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
+        pickFirst 'lib/*/libc++_shared.so'
     }
     compileOptions {
         targetCompatibility 1.8
@@ -192,6 +193,8 @@ android {
 }
 
 dependencies {
+    implementation project(':react-native-webview')
+    implementation project(':react-native-gesture-handler')
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'com.android.support:multidex:1.0.3'
     implementation "com.android.support:appcompat-v7:${rootProject.ext.supportLibVersion}"

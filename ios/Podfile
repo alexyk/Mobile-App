@@ -44,6 +44,11 @@ target 'MobileApp' do
   pod 'react-native-image-resizer', :path => '../node_modules/react-native-image-resizer'
 
 
+
+  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
+
+  pod 'react-native-webview', :path => '../node_modules/react-native-webview'
+
 end
 
 post_install do |installer|
