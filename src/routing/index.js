@@ -7,7 +7,7 @@ import {
 } from 'react-navigation';
 
 import {
-    reduxifyNavigator,
+    createReduxContainer,
     createReactNavigationReduxMiddleware,
 } from 'react-navigation-redux-helpers';
 import {Platform, BackHandler, View} from 'react-native';
@@ -182,7 +182,7 @@ const middleware = createReactNavigationReduxMiddleware(
     state => state.nav
 );
 
-const AppWithNavigationState = reduxifyNavigator(RootNavigator, 'root');
+const AppWithNavigationState = createReduxContainer(RootNavigator, 'root');
 
 // create nav component
 class ReduxNavigation extends PureComponent {

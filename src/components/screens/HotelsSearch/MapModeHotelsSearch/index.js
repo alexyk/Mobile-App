@@ -499,6 +499,6 @@ let mapStateToProps = (state) => {
         exchangeRates: state.exchangeRates,
     };
 }
-export default connect(mapStateToProps, null, null, { withRef: true })(MapModeHotelsSearch);
+export default connect(mapStateToProps)(MapModeHotelsSearch);
 
 // export default MapModeHotelsSearch;

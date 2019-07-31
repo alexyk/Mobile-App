@@ -17,7 +17,6 @@
         android:allowBackup="true"
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:background="@color/lockchain_orange"
         android:theme="@style/AppTheme"
         android:largeHeap="true"
