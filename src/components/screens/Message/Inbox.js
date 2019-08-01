@@ -8,10 +8,10 @@ import {
 import React, { Component } from 'react';
 
 import InboxMessagesView from './InboxMessagesView';
-import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 import Toast from 'react-native-simple-toast';
 import requester from '../../../initDependencies';
 import styles from './inboxStyle';
+import LTLoader from '../../molecules/LTLoader';
 
 
 class Inbox extends Component {
@@ -108,42 +108,38 @@ class Inbox extends Component {
     }
 
     render() {
-        return (
-            <View style={styles.InboxView}>
-                {/* Main Container Start */}
-                <View style={[styles.topText]}>
-                    {/* Top Text Start */}
-                    <Text style={[styles.heading]}>Inbox</Text>
-                    <Text style={styles.subHeading}>You have {this.state.inboxMessages.length} unread messages</Text>
-                    {/* Top Text end */}
+        if (this.state.showProgress) {
+            return <LTLoader message={"Loading messages ..."} />
+        } else {
+            return (
+                <View style={styles.InboxView}>
+                    {/* Main Container Start */}
+                    <View style={[styles.topText]}>
+                        {/* Top Text Start */}
+                        <Text style={[styles.heading]}>Inbox</Text>
+                        <Text style={styles.subHeading}>You have {this.state.inboxMessages.length} unread messages</Text>
+                        {/* Top Text end */}
+                    </View>
+                    <ScrollView>
+                        <FlatList data={this.state.inboxMessages} // Data source
+                            // List Start
+                            renderItem={({ item, index }) => (
+                                <TouchableOpacity style={[styles.tr]} onPress={() => { this.onConversation(item) }}>
+                                    {/* Press to go on chat screen start*/}
+                                    <InboxMessagesView
+                                        inboxMessage={item}>
+                                    </InboxMessagesView>
+                                    {/* Press to go on chat screen end*/}
+                                </TouchableOpacity>
+                            )
+                                // List End
+                            } />
+                    </ScrollView>
+
+                    {/* Main Container End */}
                 </View>
-                <ScrollView>
-                    <FlatList data={this.state.inboxMessages} // Data source
-                        // List Start
-                        renderItem={({ item, index }) => (
-                            <TouchableOpacity style={[styles.tr]} onPress={() => { this.onConversation(item) }}>
-                                {/* Press to go on chat screen start*/}
-                                <InboxMessagesView
-                                    inboxMessage={item}>
-                                </InboxMessagesView>
-                                {/* Press to go on chat screen end*/}
-                            </TouchableOpacity>
-                        )
-                            // List End
-                        } />
-                </ScrollView>
-
-                {/* Main Container End */}
-
-                <ProgressDialog
-                    visible={this.state.showProgress}
-                    title=""
-                    message="Loading Message..."
-                    animationType="slide"
-                    activityIndicatorSize="large"
-                    activityIndicatorColor="black" />
-            </View>
-        );
+           );
+        }
     }
 }
 export default Inbox;

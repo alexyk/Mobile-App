@@ -1121,14 +1121,6 @@ class HotelsSearchScreen extends Component {
 
         {this.renderDebugWebview()}
         {this.renderDebugMap()}
-
-        {/* <ProgressDialog
-                      visible={this.state.isLoading}
-                      title="Please Wait"
-                      message="Loading..."
-                      animationType="slide"
-                      activityIndicatorSize="large"
-                      activityIndicatorColor="black"/> */}
       </View>
     );
   }

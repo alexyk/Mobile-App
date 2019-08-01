@@ -18,6 +18,7 @@ export default function NavButton(props) {
         <View style={styles.tab}>
             <FontAwesomeIcon
               icon={icon}
+              size={32}
               style={active === text ? styles.activeIconStyle : styles.inactiveIconStyle}
             />
 
@@ -36,7 +37,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingLeft: 10,
-    paddingRight: 10
+    paddingRight: 10,
+    marginBottom: 10
   },
   activeIconStyle: {
     fontSize: 25,

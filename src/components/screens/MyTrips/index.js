@@ -8,6 +8,7 @@ import _ from 'lodash';
 import { connect } from 'react-redux';
 import requester from '../../../initDependencies';
 import styles from './styles';
+import LTLoader from '../../molecules/LTLoader';
 
 class MyTrips extends Component {
     static propTypes = {
@@ -91,29 +92,25 @@ class MyTrips extends Component {
     }
 
     render() {
-        const { navigate } = this.props.navigation;
-        return (
-            <View style={styles.container}>
-                <View style={styles.placeholderImageView}>
-                    <Image
-                        style={styles.placeholderImage}
-                        source={require('../../../assets/placeholder_mytrips.png')}
-                    />
+        if (this.state.showProgress) {
+            return <LTLoader message={"Loading trips ..."} />
+        } else {
+            return (
+                <View style={styles.container}>
+                    <View style={styles.placeholderImageView}>
+                        <Image
+                            style={styles.placeholderImage}
+                            source={require('../../../assets/placeholder_mytrips.png')}
+                        />
+                    </View>
+                    <Text style={styles.title}>You have no upcoming trips</Text>
+                    <Text style={styles.subtext}>Discover your next experience</Text>
+                    <TouchableOpacity onPress={() => this.state.myTripsData.content.length > 0 ? this.gotoMyTrips() : this.gotoBooking()} style={styles.buttonExplore}>
+                        <Text style={styles.exploreBtnText}>Start Exploring</Text>
+                    </TouchableOpacity>
                 </View>
-                <Text style={styles.title}>You have no upcoming trips</Text>
-                <Text style={styles.subtext}>Discover your next experience</Text>
-                <TouchableOpacity onPress={() => this.state.myTripsData.content.length > 0 ? this.gotoMyTrips() : this.gotoBooking()} style={styles.buttonExplore}>
-                    <Text style={styles.exploreBtnText}>Start Exploring</Text>
-                </TouchableOpacity>
-                <ProgressDialog
-                    visible={this.state.showProgress}
-                    title=""
-                    message={'Loading trips...'}
-                    animationType="slide"
-                    activityIndicatorSize="large"
-                    activityIndicatorColor="black" />
-            </View>
-        )
+            )
+        }
     }
 
 }

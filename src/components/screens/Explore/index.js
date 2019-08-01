@@ -672,10 +672,13 @@ class Explore extends Component {
                     title = { 'Select Currency' }
                     items = { BASIC_CURRENCY_LIST.map((row, index) => ({ value: index, label: row })) }
                     visible = { this.state.currencySelectionVisible }
+                    selected = { this.props.currency }
                     onCancel = { () =>this.setState({ currencySelectionVisible: false }) }
                     onOk = { result => {
                         this.setState({ currencySelectionVisible: false });
                         this.props.setCurrency({currency: result.selectedItem.label});
+
+
                         // this.props.actions.getCurrency(result.selectedItem.label);
                         // this.setState({ singlePickerSelectedItem: result.selectedItem });
                     }}
