@@ -7,10 +7,11 @@
  */
 
 import { 
-    BackHandler, Platform, View, WebView, Text, TouchableOpacity
+    BackHandler, Platform, View, Text, TouchableOpacity
 } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
+import WebView from "react-native-webview";
 
 import styles from './styles';
 

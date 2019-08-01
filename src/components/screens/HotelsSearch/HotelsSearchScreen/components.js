@@ -5,9 +5,9 @@ import {
   Text,
   Platform,
   Dimensions,
-  WebView,
   StyleSheet
 } from "react-native"
+import WebView from "react-native-webview";
 
 import {
   showBothMapAndListHotelSearch,

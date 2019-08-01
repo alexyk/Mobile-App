@@ -1,5 +1,4 @@
 import {
-    // ListView,
     FlatList,
     Text,
     TouchableOpacity,
@@ -45,8 +44,6 @@ class AvailableRoomsView extends Component {
 
     constructor(props) {
         super(props);
-        // this.onBooking = this.onBooking.bind(this);
-        // const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
         this.state = {
             rooms: [],//ds.cloneWithRows([]),
             isLoading: true
@@ -61,9 +58,6 @@ class AvailableRoomsView extends Component {
             //console.log("getHotelRooms", res);
             if (res.success) {
                 res.body.then(data => {
-                    // const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
-                    // this.setState({ rooms: ds.cloneWithRows(this.sortArray(data, 'price')), isLoading: false });
-                    
                     let roomsResults = [];
                     const rooms = data;
                     if (rooms) {

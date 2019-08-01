@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Text, View, Platform, WebView } from 'react-native';
+import { Text, View, Platform } from 'react-native';
 import FastImage from 'react-native-fast-image';
+import WebView from "react-native-webview";
 import FontAwesome, { Icons } from 'react-native-fontawesome';
 import MapView, { Marker } from 'react-native-maps';
 import { connect } from 'react-redux';

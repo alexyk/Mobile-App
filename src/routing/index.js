@@ -50,23 +50,11 @@ import AddPaymentMethod from '../components/screens/AddPaymentMethod';
 
 import Guests from '../components/screens/Guests';
 
-import PropertyFacilites from '../components/screens/PropertyFacilites';
-import PropertyRules from '../components/screens/PropertyRules';
-import PropertyPrices from '../components/screens/PropertyPrices';
-
-import ReviewHouse from '../components/screens/Booking/ReviewHouse';
-import ReviewPay from '../components/screens/Booking/ReviewPay';
-import ReviewSend from '../components/screens/Booking/ReviewSend';
-import ReviewTrip from '../components/screens/Booking/ReviewTrip';
-import RequestAccepted from '../components/screens/Booking/RequestAccepted';
-
 import WebviewScreen from '../components/screens/Webview';
 import Filters from '../components/screens/Filters';
 import AvailableRoomsView from '../components/molecules/AvailableRoomsView'
-import UserProfile from '../components/screens/UserProfile';
 import SimpleUserProfile from '../components/screens/SimpleUserProfile';
 import EditUserProfile from '../components/screens/EditUserProfile';
-import UpdateProfileInfo from '../components/screens/UpdateProfileInfo';
 import SendToken from '../components/screens/SendToken';
 import CongratsCreditCard from '../components/screens/CongratsCreditCard';
 
@@ -137,14 +125,6 @@ const RootNavigator = createStackNavigator(
         WebviewScreen: {screen: WebviewScreen},
         PropertyList : {screen: PropertyList},
         HotelDetails:{ screen: HotelDetails},
-        PropertyFacilitesScreen: { screen: PropertyFacilites },
-        PropertyRulesScreen: { screen: PropertyRules },
-        PropertyPricesScreen: { screen: PropertyPrices },
-        ReviewHouseScreen: { screen: ReviewHouse },
-        ReviewPayScreen: { screen: ReviewPay },
-        ReviewSendScreen: { screen: ReviewSend },//issue needs debugging by developer of this screen
-        ReviewTripScreen: { screen: ReviewTrip },
-        RequestAcceptedScreen: { screen: RequestAccepted },
         FilterScreen: { screen: Filters },
         AvailableRoomsView: { screen: AvailableRoomsView},
         Notifications: { screen: Notifications},
@@ -153,9 +133,7 @@ const RootNavigator = createStackNavigator(
         CongratsCreditCard: {screen: CongratsCreditCard},
         PaymentMethods :{ screen:PaymentMethods},
         AddPaymentMethod :{screen:AddPaymentMethod},
-        UserProfile: { screen: UserProfile },
         EditUserProfile: { screen: EditUserProfile },
-        UpdateProfileInfo: { screen: UpdateProfileInfo },
         SimpleUserProfile: {screen: SimpleUserProfile},
         SendToken: {screen: SendToken},
         SingleWishlist: {screen: SingleWishlist},
