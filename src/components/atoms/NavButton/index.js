@@ -19,10 +19,10 @@ export default function NavButton(props) {
             <FontAwesomeIcon
               icon={icon}
               size={32}
-              style={active === text ? styles.activeIconStyle : styles.inactiveIconStyle}
+              style={active === name ? styles.activeIconStyle : styles.inactiveIconStyle}
             />
 
-            <Text style={active === text ? styles.activeTextStyle : styles.inactiveTextStyle}>
+            <Text style={active === name ? styles.activeTextStyle : styles.inactiveTextStyle}>
               {text}
             </Text>
         </View>
