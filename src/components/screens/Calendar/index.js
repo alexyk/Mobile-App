@@ -9,6 +9,8 @@ import CloseButton from '../../atoms/CloseButton';
 import MonthList from '../../organisms/MonthList';
 import styles from './styles';
 import { updateMarkedCalendarData, i18n, formatDay } from './utils';
+import { tslog, telog } from '../../../config-debug';
+import LTLoader from '../../molecules/LTLoader';
 
 
 class Calendar extends Component {
@@ -32,7 +34,7 @@ class Calendar extends Component {
     constructor(props) {
         super(props);
 
-        // tslog('Calendar constructor');
+        tslog('Calendar constructor');
         const {
             today, checkInMoment, checkOutMoment
         } = props.datesAndGuestsData;
@@ -54,6 +56,7 @@ class Calendar extends Component {
         // reload cache from redux & set to state
         this.initialState = {
             ...this.props.datesAndGuestsData,
+            isLoading: true,
             weekDays: [7, 1, 2, 3, 4, 5, 6].map(item => <Text style={[styles.weekText, subFontColor]} key={item}>{i18n(this.year, item, 'w')}</Text>)
         };
         this.state = { ... this.initialState }
@@ -62,12 +65,14 @@ class Calendar extends Component {
         this.cancel = this.cancel.bind(this);
         this.clear = this.clear.bind(this);
         this.confirm = this.confirm.bind(this);
-        // telog('Calendar constructor');
+        telog('Calendar constructor');
+
+        setTimeout( () => this.setState({isLoading: false}), 100)
     }
 
 
     setCalendarData(newState=null) {
-        // console.time('**** setCalendarData 1');
+        tslog('**** setCalendarData 1');
         const { internalFormat, calendarMarkedDays: oldMarkedDays } = this.state;
 
         let newData = {};
@@ -83,11 +88,11 @@ class Calendar extends Component {
             calendarMarkedDays,
             calendarMarkedMonths
         };
-        // console.timeEnd('**** setCalendarData 1');
+        telog('**** setCalendarData 1');
 
-        console.time('**** setCalendarData 2');
+        tslog('**** setCalendarData 2');
         this.setState(newData);
-        console.timeEnd('**** setCalendarData 2');
+        telog('**** setCalendarData 2');
     }
 
 
@@ -303,9 +308,14 @@ class Calendar extends Component {
     }
 
     render() {
-        // console.time('*** render Calendar')
+        const { isLoading, startDate, endDate } = this.state;
+        if (isLoading) {
+            return <LTLoader message={'Loading calendar ...'} />
+        }
 
-        const { startDate, endDate } = this.state;
+
+        tslog('*** render Calendar')
+
 
         const {color} = this.props;
         const {
@@ -341,7 +351,7 @@ class Calendar extends Component {
             </View>
         );
 
-        // console.timeEnd('*** render Calendar')
+        telog('*** render Calendar')
 
         return result;
     }

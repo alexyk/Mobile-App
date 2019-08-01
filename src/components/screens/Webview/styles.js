@@ -3,14 +3,13 @@ import { commonText } from '../../../common.styles';
 
 const styles = StyleSheet.create({
     container: {
-        marginTop: 0,
         width: '100%',
         height: '100%',
         flexDirection: 'column',
         backgroundColor: '#f0f1f3'
     },
     webviewContainer: {
-        flex: 0.89,
+        flex: 1,
     },
     backButton: {
         margin: 5,
