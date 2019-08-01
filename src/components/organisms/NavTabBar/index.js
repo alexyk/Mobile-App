@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { View } from 'react-native';
-import { Icons } from 'react-native-fontawesome';
 import PropTypes from 'prop-types';
 import styles from './styles';
 import SplashScreen from 'react-native-smart-splash-screen';
 import NavButton from '../../atoms/NavButton'
+import { faSuitcase, faUser, faComment, faHeart, faSearch } from '@fortawesome/free-solid-svg-icons'
+
 
 
 export default class NavTabBar extends Component {
@@ -51,15 +52,15 @@ export default class NavTabBar extends Component {
         //     </View>
         // )
 
-        const commonProps = {active, navigate}
+        const commonProps = {active, navigate};
 
         return (
             <View style={styles.container}>
-                <NavButton {...commonProps} name={'PROFILE'}   icon={Icons.user}       />
-                <NavButton {...commonProps} name={'MESSAGES'}  icon={Icons.comments} />
-                <NavButton {...commonProps} name={'MY_TRIPS'}  icon={Icons.suitcase} />
-                <NavButton {...commonProps} name={'FAVORITES'} icon={Icons.heart}      />
-                <NavButton {...commonProps} name={'EXPLORE'}   icon={Icons.search}      />
+                <NavButton {...commonProps} name={'PROFILE'}   icon={faUser}       />
+                <NavButton {...commonProps} name={'MESSAGES'}  icon={faComment} />
+                <NavButton {...commonProps} name={'MY_TRIPS'}  icon={faSuitcase} />
+                <NavButton {...commonProps} name={'FAVORITES'} icon={faHeart}      />
+                <NavButton {...commonProps} name={'EXPLORE'}   icon={faSearch}      />
             </View>
         );
     }

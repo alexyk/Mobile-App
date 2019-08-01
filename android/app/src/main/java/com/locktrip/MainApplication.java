@@ -6,6 +6,7 @@ import com.airbnb.android.react.maps.MapsPackage;
 import com.dylanvann.fastimage.FastImageViewPackage;
 import com.facebook.CallbackManager;
 import com.facebook.react.ReactApplication;
+import com.horcrux.svg.SvgPackage;
 import com.swmansion.reanimated.ReanimatedPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
@@ -42,21 +43,22 @@ public class MainApplication extends Application implements ReactApplication {
     @Override
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
-          new RNCardViewPackage(),
-          new MainReactPackage(),
-          new ReanimatedPackage(),
-          new RNCWebViewPackage(),
-          new RNGestureHandlerPackage(),
-          new ImageResizerPackage(),
-          new RNUUIDGeneratorPackage(),
-          new RCTSplashScreenPackage(),    //register Module
-          new MapsPackage(),
-          new ImagePickerPackage(),
-          new FBSDKPackage(mCallbackManager),
-          new RNFastCryptoPackage(),
-          new StompPackage(),
-          new FastImageViewPackage(),
-          new VectorIconsPackage()
+            new RNCardViewPackage(),
+            new MainReactPackage(),
+            new SvgPackage(),
+            new ReanimatedPackage(),
+            new RNCWebViewPackage(),
+            new RNGestureHandlerPackage(),
+            new ImageResizerPackage(),
+            new RNUUIDGeneratorPackage(),
+            new RCTSplashScreenPackage(),    //register Module
+            new MapsPackage(),
+            new ImagePickerPackage(),
+            new FBSDKPackage(mCallbackManager),
+            new RNFastCryptoPackage(),
+            new StompPackage(),
+            new FastImageViewPackage(),
+            new VectorIconsPackage()
       );
     }
 

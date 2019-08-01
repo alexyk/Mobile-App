@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import FontAwesome from 'react-native-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { Text, TouchableWithoutFeedback, View } from 'react-native';
 
 
@@ -16,9 +16,11 @@ export default function NavButton(props) {
   return (
     <TouchableWithoutFeedback onPress={onPress} >
         <View style={styles.tab}>
-            <Text style={active === text ? styles.activeIconStyle : styles.inactiveIconStyle}>
-                <FontAwesome>{icon}</FontAwesome>
-            </Text>
+            <FontAwesomeIcon
+              icon={icon}
+              style={active === text ? styles.activeIconStyle : styles.inactiveIconStyle}
+            />
+
             <Text style={active === text ? styles.activeTextStyle : styles.inactiveTextStyle}>
               {text}
             </Text>
