@@ -177,12 +177,8 @@ const RootNavigator = createStackNavigator(
     }
 );
 
-const middleware = createReactNavigationReduxMiddleware(
-    'root',
-    state => state.nav
-);
-
-const AppWithNavigationState = createReduxContainer(RootNavigator, 'root');
+const middleware = createReactNavigationReduxMiddleware(state => state.nav);
+const AppWithNavigationState = createReduxContainer(RootNavigator);
 
 // create nav component
 class ReduxNavigation extends PureComponent {

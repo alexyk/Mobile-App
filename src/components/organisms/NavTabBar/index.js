@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { Text, TouchableWithoutFeedback, View } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import { View } from 'react-native';
+import { Icons } from 'react-native-fontawesome';
 import PropTypes from 'prop-types';
 import styles from './styles';
 import SplashScreen from 'react-native-smart-splash-screen';
+import NavButton from '../../atoms/NavButton'
+
 
 export default class NavTabBar extends Component {
     static propTypes = {
@@ -43,62 +45,21 @@ export default class NavTabBar extends Component {
         const { index, routes } = state;
         const active = routes[index].key;
 
+        // return (
+        //     <View style={{width:"100%", height:50, backgroundColor:'red', justifyContent: 'center', alignItems: 'center'}}>
+        //         <Text>Hello there - I am the navigator</Text>
+        //     </View>
+        // )
+
+        const commonProps = {active, navigate}
+
         return (
             <View style={styles.container}>
-                <TouchableWithoutFeedback onPress={() => navigate('PROFILE')}>
-                    <View style={styles.tab}>
-                        <Text style={active === 'PROFILE' ? styles.activeIconStyle : styles.inactiveIconStyle}>
-                            <FontAwesome>{Icons.userO}</FontAwesome>
-                        </Text>
-                        <Text style={active === 'PROFILE' ? styles.activeTextStyle : styles.inactiveTextStyle}>
-              PROFILE
-                        </Text>
-                    </View>
-                </TouchableWithoutFeedback>
-
-                <TouchableWithoutFeedback onPress={() => navigate('MESSAGES')}>
-                    <View style={styles.tab}>
-                        <Text style={active === 'MESSAGES' ? styles.activeIconStyle : styles.inactiveIconStyle}>
-                            <FontAwesome>{Icons.commentingO}</FontAwesome>
-                        </Text>
-                        <Text style={active === 'MESSAGES' ? styles.activeTextStyle : styles.inactiveTextStyle}>
-              MESSAGES
-                        </Text>
-                    </View>
-                </TouchableWithoutFeedback>
-
-                <TouchableWithoutFeedback onPress={() => navigate('MY_TRIPS', {reload: this.props.reloadTab})}>
-                    <View style={styles.tab}>
-                        <Text style={active === 'MY_TRIPS' ? styles.activeIconStyle : styles.inactiveIconStyle}>
-                            <FontAwesome>{Icons.suitcase}</FontAwesome>
-                        </Text>
-                        <Text style={active === 'MY_TRIPS' ? styles.activeTextStyle : styles.inactiveTextStyle}>
-              MY TRIPS
-                        </Text>
-                    </View>
-                </TouchableWithoutFeedback>
-
-                <TouchableWithoutFeedback onPress={() => navigate('FAVORITES')}>
-                    <View style={styles.tab}>
-                        <Text style={active === 'FAVORITES' ? styles.activeIconStyle : styles.inactiveIconStyle}>
-                            <FontAwesome>{Icons.heartO}</FontAwesome>
-                        </Text>
-                        <Text style={active === 'FAVORITES' ? styles.activeTextStyle : styles.inactiveTextStyle}>
-            FAVORITES
-                        </Text>
-                    </View>
-                </TouchableWithoutFeedback>
-
-                <TouchableWithoutFeedback onPress={() => navigate('EXPLORE')}>
-                    <View style={styles.tab}>
-                        <Text style={active === 'EXPLORE' ? styles.activeIconStyle : styles.inactiveIconStyle}>
-                            <FontAwesome>{Icons.search}</FontAwesome>
-                        </Text>
-                        <Text style={active === 'EXPLORE' ? styles.activeTextStyle : styles.inactiveTextStyle}>
-              EXPLORE
-                        </Text>
-                    </View>
-                </TouchableWithoutFeedback>
+                <NavButton {...commonProps} name={'PROFILE'}   icon={Icons.user}       />
+                <NavButton {...commonProps} name={'MESSAGES'}  icon={Icons.comments} />
+                <NavButton {...commonProps} name={'MY_TRIPS'}  icon={Icons.suitcase} />
+                <NavButton {...commonProps} name={'FAVORITES'} icon={Icons.heart}      />
+                <NavButton {...commonProps} name={'EXPLORE'}   icon={Icons.search}      />
             </View>
         );
     }
