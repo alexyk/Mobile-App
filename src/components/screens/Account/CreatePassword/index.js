@@ -1,4 +1,3 @@
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 import {
     Platform,
     Text,
@@ -14,6 +13,7 @@ import styles from './styles';
 import { hasLetterAndNumber, hasSymbol, validateConfirmPassword, validatePassword } from '../../../../utils/validation';
 import SmartInput from '../../../atoms/SmartInput';
 import WhiteBackButton from '../../../atoms/WhiteBackButton';
+import LTIcon from '../../../atoms/LTIcon';
 
 class CreatePassword extends Component {
     constructor(props) {
@@ -114,7 +114,7 @@ class CreatePassword extends Component {
                             onPress={this.onCreatePassword}>
                             <View style={styles.nextButton}>
                                 <Text style={styles.buttonText}>
-                                    <FontAwesome>{Icons.arrowRight}</FontAwesome>
+                                    <LTIcon name={'arrowRight'} />
                                 </Text>
                             </View>
                         </TouchableOpacity>

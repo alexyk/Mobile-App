@@ -12,12 +12,12 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import RNPickerSelect from 'react-native-picker-select';
 import Switch from 'react-native-customisable-switch';
 import Toast from 'react-native-simple-toast';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 import styles from './styles';
 import { validateEmail, validateName } from '../../../../utils/validation';
 import SmartInput from '../../../atoms/SmartInput';
 import WhiteBackButton from '../../../atoms/WhiteBackButton';
 import requester from '../../../../initDependencies';
+import LTIcon from '../../../atoms/LTIcon';
 
 class CreateAccount extends Component {
 
@@ -280,9 +280,10 @@ class CreateAccount extends Component {
                             <View style={styles.switchContainer}>
                                 {userWantsPromo ?
                                     <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.switchCheckText}>
-                                            <FontAwesome>{Icons.check}</FontAwesome>
-                                        </Text>
+                                        <LTIcon
+                                            textStyle={styles.switchCheckText}
+                                            name={'check'}
+                                        />
                                     </View>
                                     : null}
                                 <Switch
@@ -313,9 +314,10 @@ class CreateAccount extends Component {
                                 disabled={!validateName(firstName) || !validateName(lastName) || !validateEmail(email)}
                                 onPress={() => this.goToNextScreen()}>
                                 <View style={styles.nextButton}>
-                                    <Text style={styles.buttonText}>
-                                        <FontAwesome>{Icons.arrowRight}</FontAwesome>
-                                    </Text>
+                                    <LTIcon 
+                                        textStyle={styles.buttonText}
+                                        name={'arrowRight'}
+                                    />
                                 </View>
                             </TouchableOpacity>
                         </View>

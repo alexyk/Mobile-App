@@ -1,7 +1,70 @@
-import React, { Component } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
+import LTIcon from '../LTIcon';
+
+
+class SmartInput extends Component {
+    static propTypes = {
+        onRightPress: PropTypes.func,
+        rightIcon: PropTypes.string
+    }
+
+    static defaultProps = {
+        onRightPress: () => {},
+        rightIcon: ''
+    }
+
+    constructor() {
+        super();
+        this.input = {
+            focus: () => {}
+        };
+    }
+    focus() {
+        this.input.focus();
+    }
+
+    renderRightButton() {
+        const { rightIcon, onRightPress } = this.props;
+        let renderButton = null;
+
+        if (rightIcon) {
+            renderButton = (
+                <View style={styles.rightIconView}>
+                    <LTIcon
+                        textStyle = {styles.rightIconText} 
+                        name={rightIcon}
+                    />
+                </View>
+            );
+        }
+
+        if (rightIcon && onRightPress) {
+            renderButton = (
+                <TouchableOpacity onPress={() => onRightPress()}>{ renderButton }</TouchableOpacity>
+            );
+        }
+
+        return renderButton;
+    }
+
+    render() {
+        return (
+            <View style={[styles.container]}>
+                <TextInput
+                    ref={(i) => { this.input = i; }}
+                    style={styles.input}
+                    underlineColorAndroid="rgba(0,0,0,0)"
+                    selectionColor="white"
+                    {...this.props}
+                />
+
+                { this.renderRightButton() }
+            </View>
+        );
+    }
+}
 
 // TODO: move styles to separate file
 const styles = StyleSheet.create({
@@ -39,66 +102,5 @@ const styles = StyleSheet.create({
         fontFamily: 'FuturaStd-Light'
     }
 });
-
-class SmartInput extends Component {
-    static propTypes = {
-        onRightPress: PropTypes.func,
-        rightIcon: PropTypes.string
-    }
-
-    static defaultProps = {
-        onRightPress: () => {},
-        rightIcon: ''
-    }
-
-    constructor() {
-        super();
-        this.input = {
-            focus: () => {}
-        };
-    }
-    focus() {
-        this.input.focus();
-    }
-
-    renderRightButton() {
-        const { rightIcon, onRightPress } = this.props;
-        let renderButton = null;
-
-        if (rightIcon) {
-            renderButton = (
-                <View style={styles.rightIconView}>
-                    <Text style={styles.rightIconText}>
-                        <FontAwesome>{Icons[rightIcon]}</FontAwesome>
-                    </Text>
-                </View>
-            );
-        }
-
-        if (rightIcon && onRightPress) {
-            renderButton = (
-                <TouchableOpacity onPress={() => onRightPress()}>{ renderButton }</TouchableOpacity>
-            );
-        }
-
-        return renderButton;
-    }
-
-    render() {
-        return (
-            <View style={[styles.container]}>
-                <TextInput
-                    ref={(i) => { this.input = i; }}
-                    style={styles.input}
-                    underlineColorAndroid="rgba(0,0,0,0)"
-                    selectionColor="white"
-                    {...this.props}
-                />
-
-                { this.renderRightButton() }
-            </View>
-        );
-    }
-}
 
 export default SmartInput;

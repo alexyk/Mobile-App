@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { View, Text, TouchableWithoutFeedback } from 'react-native';
+import { Text } from 'react-native';
 import { reset } from '../../../redux/action/locPriceUpdateTimer'
-import Icon from 'react-native-vector-icons/FontAwesome';
+import LTIcon from '../LTIcon';
 import styles from './styles';
 
 class LocPriceUpdateTimer extends Component {
@@ -66,7 +66,7 @@ class LocPriceUpdateTimer extends Component {
         return (
             this.state.seconds != null?
                 <Text style={[this.props.style, styles.info]}>
-                    LOC price will update in <Icon name={'clock-o'} color={'#fff'} size={16}/> {this.state.seconds}
+                    LOC price will update in <LTIcon name={'clock-o'} color={'#fff'} size={16}/> {this.state.seconds}
                 </Text>
             :
                 null

@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { connect } from "react-redux";
-import FontAwesome, { Icons } from "react-native-fontawesome";
 import Image from "react-native-remote-svg";
 import CardView from "react-native-cardview";
 import PropTypes from "prop-types";
@@ -15,6 +14,7 @@ import LocPrice from "../../atoms/LocPrice";
 
 import styles from "./styles";
 import lang from "../../../language";
+import LTIcon from "../../atoms/LTIcon";
 
 
 class HotelItemView extends Component {
@@ -86,16 +86,20 @@ class HotelItemView extends Component {
     const indents = [];
     for (let i = 0; i < count; i++) {
       indents.push(
-        <Text key={`star - ${i}`} style={{ color: "#a3c5c0" }}>
-          <FontAwesome>{Icons.star}</FontAwesome>
-        </Text>
+        <LTIcon
+            key={`star - ${i}`}
+            textStyle={{ color: '#a3c5c0' }}
+            name={'star'}
+        />
       );
     }
     for (let i = count; i < 5; i++) {
       indents.push(
-        <Text key={`star - ${i}`} style={{ color: "#dddddd" }}>
-          <FontAwesome>{Icons.star}</FontAwesome>
-        </Text>
+        <LTIcon
+            key={`star - ${i}`}
+            textStyle={{ color: '#dddddd' }}
+            name={'star'}
+        />
       );
     }
     return indents;

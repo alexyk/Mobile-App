@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
@@ -12,6 +11,7 @@ import { CurrencyConverter } from '../../../services/utilities/currencyConverter
 import styles from './styles';
 
 import VersionText from '../../atoms/VersionText'
+import LTIcon from '../LTIcon';
 
 const DEFAULT_CRYPTO_CURRENCY = 'EUR';
 
@@ -106,7 +106,7 @@ class ProfileWalletCard extends Component {
             (!walletExists && !isEmpty) &&
             (
                 <TouchableOpacity onPress={createWallet} style={styles.addMore}>
-                    <FontAwesomeIcon size={24} icon={faPlus} style={{color: '#FFF7'}} />
+                    <LTIcon size={24} name={'plus'} style={{color: '#FFF7'}} />
                 </TouchableOpacity>
             )
 

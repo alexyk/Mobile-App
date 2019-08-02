@@ -5,7 +5,6 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 import Image from 'react-native-remote-svg';
 import CardView from 'react-native-cardview'
 import PropTypes from 'prop-types';
@@ -15,6 +14,7 @@ import styles from './styles';
 import FastImage from 'react-native-fast-image'
 import { RoomsXMLCurrency } from '../../../services/utilities/roomsXMLCurrency';
 import LocPrice from '../../atoms/LocPrice'
+import LTIcon from '../../atoms/LTIcon';
 
 class HomeItemView extends Component {
     static propTypes = {
@@ -43,10 +43,22 @@ class HomeItemView extends Component {
     renderStars = (count) => {
         const indents = [];
         for (let i = 0; i < count; i ++) {
-            indents.push(<Text key = {`star - ${i}`} style={{ color: '#a3c5c0' }}><FontAwesome>{Icons.star}</FontAwesome></Text>);
+            indents.push(
+                <LTIcon
+                    key={`star - ${i}`}
+                    textStyle={{ color: '#a3c5c0' }}
+                    name={'star'}
+                />
+            );            
         }
         for (let i = count; i < 5; i ++) {
-            indents.push(<Text key = {`star - ${i}`} style={{ color: '#dddddd' }}><FontAwesome>{Icons.star}</FontAwesome></Text>);
+            indents.push(
+                <LTIcon
+                    key={`star - ${i}`}
+                    textStyle={{ color: '#dddddd' }}
+                    name={'star'}
+                />
+            );
         }
         return indents;
     }

@@ -1,12 +1,12 @@
-import { AsyncStorage, Image, Text, View } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
-import React, { Component } from 'react';
-
 import PropTypes from 'prop-types';
+import React, { Component } from 'react';
+import { AsyncStorage, Image, Text, View } from 'react-native';
 import { connect } from 'react-redux';
 import requester from '../../../initDependencies';
-import styles from './styles';
 import { toJS } from '../../../utils/toJS';
+import LTIcon from '../../atoms/LTIcon';
+import styles from './styles';
+
 
 // TODO: Separate component from container in the new containers dir
 // components dir should contain only stateless components
@@ -44,14 +44,10 @@ class SmallPropertyTile extends Component {
         // Determine stars
         const stars = [];
         const fullStar = key => (
-            <Text style={{ color: '#acc6c1', fontSize: 7 }} key={key}>
-                <FontAwesome>{Icons.starO}</FontAwesome>
-            </Text>
+            <LTIcon name={'starO'} textStyle={{ color: '#acc6c1', fontSize: 7 }} key={key} />
         );
         const emptyStar = key => (
-            <Text style={{ color: '#d8d8d8', fontSize: 7 }} key={key}>
-                <FontAwesome>{Icons.starO}</FontAwesome>
-            </Text>
+            <LTIcon name={'starO'} textStyle={{ color: '#d8d8d8', fontSize: 7 }} key={key} />
         );
         for (let i = 0; i < averageRating; i++) stars.push(fullStar(i));
         for (let i = 0; i < 5 - averageRating; i++) stars.push(emptyStar(5 - i));
@@ -89,7 +85,7 @@ class SmallPropertyTile extends Component {
         return (
             <View style={styles.container}>
                 <View style={styles.favoriteView}>
-                    <Text style={styles.favoriteText}><FontAwesome>{Icons.heartO}</FontAwesome></Text>
+                    <LTIcon name={'heartO'} textStyle={styles.favoriteText} />
                 </View>
 
                 <Image

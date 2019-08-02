@@ -1,17 +1,12 @@
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, KeyboardAvoidingView, ScrollView, TextInput } from 'react-native';
-import { validateEmail, validateName, validateCardExpiry, validateCVV, validateCardNumber } from '../../../utils/validation';
-
-import GoBack from '../../atoms/GoBack';
+import { validateName, validateCardExpiry, validateCVV, validateCardNumber } from '../../../utils/validation';
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 import SmartInput from '../../atoms/SmartInput';
 import SmartInputCreditCard from '../../atoms/SmartInput/creditcard';
 import SmartInputDate from '../../atoms/SmartInput/date';
-import Switch from 'react-native-customisable-switch';
-import { TextInputMask } from 'react-native-masked-text';
-import { Header } from 'react-navigation';
+import LTIcon from '../../atoms/LTIcon';
 
 const styles = StyleSheet.create({
     container: {
@@ -264,9 +259,10 @@ class CreditCard extends Component {
                                     disabled={!CardHolder ||!CardNumber || !CVV || !MY}
                                     onPress={() => this.onClickSave()}
                                 >
-                                    <Text style={styles.buttonText}>
-                                        <FontAwesome>{Icons.arrowRight}</FontAwesome>
-                                    </Text>
+                                    <LTIcon
+                                        textStyle={styles.buttonText}
+                                        name={'arrowRight'}
+                                    />
                                 </TouchableOpacity>
                             </View>
                     </View>

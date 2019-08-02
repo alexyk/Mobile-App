@@ -1,13 +1,9 @@
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 import React, { Component } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { validateEmail, validateName } from '../../../utils/validation';
-
-import GoBack from '../../atoms/GoBack';
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 import SmartInput from '../../atoms/SmartInput';
-import Switch from 'react-native-customisable-switch';
+import LTIcon from '../../atoms/LTIcon';
 
 const styles = StyleSheet.create({
     container: {
@@ -221,9 +217,10 @@ class CreditCardFilled extends Component {
                         <View style={styles.nextButtonView}>
           
                                 <View style={styles.nextButton}>
-                                    <Text style={styles.buttonText}>
-                                        <FontAwesome>{Icons.arrowRight}</FontAwesome>
-                                    </Text>
+                                    <LTIcon
+                                        textStyle={styles.buttonText}
+                                        name={'arrowRight'}
+                                    />
                                 </View>
                             
                     </View>

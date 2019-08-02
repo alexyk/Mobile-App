@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
 import { Text, TouchableWithoutFeedback, View } from 'react-native';
+import LTIcon from '../LTIcon';
 
 
 export default function NavButton(props) {
@@ -16,8 +16,8 @@ export default function NavButton(props) {
   return (
     <TouchableWithoutFeedback onPress={onPress} >
         <View style={styles.tab}>
-            <FontAwesomeIcon
-              icon={icon}
+            <LTIcon
+              name={icon}
               size={32}
               style={active === name ? styles.activeIconStyle : styles.inactiveIconStyle}
             />

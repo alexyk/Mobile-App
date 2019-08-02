@@ -1,8 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList,TouchableOpacity, ProgressBarAndroid } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
-import Icon from 'react-native-fontawesome';
+import { Text, View, FlatList,TouchableOpacity, ProgressBarAndroid } from 'react-native';
 import Image from 'react-native-remote-svg';
 
 import styles from './styles';
@@ -83,7 +81,9 @@ class Favorites extends Component {
                                     source={require('../../../assets/temple/overview.jpg')}
                                 />
                                 <View style={{flexDirection:'column', alignItems: 'flex-start', width:'90%'}}>
-                                    <Text style={styles.subtitle}>Summer <FontAwesome style={{fontSize: 8}}>{Icons.circle}</FontAwesome><Text  style={styles.subtext}> 4 Listings </Text></Text>
+                                    <Text style={styles.subtitle}>Summer </Text>
+                                    <LTIcon textStyle={[styles.subtitle,{fontSize: 8}]} name={'circle'} />
+                                    <Text  style={styles.subtext}> 4 Listings </Text>
                                 </View>
                             </TouchableOpacity>
                         }

@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { Text, TextInput, TouchableOpacity, View } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+
 import PropTypes from 'prop-types';
 import styles from './styles';
+import LTIcon from '../../atoms/LTIcon';
 
 class SearchBar extends Component {
     static propTypes = {
@@ -32,10 +33,12 @@ class SearchBar extends Component {
         if (leftIcon) {
             renderButton = (
                 <View style={styles.leftIconView}>
-                    <Text style={styles.leftIconText}>
-                        <Icon name={leftIcon} size={22} color="#000" />
-                        {/* <FontAwesome>{Icons[leftIcon]}</FontAwesome> */}
-                    </Text>
+                    <LTIcon
+                        name={leftIcon}
+                        size={22}
+                        color="#000"
+                        textStyle={styles.leftIconText}
+                    />
                 </View>
             );
         }

@@ -1,8 +1,6 @@
-import React, { Component } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
-import PropTypes from 'prop-types';
-import LineProgressBar from '../LineProgressBar'
+import React from 'react';
+import { Text, View } from 'react-native';
+import LineProgressBar from '../LineProgressBar';
 import styles from './styles';
 
 const RatingProgreeBar = (props) => {

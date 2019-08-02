@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Text, Keyboard } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 import PropTypes from 'prop-types';
+import LTIcon from '../LTIcon';
 
 import styles from './styles';
 
@@ -10,9 +10,10 @@ const GoBack = (props) => {
     if (props.icon) {
         renderIcon = (
             <View style={[styles.iconView, { borderColor: props.color }]}>
-                <Text style={[styles.iconText, { color: props.color }]}>
-                    <FontAwesome>{Icons[props.icon]}</FontAwesome>
-                </Text>
+                <LTIcon
+                    name={props.icon}
+                    textStyle={[styles.iconText, { color: props.color }]}
+                />
             </View>
         );
     }
