@@ -37,7 +37,7 @@ const {
 
 } = require('./config/constants.json');
 
-import crypto from '../../../library/react-native-fast-crypto';
+import crypto from 'react-native-fast-crypto';
 
 export class HotelReservation {
     static async createReservation(jsonObj,

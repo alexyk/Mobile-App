@@ -13,6 +13,7 @@ import ProfileWalletCard from  '../../atoms/ProfileWalletCard'
 import { setCurrency } from '../../../redux/action/Currency'
 import styles from './styles';
 
+
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];
 class Profile extends Component {
     constructor(props) {
@@ -20,11 +21,11 @@ class Profile extends Component {
         this.state = {
             info: {},
             walletAddress: '',
-            locBalance: 0,
-            ethBalance: '0.0',
+            locBalance: -1,
+            ethBalance: -1,
             currency: props.currency,
             currencySign: props.currencySign,
-            currencySelectionVisible: false,
+            currencySelectionVisible: false
         }
         // this.props.actions.getCurrency(props.currency, false);
     }
@@ -134,12 +135,34 @@ class Profile extends Component {
     onSendToken = () => {
         const { locBalance, walletAddress, ethBalance } = this.state;
         const {navigate} = this.props.navigation;
-        //console.log("walletAddress ----", walletAddress);
+
         if (walletAddress === undefined || walletAddress === null || walletAddress === "") {
-            this.refs.toast.show('Please create LOC wallet before send token.', 1500);
+            this.refs.toast.show('Please create LOC wallet before sending token.', 1500);
             return;
         }
         navigate('SendToken', { locBalance: locBalance.toFixed(6), ethBalance: parseFloat(ethBalance).toFixed(6)});
+    }
+
+    _renderWallet(locBalance, walletAddress, ethBalance) {
+        const hasWallet = (walletAddress != null && walletAddress != '')
+
+        return (
+            <View>
+                <ProfileWalletCard
+                    walletAddress = { walletAddress }
+                    locBalance = { locBalance }
+                    ethBalance = { ethBalance }
+                    createWallet = { this.createWallet }/>
+
+                { (hasWallet) &&
+                    <TouchableOpacity onPress={() => { Clipboard.setString(walletAddress) }}>
+                        <View style={styles.copyBox}>
+                            <Text style={styles.copyText}>Copy your wallet address to clipboard</Text>
+                        </View>
+                    </TouchableOpacity>
+                }
+            </View>
+        )
     }
 
     render() {
@@ -153,8 +176,8 @@ class Profile extends Component {
             <View style={styles.container}>
                 <Toast
                     ref="toast"
-                    style={{ backgroundColor: '#DA7B61' }}
-                    position='bottom'
+                    style={{ backgroundColor: '#DA7B61', top: 500 }}
+                    position='middle'
                     positionValue={100}
                     fadeInDuration={500}
                     fadeOutDuration={500}
@@ -162,16 +185,7 @@ class Profile extends Component {
                     textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                 />
                 <ScrollView showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
-                    <ProfileWalletCard
-                        walletAddress = { walletAddress }
-                        locBalance = { locBalance }
-                        ethBalance = { ethBalance }
-                        createWallet = { this.createWallet }/>
-                    <TouchableOpacity onPress={() => { Clipboard.setString(this.state.walletAddress) }}>
-                        <View style={styles.copyBox}>
-                            <Text style={styles.copyText}>Copy your wallet address to clipboard</Text>
-                        </View>
-                    </TouchableOpacity>
+                    { this._renderWallet(locBalance, walletAddress, ethBalance) }
 
                     <View>
                         <TouchableOpacity onPress={() => navigate('SimpleUserProfile')} style={styles.navItem}>

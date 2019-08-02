@@ -14,32 +14,33 @@ const styles = StyleSheet.create({
         paddingTop: 5,
         paddingBottom: 15
     },
-    walletAddres: {
+    walletAddress: {
         color: '#fff',
         fontFamily: 'FuturaStd-Light',
         fontSize: 11.5,
-        margin: 20,
-        marginTop: 10,
-        marginBottom: 30
+        marginHorizontal: 20,
+        marginTop: 20
     },
     logo: {
-          width: 80,
-          height: 55,
-          borderRadius: 10,
-          marginLeft: 10
+        width: 80,
+        height: 55,
+        borderRadius: 10,
+        marginLeft: 10,
+        alignSelf: 'flex-start',
     },
     logoBackground: {
         position: 'absolute',
-        bottom: -5,
+        bottom: 10,
         left: -33,
         opacity: 0.1,
-        width: '60%',
-        height: '60%'
+        width: '70%',
+        height: '70%'
     },
     balanceLabel: {
         fontSize: 10,
         color: '#fff',
         marginLeft: 20,
+        marginTop: 10,
         fontFamily: 'FuturaStd-Light'
     },
     balanceText: {
@@ -47,6 +48,12 @@ const styles = StyleSheet.create({
         color: '#fff',
         marginLeft: 20,
         fontFamily: 'FuturaStd-Medium'
+    },
+    messageText: {
+        marginTop: 20,
+        fontSize: 16,
+        color: '#fff',
+        fontFamily: 'FuturaStd-Light'
     },
     addMore: {
         position: 'absolute',

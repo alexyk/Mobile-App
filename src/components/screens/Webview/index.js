@@ -301,7 +301,7 @@ class WebviewScreen extends Component {
                     />
                 </View>
 
-                <LTLoader isLoading={isLoading} message={loaderText} style={{height:'90%', top:'10%'}} />
+                <LTLoader isLoading={isLoading} message={loaderText} opacity={'00'} style={{height:'90%', top:'15%'}} />
             </View>
         );
     }

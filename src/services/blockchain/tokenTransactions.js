@@ -19,7 +19,7 @@ import {
 const gasConfig = require('./config/gas-config.json');
 const errors = require('./config/errors.json');
 
-import crypto from '../../../library/react-native-fast-crypto';
+import crypto from 'react-native-fast-crypto';
 
 export class TokenTransactions {
 

@@ -6,7 +6,8 @@ import {
     View,
     StatusBar
 } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import React, { Component } from 'react';
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -183,9 +184,7 @@ class CreateWallet extends Component {
                                 onPress={() => this.submitPassword()}
                             >
                                 <View style={styles.nextButton}>
-                                    <Text style={styles.buttonText}>
-                                        <FontAwesome>{Icons.arrowRight}</FontAwesome>
-                                    </Text>
+                                    <FontAwesomeIcon size={24} icon={faArrowRight} style={{color: 'white'}} />
                                 </View>
                             </TouchableOpacity>
                         </View>
