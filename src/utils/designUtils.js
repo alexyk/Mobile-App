@@ -1,4 +1,4 @@
-import { Platform, Dimensions, PixelRatio } from 'react-native'
+import { Platform, Dimensions, PixelRatio, StyleSheet } from 'react-native'
 import { rlogd } from '../config-debug';
 import { isFontScalingEnabled } from '../config-settings';
 
@@ -88,4 +88,8 @@ export function logDebugInformation() {
 
   //log('screen-utils', `Window size: ${width.toFixed(1)}x${height.toFixed(1)}, pixelRatio: ${pixelRatio}x, fontScale: ${fontScale}, font 12 at scale: ${font12}`, {Platform,height, windowSize: {width, pixelRatio}, fontScale})
   //console.log('screen-utils', `Screen size: ${width.toFixed(1)}x${height.toFixed(1)}, pixelRatio: ${pixelRatio}x, fontScale: ${fontScale}, font 12 at scale: ${font12}`, {Platform, windowSize: {height, width}, pixelRatio, fontScale, font12})
+}
+
+export function createStyleFromObject(obj) {
+  return StyleSheet.create(obj);
 }

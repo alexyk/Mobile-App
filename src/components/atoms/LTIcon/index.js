@@ -6,16 +6,13 @@ import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import SimpleIcon from 'react-native-vector-icons/SimpleLineIcons';
 
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { createStyleFromObject } from '../../../utils/designUtils';
 const faIconsSolid = require('@fortawesome/free-solid-svg-icons');
-
-import { rlog } from '../../../config-debug';
 
 
 export default function LTIcon(props) {
-  rlog(`icon-constructor`, `props`, props);
-
   let { name, style, size, textStyle, color, iconSet, key } = props;
-  let renderAsText = false;
+  let isAsText = false;
 
   if (color != null) {
     style = {color};
@@ -24,60 +21,54 @@ export default function LTIcon(props) {
     size = 24;
   }
   if (textStyle != null) {
-    renderAsText = true;
+    isAsText = true;
   }
+
+  let renderedResult = null;
+  let renderedIcon = null;
 
   if (name == null) {
     return null;
-  } else if (renderAsText) {
+  }
+  
+
+  if (isAsText) {
+    //TODO: Fix icon as text
+    // Example Usage: SearchBar
+    if (!Icons[name]) {
+      console.warn(`[LTIcon] Icon '${name}' as text not found`, props);
+    }
+    renderedResult = (
+      <Text style={[textStyle, {color}]} key={key}>
+        <FontAwesome>{Icons[name]}</FontAwesome>
+      </Text>
+    )
+  } else {
     if (iconSet != null) {
       switch (iconSet) {
 
         case 'material':
-          rlog(`icon`, `icon: ${name}, case 1`);
+          renderedIcon = <FontAwesomeIcon icon={faIconsSolid[faName]} style={style} size={size} color={color} />
+          break;
 
-          return (
-            <Text style={styles.leftIconText} key={key}>
-              <MaterialIcon name={name} size={size} color={color} />
-            </Text>
-          )
-
-          case 'solid':
-              rlog(`icon`, `icon: ${name}, case 2`);
-
-              return (
-                <Text style={styles.leftIconText}>
-                  <SimpleIcon name={name} size={size} color={color} />
-                </Text>
-              )
+        case 'simple':
+          renderedIcon = <SimpleIcon name={name} size={size} color={color} />
+          break;
     
         default:
           console.warn(`[LTIcon] Icon '${name}' of set '${iconSet}' wanted`, props);
-          rlog(`icon`, `icon: ${name}, case 3`);
-
-          return (
-            <Text style={textStyle}>
-                <FontAwesome>{Icons[name]}</FontAwesome>
-            </Text>
-          )
+          renderedIcon = <FontAwesome>{Icons[name]}</FontAwesome>
+          break;
 
       }
     } else {
-      rlog(`icon`, `icon: ${name}, case 4`, {Icons});
-
-      return (
-        <Text style={textStyle}>
-            <FontAwesome>{Icons[name]}</FontAwesome>
-        </Text>
-      )
+      const faName = 'fa' + name.substr(0,1).toUpperCase() + name.substr(1);
+      renderedIcon = ( <FontAwesomeIcon icon={faIconsSolid[faName]} style={style} size={size} /> );
     }
-  } else {
-    const faName = 'fa' + name.substr(0,1).toUpperCase() + name.substr(1);
-    rlog(`icon`, `icon: ${name}, case 5`, {props, faIconsSolid, FontAwesomeIcon, FontAwesome, faName});
-    // rlog(`icon`, `icon: ${name}, case 5`, {props, faIcons, FontAwesomeIcon, FontAwesome});
-
-    return (
-      <FontAwesomeIcon icon={faIconsSolid[faName]} style={style} size={size} />
-    )  
+  
+    renderedResult = renderedIcon;
   }
+
+
+  return renderedResult;
 }

@@ -4,6 +4,7 @@ import { Text, View, FlatList,TouchableOpacity, ProgressBarAndroid } from 'react
 import Image from 'react-native-remote-svg';
 
 import styles from './styles';
+import LTIcon from '../../atoms/LTIcon';
 
 class Favorites extends Component {
     state = {

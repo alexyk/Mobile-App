@@ -1,7 +1,6 @@
-import moment from 'moment';
 import React, { Component } from 'react';
 import {
-    AsyncStorage, Image, Keyboard, SafeAreaView, ScrollView, StyleSheet,
+    AsyncStorage, Image, Keyboard, ScrollView, StyleSheet,
     Text, TouchableOpacity, View
 } from 'react-native';
 import Toast from 'react-native-easy-toast'; //eslint-disable-line

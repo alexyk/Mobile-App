@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import { withNavigation } from 'react-navigation';
 import { autoCalendar } from '../../../config-debug';
 import styles from './styles';
+import LTIcon from '../../atoms/LTIcon';
 
 
 class DateAndGuestPicker extends Component {
@@ -90,7 +91,12 @@ class DateAndGuestPicker extends Component {
                                     disabled={disabled}
                                     onPress={this.onFilter}>
                                     <View style={styles.optionsPickerViewIncomplete}>
-                                        <Icon name={"filter-list"} size={28} color={disabled?'#d9d9d9':"#565656"}/>
+                                        <LTIcon
+                                            name={"filter-list"}
+                                            size={28}
+                                            color={disabled?'#d9d9d9':"#565656"}
+                                            iconSet={'material'}
+                                        />
                                     </View>
                                 </TouchableOpacity>
                             )
