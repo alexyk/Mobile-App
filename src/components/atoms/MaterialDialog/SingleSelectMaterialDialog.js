@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 15,
     borderRadius: 10,
-    backgroundColor: '#5555'
+    backgroundColor: '#5551'
   },
   iconContainer: {
     marginRight: 16,
