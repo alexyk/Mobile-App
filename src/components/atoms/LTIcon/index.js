@@ -11,8 +11,17 @@ const faIconsSolid = require('@fortawesome/free-solid-svg-icons');
 
 
 export default function LTIcon(props) {
-  let { name, style, size, textStyle, color, iconSet, key } = props;
+  let { name, style, size, textStyle, color, iconSet, key, isText } = props;
   let isAsText = false;
+
+  /**
+   * Inside a <Text> component tag - case 1, when <Text> is in the parent component
+   * (where LTIcon is imported) and it is among characters (Exmple: <Text>USD - <LTIcon isText name={'usd'} /> </Text>)
+   */
+  if (isText) {
+    return <FontAwesome>{Icons[name]}</FontAwesome>
+  }
+
 
   if (color != null) {
     style = {color};
@@ -32,14 +41,19 @@ export default function LTIcon(props) {
   }
   
 
+  /**
+   * Inside a <Text> component tag - case 2, when <Text> is created here
+   */
   if (isAsText) {
     //TODO: Fix icon as text
     // Example Usage: SearchBar
     if (!Icons[name]) {
       console.warn(`[LTIcon] Icon '${name}' as text not found`, props);
     }
+    
     renderedResult = (
-      <Text style={[textStyle, {color}]} key={key}>
+      // <Text style={[textStyle, {color}]} key={key}>
+      <Text style={textStyle} key={key}>
         <FontAwesome>{Icons[name]}</FontAwesome>
       </Text>
     )

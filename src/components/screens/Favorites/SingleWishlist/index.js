@@ -1,13 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { Image, StyleSheet, Text, View, FlatList,TouchableOpacity, ProgressBarAndroid } from 'react-native';
+import { Image, Text, View, FlatList,TouchableOpacity } from 'react-native';
 import styles from './styles';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
-import Icon from 'react-native-fontawesome';
+import LTIcon from '../../../atoms/LTIcon';
 
-const dot = <FontAwesome style={{fontSize: 5}}>{Icons.circle}</FontAwesome>
-const starEmpty = <FontAwesome style={{fontSize: 15, color: '#8f9191'}}>{Icons.starO}</FontAwesome>;
-const starFill = <FontAwesome style={{fontSize: 15, color: '#bacfc9'}}>{Icons.starO}</FontAwesome>;
+const dot = <LTIcon style={{fontSize: 5}} name={Icons.circle} />
+const starEmpty = <LTIcon style={{fontSize: 15, color: '#8f9191'}} name={Icons.starO} />;
+const starFill = <LTIcon style={{fontSize: 15, color: '#bacfc9'}} name={Icons.starO} />;
 
 const flastlst_data = [{
     title1: "ENTIRE APPARTMENT . 1 BEDROOM 1 BED 1.5 BATHS",
@@ -59,7 +58,7 @@ class SingleWishList extends Component {
                     <Image style={styles.btn_backImage} source={require('../../../../assets/png/arrow-back.png')} />
                 </TouchableOpacity>
                 <Text style={styles.title}>Summer</Text>
-                <Text style={styles.subtTitle}>Anytime <FontAwesome style={{fontSize: 5}}>{Icons.circle}</FontAwesome> 2 guests</Text>
+                <Text style={styles.subtTitle}>Anytime <LTIcon isText style={{fontSize: 5}} name={Icons.circle} /> 2 guests</Text>
                 <View style={{width: '100%'}}>
                 <FlatList style={styles.flatList}
                     data={flastlst_data}

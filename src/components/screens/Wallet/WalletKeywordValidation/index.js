@@ -252,9 +252,10 @@ class WalletKeywordValidation extends Component {
                                 {/*<TouchableOpacity*/}
                                     {/*onPress={() => this.test()}>*/}
                                     {/*<View style={styles.nextButton}>*/}
-                                        {/*<Text style={styles.buttonText}>*/}
-                                            {/*<FontAwesome>{Icons.arrowRight}</FontAwesome>*/}
-                                        {/*</Text>*/}
+                                        {/* <LTIcon
+                                            textStyle={styles.buttonText}>
+                                            name={Icons.arrowRight}
+                                        /> */}
                                     {/*</View>*/}
                                 {/*</TouchableOpacity>*/}
                             {/*</View>*/}

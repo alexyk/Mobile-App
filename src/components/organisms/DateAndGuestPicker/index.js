@@ -1,11 +1,10 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import { withNavigation } from 'react-navigation';
 import { autoCalendar } from '../../../config-debug';
-import styles from './styles';
 import LTIcon from '../../atoms/LTIcon';
+import styles from './styles';
 
 
 class DateAndGuestPicker extends Component {

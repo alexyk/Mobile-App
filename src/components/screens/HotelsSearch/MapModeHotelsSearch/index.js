@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Text, View, Platform } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import WebView from "react-native-webview";
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import LTIcon from '../../../atoms/LTIcon';
 import MapView, { Marker } from 'react-native-maps';
 import { connect } from 'react-redux';
 import blue_marker from '../../../../assets/blue_marker.png';
@@ -132,7 +132,7 @@ class MapModeHotelsSearch extends Component {
             try {
                 result = (
                     <Text style={styles.ratingsMap}>
-                        { arr.map((item,index) => <FontAwesome key={`star_${index}_${this.itemId}`}>{Icons.starO}</FontAwesome>) }
+                        { arr.map((item,index) => <LTIcon isText key={`star_${index}_${this.itemId}`} name={Icons.starO} />) }
                     </Text>
                 )
             } catch (error) {

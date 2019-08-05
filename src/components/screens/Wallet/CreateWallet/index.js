@@ -6,8 +6,6 @@ import {
     View,
     StatusBar
 } from 'react-native';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import React, { Component } from 'react';
 
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view'
@@ -18,6 +16,7 @@ import SmartInput from '../../../atoms/SmartInput';
 import { Wallet } from '../../../../services/blockchain/wallet';
 import LineProgressDialog from '../../../atoms/SimpleDialogs/LineProgressDialog';
 import WhiteBackButton from '../../../atoms/WhiteBackButton';
+import LTIcon from '../../../atoms/LTIcon';
 
 class CreateWallet extends Component {
     constructor(props) {
@@ -184,7 +183,7 @@ class CreateWallet extends Component {
                                 onPress={() => this.submitPassword()}
                             >
                                 <View style={styles.nextButton}>
-                                    <FontAwesomeIcon size={24} icon={faArrowRight} style={{color: 'white'}} />
+                                    <LTIcon size={24} icon={'arrow-right'} style={{color: 'white'}} />
                                 </View>
                             </TouchableOpacity>
                         </View>

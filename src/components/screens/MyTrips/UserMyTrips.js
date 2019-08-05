@@ -1,7 +1,6 @@
-import { BackHandler, FlatList, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import { FlatList, Image, Text, View } from 'react-native';
 import React, { Component } from 'react';
-import { domainPrefix, imgHost } from '../../../config';
+import { imgHost } from '../../../config';
 
 import Dash from 'react-native-dash';
 import PropTypes from 'prop-types';
@@ -12,6 +11,7 @@ import { userInstance } from '../../../utils/userInstance';
 import styles from './styles';
 import lang from '../../../language/';
 import SearchBar from "../../molecules/SearchBar"
+import LTIcon from '../../atoms/LTIcon';
 
 class UserMyTrips extends Component {
     static propTypes = {
@@ -217,7 +217,7 @@ class UserMyTrips extends Component {
         const dateFormat = 'DD MMM, YYYY'; // example: "01 Oct, 2019"
         const dateFrom = arrivalDate.format(dateFormat).toString();
         const dateTo = arrivalDate.add(item.item.nights, 'day').format(dateFormat).toString();
-        const arrow = (<FontAwesome>{Icons.longArrowRight}</FontAwesome>);
+        const arrow = (<LTIcon name={Icons.longArrowRight} />);
 
         return {
             hotelImageURL,

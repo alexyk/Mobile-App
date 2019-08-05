@@ -1,12 +1,11 @@
 import {
     FlatList,
     Image,
-    StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import LTIcon from '../../atoms/LTIcon';
 import { imgHost, basePath } from '../../../config';
 
 import PropTypes from 'prop-types';
@@ -103,17 +102,17 @@ class PropertyList extends React.Component {
     renderCurrency(eur, usd, gbp) {
         if (this.state.currency == "EUR") {
             return (
-                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail"><FontAwesome>{Icons.euro}</FontAwesome> EUR {eur} LOC {parseFloat(eur / this.state.locRate).toFixed(2)} </Text>
+                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail"><LTIcon isText name={'euro'}/> EUR {eur} LOC {parseFloat(eur / this.state.locRate).toFixed(2)} </Text>
             );
         }
         else if (this.state.currency == "USD") {
             return (
-                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail"><FontAwesome>{Icons.usd}</FontAwesome> USD {usd} LOC {parseFloat(usd / this.state.locRate).toFixed(2)} </Text>
+                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail"><LTIcon isText name={'usd'} /> USD {usd} LOC {parseFloat(usd / this.state.locRate).toFixed(2)} </Text>
             );
         }
         else if (this.state.currency == "GBP") {
             return (
-                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail"><FontAwesome>{Icons.gbp}</FontAwesome> GBP {gbp} LOC {parseFloat(gbp / this.state.locRate).toFixed(2)} </Text>
+                <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail"><LTIcon isText name={'gbp'}/> GBP {gbp} LOC {parseFloat(gbp / this.state.locRate).toFixed(2)} </Text>
             );
         }
     }

@@ -1,5 +1,4 @@
-import { AsyncStorage, Clipboard, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import { ScrollView, Text, View } from 'react-native';
 import React, { Component } from 'react';
 
 import BackButton from '../../atoms/BackButton';

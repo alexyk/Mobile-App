@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Toast from 'react-native-easy-toast';
 import RNPickerSelect from 'react-native-picker-select';
 import { UltimateListView } from 'react-native-ultimate-listview';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+import LTIcon from '../../../atoms/LTIcon';
 import { connect } from 'react-redux';
 import { imgHost } from '../../../../config';
 import { processError, rlog } from '../../../../config-debug';
@@ -514,10 +514,10 @@ class HomesSearchScreen extends Component {
                 <View style={styles.countriesSpinner}>
                     <TouchableOpacity onPress={this.onCancel}>
                         <View style={styles.leftIconView}>
-                            <Text style={styles.leftIconText}>
-                                <Icon name="arrow-back" size={22} color="#000" />
-                                {/* <FontAwesome>{Icons[leftIcon]}</FontAwesome> */}
-                            </Text>
+                            <LTIcon
+                                textStyle={styles.leftIconText}
+                                name="arrow-back" size={22} color="#000"
+                            />
                         </View>
                     </TouchableOpacity>
                     <View style={styles.pickerWrapHomes}>

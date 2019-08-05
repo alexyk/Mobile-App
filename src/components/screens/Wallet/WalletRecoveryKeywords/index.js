@@ -7,13 +7,13 @@ import {
     View,
     StatusBar
 } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
 import React, { Component } from 'react';
 
 import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import PropTypes from 'prop-types';
 import SmartInput from '../../../atoms/SmartInput';
 import WhiteBackButton from '../../../atoms/WhiteBackButton';
+import LTIcon from '../../../atoms/LTIcon';
 import styles from './styles';
 
 class WalletRecoveryKeywords extends Component {
@@ -89,9 +89,10 @@ class WalletRecoveryKeywords extends Component {
                                 <TouchableOpacity
                                     onPress={() => this.toWalletKeywordValidation()}>
                                     <View style={styles.nextButton}>
-                                        <Text style={styles.buttonText}>
-                                            <FontAwesome>{Icons.arrowRight}</FontAwesome>
-                                        </Text>
+                                        <LTIcon
+                                            textStyle={styles.buttonText}
+                                            name={Icons.arrowRight}
+                                        />
                                     </View>
                                 </TouchableOpacity>
                             </View>

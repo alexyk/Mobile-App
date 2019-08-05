@@ -25,7 +25,6 @@ import MapModeHotelsSearch from "../MapModeHotelsSearch";
 import Toast from 'react-native-easy-toast';//eslint-disable-line
 import { UltimateListView } from "react-native-ultimate-listview";
 import { DotIndicator } from "react-native-indicators";
-import FontAwesome, { Icons } from "react-native-fontawesome"
 
 import {
   DISPLAY_MODE_RESULTS_AS_LIST,
@@ -38,6 +37,7 @@ import { commonText } from "../../../../common.styles"
 import styles from "./styles";
 
 import { hasValidCoordinatesForMap } from '../utils'
+import LTIcon from '../../../atoms/LTIcon';
 
 const { width, height } = Dimensions.get("window");
 
@@ -302,9 +302,10 @@ export function renderMapButton() {
           onPress={this.onToggleMapOrListResultsView}
           style={styles.switchButton}
         >
-          <FontAwesome style={styles.icon}>
-            {isMap && !isList ? Icons.listUl : Icons.mapMarker}
-          </FontAwesome>
+          <LTIcon 
+            style={styles.icon}
+            name={isMap && !isList ? Icons.listUl : Icons.mapMarker}
+          />
         </TouchableOpacity>
       )
     }

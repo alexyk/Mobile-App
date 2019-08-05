@@ -1,12 +1,11 @@
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import FontAwesome, { Icons } from 'react-native-fontawesome';
+import { ScrollView, Text, View } from 'react-native';
 import React, { Component } from 'react';
-import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 import Switch from 'react-native-customisable-switch';
 import BackButton from '../../atoms/BackButton';
 import styles from './styles';
 import { userInstance } from '../../../utils/userInstance';
+import LTIcon from '../../atoms/LTIcon';
 
 class Notifications extends Component {
     state = {
@@ -36,6 +35,19 @@ class Notifications extends Component {
             recieveText: reminderText,
             recievePushNotification: reminderPush,
         });
+    }
+
+    renderSwitchIcon(isSwitched) {
+        return (
+            isSwitched ?
+                <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
+                    <LTIcon textStyle={styles.switchCheckText} name={Icons.check} />
+                </View>
+                :
+                <View style={[styles.switchUnCheckView, { zIndex: checkZIndex }]}>
+                    <LTIcon textStyle={styles.unSwitchCheckText} name={Icons.times} />
+                </View>
+        )
     }
 
     render() {
@@ -71,19 +83,7 @@ class Notifications extends Component {
                             <Text style={styles.navItemText}>Email</Text>
 
                             <View>
-                                {recieveEmailMessage ?
-                                    <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.switchCheckText}>
-                                            <FontAwesome>{Icons.check}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                    :
-                                    <View style={[styles.switchUnCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.unSwitchCheckText}>
-                                            <FontAwesome>{Icons.times}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                }
+                                { this.renderSwitchIcon(recieveEmailMessage) }                            
                                 {/* if you want to solve cross appearing above switch you need to set checkZIndex to 0 */}
                                 <Switch
                                     value={recieveEmailMessage}
@@ -114,19 +114,7 @@ class Notifications extends Component {
                         <View style={styles.navItem}>
                             <Text style={styles.navItemText}>Text Message</Text>
                             <View>
-                                {recieveTextMessage ?
-                                    <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.switchCheckText}>
-                                            <FontAwesome>{Icons.check}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                    :
-                                    <View style={[styles.switchUnCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.unSwitchCheckText}>
-                                            <FontAwesome>{Icons.times}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                }
+                                { this.renderSwitchIcon(recieveTextMessage) }
                                 <Switch
                                     value={recieveTextMessage}
                                     onChangeValue={() => {
@@ -158,19 +146,7 @@ class Notifications extends Component {
                             <Text style={styles.navItemText}>Push Notifications{'\n'}{'\n'}<Text style={styles.navText}>To your mobile or tablet device </Text></Text>
 
                             <View>
-                                {recievePushNotificationMessages ?
-                                    <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.switchCheckText}>
-                                            <FontAwesome>{Icons.check}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                    :
-                                    <View style={[styles.switchUnCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.unSwitchCheckText}>
-                                            <FontAwesome>{Icons.times}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                }
+                                { this.renderSwitchIcon(recievePushNotificationMessages) }
                                 <Switch
                                     value={recievePushNotificationMessages}
                                     onChangeValue={() => {
@@ -209,19 +185,7 @@ class Notifications extends Component {
                         <View style={styles.navItem}>
                             <Text style={styles.navItemText}>Email</Text>
                             <View>
-                                {recieveEmail ?
-                                    <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.switchCheckText}>
-                                            <FontAwesome>{Icons.check}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                    :
-                                    <View style={[styles.switchUnCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.unSwitchCheckText}>
-                                            <FontAwesome>{Icons.times}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                }
+                                { this.renderSwitchIcon(recieveEmail) }
                                 <Switch
                                     value={recieveEmail}
                                     onChangeValue={() => {
@@ -249,19 +213,7 @@ class Notifications extends Component {
                         <View style={styles.navItem}>
                             <Text style={styles.navItemText}>Text Message</Text>
                             <View>
-                                {recieveText ?
-                                    <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.switchCheckText}>
-                                            <FontAwesome>{Icons.check}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                    :
-                                    <View style={[styles.switchUnCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.unSwitchCheckText}>
-                                            <FontAwesome>{Icons.times}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                }
+                                { this.renderSwitchIcon(recieveText) }
                                 <Switch
                                     value={recieveText}
                                     onChangeValue={() => {
@@ -293,19 +245,7 @@ class Notifications extends Component {
                             <Text style={styles.navItemText}>Push Notifications{'\n'}{'\n'}<Text style={styles.navText}>To your mobile or tablet device </Text></Text>
 
                             <View>
-                                {recievePushNotification ?
-                                    <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.switchCheckText}>
-                                            <FontAwesome>{Icons.check}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                    :
-                                    <View style={[styles.switchUnCheckView, { zIndex: checkZIndex }]}>
-                                        <Text style={styles.unSwitchCheckText}>
-                                            <FontAwesome>{Icons.times}</FontAwesome>
-                                        </Text>
-                                    </View>
-                                }
+                                { this.renderSwitchIcon(recievePushNotification) }
                                 <Switch
                                     value={recievePushNotification}
                                     onChangeValue={() => {
