@@ -18,7 +18,7 @@ export default function NavButton(props) {
         <View style={styles.tab}>
             <LTIcon
               name={icon}
-              size={32}
+              size={28}
               style={active === name ? styles.activeIconStyle : styles.inactiveIconStyle}
             />
 
@@ -50,13 +50,13 @@ const styles = StyleSheet.create({
   },
 
   activeTextStyle: {
-      fontSize: 8.5,
+      fontSize: 12,
       fontFamily: 'FuturaStd-Light',
       color: '#DA7B61',
       marginTop: 6
   },
   inactiveTextStyle: {
-      fontSize: 8.5,
+      fontSize: 12,
       fontFamily: 'FuturaStd-Light',
       color: '#646464',
       marginTop: 6

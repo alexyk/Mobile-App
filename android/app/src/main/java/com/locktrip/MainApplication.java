@@ -6,7 +6,6 @@ import com.airbnb.android.react.maps.MapsPackage;
 import com.dylanvann.fastimage.FastImageViewPackage;
 import com.facebook.CallbackManager;
 import com.facebook.react.ReactApplication;
-import com.horcrux.svg.SvgPackage;
 import com.swmansion.reanimated.ReanimatedPackage;
 import com.reactnativecommunity.webview.RNCWebViewPackage;
 import com.swmansion.gesturehandler.react.RNGestureHandlerPackage;
@@ -45,7 +44,6 @@ public class MainApplication extends Application implements ReactApplication {
       return Arrays.<ReactPackage>asList(
             new RNCardViewPackage(),
             new MainReactPackage(),
-            new SvgPackage(),
             new ReanimatedPackage(),
             new RNCWebViewPackage(),
             new RNGestureHandlerPackage(),

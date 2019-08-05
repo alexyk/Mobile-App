@@ -38,6 +38,7 @@ class Notifications extends Component {
     }
 
     renderSwitchIcon(isSwitched) {
+        const { checkZIndex } = this.state;
         return (
             isSwitched ?
                 <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
@@ -54,7 +55,7 @@ class Notifications extends Component {
         const { navigate } = this.props.navigation;
         const {
             recieveEmailMessage, recieveTextMessage, recievePushNotificationMessages, recieveEmail, recieveText,
-            recievePushNotification, checkZIndex
+            recievePushNotification
         } = this.state;
         return (
             <View style={styles.container}>

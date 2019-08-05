@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { faPlus } from '@fortawesome/free-solid-svg-icons'
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 

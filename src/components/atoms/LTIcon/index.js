@@ -5,10 +5,6 @@ import FontAwesome, { Icons } from 'react-native-fontawesome';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import SimpleIcon from 'react-native-vector-icons/SimpleLineIcons';
 
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
-import { createStyleFromObject } from '../../../utils/designUtils';
-const faIconsSolid = require('@fortawesome/free-solid-svg-icons');
-
 
 export default function LTIcon(props) {
   let { name, style, size, textStyle, color, iconSet, key, isText } = props;
@@ -16,7 +12,7 @@ export default function LTIcon(props) {
 
   /**
    * Inside a <Text> component tag - case 1, when <Text> is in the parent component
-   * (where LTIcon is imported) and it is among characters (Exmple: <Text>USD - <LTIcon isText name={'usd'} /> </Text>)
+   * (where LTIcon is imported) and it is among characters (Example: <Text>USD - <LTIcon isText name={'usd'} /> </Text>)
    */
   if (isText) {
     return <FontAwesome>{Icons[name]}</FontAwesome>
@@ -58,11 +54,12 @@ export default function LTIcon(props) {
       </Text>
     )
   } else {
+    let isDefault = false;
     if (iconSet != null) {
       switch (iconSet) {
 
         case 'material':
-          renderedIcon = <FontAwesomeIcon icon={faIconsSolid[faName]} style={style} size={size} color={color} />
+          renderedIcon = <MaterialIcon name={name} style={style} size={size} color={color} />
           break;
 
         case 'simple':
@@ -70,16 +67,27 @@ export default function LTIcon(props) {
           break;
     
         default:
+          isDefault = true;
           console.warn(`[LTIcon] Icon '${name}' of set '${iconSet}' wanted`, props);
-          renderedIcon = <FontAwesome>{Icons[name]}</FontAwesome>
           break;
 
       }
     } else {
-      const faName = 'fa' + name.substr(0,1).toUpperCase() + name.substr(1);
-      renderedIcon = ( <FontAwesomeIcon icon={faIconsSolid[faName]} style={style} size={size} /> );
+      isDefault = true;
     }
-  
+    
+    if (isDefault) {
+      let extraStyle = {};
+      if (size != null) {
+        extraStyle.fontSize = size;
+      }
+      if (color != null) {
+        extraStyle.color = color;
+      }
+
+      renderedIcon = <FontAwesome style={[style,extraStyle]}>{Icons[name]}</FontAwesome>
+    }
+
     renderedResult = renderedIcon;
   }
 
