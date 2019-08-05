@@ -1,6 +1,6 @@
 {
   "name": "Mobile-App",
-  "version": "1.0.23-native-search-3",
+  "version": "1.0.23-android64-1",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.5.5",
