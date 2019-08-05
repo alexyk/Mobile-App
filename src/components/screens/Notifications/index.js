@@ -41,11 +41,11 @@ class Notifications extends Component {
         return (
             isSwitched ?
                 <View style={[styles.switchCheckView, { zIndex: checkZIndex }]}>
-                    <LTIcon textStyle={styles.switchCheckText} name={Icons.check} />
+                    <LTIcon textStyle={styles.switchCheckText} name={'check'} />
                 </View>
                 :
                 <View style={[styles.switchUnCheckView, { zIndex: checkZIndex }]}>
-                    <LTIcon textStyle={styles.unSwitchCheckText} name={Icons.times} />
+                    <LTIcon textStyle={styles.unSwitchCheckText} name={'times'} />
                 </View>
         )
     }

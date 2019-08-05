@@ -304,7 +304,7 @@ export function renderMapButton() {
         >
           <LTIcon 
             style={styles.icon}
-            name={isMap && !isList ? Icons.listUl : Icons.mapMarker}
+            name={isMap && !isList ? 'listUl' : 'mapMarker'}
           />
         </TouchableOpacity>
       )

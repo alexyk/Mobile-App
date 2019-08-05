@@ -10,7 +10,7 @@ import {
     createReduxContainer,
     createReactNavigationReduxMiddleware,
 } from 'react-navigation-redux-helpers';
-import {Platform, BackHandler, View} from 'react-native';
+import {BackHandler, View} from 'react-native';
 
 import ExitConfirmDialog from '../components/molecules/ExitConfirmDialog'
 
@@ -58,9 +58,7 @@ import EditUserProfile from '../components/screens/EditUserProfile';
 import SendToken from '../components/screens/SendToken';
 import CongratsCreditCard from '../components/screens/CongratsCreditCard';
 
-import PropertyList from '../components/screens/PropertyList';
 import SingleWishlist from '../components/screens/Favorites/SingleWishlist';
-import Debug from '../components/screens/Debug';
 import Calendar from '../components/screens/Calendar';
 
 import HotelsSearchScreen from '../components/screens/HotelsSearch/HotelsSearchScreen';
@@ -123,7 +121,6 @@ const RootNavigator = createStackNavigator(
         RoomDetailsReview: { screen: RoomDetailsReview},
         GuestInfoForm: { screen: GuestInfoForm},
         WebviewScreen: {screen: WebviewScreen},
-        PropertyList : {screen: PropertyList},
         HotelDetails:{ screen: HotelDetails},
         FilterScreen: { screen: Filters },
         AvailableRoomsView: { screen: AvailableRoomsView},
@@ -137,7 +134,6 @@ const RootNavigator = createStackNavigator(
         SimpleUserProfile: {screen: SimpleUserProfile},
         SendToken: {screen: SendToken},
         SingleWishlist: {screen: SingleWishlist},
-        Debug : {screen: Debug},
         Chat: {screen: Chat},
 
         HotelsSearchScreen: {screen: HotelsSearchScreen},

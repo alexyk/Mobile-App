@@ -254,7 +254,7 @@ class WalletKeywordValidation extends Component {
                                     {/*<View style={styles.nextButton}>*/}
                                         {/* <LTIcon
                                             textStyle={styles.buttonText}>
-                                            name={Icons.arrowRight}
+                                            name={'arrowRight'}
                                         /> */}
                                     {/*</View>*/}
                                 {/*</TouchableOpacity>*/}
