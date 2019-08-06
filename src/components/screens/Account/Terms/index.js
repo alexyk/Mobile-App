@@ -36,7 +36,6 @@ class Terms extends Component {
         let user = params;
         user['image'] = PUBLIC_URL + "images/default.png";
 
-        //console.log(user);
 
         this.setState({ showProgress: true });
         requester.register(user, null).then(res => {
@@ -58,7 +57,7 @@ class Terms extends Component {
         })
         .catch(err => {
             this.setState({ showProgress: false });
-            Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
+            Toast.showWithGravity('Cannot get messages. Please check network connection.', Toast.SHORT, Toast.BOTTOM);
             //console.log(err);
         });
     }

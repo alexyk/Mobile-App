@@ -156,7 +156,7 @@ class Login extends Component {
                                 onChangeText={this.onChangeHandler('email')}
                                 placeholder="Email"
                                 placeholderTextColor="#fff"
-                                rightIcon={validateEmail(email) ? 'check' : null}
+                                rightIcon={validateEmail(email) ? null : 'close'}
                             />
                         </View>
 
@@ -169,7 +169,7 @@ class Login extends Component {
                                 onChangeText={this.onChangeHandler('password')}
                                 placeholder="Password"
                                 placeholderTextColor="#fff"
-
+                                rightIcon={validatePassword1(password) ? null : 'close'}
                             />
                         </View>
 

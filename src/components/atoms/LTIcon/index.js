@@ -19,9 +19,6 @@ export default function LTIcon(props) {
   }
 
 
-  if (color != null) {
-    style = {color};
-  }
   if (size == null) {
     size = 24;
   }

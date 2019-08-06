@@ -13,7 +13,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import Switch from 'react-native-customisable-switch';
 import Toast from 'react-native-simple-toast';
 import styles from './styles';
-import { validateEmail, validateName } from '../../../../utils/validation';
+import { validateEmail, validateName, validatePhone } from '../../../../utils/validation';
 import SmartInput from '../../../atoms/SmartInput';
 import WhiteBackButton from '../../../atoms/WhiteBackButton';
 import requester from '../../../../initDependencies';
@@ -31,6 +31,7 @@ class CreateAccount extends Component {
             firstName: '',
             lastName: '',
             email: '',
+            phoneNumber:'',
             userWantsPromo: true,
             checkZIndex: 1, // zIndex of switchCheckView
             countriesLoaded: false,
@@ -137,18 +138,18 @@ class CreateAccount extends Component {
 
         if (params != undefined && params != null) {
             const {
-                firstName, lastName, email, country, userWantsPromo, checkZIndex, countryState
+                firstName, lastName, email, phoneNumber, country, userWantsPromo, checkZIndex, countryState
             } = this.state;
             if (country === undefined || country === null) {
                 Toast.showWithGravity('Select Country.', Toast.SHORT, Toast.BOTTOM);
             }
             else {
-                this.props.navigation.navigate('Terms', { ...params, firstName, lastName, email, country: country.id, countryState: countryState.id, userWantsPromo })
+                this.props.navigation.navigate('Terms', { ...params, firstName, lastName, email, phoneNumber, country: country.id, countryState: countryState.id, userWantsPromo })
             }
         }
         else {
             const {
-                firstName, lastName, email, country, userWantsPromo, checkZIndex, countryState
+                firstName, lastName, email, country, userWantsPromo, checkZIndex, countryState, phoneNumber
             } = this.state;
             
             if (country === undefined || country === null) {
@@ -158,10 +159,10 @@ class CreateAccount extends Component {
                 requester.getEmailFreeResponse(email).then(res => {
                     res.body.then(data => {
                         if (data.exist) {
-                            Toast.showWithGravity('Already exist email, please try with another email.', Toast.SHORT, Toast.BOTTOM);
+                            Toast.showWithGravity('This e-mail is taken, please try with another.', Toast.SHORT, Toast.BOTTOM);
                         } else {
                             this.props.navigation.navigate('CreatePassword', {
-                                firstName, lastName, email, country: country.id, countryState: countryState.id, userWantsPromo
+                                firstName, lastName, email, phoneNumber, country: country.id, countryState: countryState.id, userWantsPromo
                             })
                         }
                     });
@@ -172,7 +173,7 @@ class CreateAccount extends Component {
 
     render() {
         const {
-            firstName, lastName, email, userWantsPromo, checkZIndex
+            firstName, lastName, email, phoneNumber, userWantsPromo, checkZIndex
         } = this.state;
         const { params } = this.props.navigation.state;
         const { navigate, goBack } = this.props.navigation;
@@ -210,7 +211,7 @@ class CreateAccount extends Component {
                                 onChangeText={this.onChangeHandler('firstName')}
                                 placeholder="First Name"
                                 placeholderTextColor="#fff"
-                                rightIcon={validateName(firstName) ? 'check' : null}
+                                rightIcon={validateName(firstName) ? null : 'close'}
                             />
                         </View>
 
@@ -221,7 +222,7 @@ class CreateAccount extends Component {
                                 onChangeText={this.onChangeHandler('lastName')}
                                 placeholder="Last Name"
                                 placeholderTextColor="#fff"
-                                rightIcon={validateName(lastName) ? 'check' : null}
+                                rightIcon={validateName(lastName) ? null : 'close'}
                             />
                         </View>
 
@@ -235,9 +236,24 @@ class CreateAccount extends Component {
                                 onChangeText={this.onChangeHandler('email')}
                                 placeholder="Email"
                                 placeholderTextColor="#fff"
-                                rightIcon={validateEmail(email) ? 'check' : null}
+                                rightIcon={validateEmail(email) ? null : 'close'}
                             />
                         </View>
+
+                        <View style={styles.inputView}>
+                            <SmartInput
+                                editable={isEditableEmail} selectTextOnFocus={isEditableEmail} 
+                                keyboardType="phone-pad"
+                                autoCorrect={false}
+                                autoCapitalize="none"
+                                value={phoneNumber}
+                                onChangeText={this.onChangeHandler('phoneNumber')}
+                                placeholder="Phone"
+                                placeholderTextColor="#fff"
+                                rightIcon={validatePhone(phoneNumber) ? null : "close"}
+                            />
+                        </View>
+
 
                         <View style={styles.inputView}>
                             <RNPickerSelect

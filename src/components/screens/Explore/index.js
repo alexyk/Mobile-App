@@ -91,6 +91,7 @@ class Explore extends Component {
             if (autoHotelSearchFocus) this.searchBarRef.focus()
         }
 
+        // TODO: An old note below. To fix - investigate the commit by abhi when it was added:
         // Below line gives null cannot be casted to string error on ios please look into it
         requester.getUserInfo().then((res) => {
             res.body.then((data) => {
@@ -105,6 +106,8 @@ class Explore extends Component {
                 //console.log('componentWillMount', err);
             });
         });
+        // TODO: Also there was a merge about 10 months ago - see yuri930 commit for the above code (where the issue is)
+        // Best - get rid of AsyncStorage and use redux to clear any cache issues
         this.setCountriesInfo();
     }
 

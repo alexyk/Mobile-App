@@ -90,7 +90,7 @@ class CreatePassword extends Component {
                             onChangeText={this.onChangeHandler('password')}
                             placeholder="8 chars with a digit and a symbol"
                             placeholderTextColor="#fff"
-                            rightIcon={validatePassword(password) ? 'check' : null}
+                            rightIcon={validatePassword(password) ? null : 'close'}
                         />
                     </View>
 
@@ -105,7 +105,7 @@ class CreatePassword extends Component {
                             onChangeText={this.onChangeHandler('confirmPassword')}
                             placeholder="8 chars with a digit and a symbol"
                             placeholderTextColor="#fff"
-                            rightIcon={validateConfirmPassword(password, confirmPassword) ? 'check' : null}
+                            rightIcon={validateConfirmPassword(password, confirmPassword) ? null : 'close'}
                         />
                     </View>
 
