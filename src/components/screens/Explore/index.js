@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import {
     AsyncStorage, Image, Keyboard, ScrollView, StyleSheet,
-    Text, TouchableOpacity, View
+    Text, TouchableOpacity, View, StatusBar
 } from 'react-native';
 import Toast from 'react-native-easy-toast'; //eslint-disable-line
 import RNPickerSelect from 'react-native-picker-select'; //eslint-disable-line
@@ -33,6 +33,7 @@ const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];//eslint-disable-line
 
 class Explore extends Component {
     static self;
+
     constructor(props) {
         super(props);
 
@@ -575,6 +576,10 @@ class Explore extends Component {
     render() {
         return (
             <View style={styles.container}>
+                <StatusBar
+                    barStyle="dark-content"
+                    backgroundColor="#f0f1f3"
+                />
                 <Toast
                     ref="toast"
                     style={{ backgroundColor: '#DA7B61' }}
@@ -590,7 +595,6 @@ class Explore extends Component {
                 {this.renderAutocomplete()}
 
                 <ScrollView  style={styles.scrollView} automaticallyAdjustContentInsets={true}>
-
                     { this.renderDateAndGuestsPicker() }
 
                     <Text style={[styles.scrollViewTitles, { marginBottom: 10, marginTop: 5 }]}>Discover</Text>

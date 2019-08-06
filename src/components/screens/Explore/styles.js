@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     searchAreaView: {
         flex:1,
         backgroundColor: '#f0f1f3',
-        paddingTop: 0,
+        paddingTop: 10,
         paddingLeft: 15,
         paddingRight: 15
     },
