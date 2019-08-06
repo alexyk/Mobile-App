@@ -91,6 +91,7 @@ export default function createOfflineRequester() {
       case 'createReservation':             return require('./offline-responses/booking1.json')
       case 'getUserHasPendingBooking':      return require('./offline-responses/booking1-pending.json')
       case 'getListingsByFilter':           return offlinePacksHomes[autoHomeSearchPlace]
+      case 'getMyHotelBookings':            return require('./offline-responses/my-trips-all.json')
       default: {}
     }
   }
@@ -123,6 +124,8 @@ export default function createOfflineRequester() {
     markQuoteIdAsMarked: (...args) 	        => genPromise(args,'getUserHasPendingBooking'),
     // homes
     getListingsByFilter: (...args)          => genPromise(args,'getListingsByFilter', 1),
+    // my trips aka bookings
+    getMyHotelBookings: (...args)           => genPromise(args,'getMyHotelBookings', 0.1),
 		// socket
 		startSocketConnection: (onData,_this) => {
       let arr = require('./offline-responses/fromSocket.json');
