@@ -13,6 +13,7 @@ import lang from '../../../language/';
 import SearchBar from "../../molecules/SearchBar"
 import LTIcon from '../../atoms/LTIcon';
 
+
 class UserMyTrips extends Component {
     static propTypes = {
         navigation: PropTypes.shape({
@@ -28,26 +29,26 @@ class UserMyTrips extends Component {
 
     constructor(props) {
         super(props);
-        //console.log(props.navigation.state);
-        //State
+
+        const { trips } = props.navigation.state.params;
+
+        // State
         this.state = {
-            trips: props.navigation.state.params.trips.content.concat(), // make a copy
-            isLast: props.navigation.state.params.trips.last,
             page: 0,
             userImageUrl: '',
-            isLoading: false,
-            allTrips: props.navigation.state.params.trips.content.concat() // make a copy
+            isLoading: true,
+            allTrips: trips
         };
+
         this.renderItem = this.renderItem.bind(this);
         this.renderHotelImage = this.renderHotelImage.bind(this);
         this.renderStatusText = this.renderStatusText.bind(this);
         this.renderRefNoText = this.renderRefNoText.bind(this);
         this.renderBookingStatusAndRefNo = this.renderBookingStatusAndRefNo.bind(this);
-        this.onServerNextPageLoaded = this.onServerNextPageLoaded.bind(this);
+        this.onServerMyTrips = this.onServerMyTrips.bind(this);
         this.refreshFilterResult = this.refreshFilterResult.bind(this);
         this.filterTrips = this.filterTrips.bind(this);
         this.clearFilterDelay = this.clearFilterDelay.bind(this);
-        this.onEndReached = this.onEndReached.bind(this);
         this.onFilterChanged = this.onFilterChanged.bind(this);
         this.onFilterTrips = this.onFilterTrips.bind(this);
 
@@ -55,11 +56,9 @@ class UserMyTrips extends Component {
     }
 
     async componentDidMount() {
-        //Loading user info for user image
+        // Loading user info for user image
         let profileImage = await userInstance.getProfileImage();
-        this.setState({
-            userImageUrl: profileImage==null? '' : profileImage,
-        });
+        this.setState({userImageUrl: profileImage==null? '' : profileImage});
     }
 
     clearFilterDelay() {
@@ -128,12 +127,12 @@ class UserMyTrips extends Component {
         this.refreshFilterResult();
     }
 
-    onServerNextPageLoaded(data) {
+    onServerMyTrips(data) {
         var allTrips = []
         allTrips = this.state.allTrips.concat(data.content)
 
         this.setState({
-            allTrips: allTrips,
+            allTrips,
             isLast: data.last,
             page: pageNumber,
             isLoading: false,
@@ -153,13 +152,14 @@ class UserMyTrips extends Component {
             
     }
 
-    onEndReached() {
+    getAllTrips() {
         let pageNumber = this.state.page + 1;
         if (!this.state.isLast && !this.state.isLoading) {
             this.setState({ isLoading: true })
-            requester.getMyHotelBookings([`page=${pageNumber}`]).then(res => {
+            // second parameter of getMyHotelBookings() is size - 1000 is max and will return all bookings at once
+            requester.getMyHotelBookings([`page=${pageNumber}`], 1000).then(res => {
                 res.body
-                    .then(this.onServerNextPageLoaded)
+                    .then(this.onServerMyTrips)
                     .catch(err => {
                         //console.log(err);
                     });
@@ -400,7 +400,7 @@ class UserMyTrips extends Component {
     }
 
     render() {
-        const { navigate } = this.props.navigation;        
+        const { search } = this.state;
 
         return (
             <View style={styles.container}>
@@ -412,7 +412,7 @@ class UserMyTrips extends Component {
                         <SearchBar
                             ref={'searchBar'}
                             autoCorrect={false}
-                            value={this.state.search}
+                            value={search}
                             onChangeText={this.onFilterChanged}
                             placeholder={lang.TEXT.MYTRIPS_FILTER}
                             placeholderTextColor="#bdbdbd"
@@ -424,7 +424,7 @@ class UserMyTrips extends Component {
 
                 <FlatList
                     style={styles.flatList}
-                    data={this.state.trips}
+                    data={this.state.allTrips}
                     onEndReached={this.onEndReached}
                     onEndReachedThreshold={0.5}
                     renderItem={this.renderItem}

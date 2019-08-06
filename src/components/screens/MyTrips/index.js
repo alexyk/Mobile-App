@@ -1,7 +1,6 @@
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import React, { Component } from 'react';
 
-import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
 import PropTypes from 'prop-types';
 import Toast from 'react-native-simple-toast';
 import _ from 'lodash';
@@ -10,6 +9,7 @@ import requester from '../../../initDependencies';
 import styles from './styles';
 import LTLoader from '../../molecules/LTLoader';
 
+
 class MyTrips extends Component {
     static propTypes = {
         navigation: PropTypes.shape({
@@ -17,82 +17,88 @@ class MyTrips extends Component {
         })
     }
 
-    static defaultProps = {
-        navigation: {
-            navigate: () => { }
-        }
-    }
 
     constructor() {
         super();
         this.state = {
-            showProgress: true,
+            isLoading: true,
             myTrips: [],
             hasPendingTrips: false,
         };
-        this.onStartExploring();
+        this.gotoMyTrips = this.gotoMyTrips.bind(this);
         this.gotoBooking = this.gotoBooking.bind(this);
+        this.getTripsFromServer = this.getTripsFromServer.bind(this);
+        this.onExplorePress = this.onExplorePress.bind(this);
     }
 
-    hideProgress() {
-        this.setState({
-            showProgress: false,
-        })
+    
+    shouldComponentUpdate(nextProps, nextState) {
+      const { state } = this;
+
+      return (state.myTrips !== nextState.myTrips || state.isLoading !== nextState.isLoading);
+    }
+    
+
+
+    componentDidMount() {
+        //console.log('did mount-----', this.props);
+        this.getTripsFromServer();
     }
 
-    showProgress() {
-        this.setState({
-            showProgress: true,
-        })
+    componentDidUpdate(prevProps) {
+        //console.log('did update-----', prevProps.navigation.state.params);
+        if (this.state.hasPendingTrips) {
+            this.props.navigation.navigate('UserMyTrips', { trips: this.state.myTrips, gotoBooking: this.gotoBooking });
+        }
     }
+
+    getTripsFromServer() {
+        requester
+            .getMyHotelBookings()
+            .then(res => {
+                res.body.then(data => {
+                    let tripArray = _.orderBy(data, ['arrival_date'], ['desc']);
+
+                    this.setState({
+                        myTrips: tripArray,
+                        hasPendingTrips: (data.length > 0),
+                        isLoading: false
+                    });
+                    this.hideProgress();
+                })
+            })
+            .catch(err => {
+                this.hideProgress();
+                Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
+                //console.log(err);
+            });
+    }
+
 
     gotoBooking() {
         this.props.navigation.navigate('EXPLORE');
     }
 
     gotoMyTrips = () => {
-        this.props.navigation.navigate('UserMyTrips', { trips: this.state.myTripsData });
+        this.props.navigation.navigate('UserMyTrips', { trips: this.state.myTrips });
     }
 
-    componentDidMount() {
-        //console.log('did mount-----', this.props);
-    }
 
-    componentDidUpdate(prevProps) {
-        //console.log('did update-----', prevProps.navigation.state.params);
-        if (this.state.hasPendingTrips) {
-            this.props.navigation.navigate('UserMyTrips', { trips: this.state.myTripsData, gotoBooking: this.gotoBooking });
+    onExplorePress() {
+        const { length } = this.state.myTrips;
+
+        if (length > 0) {
+            this.gotoMyTrips();
+        } else {
+            this.gotoBooking();
         }
     }
 
-    onStartExploring = () => {
-        //Here we will load trips
-        requester.getMyHotelBookings().then(res => {
-            res.body.then(data => {
-                //console.log("getMyHotelBookings", data);
-                var tripArray = _.orderBy(data.content, ['arrival_date'], ['desc']);
-                // _.remove(tripArray, function(obj) {
-                //     var tripDate = moment(obj.arrival_date).utc();
-                //     var now = moment().utc();
-                //     return tripDate < now;
-                // });
-                this.state.myTripsData = data;
-                this.state.myTripsData.content = tripArray;
-                if (data.content.length > 0) {
-                    this.state.hasPendingTrips = true
-                }
-                this.hideProgress();
-
-            })
-        }).catch(err => {
-            this.hideProgress();
-            Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-            //console.log(err);
-        });
-    }
 
     render() {
-        if (this.state.showProgress) {
+        const { isLoading } = this.state;
+
+        if (isLoading) {
             return <LTLoader message={"Loading trips ..."} />
         } else {
             return (
@@ -105,7 +111,7 @@ class MyTrips extends Component {
                     </View>
                     <Text style={styles.title}>You have no upcoming trips</Text>
                     <Text style={styles.subtext}>Discover your next experience</Text>
-                    <TouchableOpacity onPress={() => this.state.myTripsData.content.length > 0 ? this.gotoMyTrips() : this.gotoBooking()} style={styles.buttonExplore}>
+                    <TouchableOpacity onPress={this.onExplorePress} style={styles.buttonExplore}>
                         <Text style={styles.exploreBtnText}>Start Exploring</Text>
                     </TouchableOpacity>
                 </View>
