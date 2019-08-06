@@ -388,7 +388,7 @@ class Explore extends Component {
                 <ScrollView
                     style={{
                         position: 'absolute',
-                        top: getSafeTopOffset() + 7,
+                        top: getSafeTopOffset() + 45,
                         marginLeft: 15,
                         marginRight: 15,
                         minHeight: 100,
@@ -568,6 +568,7 @@ class Explore extends Component {
                     showSearchButton={true}
                     disabled={false}
                     isFilterable={false}
+                    containerStyle={{paddingTop: 0}}
                 />
             </View>
         )

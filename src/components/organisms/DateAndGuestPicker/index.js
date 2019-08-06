@@ -44,7 +44,8 @@ class DateAndGuestPicker extends Component {
 
     render() {
         const {
-            checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable
+            checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable,
+            containerStyle
         } = this.props;
 
         const checkInDateText = (checkInDate || 'Select Date')
@@ -54,7 +55,7 @@ class DateAndGuestPicker extends Component {
         const isGuestsDisabled = (disabled || this.props.gotoGuests == null);
 
         return (
-            <View style={styles.container}>
+            <View style={[styles.container,containerStyle]}>
                 <View style={styles.pickerRow}>
                     <View style={{flex:1}}>
                         <TouchableOpacity
