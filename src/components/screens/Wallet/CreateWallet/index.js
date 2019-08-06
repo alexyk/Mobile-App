@@ -183,7 +183,7 @@ class CreateWallet extends Component {
                                 onPress={() => this.submitPassword()}
                             >
                                 <View style={styles.nextButton}>
-                                    <LTIcon size={24} icon={'arrow-right'} style={{color: 'white'}} />
+                                    <LTIcon size={24} name={'arrowRight'} style={{color: 'white'}} />
                                 </View>
                             </TouchableOpacity>
                         </View>

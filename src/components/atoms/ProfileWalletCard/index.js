@@ -18,8 +18,8 @@ class ProfileWalletCard extends Component {
     constructor(props) {
         super(props);
 
-        this.state = { isEmpty: true };
-        setTimeout(()=> this.setState({isEmpty:false}), 100);
+        this.state = { isWalletEmpty: true };
+        setTimeout(()=> this.setState({isWalletEmpty:false}), 100);
     }
 
     _renderLogoBackground() {
@@ -60,9 +60,9 @@ class ProfileWalletCard extends Component {
     }
 
 
-    _renderWalletContent(isWalletReady, isEmpty, walletExists, walletAddress, locBalance, ethBalance, displayPrice) {
-        if (isEmpty) {
-            return this._renderMessage('')
+    _renderWalletContent(isWalletReady, isWalletEmpty, walletExists, walletAddress, locBalance, ethBalance, displayPrice) {
+        if (isWalletEmpty) {
+            return this._renderMessage('Checking for wallet ...')
         }
 
         const fullBody = (
@@ -100,9 +100,9 @@ class ProfileWalletCard extends Component {
     }
 
 
-    _renderCreateWalletButton(walletExists, isEmpty, createWallet) {
+    _renderCreateWalletButton(walletExists, isWalletEmpty, createWallet) {
         return (
-            (!walletExists && !isEmpty) &&
+            (!walletExists && !isWalletEmpty) &&
             (
                 <TouchableOpacity onPress={createWallet} style={styles.addMore}>
                     <LTIcon size={24} name={'plus'} style={{color: '#FFF7'}} />
@@ -115,7 +115,7 @@ class ProfileWalletCard extends Component {
 
     render() {
         const {currency, exchangeRates, locAmounts, currencySign, createWallet} = this.props;
-        const { isEmpty } = this.state;
+        const { isWalletEmpty } = this.state;
         
         const fiat = exchangeRates.currencyExchangeRates && CurrencyConverter.convert(exchangeRates.currencyExchangeRates, DEFAULT_CRYPTO_CURRENCY, currency, exchangeRates.locRateFiatAmount);
         let locAmount = locAmounts.locAmounts[exchangeRates.locRateFiatAmount] && locAmounts.locAmounts[exchangeRates.locRateFiatAmount].locAmount;
@@ -138,9 +138,9 @@ class ProfileWalletCard extends Component {
  
                 { this._renderAppVersion() }
 
-                { this._renderWalletContent(isWalletReady, isEmpty, walletExists, walletAddress, locBalance, ethBalance, displayPrice) }
+                { this._renderWalletContent(isWalletReady, isWalletEmpty, walletExists, walletAddress, locBalance, ethBalance, displayPrice) }
 
-                { this._renderCreateWalletButton(walletExists, isEmpty, createWallet) }
+                { this._renderCreateWalletButton(walletExists, isWalletEmpty, createWallet) }
 
             </View>
         );
