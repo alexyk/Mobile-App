@@ -37,6 +37,7 @@ class UserMyTrips extends Component {
             page: 0,
             userImageUrl: '',
             isLoading: true,
+            trips,
             allTrips: trips
         };
 
@@ -77,26 +78,33 @@ class UserMyTrips extends Component {
     filterTrips(value) {
         const filterValueLower = value.toLowerCase();
         const filterValueUpper = value.toUpperCase();
+
         if (filterValueLower.length <= 1) {
-            this.setState({ trips: this.state.allTrips.concat()});
+            this.setState( {trips: this.state.allTrips.concat()} );
         } else {
-            let tmpTrips = this.state.allTrips.concat()
+            let tmpTrips = this.state.allTrips.concat();
             tmpTrips = tmpTrips.filter(
                 (item) => {
-                    const hotelName = (item.hotel_name.toLowerCase().indexOf(filterValueLower) > -1);
+                    let { hotel_name, arrival_date, status, booking_id } = item;
+
+                    // hotel name filter
+                    let hotelName = (hotel_name.toLowerCase().indexOf(filterValueLower) > -1);
                     const bookingId = (
-                        item.booking_id
-                        && item.booking_id.toString().indexOf(filterValueLower) > -1
+                        booking_id
+                        && booking_id.toString().indexOf(filterValueLower) > -1
                     );
-                    const status = (
-                        item.status
-                        && lang.SERVER.BOOKING_STATUS[item.status]
-                        && lang.SERVER.BOOKING_STATUS[item.status]
+
+                    // status filter
+                    status = (
+                        status
+                        && lang.SERVER.BOOKING_STATUS[status]
+                        && lang.SERVER.BOOKING_STATUS[status]
                             .toString()
                             .indexOf(filterValueUpper) > -1
                     );
 
-                    const tmpDate = moment(item.arrival_date).utc();
+                    // arrival date
+                    const tmpDate = moment(arrival_date).utc();
                     let arrivalDate = false;
                     const tmpDateFilters = [
                         tmpDate.format('DD MMM').toLowerCase(),   // [2-digit day] [3-letter month] (space in between)
@@ -105,8 +113,8 @@ class UserMyTrips extends Component {
                         tmpDate.format('YYYY-MM'),                // [4-digit year]-[2-digit month]
                         tmpDate.year()                            // year
                     ];
-                    for (item of tmpDateFilters) {
-                        if (item.toString().indexOf(filterValueLower) > -1) {
+                    for (let current of tmpDateFilters) {
+                        if (current.toString().indexOf(filterValueLower) > -1) {
                             arrivalDate = true;
                             break;
                         }
@@ -128,10 +136,10 @@ class UserMyTrips extends Component {
     }
 
     onServerMyTrips(data) {
-        var allTrips = []
-        allTrips = this.state.allTrips.concat(data.content)
+        let allTrips = this.state.allTrips.concat(data.content);
 
         this.setState({
+            trips: allTrips,
             allTrips,
             isLast: data.last,
             page: pageNumber,
@@ -288,12 +296,15 @@ class UserMyTrips extends Component {
 
         if (status == '' 
             || status == null 
-            || status == 'PENDING_SAFECHARGE_CONFIRMATION') 
+            || status == 'null' 
+            || status == 'undefined' 
+            || status == 'PENDING_SAFECHARGE_CONFIRMATION'
+            || statusValue == null ) 
         {
             bookingStatusRendered = (
                 <View testID={'renderBookingStatus1'} />
             );
-        } else if (status && status == 'DONE') {
+        } else if (status == 'DONE') {
             hasStatus = true;
             hasRefNo = true;
             bookingStatusRendered = (
@@ -314,8 +325,9 @@ class UserMyTrips extends Component {
                 >
                     {this.renderStatusText(statusValue)}
                 </View>
-            );
+            );    
         }
+
 
         return {bookingStatusRendered, hasStatus, hasRefNo};
     }
@@ -424,8 +436,7 @@ class UserMyTrips extends Component {
 
                 <FlatList
                     style={styles.flatList}
-                    data={this.state.allTrips}
-                    onEndReached={this.onEndReached}
+                    data={this.state.trips}
                     onEndReachedThreshold={0.5}
                     renderItem={this.renderItem}
                 />
