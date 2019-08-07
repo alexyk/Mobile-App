@@ -47,7 +47,7 @@ class CreatePassword extends Component {
         }
 
         if (!validateConfirmPassword(this.state.password, this.state.confirmPassword)) {
-            Toast.showWithGravity('Passwords are not matched, Please input correctly', Toast.SHORT, Toast.BOTTOM);
+            Toast.showWithGravity('Passwords do not match. Please try again.', Toast.SHORT, Toast.BOTTOM);
             return;
         }
         const { params } = this.props.navigation.state;
@@ -78,7 +78,7 @@ class CreatePassword extends Component {
                     <View style={styles.titleView}><Text style={styles.titleText}>Create Password</Text></View>
 
                     <Text style={styles.finePrintText}>
-                    Your password must be at least: 8 characters long, should containt at least one digit and should contain at least one symbol.
+                    Your password must be at least 8 characters long and should contain at least 1 digit and 1 symbol.
                     </Text>
 
                     <View style={styles.inputView}>
