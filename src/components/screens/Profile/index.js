@@ -33,6 +33,7 @@ class Profile extends Component {
         }
 
         this._isWalletTimeoutEnabled = false;
+        this._refreshId = -1;
 
         this.refreshWalletFromServer = this.refreshWalletFromServer.bind(this);
         this.processWalletError = this.processWalletError.bind(this);
@@ -70,15 +71,15 @@ class Profile extends Component {
     }
 
     startRefreshWalletTimer() {
-        this.refreshId = setInterval(() => {
+        this._refreshId = setInterval(() => {
             this.refreshWalletFromServer();
         }, WALLET_REFRESH_TIMEOUT * 1000);
     }
 
     stopRefreshWalletTimer() {
-        if (this.refreshId != -1) {
-            clearInterval(this.refreshId);
-            this.refreshId = -1;
+        if (this._refreshId != -1) {
+            clearInterval(this._refreshId);
+            this._refreshId = -1;
         }
     }
 
