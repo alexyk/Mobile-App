@@ -1,6 +1,6 @@
 {
   "name": "Mobile-App",
-  "version": "1.0.23-android64-2",
+  "version": "1.0.23",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.5.5",
