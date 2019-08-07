@@ -7,7 +7,7 @@ export const validateEmail = (email) => {
 };
 
 export const validatePhone = (phone) => {
-    const re = /^([\d]{5,})$/; // eslint-disable-line
+    const re = /^([+]{0,1})([\d]{5,})$/; // eslint-disable-line
     return re.test(phone);
 };
 
