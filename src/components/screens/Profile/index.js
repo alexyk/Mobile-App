@@ -7,53 +7,55 @@ import { bindActionCreators } from 'redux';
 import Image from 'react-native-remote-svg';
 import Toast from 'react-native-easy-toast'
 import { Wallet } from '../../../services/blockchain/wallet';
-import { userInstance } from '../../../utils/userInstance';
 import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectMaterialDialog'
 import ProfileWalletCard from  '../../atoms/ProfileWalletCard'
 import { setCurrency } from '../../../redux/action/Currency'
 import styles from './styles';
+import { rlog } from '../../../config-debug';
+import requester from '../../../initDependencies';
+import { setLoginDetails } from '../../../redux/action/userInterface';
+import { WALLET_REFRESH_TIMEOUT } from '../../../config-settings';
 
 
+// TODO: Finish wallet refreshing (see this._isWalletTimeoutEnabled usage)
+// Currently refreshed when switching to this tab 'Profile' from bottom navigation bar
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];
 class Profile extends Component {
     constructor(props) {
         super(props);
         this.state = {
             info: {},
-            walletAddress: '',
             locBalance: -1,
             ethBalance: -1,
             currency: props.currency,
             currencySign: props.currencySign,
             currencySelectionVisible: false
         }
-        // this.props.actions.getCurrency(props.currency, false);
+
+        this._isWalletTimeoutEnabled = false;
+
+        this.refreshWalletFromServer = this.refreshWalletFromServer.bind(this);
+        this.processWalletError = this.processWalletError.bind(this);
+        this.onRefresh = this.onRefresh.bind(this);
     }
 
     async componentDidMount() {
         this.listListener = [
             this.props.navigation.addListener('didFocus', () => {
-              this.onRefresh()
+              this.refreshWalletFromServer();
+              if (this._isWalletTimeoutEnabled) {
+                  this.startRefreshWalletTimer();
+              }
+            }),
+            this.props.navigation.addListener('willBlur', () => {
+              this.stopRefreshWalletTimer();
             })
         ];
-
-        let walletAddress = await userInstance.getLocAddress();
-        this.setState({
-            walletAddress: walletAddress,
-        });
-        if (walletAddress !== null && walletAddress !== '') {
-            Wallet.getBalance(walletAddress).then(x => {
-                const ethBalance = x / (Math.pow(10, 18));
-                this.setState({ ethBalance: ethBalance });
-            });
-            Wallet.getTokenBalance(walletAddress).then(y => {
-                const locBalance = y / (Math.pow(10, 18));
-                this.setState({ locBalance: locBalance });
-            });
-        }
     }
 
     componentWillUnmount() {
+        this.stopRefreshWalletTimer('will unmount');
+
        // Now remove listeners here
        this.listListener.forEach( item => item.remove() )
      }
@@ -67,25 +69,60 @@ class Profile extends Component {
         }
     }
 
-    onRefresh = async () => {
-        //console.log("onRefresh ---------------");
+    startRefreshWalletTimer() {
+        this.refreshId = setInterval(() => {
+            this.refreshWalletFromServer();
+        }, WALLET_REFRESH_TIMEOUT * 1000);
+    }
 
-        if (this.state.walletAddress === null || this.state.walletAddress === '') {
-            
-            let walletAddress = await userInstance.getLocAddress();
-            if (walletAddress !== null && walletAddress !== '') {
-                this.setState({
-                    walletAddress: walletAddress,
-                });
-                Wallet.getBalance(walletAddress).then(x => {
-                    const ethBalance = x / (Math.pow(10, 18));
-                    this.setState({ ethBalance: ethBalance });
-                });
-                Wallet.getTokenBalance(walletAddress).then(y => {
-                    const locBalance = y / (Math.pow(10, 18));
-                    this.setState({ locBalance: locBalance });
-                });
-            }
+    stopRefreshWalletTimer() {
+        if (this.refreshId != -1) {
+            clearInterval(this.refreshId);
+            this.refreshId = -1;
+        }
+    }
+
+    refreshWalletFromServer() {
+        // Set wallet state as 'loading' (has locAddress but locBalance is -1)
+        // For details - see ProfileWalletCard._renderWalletContent()
+        this.setState({locBalance:-1});
+
+        requester
+            .getUserInfo()
+            .then((res) => {
+                if (res && res.body) {
+                    res.body
+                        .then((data) => {
+                            const { locAddress } = data;
+                            this.props.setLoginDetails({locAddress});
+                            this.onRefresh();
+                        })
+                        .catch(error => this.processWalletError(error));
+                } else {
+                    this.processWalletError();
+                }
+            })
+            .catch(error => this.processWalletError(error));
+    }
+
+    processWalletError(error) {
+        this.props.setLoginDetails({locAddress: 'connectionError'});
+    }
+
+    async onRefresh() {
+        const { locAddress } = this.props.loginDetails;
+
+        rlog('wallet-refresh',`refreshing with address ${locAddress}`, locAddress)
+        
+        if (locAddress !== null && locAddress !== '') {
+            Wallet.getBalance(locAddress).then(x => {
+                const ethBalance = x / (Math.pow(10, 18));
+                this.setState({ ethBalance: ethBalance });
+            });
+            Wallet.getTokenBalance(locAddress).then(y => {
+                const locBalance = y / (Math.pow(10, 18));
+                this.setState({ locBalance: locBalance });
+            });
         }
     }
 
@@ -133,29 +170,30 @@ class Profile extends Component {
     }
 
     onSendToken = () => {
-        const { locBalance, walletAddress, ethBalance } = this.state;
-        const {navigate} = this.props.navigation;
+        const { locBalance, ethBalance } = this.state;
+        const { locAddress } = this.props;
+        const { navigate } = this.props.navigation;
 
-        if (walletAddress === undefined || walletAddress === null || walletAddress === "") {
+        if (locAddress === undefined || locAddress === null || locAddress === "") {
             this.refs.toast.show('Please create LOC wallet before sending token.', 1500);
             return;
         }
         navigate('SendToken', { locBalance: locBalance.toFixed(6), ethBalance: parseFloat(ethBalance).toFixed(6)});
     }
 
-    _renderWallet(locBalance, walletAddress, ethBalance) {
-        const hasWallet = (walletAddress != null && walletAddress != '')
+    _renderWallet(locBalance, locAddress, ethBalance) {
+        const hasWallet = (locAddress != null && locAddress != '')
 
         return (
             <View>
                 <ProfileWalletCard
-                    walletAddress = { walletAddress }
+                    locAddress = { locAddress }
                     locBalance = { locBalance }
                     ethBalance = { ethBalance }
                     createWallet = { this.createWallet }/>
 
                 { (hasWallet) &&
-                    <TouchableOpacity onPress={() => { Clipboard.setString(walletAddress) }}>
+                    <TouchableOpacity onPress={() => { Clipboard.setString(locAddress) }}>
                         <View style={styles.copyBox}>
                             <Text style={styles.copyText}>Copy your wallet address to clipboard</Text>
                         </View>
@@ -166,10 +204,11 @@ class Profile extends Component {
     }
 
     render() {
+        const { currency, locBalance, ethBalance } = this.state;
+        const { locAddress } = this.props.loginDetails;
         const { navigate } = this.props.navigation;
-        const { currency, locBalance, walletAddress, ethBalance } = this.state;
 
-        //console.log("profile walletAddress: ", walletAddress);
+        //console.log("profile locAddress: ", locAddress);
         //console.log("profile currency: ", currency);
 
         return (
@@ -185,7 +224,7 @@ class Profile extends Component {
                     textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                 />
                 <ScrollView showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
-                    { this._renderWallet(locBalance, walletAddress, ethBalance) }
+                    { this._renderWallet(locBalance, locAddress, ethBalance) }
 
                     <View>
                         <TouchableOpacity onPress={() => navigate('SimpleUserProfile')} style={styles.navItem}>
@@ -242,12 +281,15 @@ class Profile extends Component {
 let mapStateToProps = (state) => {
     return {
         currency: state.currency.currency,
-        currencySign: state.currency.currencySign
+        currencySign: state.currency.currencySign,
+        loginDetails: state.userInterface.login,
+        allState: state
     };
 }
 
 const mapDispatchToProps = dispatch => ({
     setCurrency: bindActionCreators(setCurrency, dispatch),
+    setLoginDetails: bindActionCreators(setLoginDetails, dispatch),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile);

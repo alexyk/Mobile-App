@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 
 import { CurrencyConverter } from '../../../services/utilities/currencyConverter'
 
-import styles from './styles';
+import styles, { walletBoxHeight } from './styles';
 
 import VersionText from '../../atoms/VersionText'
 import LTIcon from '../LTIcon';
@@ -41,7 +41,7 @@ class ProfileWalletCard extends Component {
 
     _renderMessage(message) {
         return (
-            <View style={{ width: '100%', height: 180, alignItems: 'center', justifyContent: 'flex-start',paddingBottom: 5}}>
+            <View style={{ width: '100%', height: walletBoxHeight, alignItems: 'center', justifyContent: 'flex-start',paddingBottom: 5}}>
                 { this._renderLogo() }
                 { this._renderLogoBackground() }
                 <Text style={styles.messageText}>{message}</Text>
@@ -60,13 +60,16 @@ class ProfileWalletCard extends Component {
     }
 
 
-    _renderWalletContent(isWalletReady, isWalletEmpty, walletExists, walletAddress, locBalance, ethBalance, displayPrice) {
+    _renderWalletContent(isWalletReady, isWalletEmpty, walletExists, locAddress, locBalance, ethBalance, displayPrice) {
         if (isWalletEmpty) {
             return this._renderMessage('Checking for wallet ...')
         }
+        if (locAddress == 'connectionError') {
+            return this._renderMessage('Connection error while getting wallet ...');
+        }
 
         const fullBody = (
-            <View>
+            <View style={{height: walletBoxHeight}}>
                 { this._renderLogo() }
                 { this._renderLogoBackground() }
 
@@ -80,11 +83,11 @@ class ProfileWalletCard extends Component {
                 </View>
 
                 <View style={{ width: '100%' }}>
-                    <Text style={styles.walletAddress}>{walletAddress}</Text>
+                    <Text style={styles.locAddress}>{`${locAddress}`}</Text>
                 </View>
             </View>
         );
-        const loadingBody = this._renderMessage('Loading wallet ...');
+        const loadingBody = this._renderMessage('Refreshing wallet data ...');
         const noWalletBody = this._renderMessage(`Please click the button to create your LOC Wallet!`);
         let result = null;
 
@@ -124,9 +127,9 @@ class ProfileWalletCard extends Component {
         }
         let locRate = fiat / locAmount;
 
-        const {walletAddress, locBalance, ethBalance} = this.props;
-        const isWalletReady = (walletAddress && locBalance != -1 && ethBalance != -1);
-        const walletExists = (walletAddress != null && walletAddress != '');
+        const {locAddress, locBalance, ethBalance} = this.props;
+        const isWalletReady = (locAddress && locBalance != -1 && ethBalance != -1);
+        const walletExists = (locAddress != null && locAddress != '');
 
         let price = locBalance * locRate;
         let displayPrice = currencySign;
@@ -138,7 +141,7 @@ class ProfileWalletCard extends Component {
  
                 { this._renderAppVersion() }
 
-                { this._renderWalletContent(isWalletReady, isWalletEmpty, walletExists, walletAddress, locBalance, ethBalance, displayPrice) }
+                { this._renderWalletContent(isWalletReady, isWalletEmpty, walletExists, locAddress, locBalance, ethBalance, displayPrice) }
 
                 { this._renderCreateWalletButton(walletExists, isWalletEmpty, createWallet) }
 
@@ -148,14 +151,14 @@ class ProfileWalletCard extends Component {
 }
 
 ProfileWalletCard.propTypes = {
-    walletAddress: PropTypes.string,
+    locAddress: PropTypes.string,
     locBalance: PropTypes.number,
     ethBalance: PropTypes.number,
     createWallet: PropTypes.func
 };
 
 ProfileWalletCard.defaultProps = {
-    walletAddress: "",
+    locAddress: "",
     locBalance: 0.0,
     ethBalance: 0.0,
     createWallet: () => {}

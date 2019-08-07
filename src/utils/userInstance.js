@@ -1,3 +1,6 @@
+/**
+ * TODO: Deprecate this in favor of redux case - see setLoginDetails action in userInterface
+ */
 import { AsyncStorage } from 'react-native';
 
 const id_key = 'id_key';

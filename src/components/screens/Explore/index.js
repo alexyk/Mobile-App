@@ -101,7 +101,11 @@ class Explore extends Component {
                         email: email_value,
                     });
                 }
+
+                // TODO: Replace all references to user data (async storage)
                 userInstance.setUserData(data);
+                //  with redux cache, for example:
+                this.props.setLoginDetails(data);
             }).catch((err) => {
                 //console.log('componentWillMount', err);
             });

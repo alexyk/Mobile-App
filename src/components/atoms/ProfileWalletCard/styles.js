@@ -14,7 +14,7 @@ const styles = StyleSheet.create({
         paddingTop: 5,
         paddingBottom: 15
     },
-    walletAddress: {
+    locAddress: {
         color: '#fff',
         fontFamily: 'FuturaStd-Light',
         fontSize: 11.5,
@@ -73,4 +73,5 @@ const styles = StyleSheet.create({
     },
 });
 
+export const walletBoxHeight = 190;
 export default styles;

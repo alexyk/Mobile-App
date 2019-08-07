@@ -81,7 +81,7 @@ export default handleActions(
     [setLoginDetails]: (state, {payload}) => {
       return {
         ...state,
-        login: Object.assign({}, payload)
+        login: Object.assign({...state.login}, payload)
       };
     },
   },
