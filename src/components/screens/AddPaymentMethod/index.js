@@ -1,34 +1,24 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import Image from 'react-native-remote-svg';
 import Toast from 'react-native-easy-toast';
 import styles from './styles';
-import { userInstance } from '../../../utils/userInstance';
+
 
 class AddPaymentMethod extends Component {
-    state = {
-        walletAddress: ''
-    }
     constructor(props) {
         super(props);
     }   
    
-    async componentDidMount() {
-        let walletAddress = await userInstance.getLocAddress();
-        if (walletAddress !== null && walletAddress !== '') {
-            this.setState({
-                walletAddress: walletAddress,
-            });
-        }
-    }
-
   
     createWallet = () => {
-        const {navigate} = this.props.navigation;
+        const { navigate } = this.props.navigation;
+        let { locAddress } = this.props.loginDetails;
 
-        //console.log("walletAddress", this.state.walletAddress);
-        if (this.state.walletAddress != '') {
+        //console.log("locAddress", this.state.locAddress);
+        if (locAddress != '') {
             this.refs.toast.show('You already created LOC wallet.', 1500);
             return;
         }
@@ -107,4 +97,10 @@ AddPaymentMethod.propTypes = {
     navigation: PropTypes.object.isRequired
 };
 
-export default AddPaymentMethod;
+const mapStateToProps = (state) => {
+    return {
+        loginDetails: state.userInterface.loginDetails
+    };
+}
+
+export default connect(mapStateToProps)(AddPaymentMethod);

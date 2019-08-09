@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import BackButton from '../../atoms/BackButton';
 import ProfileHistoryItem from '../../atoms/ProfileHistoryItem';
 import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
@@ -41,10 +42,10 @@ class SendToken extends Component {
 
      async componentDidMount() {
         let jsonFile = await userInstance.getJsonFile();
-        let walletAddress = await userInstance.getLocAddress();
+        let { locAddress } = this.props.loginDetails;
         this.setState({
-            jsonFile: jsonFile,
-            locAddress: walletAddress,
+            jsonFile,
+            locAddress,
             ethBalance: this.props.navigation.state.params.ethBalance,
             locBalance: this.props.navigation.state.params.locBalance
         });
@@ -216,4 +217,10 @@ class SendToken extends Component {
     }
 }
 
-export default SendToken;
+const mapStateToProps = (state) => {
+    return {
+        loginDetails: state.userInterface.loginDetails
+    };
+}
+
+export default connect(mapStateToProps)(SendToken);

@@ -160,18 +160,6 @@ export const userInstance = {
         return jsonFile;
     },
 
-    setLocAddress: function(locAddress) {
-        if (locAddress == undefined || locAddress == null) {
-            locAddress = '';
-        }
-        AsyncStorage.setItem(locaddredss_key, locAddress);
-    },
-
-    getLocAddress: async function() {
-        let locAddress = await AsyncStorage.getItem(locaddredss_key);
-        return locAddress;
-    },
-
     setPhoneNumber: function(phoneNumber) {
         if (phoneNumber == undefined || phoneNumber == null) {
             phoneNumber = '';
@@ -268,7 +256,6 @@ export const userInstance = {
         this.setCountryState(data.countryState);
         this.setProfileImage(data.image);
         this.setJsonFile(data.jsonFile);
-        this.setLocAddress(data.locAddress);
         this.setPhoneNumber(data.phoneNumber);
         this.setCurrency(data.preferredCurrency);
         this.setLanguage(data.preferredLanguage);

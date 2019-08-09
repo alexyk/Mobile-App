@@ -1,15 +1,18 @@
 import { handleActions } from 'redux-actions';
 import {
-  setIsApplyingFilter, setDatesAndGuestsData, setWebViewURL, setLoginDetails
+  setIsApplyingFilter, setDatesAndGuestsData, setWebViewURL, setLoginDetails, setWalletData
 } from '../../action/userInterface';
 
 import moment from 'moment'
 import { generateInitialCalendarData, formatDatesData } from '../../../components/screens/Calendar/utils';
 import { stringifyRoomsData } from '../../../components/screens/utils';
+import { WALLET_STATE } from '../../enum'
+import { validateLOCAddress } from '../../../utils/validation';
 
-const internalFormat = "YYYY-MM-DD";
-const inputDateFormat = 'DD/MM/YYYY';
-const displayDateFormat = 'ddd, DD MMM';
+
+export const internalFormat = "YYYY-MM-DD";
+export const inputDateFormat = 'DD/MM/YYYY';
+export const displayDateFormat = 'ddd, DD MMM';
 const today = moment().startOf('day');
 const checkInMoment = today.clone().add(1, 'day');
 const checkOutMoment = today.clone().add(2, 'day');
@@ -26,12 +29,24 @@ if (maxValid && !minValid) {
 const {
   calendarData, calendarMarkedDays, calendarMarkedMonths
 } = generateInitialCalendarData(checkInMoment,checkOutMoment,today,minDate,maxDate,internalFormat,{});
-const initialState  = {
+
+// export for testing purposes
+export const initialState  = {
   webViewURL: null,
   isApplyingFilter: false,
-  login: {
+  loginDetails: {
     token: null,
-    email: null
+    email: null,
+    locAddress: null,
+    // TODO: Add all properties and remove userInstance (uses Async Storage)
+  },
+  walletData: {
+    walletState: WALLET_STATE.CHECKING,
+    ethBalance: null,
+    locBalance: null,
+    isFirstLoading: true,
+    skipLOCAddressRequest: false,
+    // 'locAddress' comes with login data above
   },
   datesAndGuestsData: {
       today, minDate, maxDate, 
@@ -51,6 +66,7 @@ const initialState  = {
       ...formatDatesData(today.year(), checkInMoment, checkOutMoment, inputDateFormat)
   },
 };
+
 
 export default handleActions(
   {
@@ -79,10 +95,42 @@ export default handleActions(
     },
 
     [setLoginDetails]: (state, {payload}) => {
-      return {
+      let newState = {
         ...state,
-        login: Object.assign({...state.login}, payload)
+        loginDetails: Object.assign({...state.loginDetails}, payload)
       };
+
+      // a private case of loading user info before wallet data
+      if (payload.locAddress && validateLOCAddress(payload.locAddress) == 1) {
+        newState.walletData.skipLOCAddressRequest = true;
+      }
+
+      return newState;
+    },
+
+    [setWalletData]: (state, {payload}) => {
+      let newState = {...state};
+      const {locAddress} = payload;
+
+      // set locAddress in login data
+      if (locAddress !== undefined) {
+        newState.loginDetails.locAddress = locAddress;
+      }
+      delete payload.locAddress;
+
+      // set walletData properties
+      newState = Object.assign(newState, {
+        walletData: {
+          ...newState.walletData,
+          ...payload
+      }});
+
+      // unset isFirstLoading
+      if (newState.isFirstLoading && newState.walletState == WALLET_STATE.READY) {
+        newState.isFirstLoading = false;
+      }
+
+      return newState;
     },
   },
   initialState

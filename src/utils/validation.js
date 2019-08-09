@@ -1,3 +1,5 @@
+import { isString, isNumber } from '../components/screens/utils';
+
 var valid = require('card-validator');
 export const validateName = name => !!name;
 
@@ -60,5 +62,27 @@ export const validateCVV = (cvv) => {
     var cvv = valid.cvv(cvv);
     return cvv.isValid;
 };
+
+/**
+ * Very basic validator
+ * Maybe switch to using wallet-address-validator from npm in the future
+ * @param {Number | String | null} value 
+ * @returns -1 for null or not a number or string, 0 for invalid, 1 for valid
+ */
+export const validateLOCAddress = (value) => {
+    const asString = (isString(value) ? value : (isNumber(value) ? '0x'+value.toString(16) : null));
+    if (value == null || asString == null) {
+        return -1;
+    }
+
+    const re =  /^0x[a-f\d]{1,42}$/i; // eslint-disable-line
+    const result = (re.test(asString))
+    
+    if (result) {
+        return 1;
+    } else {
+        return 0;
+    }
+}
 
 export const validateConfirmPassword = (password, confirmPassword) => !!password && !!confirmPassword && password === confirmPassword;

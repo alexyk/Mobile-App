@@ -6,124 +6,20 @@ import { bindActionCreators } from 'redux';
 
 import Image from 'react-native-remote-svg';
 import Toast from 'react-native-easy-toast'
-import { Wallet } from '../../../services/blockchain/wallet';
 import SingleSelectMaterialDialog from '../../atoms/MaterialDialog/SingleSelectMaterialDialog'
 import ProfileWalletCard from  '../../atoms/ProfileWalletCard'
 import { setCurrency } from '../../../redux/action/Currency'
 import styles from './styles';
-import { rlog } from '../../../config-debug';
-import requester from '../../../initDependencies';
-import { setLoginDetails } from '../../../redux/action/userInterface';
-import { WALLET_REFRESH_TIMEOUT } from '../../../config-settings';
+import { WALLET_STATE } from '../../../redux/enum';
 
 
-// TODO: Finish wallet refreshing (see this._isWalletTimeoutEnabled usage)
-// Currently refreshed when switching to this tab 'Profile' from bottom navigation bar
 const BASIC_CURRENCY_LIST = ['EUR', 'USD', 'GBP'];
 class Profile extends Component {
     constructor(props) {
         super(props);
         this.state = {
             info: {},
-            locBalance: -1,
-            ethBalance: -1,
-            currency: props.currency,
-            currencySign: props.currencySign,
             currencySelectionVisible: false
-        }
-
-        this._isWalletTimeoutEnabled = false;
-        this._refreshId = -1;
-
-        this.refreshWalletFromServer = this.refreshWalletFromServer.bind(this);
-        this.processWalletError = this.processWalletError.bind(this);
-        this.onRefresh = this.onRefresh.bind(this);
-    }
-
-    async componentDidMount() {
-        this.listListener = [
-            this.props.navigation.addListener('didFocus', () => {
-              this.refreshWalletFromServer();
-              if (this._isWalletTimeoutEnabled) {
-                  this.startRefreshWalletTimer();
-              }
-            }),
-            this.props.navigation.addListener('willBlur', () => {
-              this.stopRefreshWalletTimer();
-            })
-        ];
-    }
-
-    componentWillUnmount() {
-        this.stopRefreshWalletTimer('will unmount');
-
-       // Now remove listeners here
-       this.listListener.forEach( item => item.remove() )
-     }
-
-    componentDidUpdate(prevProps) {
-        // Typical usage (don't forget to compare props):
-        if (this.props.currency != prevProps.currency) {
-            this.setState({
-                currency: this.props.currency, 
-                currencySign:this.props.currencySign});
-        }
-    }
-
-    startRefreshWalletTimer() {
-        this._refreshId = setInterval(() => {
-            this.refreshWalletFromServer();
-        }, WALLET_REFRESH_TIMEOUT * 1000);
-    }
-
-    stopRefreshWalletTimer() {
-        if (this._refreshId != -1) {
-            clearInterval(this._refreshId);
-            this._refreshId = -1;
-        }
-    }
-
-    refreshWalletFromServer() {
-        // Set wallet state as 'loading' (has locAddress but locBalance is -1)
-        // For details - see ProfileWalletCard._renderWalletContent()
-        this.setState({locBalance:-1});
-
-        requester
-            .getUserInfo()
-            .then((res) => {
-                if (res && res.body) {
-                    res.body
-                        .then((data) => {
-                            const { locAddress } = data;
-                            this.props.setLoginDetails({locAddress});
-                            this.onRefresh();
-                        })
-                        .catch(error => this.processWalletError(error));
-                } else {
-                    this.processWalletError();
-                }
-            })
-            .catch(error => this.processWalletError(error));
-    }
-
-    processWalletError(error) {
-        this.props.setLoginDetails({locAddress: 'connectionError'});
-    }
-
-    async onRefresh() {
-        const { locAddress } = this.props.loginDetails;
-
-        rlog('wallet-refresh',`refreshing with address ${locAddress}`, locAddress)
-        
-        if (locAddress !== null && locAddress !== '') {
-            Wallet.getBalance(locAddress).then(x => {
-                const ethBalance = x / (Math.pow(10, 18));
-                this.setState({ ethBalance: ethBalance });
-            });
-            Wallet.getTokenBalance(locAddress).then(y => {
-                const locBalance = y / (Math.pow(10, 18));
-                this.setState({ locBalance: locBalance });
-            });
         }
     }
 
@@ -161,39 +57,48 @@ class Profile extends Component {
         this.props.navigation.navigate('PaymentMethods', {});
     }
 
-    createWallet = () => {
-        const {navigate} = this.props.navigation;
-        navigate("CreateWallet");
-    }
 
     showToast = () => {
         this.refs.toast.show('This feature is not enabled yet in the current alpha version.', 1500);
     }
 
     onSendToken = () => {
-        const { locBalance, ethBalance } = this.state;
-        const { locAddress } = this.props;
+        const { locBalance, ethBalance, walletState } = this.props.walletData;
+        const { locAddress } = this.props.loginDetails;
         const { navigate } = this.props.navigation;
 
-        if (locAddress === undefined || locAddress === null || locAddress === "") {
-            this.refs.toast.show('Please create LOC wallet before sending token.', 1500);
-            return;
+        switch (walletState) {
+
+            case WALLET_STATE.NONE:
+                this.refs.toast.show('Please create LOC wallet before sending token.', 1500);
+                return;
+
+            case WALLET_STATE.CONNECTION_ERROR:
+            case WALLET_STATE.INVALID:
+                this.refs.toast.show('There was an error while loading your wallet. Please try again later or contact support.', 1500);
+                return;
+    
+            case WALLET_STATE.LOADING:
+            case WALLET_STATE.CHECKING:
+                this.refs.toast.show('Your LOC wallet is loading. Please wait until this process ends before sending tokens.', 1500);
+                return;
+
+            case WALLET_STATE.CREATING:
+                this.refs.toast.show('Please wait for the process of creating your LOC wallet to be complete before sending token.', 1500);
+                return;
+
         }
+
         navigate('SendToken', { locBalance: locBalance.toFixed(6), ethBalance: parseFloat(ethBalance).toFixed(6)});
     }
 
-    _renderWallet(locBalance, locAddress, ethBalance) {
-        const hasWallet = (locAddress != null && locAddress != '')
+    _renderWallet(walletState) {
 
         return (
             <View>
-                <ProfileWalletCard
-                    locAddress = { locAddress }
-                    locBalance = { locBalance }
-                    ethBalance = { ethBalance }
-                    createWallet = { this.createWallet }/>
+                <ProfileWalletCard navigation={this.props.navigation} createWallet = { this.createWallet }/>
 
-                { (hasWallet) &&
+                { (walletState == WALLET_STATE.READY) &&
                     <TouchableOpacity onPress={() => { Clipboard.setString(locAddress) }}>
                         <View style={styles.copyBox}>
                             <Text style={styles.copyText}>Copy your wallet address to clipboard</Text>
@@ -205,9 +110,11 @@ class Profile extends Component {
     }
 
     render() {
-        const { currency, locBalance, ethBalance } = this.state;
-        const { locAddress } = this.props.loginDetails;
-        const { navigate } = this.props.navigation;
+        const {
+            currency, walletData,  navigation
+        } = this.props;
+        const { walletState } = walletData;
+        const { navigate } = navigation;
 
         //console.log("profile locAddress: ", locAddress);
         //console.log("profile currency: ", currency);
@@ -225,7 +132,7 @@ class Profile extends Component {
                     textStyle={{ color: 'white', fontFamily: 'FuturaStd-Light' }}
                 />
                 <ScrollView showsHorizontalScrollIndicator={false} style={{ width: '100%' }}>
-                    { this._renderWallet(locBalance, locAddress, ethBalance) }
+                    { this._renderWallet(walletState) }
 
                     <View>
                         <TouchableOpacity onPress={() => navigate('SimpleUserProfile')} style={styles.navItem}>
@@ -283,14 +190,13 @@ let mapStateToProps = (state) => {
     return {
         currency: state.currency.currency,
         currencySign: state.currency.currencySign,
-        loginDetails: state.userInterface.login,
-        allState: state
+        loginDetails: state.userInterface.loginDetails,
+        walletData: state.userInterface.walletData
     };
 }
 
 const mapDispatchToProps = dispatch => ({
     setCurrency: bindActionCreators(setCurrency, dispatch),
-    setLoginDetails: bindActionCreators(setLoginDetails, dispatch),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Profile);

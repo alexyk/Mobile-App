@@ -3,6 +3,11 @@ import lodash from 'lodash';
 import { isMoment } from 'moment';
 
 
+// TODO: Check if there is a better way to know if the code is in testing mode (jest etc.)
+// Currently using (__MYDEV__ === undefined) to know that it is testing (functions loose their context scope)
+// Example usage emptyFuncWithDescr, 
+
+
 /** 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * FORCE modes - possible in RELEASE                               *
@@ -82,7 +87,8 @@ export const autoCalendar                       = false;
 // ---------------  function definitions  -----------------
 
 const emptyFunc = function() {};
-function emptyFuncWithDescr(descr)  { (console.warn && console.warn(`Call of '${descr}' is disabled - see '__MYDEV__'`)) };
+function emptyFuncWithDescr(descr) { if (__MYDEV__ !== undefined && console.warn != null) console.warn(` Call of '${descr}' is disabled - see '__MYDEV__'`) };
+
 export var dlog = dlogFunc;
 export function clog(...all) {console.log(...all)};
 export function ilog(...all) {console.info(...all)}
@@ -170,7 +176,7 @@ function configureConsole() {
     console.timeEnd = emptyFunc;
     tslog = emptyFunc;
     telog = emptyFunc;
-    if (console.warn) console.warn(`[config-debug] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
+    if (__MYDEV__ !== undefined && console.warn != null) console.warn(`[config-debug] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
   }
 }
 
@@ -183,12 +189,14 @@ function configureReactotron() {
       require('./utils/reactotronLogging')
       ilog('Reactotron connected');
     } catch (e) {
-      console.warn('Reactotron could not be enabled - ' + e.message);
+      if (__MYDEV__ !== undefined) console.warn('Reactotron could not be enabled - ' + e.message);
     }
 
   } else {
-    console.disableYellowBox = true;
-    ilog(`Reactotron is disabled - release=${reactotronLoggingInReleaseForceEnabled} dev=${reactotronLoggingEnabled}`);
+    if (__MYDEV__ !== undefined) {
+      console.disableYellowBox = true;
+      ilog(`Reactotron is disabled - release=${reactotronLoggingInReleaseForceEnabled} dev=${reactotronLoggingEnabled}`);
+    }
   }
 }
 

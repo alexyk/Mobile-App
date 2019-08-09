@@ -278,7 +278,7 @@ let mapStateToProps = (state) => {
         datesAndGuestsData: state.userInterface.datesAndGuestsData,
         searchString: state.hotels.searchString,
         currency: state.currency.currency,
-        loginDetails: state.userInterface.login
+        loginDetails: state.userInterface.loginDetails
     };
 }
 

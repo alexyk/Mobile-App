@@ -1,5 +1,6 @@
 import { ScrollView, Text, View } from 'react-native';
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
 import BackButton from '../../atoms/BackButton';
 import Image from 'react-native-remote-svg';
@@ -26,6 +27,9 @@ class SimpleUserProfile extends Component {
 
     constructor(props) {
         super(props);
+
+        // TODO: Remove redundant usage of state
+        // Use redux cache (instead of props / navigation params)
         this.state = {
             birthdayDisplay: '',
             city: {},
@@ -35,7 +39,6 @@ class SimpleUserProfile extends Component {
             lastName: '',
             gender: '',
             image: '',
-            locAddress: '',
             phoneNumber: '',
             preferredCurrency: {},
             preferredLanguage: '',
@@ -48,6 +51,7 @@ class SimpleUserProfile extends Component {
     }
 
      async componentDidMount() {
+        // TODO: Use redux cache instead - remove async storage usage
         let email = await userInstance.getEmail();
         let firstName = await userInstance.getFirstName();
         let lastName = await userInstance.getLastName();
@@ -57,7 +61,6 @@ class SimpleUserProfile extends Component {
         let gender = await userInstance.getGender();
         let country = await userInstance.getCountry();
         let city = await userInstance.getCity();
-        let locAddress = await userInstance.getLocAddress();
         let profileImage = await userInstance.getProfileImage();
         let day = '01';
         let month = '01';
@@ -78,7 +81,6 @@ class SimpleUserProfile extends Component {
             lastName: lastName,
             gender: gender,
             image: profileImage==null ? '' : profileImage,
-            locAddress: locAddress,
             phoneNumber: phoneNumber,
             preferredCurrency: preferredCurrency,
             preferredLanguage: preferredLanguage,
@@ -87,7 +89,9 @@ class SimpleUserProfile extends Component {
     }
 
     render() {
-        const { navigate, goBack } = this.props.navigation;
+        const { goBack } = this.props.navigation;
+        const { locAddress } = this.props.loginDetails;
+
         let gender = '';
         if (this.state.gender === 'men') {
             gender = 'M';
@@ -161,7 +165,7 @@ class SimpleUserProfile extends Component {
                         <ProfileHistoryItem
                             style={styles.historyStyle}
                             title={"ETH/LOC address"}
-                            detail={this.state.locAddress} />
+                            detail={locAddress} />
 
 
                         <View style={styles.lineStyle} />
@@ -189,4 +193,10 @@ class SimpleUserProfile extends Component {
     }
 }
 
-export default SimpleUserProfile;
+const mapStateToProps = (state) => {
+    return {
+        loginDetails: state.userInterface.loginDetails
+    };
+}
+
+export default connect(mapStateToProps) (SimpleUserProfile);

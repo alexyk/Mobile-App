@@ -1,7 +1,7 @@
 import { AsyncStorage, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import moment, { lang } from 'moment';
+import moment from 'moment';
 
 import BackButton from '../../atoms/BackButton';
 import DateTimePicker from 'react-native-modal-datetime-picker';
@@ -103,6 +103,8 @@ class EditUserProfile extends Component {
     }
 
     async componentDidMount() {
+        const { locAddress }  = this.props.loginDetails;
+
         let firstName = await userInstance.getFirstName();
         let lastName = await userInstance.getLastName();
         let email = await userInstance.getEmail();
@@ -113,7 +115,6 @@ class EditUserProfile extends Component {
         let country = await userInstance.getCountry();
         let countryState = await userInstance.getCountryState();
         let city = await userInstance.getCity();
-        let locAddress = await userInstance.getLocAddress();
         let jsonFile = await userInstance.getJsonFile();
         let profileImage = await userInstance.getProfileImage();
         let about = await userInstance.getAbout();
@@ -132,26 +133,26 @@ class EditUserProfile extends Component {
         }
 
         this.setState({
-            about: about,
-            governmentId: governmentId,
-            school: school,
-            work: work,
-            city: city,
-            country: country,
-            countryState: countryState,
-            email: email,
-            firstName: firstName,
-            lastName: lastName,
-            gender: gender,
+            about,
+            governmentId,
+            school,
+            work,
+            city,
+            country,
+            countryState,
+            email,
+            firstName,
+            lastName,
+            gender,
             image: profileImage,
-            locAddress: locAddress,
-            phoneNumber: phoneNumber,
+            phoneNumber,
+            locAddress,
+            jsonFile,
+            day,
+            month,
+            year,
             preferredCurrency: preferredCurrency == null ? 0 : preferredCurrency.id,
             preferredLanguage: preferredLanguage == null ? 'English' : preferredLanguage,
-            jsonFile: jsonFile,
-            day: day,
-            month: month,
-            year: year,
         });
         // requester.getCountries().then(res => {
         //     res.body.then(data => {
@@ -704,6 +705,7 @@ class EditUserProfile extends Component {
 
 const mapStateToProps = (state) => {
     return {
+        loginDetails: state.userInterface.loginDetails,
         countries: state.country.countries
     };
 }

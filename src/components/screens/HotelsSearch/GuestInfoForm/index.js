@@ -533,7 +533,7 @@ const mapStateToProps = (state) => {
         locAmounts: state.locAmounts,
         exchangeRates: state.exchangeRates,
 
-        loginDetails: state.userInterface.login,
+        loginDetails: state.userInterface.loginDetails,
         guestData: state.hotels.guestData,
         datesAndGuestsData: state.userInterface.datesAndGuestsData
     };
