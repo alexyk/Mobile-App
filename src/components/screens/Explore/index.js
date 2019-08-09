@@ -79,6 +79,14 @@ class Explore extends Component {
         // this.props.actions.getCurrency(props.currency, false);//eslint-disable-line
     }
 
+    processUserError(...args) {
+        AsyncStorage.setItem(`${domainPrefix}.auth.username`, undefined);
+        this.props.navigation.navigate('Welcome');
+        alert(`Old login data expired.\nPlease log in again ...`);
+        processError(...args);
+    }
+
+
 
     async componentWillMount() {
         const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
@@ -94,7 +102,21 @@ class Explore extends Component {
         // TODO: An old note below. To fix - investigate the commit by abhi when it was added:
         // Below line gives null cannot be casted to string error on ios please look into it
         requester.getUserInfo().then((res) => {
+            if (!res || !res.body) {
+                this.processUserError(`[Explore::componentWillMount] Error while getting user info - level 3`,{res});
+                return;
+            } else if (!res.success) {
+                res.errors
+                    .then(error => {
+                        this.processUserError(`[Explore::componentWillMount] Error while getting user info - level 4`,{res,error});
+                    });
+                return
+            }
+
             res.body.then((data) => {
+                //  with redux cache, for example:
+                this.props.setLoginDetails(data);
+
                 if (email_value == undefined || email_value == null || email_value == "") {
                     AsyncStorage.setItem(`${domainPrefix}.auth.username`, data.email);
                     this.setState({
@@ -104,11 +126,11 @@ class Explore extends Component {
 
                 // TODO: Replace all references to user data (async storage)
                 userInstance.setUserData(data);
-                //  with redux cache, for example:
-                this.props.setLoginDetails(data);
-            }).catch((err) => {
-                //console.log('componentWillMount', err);
+            }).catch((error) => {
+                this.processUserError(`[Explore::componentWillMount] Error while getting user info - level 2`,{error});
             });
+        }).catch((error) => {
+            this.processUserError(`[Explore::componentWillMount] Error while getting user info - level 1`,{error});
         });
         // TODO: Also there was a merge about 10 months ago - see yuri930 commit for the above code (where the issue is)
         // Best - get rid of AsyncStorage and use redux to clear any cache issues
@@ -276,7 +298,8 @@ class Explore extends Component {
                 : lang.TEXT.SEARCH_HOME_RESULTS_TILE
         }
 
-        //TODO: When refactoring - move to login flow
+        //TODO: When refactoring - create and move to a clean login flow
+        // (the place is not here for sure, but somewhere in AppLoading for example)
         this.props.setLoginDetails({token,email});
         this.props.setDatesAndGuestsData({regionId: this.state.regionId});
 
