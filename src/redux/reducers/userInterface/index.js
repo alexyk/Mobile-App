@@ -4,10 +4,13 @@ import {
 } from '../../action/userInterface';
 
 import moment from 'moment'
+import lodash, {cloneDeep} from 'lodash';
+
 import { generateInitialCalendarData, formatDatesData } from '../../../components/screens/Calendar/utils';
 import { stringifyRoomsData } from '../../../components/screens/utils';
 import { WALLET_STATE } from '../../enum'
 import { validateLOCAddress } from '../../../utils/validation';
+import { clog } from '../../../config-debug';
 
 
 export const internalFormat = "YYYY-MM-DD";
@@ -96,12 +99,14 @@ export default handleActions(
 
     [setLoginDetails]: (state, {payload}) => {
       let newState = {
-        ...state,
-        loginDetails: Object.assign({...state.loginDetails}, payload)
+        ...state
       };
+      lodash.merge(newState, {loginDetails: payload});
+
 
       // a private case of loading user info before wallet data
-      if (payload.locAddress && validateLOCAddress(payload.locAddress) == 1) {
+      const validationResult = validateLOCAddress(payload.locAddress);
+      if (payload.locAddress && validationResult == 1) {
         newState.walletData.skipLOCAddressRequest = true;
       }
 
@@ -109,8 +114,8 @@ export default handleActions(
     },
 
     [setWalletData]: (state, {payload}) => {
-      let newState = {...state};
-      const {locAddress} = payload;
+      let newState = cloneDeep(state);
+      const { locAddress } = payload;
 
       // set locAddress in login data
       if (locAddress !== undefined) {
@@ -119,16 +124,19 @@ export default handleActions(
       delete payload.locAddress;
 
       // set walletData properties
-      newState = Object.assign(newState, {
+      lodash.merge(newState, {
         walletData: {
           ...newState.walletData,
           ...payload
       }});
 
-      // unset isFirstLoading
-      if (newState.isFirstLoading && newState.walletState == WALLET_STATE.READY) {
-        newState.isFirstLoading = false;
+      // set isFirstLoading to false
+      const { walletData } = newState;
+      if (walletData.isFirstLoading && walletData.walletState == WALLET_STATE.READY) {
+        newState.walletData.isFirstLoading = false;
       }
+
+      if (__DEV__) clog(`[Wallet] action reducer result`, newState.walletData)
 
       return newState;
     },

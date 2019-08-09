@@ -1,0 +1,612 @@
+{
+  "roles": [
+    {
+      "name": "USER"
+    }
+  ],
+  "country": {
+    "code": "ES",
+    "name": "Spain",
+    "id": 3
+  },
+  "email": "hello@there.bg",
+  "userIdentity": null,
+  "city": null,
+  "currencies": [
+    {
+      "unicode": "$",
+      "code": "USD",
+      "id": 1
+    },
+    {
+      "unicode": "£",
+      "code": "GBP",
+      "id": 2
+    },
+    {
+      "unicode": "€",
+      "code": "EUR",
+      "id": 3
+    },
+    {
+      "unicode": "$",
+      "code": "COP",
+      "id": 4
+    },
+    {
+      "unicode": "Lek",
+      "code": "ALL",
+      "id": 5
+    },
+    {
+      "unicode": "؋",
+      "code": "AF",
+      "id": 6
+    },
+    {
+      "unicode": "$",
+      "code": "ARS",
+      "id": 7
+    },
+    {
+      "unicode": "ƒ",
+      "code": "AWG",
+      "id": 8
+    },
+    {
+      "unicode": "$",
+      "code": "AUD",
+      "id": 9
+    },
+    {
+      "unicode": "ман",
+      "code": "AZ",
+      "id": 10
+    },
+    {
+      "unicode": "$",
+      "code": "BSD",
+      "id": 11
+    },
+    {
+      "unicode": "$",
+      "code": "BBD",
+      "id": 12
+    },
+    {
+      "unicode": "p.",
+      "code": "BYR",
+      "id": 13
+    },
+    {
+      "unicode": "BZ$",
+      "code": "BZD",
+      "id": 14
+    },
+    {
+      "unicode": "$",
+      "code": "BMD",
+      "id": 15
+    },
+    {
+      "unicode": "$b",
+      "code": "BOB",
+      "id": 16
+    },
+    {
+      "unicode": "KM",
+      "code": "BAM",
+      "id": 17
+    },
+    {
+      "unicode": "P",
+      "code": "BWP",
+      "id": 18
+    },
+    {
+      "unicode": "лв",
+      "code": "BG",
+      "id": 19
+    },
+    {
+      "unicode": "R$",
+      "code": "BRL",
+      "id": 20
+    },
+    {
+      "unicode": "$",
+      "code": "BND",
+      "id": 21
+    },
+    {
+      "unicode": "៛",
+      "code": "KHR",
+      "id": 22
+    },
+    {
+      "unicode": "$",
+      "code": "CAD",
+      "id": 23
+    },
+    {
+      "unicode": "$",
+      "code": "KYD",
+      "id": 24
+    },
+    {
+      "unicode": "$",
+      "code": "CLP",
+      "id": 25
+    },
+    {
+      "unicode": "¥",
+      "code": "CNY",
+      "id": 26
+    },
+    {
+      "unicode": "₡",
+      "code": "CRC",
+      "id": 27
+    },
+    {
+      "unicode": "kn",
+      "code": "HRK",
+      "id": 28
+    },
+    {
+      "unicode": "₱",
+      "code": "CUP",
+      "id": 29
+    },
+    {
+      "unicode": "Kč",
+      "code": "CZK",
+      "id": 30
+    },
+    {
+      "unicode": "kr",
+      "code": "DKK",
+      "id": 31
+    },
+    {
+      "unicode": "RD$",
+      "code": "DOP ",
+      "id": 32
+    },
+    {
+      "unicode": "$",
+      "code": "XCD",
+      "id": 33
+    },
+    {
+      "unicode": "£",
+      "code": "EGP",
+      "id": 34
+    },
+    {
+      "unicode": "$",
+      "code": "SVC",
+      "id": 35
+    },
+    {
+      "unicode": "£",
+      "code": "FKP",
+      "id": 36
+    },
+    {
+      "unicode": "$",
+      "code": "FJD",
+      "id": 37
+    },
+    {
+      "unicode": "¢",
+      "code": "GHC",
+      "id": 38
+    },
+    {
+      "unicode": "£",
+      "code": "GIP",
+      "id": 39
+    },
+    {
+      "unicode": "Q",
+      "code": "GTQ",
+      "id": 40
+    },
+    {
+      "unicode": "£",
+      "code": "GGP",
+      "id": 41
+    },
+    {
+      "unicode": "$",
+      "code": "GYD",
+      "id": 42
+    },
+    {
+      "unicode": "L",
+      "code": "HNL",
+      "id": 43
+    },
+    {
+      "unicode": "$",
+      "code": "HKD",
+      "id": 44
+    },
+    {
+      "unicode": "Ft",
+      "code": "HUF",
+      "id": 45
+    },
+    {
+      "unicode": "kr",
+      "code": "ISK",
+      "id": 46
+    },
+    {
+      "unicode": "Rp",
+      "code": "INR",
+      "id": 47
+    },
+    {
+      "unicode": "Rp",
+      "code": "IDR",
+      "id": 48
+    },
+    {
+      "unicode": "﷼",
+      "code": "IRR",
+      "id": 49
+    },
+    {
+      "unicode": "£",
+      "code": "IMP",
+      "id": 50
+    },
+    {
+      "unicode": "₪",
+      "code": "ILS",
+      "id": 51
+    },
+    {
+      "unicode": "J$",
+      "code": "JMD",
+      "id": 52
+    },
+    {
+      "unicode": "¥",
+      "code": "JPY",
+      "id": 53
+    },
+    {
+      "unicode": "£",
+      "code": "JEP",
+      "id": 54
+    },
+    {
+      "unicode": "лв",
+      "code": "KZT",
+      "id": 55
+    },
+    {
+      "unicode": "₩",
+      "code": "KPW",
+      "id": 56
+    },
+    {
+      "unicode": "₩",
+      "code": "KRW",
+      "id": 57
+    },
+    {
+      "unicode": "лв",
+      "code": "KGS",
+      "id": 58
+    },
+    {
+      "unicode": "₭",
+      "code": "LAK",
+      "id": 59
+    },
+    {
+      "unicode": "Ls",
+      "code": "LVL",
+      "id": 60
+    },
+    {
+      "unicode": "£",
+      "code": "LBP",
+      "id": 61
+    },
+    {
+      "unicode": "$",
+      "code": "LRD",
+      "id": 62
+    },
+    {
+      "unicode": "CHF",
+      "code": "CHF",
+      "id": 63
+    },
+    {
+      "unicode": "Lt",
+      "code": "LTL",
+      "id": 64
+    },
+    {
+      "unicode": "ден",
+      "code": "MKD",
+      "id": 65
+    },
+    {
+      "unicode": "RM",
+      "code": "MYR",
+      "id": 66
+    },
+    {
+      "unicode": "₨",
+      "code": "MUR",
+      "id": 67
+    },
+    {
+      "unicode": "$",
+      "code": "MX",
+      "id": 68
+    },
+    {
+      "unicode": "₮",
+      "code": "MNT",
+      "id": 69
+    },
+    {
+      "unicode": "MT",
+      "code": "MZ",
+      "id": 70
+    },
+    {
+      "unicode": "$",
+      "code": "NAD",
+      "id": 71
+    },
+    {
+      "unicode": "₨",
+      "code": "NPR",
+      "id": 72
+    },
+    {
+      "unicode": "ƒ",
+      "code": "ANG",
+      "id": 73
+    },
+    {
+      "unicode": "$",
+      "code": "NZD",
+      "id": 74
+    },
+    {
+      "unicode": "C$",
+      "code": "NIO",
+      "id": 75
+    },
+    {
+      "unicode": "₦",
+      "code": "NG",
+      "id": 76
+    },
+    {
+      "unicode": "₩",
+      "code": "KPW",
+      "id": 77
+    },
+    {
+      "unicode": "kr",
+      "code": "NOK",
+      "id": 78
+    },
+    {
+      "unicode": "﷼",
+      "code": "OMR",
+      "id": 79
+    },
+    {
+      "unicode": "₨",
+      "code": "PKR",
+      "id": 80
+    },
+    {
+      "unicode": "B/.",
+      "code": "PAB",
+      "id": 81
+    },
+    {
+      "unicode": "Gs",
+      "code": "PYG",
+      "id": 82
+    },
+    {
+      "unicode": "S/.",
+      "code": "PE",
+      "id": 83
+    },
+    {
+      "unicode": "Php",
+      "code": "PHP",
+      "id": 84
+    },
+    {
+      "unicode": "zł",
+      "code": "PL",
+      "id": 85
+    },
+    {
+      "unicode": "﷼",
+      "code": "QAR",
+      "id": 86
+    },
+    {
+      "unicode": "lei",
+      "code": "RO",
+      "id": 87
+    },
+    {
+      "unicode": "руб",
+      "code": "RUB",
+      "id": 88
+    },
+    {
+      "unicode": "£",
+      "code": "SHP",
+      "id": 89
+    },
+    {
+      "unicode": "﷼",
+      "code": "SAR",
+      "id": 90
+    },
+    {
+      "unicode": "Дин.",
+      "code": "RSD",
+      "id": 91
+    },
+    {
+      "unicode": "₨",
+      "code": "SCR",
+      "id": 92
+    },
+    {
+      "unicode": "$",
+      "code": "SGD",
+      "id": 93
+    },
+    {
+      "unicode": "$",
+      "code": "SBD",
+      "id": 94
+    },
+    {
+      "unicode": "S",
+      "code": "SOS",
+      "id": 95
+    },
+    {
+      "unicode": "R",
+      "code": "ZAR",
+      "id": 96
+    },
+    {
+      "unicode": "₩",
+      "code": "KRW",
+      "id": 97
+    },
+    {
+      "unicode": "₨",
+      "code": "LKR",
+      "id": 98
+    },
+    {
+      "unicode": "kr",
+      "code": "SEK",
+      "id": 99
+    },
+    {
+      "unicode": "CHF",
+      "code": "CHF",
+      "id": 100
+    },
+    {
+      "unicode": "$",
+      "code": "SRD",
+      "id": 101
+    },
+    {
+      "unicode": "£",
+      "code": "SYP",
+      "id": 102
+    },
+    {
+      "unicode": "NT$",
+      "code": "TWD",
+      "id": 103
+    },
+    {
+      "unicode": "฿",
+      "code": "THB",
+      "id": 104
+    },
+    {
+      "unicode": "TT$",
+      "code": "TTD",
+      "id": 105
+    },
+    {
+      "unicode": "TL",
+      "code": "TRY",
+      "id": 106
+    },
+    {
+      "unicode": "£",
+      "code": "TRL",
+      "id": 107
+    },
+    {
+      "unicode": "$",
+      "code": "TVD",
+      "id": 108
+    },
+    {
+      "unicode": "₴",
+      "code": "UAH",
+      "id": 109
+    },
+    {
+      "unicode": "$U",
+      "code": "UYU",
+      "id": 110
+    },
+    {
+      "unicode": "лв",
+      "code": "UZS",
+      "id": 111
+    },
+    {
+      "unicode": "Bs",
+      "code": "VEF",
+      "id": 112
+    },
+    {
+      "unicode": "₫",
+      "code": "VND",
+      "id": 113
+    },
+    {
+      "unicode": "﷼",
+      "code": "YER",
+      "id": 114
+    },
+    {
+      "unicode": "Z$",
+      "code": "ZWD",
+      "id": 115
+    }
+  ],
+  "image": "https://staging.locktrip.com/images/default.png",
+  "firstName": "Aaaa",
+  "lastName": "Eeee",
+  "verified": false,
+  "jsonFile": null,
+  "countryState": null,
+  "locAddress": "0x87afbc9079f89fffbad99889723fff2349867abbcc",
+  "birthday": null,
+  "phoneNumber": null,
+  "preferredCurrency": {
+    "unicode": "$",
+    "code": "EUR",
+    "id": 1
+  },
+  "gender": null,
+  "preferredLanguage": null,
+  "zipCode": null,
+  "isEmailVerified": false,
+  "address": null,
+  "id": 710
+}

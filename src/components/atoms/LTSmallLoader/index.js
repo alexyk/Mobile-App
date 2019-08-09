@@ -7,7 +7,7 @@ export default function LTSmallLoader(props) {
   if (size == null) {
     size = 'small';
   }
-  if (color == nul) {
+  if (color == null) {
     color = '#FA9';
   }
 

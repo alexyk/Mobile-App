@@ -52,6 +52,10 @@ class MyTrips extends Component {
         }
     }
 
+    hideProgress() {
+        this.setState({isLoading: false});
+    }
+
     getTripsFromServer() {
         requester
             .getMyHotelBookings()
@@ -64,7 +68,6 @@ class MyTrips extends Component {
                         hasPendingTrips: (data.length > 0),
                         isLoading: false
                     });
-                    this.hideProgress();
                 })
             })
             .catch(err => {

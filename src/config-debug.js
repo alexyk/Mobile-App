@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import { isObject, isString, getObjectClassName, isSymbol } from './components/screens/utils';
 import lodash from 'lodash';
-import { isMoment } from 'moment';
+import moment, { isMoment } from 'moment';
 import { printAny } from '../test/common-test-utils';
 
 
@@ -23,6 +23,7 @@ export const __TEST__                                = (Platform.Version == unde
 export const reactotronLoggingInReleaseForceEnabled  = false;
 export const forceOffline                            = false;
 
+
 /**  
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Error handling
@@ -38,18 +39,20 @@ export const forceOffline                            = false;
 export const errorLevel = 0;
 
   // reactotron
-export const reactotronLoggingEnabled           = false;
+export var reactotron;
+export const reactotronLoggingEnabled           = true;
 export const logConverterErrorToReactrotron     = false;
 export const showTypesInReactotronLog           = true;
 export const warnOnReactotronDisabledCalls      = false;
   // redux
 export const reduxConsoleLoggingEnabled         = false;
-export const reduxConsoleCollapsedLogging       = true;
-export const reduxReactotronLoggingEnabled      = false;
+export const reduxConsoleCollapsedLogging       = false;
+export const reduxReactotronLoggingEnabled      = true;
   // console
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
+export const consoleShowTimeInLogs              = true;    // prepend with time
   // other
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
@@ -57,11 +60,23 @@ export const hotelsSearchSocketDebug            = false;
 export const checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
   // offline mode
   // Enabled if: (__DEV__ == true) and (isOffline == true)
-                                let isOffline   = false;
+                                let isOffline   = true;
   if (forceOffline) isOffline = forceOffline;
   if (!__DEV__) isOffline = false;
 export const isOnline = (!isOffline);
 export const autoLoginInOfflineMode             = true;
+export const validationStateOfflineWallet       = 1;  // -1: none, 0: invalid, 1: valid
+export const offlineTimeInSeconds = {
+  getCountries: 0.1,
+  getCurrencyRates: 0.1,
+  login: 0.1,
+  getUserInfo: 1,
+  getLocRateByCurrency: 0.1,
+  getMyHotelBookings: 0.1,
+  getMyConversations: 0.1,
+  getWalletFromEtherJS1: 1,
+  getWalletFromEtherJS2: 0.2
+}
   // automated flows
     // hotels search
 export const autoHotelSearch                    = false;
@@ -93,11 +108,17 @@ export const autoCalendar                       = false;
 const emptyFunc = function() {};
 function emptyFuncWithDescr(descr) { if (__MYDEV__ !== undefined && console.warn != null) console.warn(` Call of '${descr}' is disabled - see '__MYDEV__'`) };
 
+function addTime(all) {
+  if (consoleShowTimeInLogs) {
+    const timeStr = `[${moment().format('HH:mm:ss.SSS')}]`;
+    all.unshift(timeStr);
+  }
+}
 export var dlog = dlogFunc;
-export function clog(...all) {console.log(...all)};
-export function ilog(...all) {console.info(...all)}
-export function wlog(...all) {console.warn(...all)}
-export function elog(...all) {console.error(...all)}
+export function clog(...all) {addTime(all); console.log(...all)};
+export function ilog(...all) {addTime(all); console.info(...all)}
+export function wlog(...all) {addTime(all); console.warn(...all)}
+export function elog(...all) {addTime(all); console.error(...all)}
 export var tslog = (consoleTimeCalculations ? console.time : emptyFunc);
 export var telog = (consoleTimeCalculations ? console.timeEnd : emptyFunc);
 
@@ -198,14 +219,12 @@ function configureReactotron() {
     return;
   }
 
+
   // if in dev mode or forceReactotronLogging
   if ((__DEV__ && reactotronLoggingEnabled) || reactotronLoggingInReleaseForceEnabled) {
     // Reactotron config
     try {
-      require('./utils/reactotronLogging')
-      const r = require('reactotron-react-native')
-      const Reactotron = r.default;
-      console.tron = Reactotron;
+      reactotron = require('./utils/reactotronLogging')
       console.tron.mylog = rlog;
       console.tron.mylogd = rlogd;
       ilog('Reactotron connected');

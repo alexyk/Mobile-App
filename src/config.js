@@ -1,5 +1,5 @@
 // debug settings
-require('./config-debug').configureDebug()
+require('./config-debug').configureDebug();
 
 // normal production config, other configs follow
 export let apiHost = 'https://beta.locktrip.com/api/';

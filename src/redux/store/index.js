@@ -1,11 +1,12 @@
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
 import thunk from 'redux-thunk';
 import appReducers from '../reducers';
 import { middleware } from '../../routing'
 import { logger } from 'redux-logger'
 import {
-    reduxConsoleLoggingEnabled, reduxConsoleCollapsedLogging, reduxReactotronLoggingEnabled
+    reduxConsoleLoggingEnabled, reduxConsoleCollapsedLogging, reduxReactotronLoggingEnabled,
+    reactotron
 } from '../../config-debug'
 
 let middlewares = [thunk, middleware];
@@ -34,11 +35,15 @@ const enchancer = composeWithDevTools({
 })(applyMiddleware(...middlewares));
 
 let store;
-if (console.tron.createStore && reduxReactotronLoggingEnabled) {
- store = console.tron.createStore(appReducers, enchancer); // eslint-disable-line
+// if (console.tron.createStore && reduxReactotronLoggingEnabled) {
+if (reactotron.createEnchancer && reduxReactotronLoggingEnabled) {
+//  store = console.tron.createStore(appReducers, compose(enchancer,console.tron.createEnhancer)); // eslint-disable-line
+ store = createStore(appReducers, compose(enchancer, reactotron.createEnchancer)); // eslint-disable-line
 } else {
  store = createStore(appReducers, enchancer); // eslint-disable-line
 }
+
+console.log(`--------- store created ----------`)
   
 // if (module.hot) {
 //     // Enable Webpack hot module replacement for reducers
