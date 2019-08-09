@@ -12,6 +12,8 @@ describe('validation functions', () => {
         p7 = '389723497234'
         p8 = '389 7234 97 234'
         p9 = '389k7234 97 234'
+        p10 = -1;
+        p11 = '-1';
     ;
 
     expect(validatePhone(p1))     .toBeTruthy();
@@ -23,6 +25,8 @@ describe('validation functions', () => {
     expect(validatePhone(p7))     .toBeTruthy();
     expect(validatePhone(p8))     .toBeFalsy();
     expect(validatePhone(p9))     .toBeFalsy();
+    expect(validatePhone(p10))    .toBeFalsy();
+    expect(validatePhone(p11))    .toBeFalsy();
   });
 
   it('validateLOCAddress - should validate blockchain address', () => {
@@ -34,6 +38,8 @@ describe('validation functions', () => {
     expect( validateLOCAddress(null) )                        .toEqual(-1);
     expect( validateLOCAddress(undefined) )                   .toEqual(-1);
     expect( validateLOCAddress({}) )                          .toEqual(-1);
+    expect( validateLOCAddress(-1) )                          .toEqual(0);
+    expect( validateLOCAddress('-1') )                        .toEqual(0);
   })
 
 });

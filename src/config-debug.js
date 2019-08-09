@@ -1,11 +1,14 @@
+import { Platform } from 'react-native';
 import { isObject, isString, getObjectClassName, isSymbol } from './components/screens/utils';
 import lodash from 'lodash';
 import { isMoment } from 'moment';
+import { printAny } from '../test/common-test-utils';
 
 
 // TODO: Check if there is a better way to know if the code is in testing mode (jest etc.)
-// Currently using (__MYDEV__ === undefined) to know that it is testing (functions loose their context scope)
+// Currently using Platform.Version and (__MYDEV__ === undefined || __TEST__) to know that it is testing (functions loose their context scope)
 // Example usage emptyFuncWithDescr, 
+// 
 
 
 /** 
@@ -16,6 +19,7 @@ import { isMoment } from 'moment';
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
 export const __MYDEV__                               = (__DEV__ && true);
+export const __TEST__                                = (Platform.Version == undefined);
 export const reactotronLoggingInReleaseForceEnabled  = false;
 export const forceOffline                            = false;
 
@@ -104,6 +108,13 @@ export var telog = (consoleTimeCalculations ? console.timeEnd : emptyFunc);
 export var mlog = mlogFunc; // moment logging
 
 function configureConsole() {
+  // if testing with jest - return
+  if (__MYDEV__ == undefined || __TEST__) {
+    return;
+  }
+
+
+
   if (!__DEV__ && !__MYDEV__) {
     clog = emptyFunc;
     ilog = emptyFunc;
@@ -182,18 +193,28 @@ function configureConsole() {
 
 
 function configureReactotron() {
+  // if testing with jest - return
+  if (__MYDEV__ == undefined || __TEST__) {
+    return;
+  }
+
   // if in dev mode or forceReactotronLogging
   if ((__DEV__ && reactotronLoggingEnabled) || reactotronLoggingInReleaseForceEnabled) {
     // Reactotron config
     try {
       require('./utils/reactotronLogging')
+      const r = require('reactotron-react-native')
+      const Reactotron = r.default;
+      console.tron = Reactotron;
+      console.tron.mylog = rlog;
+      console.tron.mylogd = rlogd;
       ilog('Reactotron connected');
     } catch (e) {
-      if (__MYDEV__ !== undefined) console.warn('Reactotron could not be enabled - ' + e.message);
+      if (__MYDEV__ !== undefined && !__TEST__) console.warn('Reactotron could not be enabled - ' + e.message);
     }
 
   } else {
-    if (__MYDEV__ !== undefined) {
+    if (__MYDEV__ !== undefined && !__TEST__) {
       console.disableYellowBox = true;
       ilog(`Reactotron is disabled - release=${reactotronLoggingInReleaseForceEnabled} dev=${reactotronLoggingEnabled}`);
     }
@@ -299,6 +320,12 @@ function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
  * @param {Boolean} isImportant 
  */
 export function rlogd(tag, description, data, isImportant = false) {
+  // if testing in jest etc.
+  if (__MYDEV__ == undefined || __TEST__) {
+    console.log('[rlog]',tag, description, data);
+    return;
+  }
+
   if (__DEV__) {
     rlog('dev-debug', `[${tag}] `+description, data, isImportant);
   }
@@ -313,6 +340,12 @@ export function rlogd(tag, description, data, isImportant = false) {
  * @param {Boolean} isImportant A highlight of tag (as in ERROR)
  */
 export function rlog(tag, description, data, isImportant = false) {
+  // if testing in jest etc.
+  if (__MYDEV__ == undefined || __TEST__) {
+    console.log(`[rlog] ${tag}`, printAny(data ? {[description]:data} : description));
+    return;
+  }
+
   let params = {}
   let doParsing = true
   

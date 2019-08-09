@@ -31,34 +31,3 @@ test('validateObject', () => {
         // expect to have 2 conditions
     expect(res)     .toEqual('@@@@')    
 })
-
-test.skip('lodash vs Object.assign',() => {
-        // init
-    const lodash = require('lodash')
-    const objOrig = {hello: 'there', id: 131, price: 3.45, photo: {url:'blue.png'}}
-    const obj = Object.assign({},objOrig);
-    const objNA = {photo: undefined, na:7};
-    const objNA2 = {photo: '', na:789};
-
-        // test 1 - lodash.merge({}, ...)
-    const objL1 = lodash.merge( {}, obj, objNA);
-    const objL1_2 = lodash.merge( {}, obj, objNA2);
-    // const objA = Object.assign({},obj, {photo: undefined})
-    // log('lodash.merge({},...)',{obj, objL1, objL1_2})
-    const lodashAll = lodash.merge(
-    	{name: 'hello', nullDeletesMe: 'he ho'},
-    	{id: 23, name: 'second'},
-    	{descr: 'hey there'},
-    	{photo: 'less.jpg', nullDeletesMe: null, descr: undefined}
-//    , 	{id: undefined, descr: undefined},
-    )
-    log('merge 4 objects', {lodashAll})
-
-        // test 2 - lodash.merge(obj, ...)
-    const objL2 = lodash.merge( obj, objNA, objNA2);
-    //log('lodash.merge(obj,...)',{obj, objL2})
-    //log('Object.assign',)
-
-        // test
-
-})

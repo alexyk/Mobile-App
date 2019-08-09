@@ -1,6 +1,5 @@
 // import Reactotron, {openInEditor,trackGlobalErrors} from 'reactotron-react-native'
 import {Platform} from 'react-native'
-import { rlog,rlogd } from '../config-debug'
 
 const r = require('reactotron-react-native')
 const Reactotron = r.default;
@@ -24,7 +23,3 @@ Reactotron
   .use(trackGlobalErrors())
   .connect()
   .clear();
-
-  console.tron = Reactotron;
-  console.tron.mylog = rlog;
-  console.tron.mylogd = rlogd;

@@ -30,7 +30,8 @@
     "test-debug": "node --inspect node_modules/.bin/jest --watch --runInBand"
   },
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "testEnvironment": "node"
   },
   "dependencies": {
     "@ptomasroos/react-native-multi-slider": "1.0.0",
