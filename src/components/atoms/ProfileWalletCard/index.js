@@ -1,8 +1,9 @@
 import React, {Component} from 'react';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import lodash from 'lodash';
 
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity,  Clipboard } from 'react-native';
 import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 import VersionText from '../../atoms/VersionText'
@@ -18,6 +19,7 @@ import { Wallet } from '../../../services/blockchain/wallet';
 import { CurrencyConverter } from '../../../services/utilities/currencyConverter'
 import requester from '../../../initDependencies';
 import { isNumber } from '../../screens/utils';
+import { clog, isOnline } from '../../../config-debug';
 
 const DEFAULT_CRYPTO_CURRENCY = 'EUR';
 
@@ -31,6 +33,7 @@ class ProfileWalletCard extends Component {
         this._isWalletTimeoutEnabled = false;
         this._refreshId = -1;
         this._tempBalance = {}; // used for quick reference avoiding effects of cache being async
+        this._message = null;
 
         this.refreshWalletFromServer = this.refreshWalletFromServer.bind(this);
         this.processWalletError = this.processWalletError.bind(this);
@@ -67,11 +70,15 @@ class ProfileWalletCard extends Component {
     refreshWalletFromServer() {
         // Skip asking for wallet address if already loaded
         // Directly refresh balance instead
+        const { locAddress } = this.props.loginDetails;
         const { isFirstLoading, skipLOCAddressRequest } = this.props.walletData;
-        if (!isFirstLoading || skipLOCAddressRequest) {
+        if ((!isFirstLoading || skipLOCAddressRequest) &&  validateLOCAddress(locAddress) == 1) {
+            this.props.setWalletData({walletState: WALLET_STATE.LOADING});
             this.refreshWalletBalance();
             return;
         }
+
+        this.props.setWalletData({walletState: WALLET_STATE.CHECKING});
 
         requester
             .getUserInfo()
@@ -108,29 +115,35 @@ class ProfileWalletCard extends Component {
             .catch(error => this.processWalletError(error));
     }
 
-    refreshWalletBalance() {
+    refreshWalletBalance(changeState=false) {
+        if (changeState) this.props.setWalletData({walletState: WALLET_STATE.LOADING});
+
         const { locAddress } = this.props.loginDetails;
         this._tempBalance = {};
         
-        if (locAddress !== null && locAddress !== '') {
-            Wallet
-                .getBalance(locAddress)
-                .then(x => {
-                    const ethBalance = x / (Math.pow(10, 18));
-                    this.checkBalance({ ethBalance });
-                });
+        if (validateLOCAddress(locAddress) == 1) {
+            if (isOnline) {
+                Wallet
+                    .getBalance(locAddress)
+                    .then(x => {
+                        const ethBalance = x / (Math.pow(10, 18));
+                        this.checkBalance({ ethBalance });
+                    });
 
-            Wallet
-                .getTokenBalance(locAddress)
-                .then(y => {
-                    const locBalance = y / (Math.pow(10, 18));
-                    this.checkBalance({ locBalance });
-                });
+                Wallet
+                    .getTokenBalance(locAddress)
+                    .then(y => {
+                        const locBalance = y / (Math.pow(10, 18));
+                        this.checkBalance({ locBalance });
+                    });
+            } else {
+                requester.getWalletFromEtherJS(data => this.checkBalance(data))
+            }
         }
     }
 
     checkBalance(newData) {
-        Object.assign(this._tempBalance, newData);
+        lodash.merge(this._tempBalance, newData);
 
         const { locBalance, ethBalance } = this._tempBalance;
 
@@ -156,8 +169,8 @@ class ProfileWalletCard extends Component {
         }
     }
 
-    createWallet = () => {
-        const {navigate} = this.props.navigation;
+    createWallet() {
+        const { navigate } = this.props.navigation;
         navigate("CreateWallet");
     }
 
@@ -178,12 +191,22 @@ class ProfileWalletCard extends Component {
         )
     }
 
-    _renderMessage(message) {
+    _renderMessage(message, isCard = false) {
+        const renderedText = <Text style={styles.messageText}>{message}</Text>;
+
+        if (isCard) {
+            return (this._renderEmptyBox(renderedText));
+        } else {
+            return renderedText;
+        }
+    }
+
+    _renderEmptyBox(extraContent = null) {
         return (
-            <View style={{ width: '100%', height: walletBoxHeight, alignItems: 'center', justifyContent: 'flex-start',paddingBottom: 5}}>
+            <View style={{ width: '100%', height: walletBoxHeight, alignItems: 'center', justifyContent: 'flex-start', paddingBottom: 5}}>
                 { this._renderLogo() }
                 { this._renderLogoBackground() }
-                <Text style={styles.messageText}>{message}</Text>
+                { extraContent }
             </View>
         )
     }
@@ -198,11 +221,75 @@ class ProfileWalletCard extends Component {
         )
     }
 
+    _renderLocBalance(locBalance, displayPrice) {
+        const validLocBalance = (isNumber(locBalance));
 
-    _renderWalletContent() {
+        if (!validLocBalance) {
+            return (
+                <View style={{ width: '100%' }}>
+                    <Text style={styles.balanceLabel}>Current Balance</Text>
+                    <Text style={styles.balanceText}>{" "}</Text>
+                </View>
+            )
+        }
+        
+        return (
+            <View style={{ width: '100%' }}>
+                <Text style={styles.balanceLabel}>Current Balance</Text>
+                <Text style={styles.balanceText}>{locBalance.toFixed(6)} LOC / {displayPrice}</Text>
+            </View>
+        )
+    } 
+
+    _renderEthBalance(ethBalance) {
+        const validEthBalance = (isNumber(ethBalance));
+
+        if (!validEthBalance) {
+            return (
+                <View style={{ width: '100%' }}>
+                    <Text style={styles.balanceLabel}>ETH Balance</Text>
+                    <Text style={styles.balanceText}>
+                        {" "}
+                    </Text>
+                </View>
+            )
+        }
+
+        return (
+            <View style={{ width: '100%' }}>
+                <Text style={styles.balanceLabel}>ETH Balance</Text>
+                <Text style={styles.balanceText}>
+                    {parseFloat(ethBalance).toFixed(6)}
+                </Text>
+            </View>
+        )
+    }
+
+    _renderLocAddress(locAddress, isRenderingLocAddress) {
+        return (
+            <View style={{ width: '100%' }}>
+                <Text style={styles.locAddress}>{`${isRenderingLocAddress ? locAddress : '...'}`}</Text>
+            </View>
+        )
+    }
+
+    _renderRefreshButton(isShown) {
+        if (!isShown) {
+            return null;
+        }
+
+        return (
+            <TouchableOpacity onPress={() => this.refreshWalletBalance(true)} style={styles.refreshBalance}>
+                <LTIcon size={16} name={'refresh'} style={{color: '#FFFa',}} />
+            </TouchableOpacity>
+        )
+    }
+
+
+    _renderWalletContent(isReloading, isEmpty, isReady, isLoading) {
         const { exchangeRates, locAmounts, currency, currencySign } = this.props;
         const { locAddress } = this.props.loginDetails;
-        const { walletState, locBalance, ethBalance, isFirstLoading } = this.props.walletData;
+        const { walletState, locBalance, ethBalance } = this.props.walletData;
 
         const fiat = exchangeRates.currencyExchangeRates && CurrencyConverter.convert(exchangeRates.currencyExchangeRates, DEFAULT_CRYPTO_CURRENCY, currency, exchangeRates.locRateFiatAmount);
         let locAmount = locAmounts.locAmounts[exchangeRates.locRateFiatAmount] && locAmounts.locAmounts[exchangeRates.locRateFiatAmount].locAmount;
@@ -217,115 +304,161 @@ class ProfileWalletCard extends Component {
         }
         
         let result = null;
+        this._message = null;
 
         // first priority cases - lost connection / errors
         switch (walletState) {
             case WALLET_STATE.INVALID:
-                result = this._renderMessage('Error occurred while reading wallet data. Please report to support.');
+                result = this._renderMessage('Error occurred while reading wallet data. Please report to support.', true);
                 break;
 
             case WALLET_STATE.CONNECTION_ERROR:
-                result = this._renderMessage('Connection error while getting wallet ...');
+                result = this._renderMessage('Connection error while getting wallet ...', true);
                 break;
         }
         if (result != null) {
             return result;
         }
 
-
         // ui cases
-        const uiState = (isFirstLoading ? walletState : WALLET_STATE.READY);
-        const isReloading = (isFirstLoading && walletState != WALLET_STATE.READY);
+        const uiState = (isReloading ? WALLET_STATE.READY : walletState);
+        result = this._renderEmptyBox();
 
         switch (uiState) {
 
             case WALLET_STATE.NONE:
-                result = this._renderMessage(`Please click the button to create your LOC Wallet!`);
+                result = this._renderMessage(`Please click the button to create your LOC Wallet!`, true);
                 break;        
                     
             case WALLET_STATE.CREATING:
-                result = this._renderMessage('Creating wallet ...');
+                this._message = this._renderMessage('Creating wallet ...');
                 break;
                         
             case WALLET_STATE.CHECKING:
-                result = this._renderMessage('Checking for wallet ...');
+                this._message = this._renderMessage('Checking for wallet ...');
                 break;
                         
             case WALLET_STATE.LOADING:                
-                result = this._renderMessage('Refreshing wallet data ...');
+                this._message = this._renderMessage('Refreshing wallet data ...');
                 break;
 
-            case WALLET_STATE.READY:                
-                result = (
-                    <View style={{height: walletBoxHeight}}>
-                        { this._renderLogo() }
-                        { this._renderLogoBackground() }
+            // case WALLET_STATE.READY:                
+            //     result = (
+            //         <View style={{height: walletBoxHeight}}>
+            //             { this._renderLogo() }
+            //             { this._renderLogoBackground() }
         
-                        <Text style={styles.balanceLabel}>Current Balance</Text>
-                        <View style={{ width: '100%' }}>
-                            <Text style={styles.balanceText}>{locBalance.toFixed(6)} LOC / {displayPrice}</Text>
-                        </View>
-                        <Text style={styles.balanceLabel}>ETH Balance</Text>
-                        <View style={{ width: '100%' }}>
-                            <Text style={styles.balanceText}>
-                                {parseFloat(ethBalance).toFixed(6)}
-                            </Text>
-                        </View>
-        
-                        <View style={{ width: '100%' }}>
-                            <Text style={styles.locAddress}>{`${locAddress}`}</Text>
-                        </View>
+            //             { this._renderLocBalance(locBalance, displayPrice) }
+            //             { this._renderEthBalance(ethBalance) }
+            //             { this._renderLocAddress(locAddress) }
+            //         </View>
+            //     );
+            //     break;
 
-                        {isReloading &&
-                            <LTSmallLoader style={{position:'absolute', right: 100, top: 140}} />
-                        }
-                    </View>
-                );
-                break;
+        }
 
+        if ( ! isEmpty ) {
+            result = (
+                <View style={{height: walletBoxHeight}}>
+                    { this._renderLogo() }
+                    { this._renderLogoBackground() }
+    
+                    { this._renderLocBalance(locBalance, displayPrice) }
+                    { this._renderEthBalance(ethBalance) }
+                    { this._renderLocAddress(locAddress, isReady || isLoading) }
+
+                    { this._renderRefreshButton(isReady) }
+                </View>
+            );
         }
 
         return result;
     }
 
 
-    _renderCreateWalletButton(walletState, createWallet) {
+    _renderCreateWalletButton() {
+        const { walletState } = this.props.walletData;
         const isButtonEnabled = ( walletState == WALLET_STATE.NONE );
 
         return (
             (isButtonEnabled) &&
-            (
-                <TouchableOpacity onPress={createWallet} style={styles.addMore}>
+                <TouchableOpacity onPress={this.createWallet} style={styles.createWallet}>
                     <LTIcon size={24} name={'plus'} style={{color: '#FFF7'}} />
                 </TouchableOpacity>
-            )
 
         )
     }
 
 
-    render() {
+    _renderCopyButton(isShowingCopyButton) {
+        if (!isShowingCopyButton) {
+            return (
+                <View style={styles.copyBox}>
+                    <Text style={styles.copyText}>{" "}</Text>
+                </View>
+            )
+        }
+
+
+        const { locAddress } = this.props.loginDetails;
+
         return (
-            <View style={styles.cardBox}>
- 
-                { this._renderAppVersion() }
+            (isShowingCopyButton) &&
+                <TouchableOpacity onPress={() => { Clipboard.setString(locAddress) }}>
+                    <View style={styles.copyBox}>
+                        <Text style={styles.copyText}>Copy your wallet address to clipboard</Text>
+                    </View>
+                </TouchableOpacity>
+        )
+    }
 
-                { this._renderWalletContent() }
 
-                { this._renderCreateWalletButton() }
+    _renderLoader(isShowingLoader) {
+        clog(`action isShowingLoader: ${isShowingLoader}`);
 
+        return (
+            isShowingLoader &&
+            <View style={[styles.loaderBox]}>
+                <LTSmallLoader size={'large'} />
+                { this._message != null && this._message }
+            </View>
+        )
+    }
+
+
+    render() {
+        const { isFirstLoading, skipLOCAddressRequest, walletState } = this.props.walletData;
+        
+        const isReady = (walletState == WALLET_STATE.READY);
+        const isLoading = (walletState == WALLET_STATE.LOADING);
+        const isEmpty = (walletState == WALLET_STATE.NONE || walletState == WALLET_STATE.CONNECTION_ERROR || walletState == WALLET_STATE.INVALID);
+        const isReloading = (!isFirstLoading && !isReady && !isEmpty);
+
+        if (__DEV__) clog(`[Wallet] action render: `, {isReloading, isEmpty, isReady, isFirstLoading})
+
+        return (
+            <View>
+                <View style={styles.cardBox}>
+                    { this._renderAppVersion() }
+
+                    { this._renderWalletContent(isReloading, isEmpty, isReady, isLoading) }
+
+                    { this._renderCreateWalletButton() }
+                </View>
+
+                { this._renderLoader(isReloading || (!isReady && !isEmpty)) }
+
+                { this._renderCopyButton((isReloading || isReady || skipLOCAddressRequest) && !isEmpty) }
             </View>
         );
     }
 }
 
 ProfileWalletCard.propTypes = {
-    createWallet: PropTypes.func,
     navigation: PropTypes.object
 };
 
 ProfileWalletCard.defaultProps = {
-    createWallet: () => {},
     navigation: null
 };
 

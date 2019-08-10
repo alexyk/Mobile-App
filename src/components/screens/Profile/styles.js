@@ -14,22 +14,6 @@ const styles = StyleSheet.create({
   text: {
     color: '#000'
   },
-  copyBox: {
-      backgroundColor: '#fff',
-      marginLeft: 40,
-      marginRight: 40,
-      padding: 10,
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderBottomLeftRadius: 10,
-      borderBottomRightRadius: 10
-  },
-  copyText: {
-      fontFamily: 'FuturaStd-Light',
-      fontSize: 13,
-      color: '#000'
-  },
   navItem: {
       borderBottomWidth: 0.5,
       borderColor: '#e2e4e3',

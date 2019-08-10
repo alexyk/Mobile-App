@@ -1,11 +1,12 @@
-// import Reactotron, {openInEditor,trackGlobalErrors} from 'reactotron-react-native'
+import Reactotron, {openInEditor,trackGlobalErrors} from 'reactotron-react-native'
+import { reactotronRedux as reduxPlugin } from 'reactotron-redux'
 import {Platform} from 'react-native'
 
-const r = require('reactotron-react-native')
-const Reactotron = r.default;
-const {openInEditor,trackGlobalErrors} = r;
+// const r = require('reactotron-react-native')
+// const Reactotron = r.default;
+// const {openInEditor,trackGlobalErrors} = r;
 
-Reactotron
+let r = Reactotron
   .configure({
     name: `Locktrip - Mobile App (${(Platform.OS == 'android' ? 'Android' : 'iOS')})`,
     host: "localhost"
@@ -19,7 +20,13 @@ Reactotron
     // errors: { veto: (stackFrame) => false }, // or turn it off with false
     // overlay: false, // just turning off overlay
   })
+  .use(reduxPlugin())
   .use(openInEditor())
-  .use(trackGlobalErrors())
-  .connect()
-  .clear();
+  .use(trackGlobalErrors());
+
+console.tron = Reactotron;
+r.connect();
+r.clear();
+  
+console.log(`--------- reactotron created ----------`, Reactotron, r)
+export default r;

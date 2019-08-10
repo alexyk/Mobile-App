@@ -10,6 +10,7 @@ import { generateInitialCalendarData, formatDatesData } from '../../../component
 import { stringifyRoomsData } from '../../../components/screens/utils';
 import { WALLET_STATE } from '../../enum'
 import { validateLOCAddress } from '../../../utils/validation';
+import { clog } from '../../../config-debug';
 
 
 export const internalFormat = "YYYY-MM-DD";
@@ -134,6 +135,8 @@ export default handleActions(
       if (walletData.isFirstLoading && walletData.walletState == WALLET_STATE.READY) {
         newState.walletData.isFirstLoading = false;
       }
+
+      if (__DEV__) clog(`[Wallet] action reducer result`, newState.walletData)
 
       return newState;
     },
