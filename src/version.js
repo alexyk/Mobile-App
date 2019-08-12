@@ -2,7 +2,7 @@ import {LT_CFG} from './config'
 import { hotelSearchIsNative } from './config-settings';
 const { step1Results, step2HotelDetails, step3BookingDetails } = hotelSearchIsNative;
 
-const compilationTime = '2019-08-07 16:43:57 EEST';
+const compilationTime = '2019-08-12 13:39:08 EEST';
 const branchName='';            // this line is updated by scripts/select_config.rb and travis-version.rb
 const travisVersion='';         // this line is updated by scripts/select_config.rb and travis-version.rb
 const packJsonVersion = require("../package.json").version;
