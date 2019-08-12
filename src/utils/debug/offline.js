@@ -1,4 +1,4 @@
-import { autoHotelSearchPlace, autoHomeSearchPlace, rlog, processError } from '../../config-debug'
+import { autoHotelSearchPlace, autoHomeSearchPlace, rlog, processError, validationStateOfflineWallet, offlineTimeInSeconds } from '../../config-debug'
 import { isObject } from '../../components/screens/utils'
 
 const offlinePacksHomes = {
@@ -46,7 +46,7 @@ const offlinePacksHotels = {
 }
 
 export default function createOfflineRequester() {
-  console.tron.logImportant('Offline mode (see utils/debug/offline.js)')
+  console.info('Offline mode (see utils/debug/offline.js)')
 
 	const promiseRes = (data,title) => ({
     body:new Promise(
@@ -78,7 +78,14 @@ export default function createOfflineRequester() {
   const getOfflineResponse = function(title) {
     switch (title) {
       case 'login':                         return require('./offline-responses/login.json')
-      case 'getUserInfo':                   return require('./offline-responses/userInfo.json')
+      case 'getUserInfo':                   return (value =>
+        {
+          switch (value) {
+            case -1: return require('./offline-responses/userInfo.json')
+            case  0: return require('./offline-responses/userInfo-with-invalid-wallet.json')
+            case  1: return require('./offline-responses/userInfo-with-wallet.json')
+          }
+        })(validationStateOfflineWallet)
       case 'getCountries':                  return require('./offline-responses/countries.json')
       case 'getCurrencyRates':              return require('./offline-responses/rates.json')
       case 'getLocRateByCurrency':          return require('./offline-responses/convert.json')
@@ -92,24 +99,34 @@ export default function createOfflineRequester() {
       case 'getUserHasPendingBooking':      return require('./offline-responses/booking1-pending.json')
       case 'getListingsByFilter':           return offlinePacksHomes[autoHomeSearchPlace]
       case 'getMyHotelBookings':            return require('./offline-responses/my-trips-all.json')
+      case 'getMyConversations':            return {content: []};
       default: {}
     }
   }
     
-	const genPromise = (args, title, delay = 0.1) => new Promise(
+	const genPromise = (args, title, delay = 0.1) => {
+    if (offlineTimeInSeconds[title] != null) {
+      delay = offlineTimeInSeconds[title];
+    }
+    const data = getOfflineResponse(title);
+    const delayInMS = 1000*delay;
+    const promise = promiseRes(data,title);
+
+    return new Promise(
 		(success, reject) => {
-      const data = getOfflineResponse(title)
-			setTimeout(success, 1000*delay, promiseRes(data,title));
-			//console.tron.log(title,`Success::START`,{data,args})
+			// setTimeout(() => success(promiseRes(data,title)), delayInMS);
+			setTimeout(() => success(promise), delayInMS);
+
+			// rlog(title,`Success::START`,{data,args})
 			//console.tron.logImportant(`[${title}] reject`,{args})
 		}
-  );
+  )};
   
   const socketDelay = 10; // in milliseconds
 	const offlineRequester = {
 		// http calls
 		login: (...args) 				                => genPromise(args,'login', 0.1),
-		getUserInfo: (...args)	                => genPromise(args,'getUserInfo', 0.5),
+		getUserInfo: (...args)	                => genPromise(args,'getUserInfo', 2.5),
 		getCountries: (...args) 				        => genPromise(args,'getCountries', 0), // with delay 100ms it has an exception
 		getCurrencyRates: (...args) 			      => genPromise(args,'getCurrencyRates'),
 		getLocRateByCurrency: (...args) 		    => genPromise(args,'getLocRateByCurrency'),
@@ -122,10 +139,12 @@ export default function createOfflineRequester() {
 		createReservation: (...args) 					  => genPromise(args,'createReservation'),
 		getUserHasPendingBooking: (...args) 	  => genPromise(args,'getUserHasPendingBooking'),
     markQuoteIdAsMarked: (...args) 	        => genPromise(args,'getUserHasPendingBooking'),
-    // homes
+      // homes
     getListingsByFilter: (...args)          => genPromise(args,'getListingsByFilter', 1),
-    // my trips aka bookings
-    getMyHotelBookings: (...args)           => genPromise(args,'getMyHotelBookings', 0.1),
+      // my trips aka bookings
+    getMyHotelBookings: (...args)           => genPromise(args,'getMyHotelBookings'),
+      // Messages / Inbox
+      getMyConversations: (...args)         => genPromise(args,'getMyConversations'),
 		// socket
 		startSocketConnection: (onData,_this) => {
       let arr = require('./offline-responses/fromSocket.json');
@@ -151,8 +170,20 @@ export default function createOfflineRequester() {
 					const func2 = () => onData.apply( _this, [ { body: JSON.stringify(onDoneSocket) } ] )
 					setTimeout(func2, index*delayPerRefresh+delay3)
 				}
-			})
-    }
+      })
+    },
+    // etherjs
+    getWalletFromEtherJS: callback        => setTimeout(
+      () => {
+        let data = {locBalance: 0.83};
+        callback(data);
+        rlog('API-OFFLINE', `getWalletFromEtherJS-1`, {data} )
+        setTimeout(() => {
+          data =  {ethBalance: 0.00032480};
+          callback(data);
+          rlog('API-OFFLINE', `getWalletFromEtherJS-2`, {data} )
+        }, 1000*offlineTimeInSeconds['getWalletFromEtherJS2']);
+      }, 1000*offlineTimeInSeconds['getWalletFromEtherJS1'])
   }
 
   return offlineRequester;

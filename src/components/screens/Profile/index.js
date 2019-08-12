@@ -1,4 +1,4 @@
-import { AsyncStorage, Clipboard, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { AsyncStorage, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { NavigationActions, StackActions } from 'react-navigation';
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
@@ -64,7 +64,6 @@ class Profile extends Component {
 
     onSendToken = () => {
         const { locBalance, ethBalance, walletState } = this.props.walletData;
-        const { locAddress } = this.props.loginDetails;
         const { navigate } = this.props.navigation;
 
         switch (walletState) {
@@ -95,17 +94,7 @@ class Profile extends Component {
     _renderWallet(walletState) {
 
         return (
-            <View>
-                <ProfileWalletCard navigation={this.props.navigation} createWallet = { this.createWallet }/>
-
-                { (walletState == WALLET_STATE.READY) &&
-                    <TouchableOpacity onPress={() => { Clipboard.setString(locAddress) }}>
-                        <View style={styles.copyBox}>
-                            <Text style={styles.copyText}>Copy your wallet address to clipboard</Text>
-                        </View>
-                    </TouchableOpacity>
-                }
-            </View>
+            <ProfileWalletCard navigation={this.props.navigation} createWallet = { this.createWallet }/>
         )
     }
 
@@ -124,7 +113,7 @@ class Profile extends Component {
                 <Toast
                     ref="toast"
                     style={{ backgroundColor: '#DA7B61', top: 500 }}
-                    position='middle'
+                    position='center'
                     positionValue={100}
                     fadeInDuration={500}
                     fadeOutDuration={500}
