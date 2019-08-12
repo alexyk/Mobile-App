@@ -1,14 +1,14 @@
 #!/bin/bash
 
-# param 1 - config (prod|staging|dev)
-# param 2 - apk new name - for upload by Travis CI
-
 case $1 in 
 	"help" | "-h" | "/h" | "--help" | "?" | "/?")
 			echo;echo
 			echo "Usage with two parameters:"
 			echo "    param 1 - config (prod|staging|dev)"
 			echo "    param 2 - apk new name - for upload by Travis CI"
+			echo "			or"
+			echo "    param 2 - apk new name - for upload by Travis CI"
+			echo "    param 3 - optional - if equal to \"no-tag\" then `npm version` is created without without got commit and tag"
 			echo;echo
 			exit 1
 			;;
@@ -34,6 +34,18 @@ fi
 
 # select config
 ./scripts/select_config.rb "$1"
+git add src/version.js
+git add src/config.js
+
+# version
+if [ $2 != "" ]; then
+	ver=$2
+	extra_params="-f"
+	[ $3 == "no-tag" ] && extra_params="-f --no-git-tag-version"
+	echo "Setting version to $ver"
+	npm version $ver $extra_params
+	[ $? -ne 0 ] && exit 2
+fi
 
 # build
 echo "Buldinging a $cfg version"
