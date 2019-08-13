@@ -1,6 +1,10 @@
 import { StyleSheet } from 'react-native';
+import { clog } from '../../../config-debug';
 
 export const walletBoxHeight = 190;
+export const loaderPreloaderBottom = "20%";
+
+clog(`$$$ [preloader] loaderPreloaderBottom = ${loaderPreloaderBottom}`);
 
 const styles = StyleSheet.create({
     cardBox: {
@@ -17,13 +21,14 @@ const styles = StyleSheet.create({
         paddingBottom: 15
     },
     loaderBox: {
-        position:'absolute',
-        right: "5%",
-        top: "34%",
-        borderRadius: 10,
-        height: walletBoxHeight + 20,
-        justifyContent: 'center',
-        alignItems: 'center'
+        position: 'absolute',
+        bottom: loaderPreloaderBottom,
+        right: 20,
+        width: 30,
+        height: 30,
+        borderRadius: 50,
+        alignItems: 'center',
+        justifyContent: 'center'
     },
     locAddress: {
         color: '#fff',
@@ -81,9 +86,9 @@ const styles = StyleSheet.create({
         justifyContent: 'center'
     },
 
-    refreshBalance: {
+    refreshButton: {
         position: 'absolute',
-        bottom: 5,
+        bottom: loaderPreloaderBottom,
         right: 20,
         width: 30,
         height: 30,

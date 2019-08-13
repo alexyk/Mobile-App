@@ -311,16 +311,16 @@ class ProfileWalletCard extends Component {
         )
     }
 
-    _renderRefreshButton(isShown) {
-        if (!isShown) {
+    _renderRefreshButtonOrLoader(isButton) {
+        if (isButton) {
+            return (
+                <TouchableOpacity onPress={() => this.refreshWalletBalance(true)} style={styles.refreshButton}>
+                    <LTIcon size={16} name={'refresh'} style={{color: '#FFF7'}} />
+                </TouchableOpacity>
+            )    
+        } else {
             return this._renderLoader(true);
         }
-
-        return (
-            <TouchableOpacity onPress={() => this.refreshWalletBalance(true)} style={styles.refreshBalance}>
-                <LTIcon size={16} name={'refresh'} style={{color: '#FFF7'}} />
-            </TouchableOpacity>
-        )
     }
 
 
@@ -400,7 +400,7 @@ class ProfileWalletCard extends Component {
                         { this._renderEthBalance(ethBalance) }
                         { this._renderLocAddress(locAddress, isReady || isLoading) }
 
-                        { this._renderRefreshButton(isReady) }
+                        { this._renderRefreshButtonOrLoader(isReady) }
                     </View>
                 );
             }
@@ -475,8 +475,6 @@ class ProfileWalletCard extends Component {
 
                     { this._renderCreateWalletButton() }
                 </View>
-
-                {/* { this._renderLoader(isReloading || (!isReady && !isEmpty)) } */}
 
                 { this._renderCopyButton((isReloading || isReady || skipLOCAddressRequest) && !isEmpty) }
 
