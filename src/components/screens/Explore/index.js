@@ -256,18 +256,19 @@ class Explore extends Component {
     updateData(data) {
         clog('[Explore] Update guests', {data})
 
+        const { adults, children, childrenAgeValues, rooms } = data;
+
         let roomsData = {};
-        roomsData['adults'] = data.adults;
+        roomsData['adults'] = adults;
         roomsData['children'] = [];
-        for (let i = 0; i < data.children; i ++) {
-            roomsData['children'].push({"age": 0});
+        for (let i = 0; i < children; i ++) {
+            roomsData['children'].push({"age": childrenAgeValues[i]});
         }
         let roomsDummyData = stringifyRoomsData( [roomsData] );
 
         const newState = {
-            adults: data.adults,
-            children: data.children,
-            guests: data.adults + data.children,
+            adults, children, rooms, childrenAgeValues,
+            guests: adults + children,
             roomsDummyData: roomsDummyData
         };
         this.setState(newState);

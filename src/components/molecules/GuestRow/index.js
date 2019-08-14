@@ -1,10 +1,5 @@
 import React, { Component } from 'react';
-import {
-        Text,
-        TouchableOpacity,
-        View
-      } from 'react-native';
-import Image from 'react-native-remote-svg';
+import { Text, View } from 'react-native';
 import PropTypes from 'prop-types';
 import Counter from '../../atoms/Counter'
 
@@ -26,9 +21,6 @@ class GuestRow extends Component {
         this.onChanged = this.onChanged.bind(this);
     }
 
-    componentDidMount() {
-    }
-
     onChanged(value) {
         if (this.props.onChanged) {
           this.props.onChanged(this.props.type, value);
@@ -36,29 +28,19 @@ class GuestRow extends Component {
     }
 
     render() {
-        const { title, subtitle, count, isChild, childAge, childNo } = this.props;
+        const {
+            title, subtitle, count, min, max
+        } = this.props;
 
-        if (isChild) {
-            return (
-                <View style={styles.container}>
-                    <View style={styles.headStyle}>
-                        <Text style={styles.titleStyle}>{Child `${childNo}`}</Text>
-                        <Text style={styles.titleStyle}>{`${childAge}`}</Text>
-                    </View>
-                    <Counter style={styles.countStyle} count={count} onChanged={this.onChanged}/>
+        return (
+            <View style={styles.container}>
+                <View style={styles.headStyle}>
+                    <Text style={styles.titleStyle}>{title}</Text>
+                    {subtitle != "" && (<Text style={styles.subtitleStyle}>{subtitle}</Text>)}
                 </View>
-            );
-        } else {
-            return (
-                <View style={styles.container}>
-                    <View style={styles.headStyle}>
-                        <Text style={styles.titleStyle}>{title}</Text>
-                        {subtitle != "" && (<Text style={styles.subtitleStyle}>{subtitle}</Text>)}
-                    </View>
-                    <Counter style={styles.countStyle} count={count} onChanged={this.onChanged}/>
-                </View>
-            );
-        }
+                <Counter min={min} max={max} style={styles.countStyle} count={count} onChanged={this.onChanged}/>
+            </View>
+        );
     }
 }
 

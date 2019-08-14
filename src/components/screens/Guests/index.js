@@ -11,7 +11,11 @@ import PropTypes from 'prop-types';
 import Toast from 'react-native-easy-toast';
 import CloseButton from '../../atoms/CloseButton';
 import GuestRow from '../../molecules/GuestRow';
+import ChildrenView from '../../molecules/ChildrenView';
 import styles from './styles';
+import { prepareChildrenAgeValue, updateChildAgesCache, INVALID_CHILD_AGE } from './utils';
+import Separator from '../../atoms/Separator';
+import { getSafeBottomOffset } from '../../../utils/designUtils';
 
 
 class Guests extends Component {
@@ -29,51 +33,94 @@ class Guests extends Component {
 
     constructor(props) {
         super(props);
-        this.onClose = this.onClose.bind(this);
-        this.onDone = this.onDone.bind(this);
-        this.onPersonChange = this.onPersonChange.bind(this);
-        const {adults, children} = this.props.datesAndGuestsData;
+        
+        const { adults, children, childrenAgeValues, rooms } = this.props.datesAndGuestsData;
+        
         this.state = {
             adults,
-            children
+            children,
+            rooms,
+            childrenAgeValues: childrenAgeValues.concat()
         };
+        this._childAgesCached = childrenAgeValues.concat();
+
+        this.onClose = this.onClose.bind(this);
+        this.onDone = this.onDone.bind(this);
+        this.onCountChange = this.onCountChange.bind(this);
+        this.onChildChange = this.onChildChange.bind(this);
     }
 
-    onPersonChange(type, value) {
-        this.setState((prevState) => ({
-            [type]: value
-        }))
+
+    onCountChange(type, count) {
+        if (type == 'children') {
+            const childrenAgeValues = prepareChildrenAgeValue(count, this._childAgesCached);
+            updateChildAgesCache(count, this._childAgesCached);
+
+            this.setState( {[type]: count, childrenAgeValues} );
+        } else {
+            this.setState( {[type]: count} );
+        }
+    }
+
+    onChildChange(index, age) {        
+        const { childrenAgeValues } = this.state;
+        let newValue = [...childrenAgeValues];
+        newValue[index] = age;
+        updateChildAgesCache(newValue, this._childAgesCached);
+        
+        this.setState( {childrenAgeValues: newValue} );
     }
 
     onClose() {
-      this.props.navigation.goBack();
+        this.props.navigation.goBack();
     }
 
     onDone() {
-        if (this.state.adults === 0){
+        const { adults, childrenAgeValues } = this.state;
+        const { params } = this.props.navigation.state;
+        if (adults === 0){
             this.refs.toast.show('You cannot book without adult.', 1500);
             return;
         }
-        if (this.props.navigation.state.params && this.props.navigation.state.params.updateData) {
-            this.props.navigation.state.params.updateData(this.state);
+
+        let allChildrenHaveAge = true;
+        for (let item of childrenAgeValues) {
+            if (item == INVALID_CHILD_AGE) {
+                allChildrenHaveAge = false;
+                break;
+            }
+        }
+        if (!allChildrenHaveAge) {
+            this.refs.toast.show('Please set age of each child.', 1500);
+            return;
+        }
+        
+        if (params && params.updateData) {
+            params.updateData(this.state);
         }
         this.props.navigation.goBack();
     }
 
     render() {
-        const { navigate } = this.props.navigation;
+        const { childrenAgeValues, children, adults, rooms } = this.state;
+
         return (
             <View style={styles.container}>
               <CloseButton onPress={this.onClose}/>
               <View style={styles.bodyRows}>
-                <GuestRow title={"Adults"} count={this.state.adults} type={"adults"} onChanged={this.onPersonChange}/>
-                <GuestRow title={"Children"} subtitle={"Age 0-17"} count={this.state.children} type={"children"} onChanged={this.onPersonChange}/>
+                <GuestRow title={"Adults"}   min={1} max={10} count={adults}     type={"adults"}     onChanged={this.onCountChange} />
+                <GuestRow title={"Rooms"}    min={1} max={5}  count={rooms}      type={"rooms"}      onChanged={this.onCountChange} />
+                <Separator isHR height={1} extraStyle={{backgroundColor: '#0002'}} />
+                <GuestRow title={"Children"} min={0} max={10} count={children}   type={"children"}   onChanged={this.onCountChange} subtitle={"Age 0-17"} />
+                <ChildrenView count={children} childrenAgeValues={childrenAgeValues} onChildChange={this.onChildChange} />
               </View>
               <View style={styles.bottomView}>
                 <TouchableOpacity style={styles.doneButtonView} onPress={this.onDone}>
                     <Text style={styles.doneButtonText}>Done</Text>
                 </TouchableOpacity>
               </View>
+
+              <Separator height={getSafeBottomOffset()} />
               
               <Toast
                     ref="toast"
@@ -90,7 +137,7 @@ class Guests extends Component {
     }
 }
 
-let mapStateToProps = (state) => {
+const mapStateToProps = (state) => {
     return {
         datesAndGuestsData: state.userInterface.datesAndGuestsData,
     };
