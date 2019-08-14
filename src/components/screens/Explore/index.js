@@ -80,7 +80,7 @@ class Explore extends Component {
     }
 
     processUserError(...args) {
-        AsyncStorage.setItem(`${domainPrefix}.auth.username`, undefined);
+        AsyncStorage.setItem(`${domainPrefix}.auth.username`, "");
         this.props.navigation.navigate('Welcome');
         alert(`Old login data expired.\nPlease log in again ...`);
         processError(...args);
