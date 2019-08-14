@@ -32,12 +32,10 @@ class Guests extends Component {
         this.onClose = this.onClose.bind(this);
         this.onDone = this.onDone.bind(this);
         this.onPersonChange = this.onPersonChange.bind(this);
-        const {adults, children, infants, childrenBool} = this.props.datesAndGuestsData;
+        const {adults, children} = this.props.datesAndGuestsData;
         this.state = {
             adults,
-            children,
-            infants,
-            childrenBool
+            children
         };
     }
 
@@ -69,9 +67,7 @@ class Guests extends Component {
               <CloseButton onPress={this.onClose}/>
               <View style={styles.bodyRows}>
                 <GuestRow title={"Adults"} count={this.state.adults} type={"adults"} onChanged={this.onPersonChange}/>
-                {/* <TouchableOpacity onPress={this.changeValue.bind(this)}><Text style={styles.ChildText}>{this.state.childrenBool == false ? "No children" : "With children"}</Text></TouchableOpacity> */}
-                <GuestRow title={"Children"} subtitle={"Age 2-12"} count={this.state.children} type={"children"} onChanged={this.onPersonChange}/>
-                <GuestRow title={"Infants"} subtitle={"Under 2"} count={this.state.infants} type={"infants"} onChanged={this.onPersonChange}/>
+                <GuestRow title={"Children"} subtitle={"Age 0-17"} count={this.state.children} type={"children"} onChanged={this.onPersonChange}/>
               </View>
               <View style={styles.bottomView}>
                 <TouchableOpacity style={styles.doneButtonView} onPress={this.onDone}>
@@ -91,23 +87,6 @@ class Guests extends Component {
                 />
             </View>
         );
-    }
-    changeValue(){
-        if(this.state.childrenBool){
-            this.setState(
-                {
-                    childrenBool: false,
-                }
-            );
-        }
-        else{
-            this.setState(
-                {
-                    childrenBool: true,
-                }
-            );
-        }
-        
     }
 }
 

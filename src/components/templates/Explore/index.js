@@ -53,8 +53,7 @@ class Explore extends Component {
         this.handleAutocompleteSelect = this.handleAutocompleteSelect.bind(this);
         this.state = {
             adults: 0,
-            children: 0,
-            infants: 0
+            children: 0
         };
     }
 
@@ -75,12 +74,12 @@ class Explore extends Component {
 
     updateData(data) {
         //console.log(data);
-        this.setState({ adults: data.adults, children: data.children, infants: data.infants });
+        this.setState({ adults: data.adults, children: data.children });
     }
 
     gotoGuests() {
         this.props.navigation.navigate('GuestsScreen', {
-            adults: this.state.adults, children: this.state.children, infants: this.state.infants, updateData: this.updateData
+            adults: this.state.adults, children: this.state.children, updateData: this.updateData
         });
     }
 
@@ -130,7 +129,7 @@ class Explore extends Component {
             search, checkInDate, checkOutDate, onDatesSelect, topHomes
         } = this.props;
         const {
-            adults, children, infants
+            adults, children
         } = this.state;
 
         return (
@@ -153,7 +152,6 @@ class Explore extends Component {
                         checkOutDate={checkOutDate}
                         adults={adults}
                         children={children}
-                        infants={infants}
                         gotoGuests={this.gotoGuests}
                         gotoSearch={this.gotoSearch}
                         onDatesSelect={onDatesSelect}

@@ -46,7 +46,7 @@ export function generateListItemKey(prop, prefix='', doReset=false) {
 export function createHotelSearchInitialState(params, reduxCache) {
   const {
     roomsDummyData,
-    guests, adults, children, infants, childrenBool,
+    guests, adults, children,
     checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated
   } = reduxCache;
 
@@ -76,7 +76,7 @@ export function createHotelSearchInitialState(params, reduxCache) {
 
     checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated,
 
-    guests, adults, children, infants, childrenBool,
+    guests, adults, children,
     daysDifference: 1,
     roomsDummyData,
 
@@ -110,8 +110,6 @@ export function createHotelSearchInitialState(params, reduxCache) {
     initialState.guests = params.guests;
     initialState.adults = params.adults;
     initialState.children = params.children;
-    initialState.infants = params.infants;
-    initialState.childrenBool = params.childrenBool;
 
     initialState.roomsDummyData = params.roomsDummyData;
     initialState.daysDifference = params.daysDifference;

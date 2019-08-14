@@ -86,7 +86,7 @@ export function renderBackButtonAndSearchField() {
 export function renderCalendarAndFilters() {
   const {
     startDateText, endDateText, checkInDateFormated, checkOutDateFormated,
-    guests, infants, children, adults
+    guests, children, adults
   } = this.props.datesAndGuestsData;
   return (
     <View
@@ -110,7 +110,6 @@ export function renderCalendarAndFilters() {
         checkOutDateFormated={checkOutDateFormated}
         adults={adults}
         children={children}
-        infants={infants}
         guests={guests}
         gotoFilter={this.gotoFilter}
         disabled={!this.state.editable}

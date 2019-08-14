@@ -267,9 +267,7 @@ class Explore extends Component {
         const newState = {
             adults: data.adults,
             children: data.children,
-            infants: data.infants,
-            guests: data.adults + data.children + data.infants,
-            childrenBool: data.childrenBool,
+            guests: data.adults + data.children,
             roomsDummyData: roomsDummyData
         };
         this.setState(newState);
@@ -314,7 +312,7 @@ class Explore extends Component {
             if (hotelSearchIsNative.step1Results) {
                 const {
                     token, email, isHotel, search, regionId, roomsDummyData, daysDifference,
-                    adults, guests, infants, children, childrenBool,
+                    adults, guests, children,
                     checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated,
                 } = this.state;
 
@@ -335,8 +333,6 @@ class Explore extends Component {
                         guests: guests,
                         adults: adults,
                         children: children,
-                        infants: infants,
-                        childrenBool: childrenBool,
                         checkInDateFormated: checkInDateFormated,
                         checkOutDateFormated: checkOutDateFormated,
                         roomsDummyData: roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
@@ -359,8 +355,6 @@ class Explore extends Component {
                         guests: guests,
                         adults: adults,
                         children: children,
-                        infants: infants,
-                        childrenBool: childrenBool,
                         checkOutDateFormated: checkOutDateFormated,
                         checkInDateFormated: checkInDateFormated,
                         roomsDummyData: roomsDummyData, //encodeURI(JSON.stringify(this.state.roomsData)),
@@ -578,7 +572,7 @@ class Explore extends Component {
 
     renderDateAndGuestsPicker() {
         const {
-            guests, infants, children, adults,
+            guests, children, adults,
             startDateText, endDateText
         } = this.props.datesAndGuestsData;
 
@@ -590,7 +584,6 @@ class Explore extends Component {
                     adults={adults}
                     children={children}
                     guests={guests}
-                    infants={infants}
                     gotoGuests={this.gotoGuests}
                     gotoSearch={this.gotoSearch}
                     onDatesSelect={this.onDatesSelect}

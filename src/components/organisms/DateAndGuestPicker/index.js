@@ -44,7 +44,7 @@ class DateAndGuestPicker extends Component {
 
     render() {
         const {
-            checkInDate, checkOutDate, adults, children, infants, showSearchButton, showCancelButton, disabled, isFilterable,
+            checkInDate, checkOutDate, adults, children, showSearchButton, showCancelButton, disabled, isFilterable,
             containerStyle
         } = this.props;
 
@@ -79,9 +79,9 @@ class DateAndGuestPicker extends Component {
                     <TouchableOpacity
                         onPress={isGuestsDisabled ? null : this.onGuests}
                         disabled={isGuestsDisabled}>
-                        <View style={adults + children + infants ? styles.guestPickerViewComplete : styles.guestPickerViewIncomplete}>
+                        <View style={adults + children ? styles.guestPickerViewComplete : styles.guestPickerViewIncomplete}>
                             <Text style={isGuestsDisabled ? styles.label_disabled : styles.label}>Guests</Text>
-                            <Text style={styles.value}>{ adults + children + infants || '-' }</Text>
+                            <Text style={styles.value}>{ adults + children || '-' }</Text>
                         </View>
                     </TouchableOpacity>
                     {
@@ -124,7 +124,6 @@ DateAndGuestPicker.propTypes = {
     onDatesSelect: PropTypes.func,
     adults: PropTypes.number.isRequired,
     children: PropTypes.number.isRequired,
-    infants: PropTypes.number.isRequired,
     gotoSearch: PropTypes.func.isRequired,
     gotoCancel: PropTypes.func.isRequired,
     gotoGuests: PropTypes.func,
@@ -141,7 +140,6 @@ DateAndGuestPicker.defaultProps = {
     onDatesSelect: null,
     adults: 2,
     children: 0,
-    infants: 0, 
     gotoSearch: ()=>{},
     gotoCancel: ()=>{},
     gotoGuests: null,

@@ -51,8 +51,6 @@ class HomesSearchScreen extends Component {
             guests: 2,
             adults: 2,
             children: 0,
-            infants: 0,
-            childrenBool: false,
             daysDifference: 1,
             roomsDummyData: encodeURI(JSON.stringify(roomsData)),
 
@@ -81,8 +79,6 @@ class HomesSearchScreen extends Component {
             this.state.guests = params.guests;
             this.state.adults = params.adults;
             this.state.children = params.children;
-            this.state.infants = params.infants;
-            this.state.childrenBool = params.childrenBool;
 
             this.state.roomsDummyData = params.roomsDummyData;
             this.state.daysDifference = params.daysDifference;
@@ -230,9 +226,7 @@ class HomesSearchScreen extends Component {
 
         this.previousState.adults = this.state.adults;
         this.previousState.children = this.state.children;
-        this.previousState.infants = this.state.infants;
         this.previousState.guests = this.state.guests;
-        this.previousState.childrenBool = this.state.childrenBool;
     }
 
     gotoGuests = () => {
@@ -240,9 +234,7 @@ class HomesSearchScreen extends Component {
             guests: this.state.guests,
             adults: this.state.adults,
             children: this.state.children,
-            infants: this.state.infants,
-            updateData: this.updateData,
-            childrenBool: this.state.childrenBool
+            updateData: this.updateData
         });
     }
 
@@ -274,9 +266,7 @@ class HomesSearchScreen extends Component {
 
             adults: this.previousState.adults,
             children: this.previousState.children,
-            infants: this.previousState.infants,
             guests: this.previousState.guests,
-            childrenBool: this.previousState.childrenBool,
             roomsDummyData: roomsDummyData,
             
             isNewSearch: false,
@@ -298,10 +288,7 @@ class HomesSearchScreen extends Component {
     }
 
     updateData = (data) => {
-        if (this.state.adults === data.adults
-                && this.state.children === data.children
-                && this.state.infants === data.infants
-                && this.state.childrenBool === data.childrenBool) {
+        if (this.state.adults === data.adults && this.state.children === data.children) {
             return;
         }
         
@@ -317,9 +304,7 @@ class HomesSearchScreen extends Component {
         this.setState({
             adults: data.adults,
             children: data.children,
-            infants: data.infants,
-            guests: data.adults + data.children + data.infants,
-            childrenBool: data.childrenBool,
+            guests: data.adults + data.children,
             roomsDummyData: roomsDummyData,
             isNewSearch: true
         });
@@ -559,7 +544,6 @@ class HomesSearchScreen extends Component {
                     checkOutDateFormated={this.state.checkOutDateFormated}
                     adults={this.state.adults}
                     children={this.state.children}
-                    infants={this.state.infants}
                     guests={this.state.guests}
                     gotoSearch={this.gotoSearch}
                     gotoCancel={this.gotoCancel}
