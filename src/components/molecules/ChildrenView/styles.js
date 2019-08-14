@@ -43,7 +43,7 @@ export const orderbyPickerSelectStyles = StyleSheet.create({
   inputIOS: {
     fontFamily: 'FuturaStd-Light',
     height: 30,
-    width: 50,
+    width: 100,
     fontSize: 16,
     marginRight: 10,
     borderRadius: 30,
@@ -59,7 +59,7 @@ export const orderbyPickerSelectStyles = StyleSheet.create({
   inputAndroid: {
     fontFamily: 'FuturaStd-Light',
     height: 30,
-    width: 45,
+    width: 100,
     alignSelf: 'flex-end',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',

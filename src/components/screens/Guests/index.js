@@ -91,7 +91,7 @@ class Guests extends Component {
             }
         }
         if (!allChildrenHaveAge) {
-            this.refs.toast.show('Please set age of each child.', 1500);
+            this.refs.toast.show('Please select the age of each of the children.', 1500);
             return;
         }
         
