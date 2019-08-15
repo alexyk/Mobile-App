@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import {
         Text,
         TouchableOpacity,
@@ -8,9 +8,9 @@ import Image from 'react-native-remote-svg';
 import PropTypes from 'prop-types';
 
 import styles from './styles';
-import { clog } from '../../../config-debug';
 
-class Counter extends Component {
+
+class Counter extends PureComponent {
     static propTypes = {
         count: PropTypes.number.isRequired,
         max: PropTypes.number,
@@ -22,10 +22,7 @@ class Counter extends Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-          count:0
-        };
-        this.state.count = this.props.count;
+
         this.onMinus = this.onMinus.bind(this);
         this.onPlus = this.onPlus.bind(this);
     }
@@ -36,52 +33,71 @@ class Counter extends Component {
         const hasMax = (max != null);
         
         const result = ( (hasMin && min > newValue) || (hasMax && max < newValue) );
-        
-
-        //@@@debu
-        clog(`isOutOfRange:`, {hasMin, hasMax, min, max, newValue, result});
 
         return result;
     }
 
     onMinus() {
-        const count = (this.state.count - 1);
+        const count = (this.props.count - 1);
 
         if (this.isOutOfRange(count)) {
             return;
         }
 
         // update value if in range
-        this.setState({ count});
         if (this.props.onChanged) {
             this.props.onChanged(count);
         }
     }
 
     onPlus() {
-        const count = (this.state.count + 1);
+        const count = (this.props.count + 1);
 
         if (this.isOutOfRange(count)) {
             return;
         }
 
         // update value if in range
-        this.setState({ count });
         if (this.props.onChanged) {
             this.props.onChanged(count);
         }
     }
 
+    _renderButton(name, isDisabled, onPress) {
+        let image;
+        switch (name) {
+            case 'plus':
+                image = require(`../../../assets/plus.png`);
+                break;
+            case 'minus':
+                image = require(`../../../assets/minus.png`);
+                break;
+        }
+
+        return (
+            isDisabled
+                ?   <Image source={image} style={ styles.DisableImage }/>
+                :
+                    <TouchableOpacity onPress={onPress}>
+                        <Image source={image} style={ styles.ButtonImage }/>
+                    </TouchableOpacity>
+        );
+    }
+
     render() {
+        const { min, max, count } = this.props;
+        const isMin = (count == min);
+        const isMax = (count == max);
+
         return (
             <View style={styles.container}>
-              <TouchableOpacity onPress={this.onMinus}>
-                  <Image source={require('../../../assets/minus.png')} style={ this.state.count > 0 ? styles.ButtonImage : styles.DisableImage }/>
-              </TouchableOpacity>
-              <Text style={styles.value}>{this.state.count > 0 ? this.state.count : "0+"}</Text>
-              <TouchableOpacity onPress={this.onPlus}>
-                  <Image source={require('../../../assets/plus.png')} style={styles.ButtonImage}/>
-              </TouchableOpacity>
+
+              { this._renderButton('minus', isMin, this.onMinus)}
+
+              <Text style={styles.value}>{count}</Text>
+
+              { this._renderButton('plus', isMax, this.onPlus)}
+
             </View>
         );
     }

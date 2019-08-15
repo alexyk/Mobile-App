@@ -57,7 +57,7 @@ export const initialState  = {
       adults: 2,
       children: 0,
       rooms: 1,
-      childrenAgeValues: [],
+      childrenAgeValues: [[]],
       roomsDummyData: stringifyRoomsData( [ {adults: 2, children: []} ] ),
       regionId: '',
       inputFormat: inputDateFormat,

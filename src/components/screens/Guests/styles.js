@@ -1,10 +1,13 @@
 import { StyleSheet } from 'react-native';
+import { getSafeTopOffset, getSafeBottomOffset } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        backgroundColor: '#f0f1f3'
+        backgroundColor: '#f0f1f3',
+        marginTop: getSafeTopOffset(),
+        marginBottom: getSafeBottomOffset()
     },
 
     bodyRows: {
@@ -40,6 +43,13 @@ const styles = StyleSheet.create({
         padding:10,
         height:70,
     },
+
+    withChildrenCheckbox: {
+        height: 15,
+        width: 15,
+        marginLeft: 15,
+        marginVertical: 10
+    }
 });
 
 export default styles;

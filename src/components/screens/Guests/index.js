@@ -11,11 +11,16 @@ import PropTypes from 'prop-types';
 import Toast from 'react-native-easy-toast';
 import CloseButton from '../../atoms/CloseButton';
 import GuestRow from '../../molecules/GuestRow';
-import ChildrenView from '../../molecules/ChildrenView';
+import CheckBox from 'react-native-checkbox';
 import styles from './styles';
-import { prepareChildrenAgeValue, updateChildAgesCache, INVALID_CHILD_AGE } from './utils';
+import {
+    prepareChildrenAgeValues, updateChildAgesCache, INVALID_CHILD_AGE, prepareInitialRoomsWithChildrenData, updateRoomsWithChildrenData,
+    modifyChildAgeInRoom
+} from './utils';
 import Separator from '../../atoms/Separator';
-import { getSafeBottomOffset } from '../../../utils/designUtils';
+import ChildrenRooms from '../../molecules/ChildrenRooms';
+import { HOTEL_ROOM_LIMITS } from '../../../config-settings';
+import { cloneDeep } from 'lodash';
 
 
 class Guests extends Component {
@@ -40,34 +45,77 @@ class Guests extends Component {
             adults,
             children,
             rooms,
-            childrenAgeValues: childrenAgeValues.concat()
+            childrenAgeValues: cloneDeep(childrenAgeValues),
+            hasChildren: false
         };
-        this._childAgesCached = childrenAgeValues.concat();
+        this._childAgesCached = cloneDeep(childrenAgeValues);
 
         this.onClose = this.onClose.bind(this);
         this.onDone = this.onDone.bind(this);
         this.onCountChange = this.onCountChange.bind(this);
         this.onChildChange = this.onChildChange.bind(this);
+        this.onWithChildrenClick = this.onWithChildrenClick.bind(this);
     }
 
 
-    onCountChange(type, count) {
-        if (type == 'children') {
-            const childrenAgeValues = prepareChildrenAgeValue(count, this._childAgesCached);
-            updateChildAgesCache(count, this._childAgesCached);
-
-            this.setState( {[type]: count, childrenAgeValues} );
-        } else {
-            this.setState( {[type]: count} );
-        }
-    }
-
-    onChildChange(index, age) {        
+    /**
+     * Sets the state of type with the updated value of count
+     * @param {String} type One of 'rooms', 'adults' or 'children'
+     * @param {Number} count 
+     * @param {Number} roomIndex 
+     */
+    onCountChange(type, count, roomIndex=null) {
         const { childrenAgeValues } = this.state;
-        let newValue = [...childrenAgeValues];
-        newValue[index] = age;
-        updateChildAgesCache(newValue, this._childAgesCached);
+        let newValue = count;
+        let extraValues = {};
+        let newAgeValues;
+
+        switch (type) {
+            case 'children':
+                // since children are set per room - total children count (newValue) is a sum of count of all rooms
+                newValue = 0;
+                childrenAgeValues.forEach(item => newValue += item.length);
+
+                // update children count in the room
+                newAgeValues = cloneDeep(childrenAgeValues);
+                let cached = this._childAgesCached[roomIndex];
+                newAgeValues[roomIndex] = prepareChildrenAgeValues(count, cached);
+                extraValues = { childrenAgeValues: newAgeValues };
+
+                // update cache
+                updateChildAgesCache(roomIndex, count, cached)
+                this._childAgesCached[roomIndex] = cached;
+                break;
         
+            case 'rooms':
+                newAgeValues = updateRoomsWithChildrenData(count, childrenAgeValues);
+                extraValues = { childrenAgeValues: newAgeValues };
+                break;
+            case 'adults':
+                const { rooms } = this.state;
+                if (newValue < rooms) {
+                    extraValues = {rooms: newValue};
+                }
+                break;
+        }
+        this.setState( {[type]: newValue, ...extraValues} );
+    }
+
+    onWithChildrenClick(value) {
+        const { rooms } = this.state;
+        const childrenAgeValues = prepareInitialRoomsWithChildrenData(rooms, this._childAgesCached)
+        for (let roomIndex = 0; roomIndex < rooms; roomIndex++) {
+            updateChildAgesCache(roomIndex, 0, this._childAgesCached);
+        }
+        
+        this.setState({
+            hasChildren: !value,
+            childrenAgeValues
+        });
+    }
+
+    onChildChange(roomIndex, data) {
+        const newValue = modifyChildAgeInRoom(roomIndex, )
         this.setState( {childrenAgeValues: newValue} );
     }
 
@@ -102,25 +150,29 @@ class Guests extends Component {
     }
 
     render() {
-        const { childrenAgeValues, children, adults, rooms } = this.state;
+        const { childrenAgeValues, children, adults, rooms, hasChildren } = this.state;
+        const maxRooms = (Math.min(HOTEL_ROOM_LIMITS.MAX.ROOMS, adults));
 
         return (
             <View style={styles.container}>
               <CloseButton onPress={this.onClose}/>
               <View style={styles.bodyRows}>
-                <GuestRow title={"Adults"}   min={1} max={10} count={adults}     type={"adults"}     onChanged={this.onCountChange} />
-                <GuestRow title={"Rooms"}    min={1} max={5}  count={rooms}      type={"rooms"}      onChanged={this.onCountChange} />
-                <Separator isHR height={1} extraStyle={{backgroundColor: '#0002'}} />
-                <GuestRow title={"Children"} min={0} max={10} count={children}   type={"children"}   onChanged={this.onCountChange} subtitle={"Age 0-17"} />
-                <ChildrenView count={children} childrenAgeValues={childrenAgeValues} onChildChange={this.onChildChange} />
+                <GuestRow title={"Adults"}   min={HOTEL_ROOM_LIMITS.MIN.ADULTS} max={HOTEL_ROOM_LIMITS.MAX.ADULTS} count={adults}     type={"adults"}     onChanged={this.onCountChange} subtitle={'at least 1 adult per room'} />
+                <GuestRow title={"Rooms"}    min={HOTEL_ROOM_LIMITS.MIN.ROOMS}  max={maxRooms}                     count={rooms}      type={"rooms"}      onChanged={this.onCountChange} />
+                <CheckBox
+                    checkboxStyle={styles.withChildrenCheckbox}
+                    label={ 'With Children' }
+                    checked={ hasChildren }
+                    onChange={this.onWithChildrenClick}
+                />
+                <Separator isHR={hasChildren} height={1} margin={10} />
+                <ChildrenRooms data={{children, childrenAgeValues, rooms}} hasChildren={hasChildren}  onCountChange={this.onCountChange} onChildChange={this.onChildChange} />
               </View>
               <View style={styles.bottomView}>
                 <TouchableOpacity style={styles.doneButtonView} onPress={this.onDone}>
                     <Text style={styles.doneButtonText}>Done</Text>
                 </TouchableOpacity>
               </View>
-
-              <Separator height={getSafeBottomOffset()} />
               
               <Toast
                     ref="toast"

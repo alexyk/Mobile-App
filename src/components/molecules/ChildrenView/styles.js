@@ -32,6 +32,14 @@ export default StyleSheet.create({
     marginRight: 10,
     color: '#54575a'
   },
+  textTitle: {
+    fontFamily: 'FuturaStd-Light',
+    fontSize: 18,
+    fontWeight: '400',
+    textDecorationLine: 'underline',
+    marginRight: 10,
+    color: '#54575a'
+  },
   androidPickerWrap: {
     backgroundColor: '#D76E5B',
     padding: 1,

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Text, View } from 'react-native';
 import PropTypes from 'prop-types';
 import Counter from '../../atoms/Counter'
@@ -6,14 +6,15 @@ import Counter from '../../atoms/Counter'
 import styles from './styles';
 
 
-class GuestRow extends Component {
+class GuestRow extends PureComponent {
 
     static propTypes = {
         title: PropTypes.string.isRequired,
         type: PropTypes.string.isRequired,
         count: PropTypes.number.isRequired,
         isChild: PropTypes.bool,
-        childAge: PropTypes.number
+        childAge: PropTypes.number,
+        index: PropTypes.any
     };
 
     constructor(props) {
@@ -22,8 +23,10 @@ class GuestRow extends Component {
     }
 
     onChanged(value) {
-        if (this.props.onChanged) {
-          this.props.onChanged(this.props.type, value);
+        const { type, index, onChanged } = this.props;
+        
+        if (onChanged) {
+            onChanged(type, value, index);
         }
     }
 
