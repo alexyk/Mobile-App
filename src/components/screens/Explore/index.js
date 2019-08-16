@@ -606,8 +606,8 @@ class Explore extends Component {
                 <Toast
                     ref="toast"
                     style={{ backgroundColor: '#DA7B61' }}
-                    position='bottom'
-                    positionValue={150}
+                    position='top'
+                    positionValue={300}
                     fadeInDuration={500}
                     fadeOutDuration={500}
                     opacity={1.0}

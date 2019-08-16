@@ -111,6 +111,8 @@ export function generateSearchString(state, props, doDecodeRooms=false) {
     }
   }
 
+  search += '&nat=-1';
+
   return search;
 }
 

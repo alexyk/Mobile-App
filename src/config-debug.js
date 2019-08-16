@@ -101,6 +101,9 @@ export const autoCalendar                       = false;
       and a rule - only one line logs (for easy ato deletion in release -> select_config.rb)
 */
 
+  // ui
+export const iconsDebugEnabled                  = false;    
+
 
 // ---------------  function definitions  -----------------
 

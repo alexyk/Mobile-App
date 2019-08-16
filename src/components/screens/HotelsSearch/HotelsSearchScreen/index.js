@@ -44,7 +44,7 @@ import {
   autoGetAllStaticPages,
   hotelSearchIsNative
 } from "../../../../config-settings";
-import { isOnline, rlog, processError, hotelsSearchSocketDebug } from "../../../../config-debug";
+import { isOnline, rlog, processError, hotelsSearchSocketDebug, clog, elog } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -162,6 +162,8 @@ class HotelsSearchScreen extends Component {
     this.onFilteredData = this.onFilteredData.bind(this);
     this.onFetchNewListViewData = this.onFetchNewListViewData.bind(this);
     this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(this);
+    this.onServerSearchStarted = this.onServerSearchStarted.bind(this);
+    this.onServerSearchError = this.onServerSearchError.bind(this);
 
     // render functions
     this.renderWebViewBack = renderWebViewBack.bind(this)
@@ -314,15 +316,40 @@ class HotelsSearchScreen extends Component {
     //console.log("#hotel-search# 4.2/6 [HotelsSearchScreen] getStaticHotelsData");
   }
 
+  onServerSearchStarted(data) {
+    clog(`Server Search Started`, data);
+  }
+
+  onServerSearchError(...error) {
+    elog(`Server Search Error`, error);
+  }
+
+  startSearch() {
+    UUIDGenerator
+      .getRandomUUID()
+      .then(value => {
+        this.uuid = value;
+        const query = `${this.searchString}&uuid=${value}`;
+
+        this.startSocketConnection();
+
+        // initiate search
+        requester
+          .getSearchHotelResults(query)
+          .then(this.onServerSearchStarted)
+          .catch(this.onServerSearchError);
+      });
+  }
+
+
   // TODO: Inspect this flow - and create a component to implement it
-  async startSocketConnection() {
+  startSocketConnection() {
     rlog('socket',`startSocketConnection`);
 
     this.isSocketDown = false;
 
-    if (isOnline) {
-      this.uuid = await UUIDGenerator.getRandomUUID();
 
+    if (isOnline) {
       // common code
       WebsocketClient.startGrouping();
 
@@ -370,10 +397,9 @@ class HotelsSearchScreen extends Component {
 
   stompiOSConnect() {
     const headers = { "content-length": false };
-    const data = { uuid: this.uuid, query: this.searchString };
 
     //console.log("stompiOSConnect ---------------");
-    rlog('socket',`stompiOSConnect`,{socketHost,data,headers});
+    clog('socket',`stompiOSConnect`,{socketHost,headers,uuid:this.uuid});
     
     stompiOSClient = stomp.client(socketHost);
     stompiOSClient.debug = (hotelsSearchSocketDebug
@@ -384,7 +410,6 @@ class HotelsSearchScreen extends Component {
       {},
       frame => {
         stompiOSClient.subscribe(`search/${this.uuid}`, this.onDataFromSocket);
-        stompiOSClient.send( "search", headers, JSON.stringify(data));
       },
       error => {
         stompiOSClient.disconnect();
@@ -395,12 +420,6 @@ class HotelsSearchScreen extends Component {
 
   stompAndroidConnect() {
     stompAndroidClient = NativeModules.StompModule;
-
-    //console.log("stompAndroid -------------");
-    //console.log("stompAndroid---------------", this.uuid, this.searchString);
-    const message =
-      '{"uuid":"' + this.uuid + '","query":"' + this.searchString + '"}';
-    const destination = "search/" + this.uuid;
 
     DeviceEventEmitter.removeAllListeners("onStompConnect");
     DeviceEventEmitter.addListener("onStompConnect", () => {
@@ -418,12 +437,10 @@ class HotelsSearchScreen extends Component {
       // TODO: (low priority) Solve this difference between iOS and Android
       return this.onDataFromSocket({ body: message });
     });
-
-    stompAndroidClient.getData(message, destination);
   }
 
   onDataFromSocket(data) {
-    // log('socket-data',`onDataFromSocket ${data.body}`, {data})
+    clog('socket-data',`onDataFromSocket`, {data})
     
     if (!this || !this.listViewRef || this.isUnmounted) {
       console.warn(`[HotelsSearchScreen::onDataFromSocket] Is screen unmounted: ${(this?this.isUnmounted:'n/a')}`,{thisNull: (this==null),listViewRef:(this?this.listViewRef:'n/a'),isUnMounted:(this?this.isUnmounted:'n/a')})      
@@ -444,9 +461,6 @@ class HotelsSearchScreen extends Component {
       }
 
       if (parsedData.hasOwnProperty("allElements")) {
-        // TODO: @@debug - remove
-        // console.warn(`#hotel-search# [HotelsSearchScreen] onDataFromSocket, DONE`, parsedData);
-
         if (parsedData.allElements) {
           this.setState({
             allElements: true,
@@ -550,35 +564,22 @@ class HotelsSearchScreen extends Component {
   onDoneSocket = data => {
     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
     rlog('on-done-socket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
+    
     printCheckHotelDataCache();
-
-    //TODO: @@@debug remove
-//     let asArray = []
-//     for (let i in this.hotelsSocketCacheMap) {
-//     	if (! isNaN(i)) {
-//     		asArray.push(this.hotelsSocketCacheMap[i])
-//     	}
-//     }
-    //log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{orig:this.hotelsSocketCacheMap.orig,parsed:this.hotelsSocketCacheMap},true)
-    //  log('socket-hotels',`${this.validSocketPrices} prices of ${this.state.totalHotels} hotels, onDoneSocket cache`,{asArray},true)
 
     this.stopSocketConnection(false);
 
-    // if (this.pageLimit > data.totalElements) {
-      // this.listSetPageLimit(data.totalElements);
-    // }
     this.setState((prevState) => ({
         pricesFromSocket: data.totalElements,
       }),
       () => {
-        // this.listSetPageLimit(this.state.totalHotels)
-        //log({name:'SOCKET',preview:`onDoneSocket`,important:true,value:{data,state:this.state,props:this.props}})
         this.isAllHotelsLoaded = false;
         this.props.setIsApplyingFilter(true);
         this.setState({ isDoneSocket: true, isLoading: false });
 
         // get first filtered results from server - showing unavailable as well
         this.updateFilter(generateFilterInitialData(true, this.state),false)
+        
         // then with UI filtering remove unavailable
         this.filtersCallback =  () => {
           if (this && this.listViewRef) {
@@ -835,7 +836,7 @@ class HotelsSearchScreen extends Component {
             displayMode: DISPLAY_MODE_RESULTS_AS_LIST
           };
           if (_this.isSocketDown) {
-            _this.startSocketConnection();
+            _this.startSearch();
           }
           _this.setState(newState);
           _this.pageSize = data.totalElements;
@@ -875,7 +876,7 @@ class HotelsSearchScreen extends Component {
         if (_this.isFirstLoad) {
           _this.isFirstLoad = false;
           if (_this.isSocketDown) {
-            _this.startSocketConnection();
+            _this.startSearch();
           }
           newState.displayMode = DISPLAY_MODE_RESULTS_AS_LIST;
         }
