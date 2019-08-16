@@ -44,7 +44,7 @@ const { width, height } = Dimensions.get("window");
 
 
 export function renderWebViewBack() {
-  if (this.isWebviewHotelDetail) {
+  // if (this.isWebviewHotelDetail) {
     return (
       <View style={{
           height: 60,
@@ -54,12 +54,12 @@ export function renderWebViewBack() {
           marginBottom: 10
       }}>
         <BackButton onPress={this.onBackButtonPress} />
-        <Text style={styles.backText}>{"Back to results"}</Text>
+        <Text style={styles.backText}>{"Back to 'Explore'"}</Text>
       </View>
     )
-  } else {
-    return null;
-  }
+  // } else {
+  //   return null;
+  // }
 }
 
 
