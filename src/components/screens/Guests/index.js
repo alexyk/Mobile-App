@@ -14,8 +14,10 @@ import GuestRow from '../../molecules/GuestRow';
 import CheckBox from 'react-native-checkbox';
 import styles from './styles';
 import {
-    prepareChildrenAgeValues, updateChildAgesCache, INVALID_CHILD_AGE, prepareInitialRoomsWithChildrenData, updateRoomsWithChildrenData,
-    modifyChildAgeInRoom
+    updateChildAgesCache, INVALID_CHILD_AGE, updateRoomsWithChildrenData,
+    modifyChildAgeInRoom,
+    modifyChildrenCountInRoom,
+    modifyRoomsForChildrenData
 } from './utils';
 import Separator from '../../atoms/Separator';
 import ChildrenRooms from '../../molecules/ChildrenRooms';
@@ -48,6 +50,8 @@ class Guests extends Component {
             childrenAgeValues: cloneDeep(childrenAgeValues),
             hasChildren: false
         };
+
+        // to be modified only by modifyChildrenCountInRoom() for consistency
         this._childAgesCached = cloneDeep(childrenAgeValues);
 
         this.onClose = this.onClose.bind(this);
@@ -72,18 +76,19 @@ class Guests extends Component {
 
         switch (type) {
             case 'children':
-                // since children are set per room - total children count (newValue) is a sum of count of all rooms
-                newValue = 0;
-                childrenAgeValues.forEach(item => newValue += item.length);
-
                 // update children count in the room
                 newAgeValues = cloneDeep(childrenAgeValues);
-                let cached = this._childAgesCached[roomIndex];
-                newAgeValues[roomIndex] = prepareChildrenAgeValues(count, cached);
+                newAgeValues[roomIndex] = modifyChildrenCountInRoom(roomIndex, count, this._childAgesCached);
                 extraValues = { childrenAgeValues: newAgeValues };
 
+                // Since children are set per room - the count of all children (newValue) is the sum of count in all rooms
+                // So for example a newAgeValues of [ [8,0,1], [10,14,3,5] ] would be 7 (3 children in room 1, and 4 in room 2)
+                // (wasn't like this before - children were just one number)
+                newValue = 0;
+                newAgeValues.forEach(item => newValue += item.length);
+
                 // update cache
-                updateChildAgesCache(roomIndex, count, cached)
+                updateChildAgesCache(roomIndex, newAgeValues, cached)
                 this._childAgesCached[roomIndex] = cached;
                 break;
         
@@ -102,11 +107,10 @@ class Guests extends Component {
     }
 
     onWithChildrenClick(value) {
-        const { rooms } = this.state;
-        const childrenAgeValues = prepareInitialRoomsWithChildrenData(rooms, this._childAgesCached)
-        for (let roomIndex = 0; roomIndex < rooms; roomIndex++) {
-            updateChildAgesCache(roomIndex, 0, this._childAgesCached);
-        }
+        const { rooms, childrenAgeValues } = this.state;
+
+        const result = modifyRoomsForChildrenData(1, this._childAgesCached);
+        updateChildAgesCache(roomIndex, result, this._childAgesCached);
         
         this.setState({
             hasChildren: !value,
