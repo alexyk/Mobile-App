@@ -254,8 +254,6 @@ class Explore extends Component {
     };
 
     updateData(data) {
-        clog('[Explore] Update guests', {data})
-
         const { adults, children, childrenAgeValues, rooms } = data;
 
         let roomsData = {};

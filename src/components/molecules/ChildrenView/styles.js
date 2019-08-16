@@ -12,7 +12,6 @@ export default StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10
   },
   childOptions: {
     flexDirection: 'row',
@@ -27,7 +26,7 @@ export default StyleSheet.create({
   },
   textChildTitle: {
     fontFamily: 'FuturaStd-Light',
-    fontSize: 17,
+    fontSize: 14,
     fontWeight: '100',
     marginRight: 10,
     color: '#54575a'
@@ -50,24 +49,22 @@ export default StyleSheet.create({
 export const orderbyPickerSelectStyles = StyleSheet.create({
   inputIOS: {
     fontFamily: 'FuturaStd-Light',
+    fontSize: 12,
     height: 30,
-    width: 100,
-    fontSize: 16,
+    width: 60,
     marginRight: 10,
     borderRadius: 30,
     borderColor: '#D76E5B',
     borderWidth: 1,
     color: '#54575a',
-    alignSelf: 'flex-end',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-end',
     textAlign: 'center',
     backgroundColor: '#FAFAFA'
   },
   inputAndroid: {
     fontFamily: 'FuturaStd-Light',
+    fontSize: 12,
     height: 30,
-    width: 100,
+    width: 60,
     alignSelf: 'flex-end',
     justifyContent: 'flex-end',
     alignItems: 'flex-end',

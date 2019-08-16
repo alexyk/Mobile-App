@@ -20,6 +20,11 @@ const styles = StyleSheet.create({
         fontFamily: 'FuturaStd-Light',
         fontSize: 17,
     },
+    childrenText: {
+        color: '#54575a',
+        fontFamily: 'FuturaStd-Light',
+        fontSize: 15
+    },
     ChildText:{
         fontFamily: 'futura',
         fontSize: 17,

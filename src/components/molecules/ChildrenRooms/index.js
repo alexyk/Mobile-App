@@ -10,12 +10,12 @@ export default class ChildrenRooms extends Component {
   }
 
   _renderContent() {
-    const { data, onChildChange, onCountChange } = this.props;
+    const { data, cache, onChildChange, onCountChange } = this.props;
     const { rooms, childrenAgeValues, children } = data;
 
 
     let items = childrenAgeValues.map((item,index) => {
-      return <ChildrenView key={`${index}_${item.join("_")}`} index={index} ageValues={item} onChildChange={onChildChange} onCountChange={onCountChange} />;
+      return <ChildrenView key={`${index}_${item.join("_")}`} index={index} ageValues={item} onChildChange={onChildChange} onCountChange={onCountChange} cache={cache} />;
     });
 
     return (

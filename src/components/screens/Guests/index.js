@@ -14,15 +14,18 @@ import GuestRow from '../../molecules/GuestRow';
 import CheckBox from 'react-native-checkbox';
 import styles from './styles';
 import {
-    updateChildAgesCache, INVALID_CHILD_AGE, updateRoomsWithChildrenData,
+    updateChildAgesCache, INVALID_CHILD_AGE,
     modifyChildAgeInRoom,
     modifyChildrenCountInRoom,
-    modifyRoomsForChildrenData
+    modifyRoomsForChildrenData,
+    calculateChildrenCount
 } from './utils';
 import Separator from '../../atoms/Separator';
 import ChildrenRooms from '../../molecules/ChildrenRooms';
 import { HOTEL_ROOM_LIMITS } from '../../../config-settings';
 import { cloneDeep } from 'lodash';
+
+
 
 
 class Guests extends Component {
@@ -48,14 +51,17 @@ class Guests extends Component {
             children,
             rooms,
             childrenAgeValues: cloneDeep(childrenAgeValues),
-            hasChildren: false
+            hasChildren: (children > 0)
         };
 
-        // to be modified only by modifyChildrenCountInRoom() for consistency
+        // local cache - to be modified only by:
+        //  1) modifyChildrenCountInRoom() for consistency
+        //  2) onClear - a private case of cleaning local cache
         this._childAgesCached = cloneDeep(childrenAgeValues);
 
         this.onClose = this.onClose.bind(this);
         this.onDone = this.onDone.bind(this);
+        this.onClear = this.onClear.bind(this);
         this.onCountChange = this.onCountChange.bind(this);
         this.onChildChange = this.onChildChange.bind(this);
         this.onWithChildrenClick = this.onWithChildrenClick.bind(this);
@@ -70,6 +76,8 @@ class Guests extends Component {
      */
     onCountChange(type, count, roomIndex=null) {
         const { childrenAgeValues } = this.state;
+        let cache = this._childAgesCached;
+
         let newValue = count;
         let extraValues = {};
         let newAgeValues;
@@ -77,29 +85,26 @@ class Guests extends Component {
         switch (type) {
             case 'children':
                 // update children count in the room
-                newAgeValues = cloneDeep(childrenAgeValues);
-                newAgeValues[roomIndex] = modifyChildrenCountInRoom(roomIndex, count, this._childAgesCached);
+                newAgeValues = modifyChildrenCountInRoom(roomIndex, count, childrenAgeValues, cache);
                 extraValues = { childrenAgeValues: newAgeValues };
 
-                // Since children are set per room - the count of all children (newValue) is the sum of count in all rooms
-                // So for example a newAgeValues of [ [8,0,1], [10,14,3,5] ] would be 7 (3 children in room 1, and 4 in room 2)
-                // (wasn't like this before - children were just one number)
-                newValue = 0;
-                newAgeValues.forEach(item => newValue += item.length);
+                newValue = calculateChildrenCount(newAgeValues);
 
-                // update cache
-                updateChildAgesCache(roomIndex, newAgeValues, cached)
-                this._childAgesCached[roomIndex] = cached;
+                updateChildAgesCache(roomIndex, newAgeValues, cache);
                 break;
         
             case 'rooms':
-                newAgeValues = updateRoomsWithChildrenData(count, childrenAgeValues);
+                newAgeValues = modifyRoomsForChildrenData(count, cache);
                 extraValues = { childrenAgeValues: newAgeValues };
+                updateChildAgesCache(null, newAgeValues, cache);
                 break;
+
             case 'adults':
                 const { rooms } = this.state;
                 if (newValue < rooms) {
-                    extraValues = {rooms: newValue};
+                    newAgeValues = modifyRoomsForChildrenData(newValue, cache);
+                    extraValues = {rooms: newValue, childrenAgeValues: newAgeValues};
+                    updateChildAgesCache(null, newAgeValues, cache);
                 }
                 break;
         }
@@ -107,20 +112,27 @@ class Guests extends Component {
     }
 
     onWithChildrenClick(value) {
-        const { rooms, childrenAgeValues } = this.state;
+        const cache = this._childAgesCached;
+        const childrenAgeValues = modifyRoomsForChildrenData(1, cache);
 
-        const result = modifyRoomsForChildrenData(1, this._childAgesCached);
-        updateChildAgesCache(roomIndex, result, this._childAgesCached);
+        updateChildAgesCache(null, childrenAgeValues, cache)
+
+        let children = (!value ? calculateChildrenCount(childrenAgeValues) : 0);
         
         this.setState({
             hasChildren: !value,
-            childrenAgeValues
+            childrenAgeValues,
+            children
         });
     }
 
-    onChildChange(roomIndex, data) {
-        const newValue = modifyChildAgeInRoom(roomIndex, )
-        this.setState( {childrenAgeValues: newValue} );
+    onChildChange(roomIndex, childIndex, age) {
+        const cache = this._childAgesCached;
+        const newValues = modifyChildAgeInRoom(roomIndex, childIndex, age, cache);
+
+        updateChildAgesCache(roomIndex, newValues, cache);
+
+        this.setState( {childrenAgeValues: newValues} );
     }
 
     onClose() {
@@ -136,10 +148,12 @@ class Guests extends Component {
         }
 
         let allChildrenHaveAge = true;
-        for (let item of childrenAgeValues) {
-            if (item == INVALID_CHILD_AGE) {
-                allChildrenHaveAge = false;
-                break;
+        for (let room of childrenAgeValues) {
+            for (let item of room) {
+                if (item == INVALID_CHILD_AGE) {
+                    allChildrenHaveAge = false;
+                    break;
+                }
             }
         }
         if (!allChildrenHaveAge) {
@@ -153,24 +167,54 @@ class Guests extends Component {
         this.props.navigation.goBack();
     }
 
-    render() {
-        const { childrenAgeValues, children, adults, rooms, hasChildren } = this.state;
-        const maxRooms = (Math.min(HOTEL_ROOM_LIMITS.MAX.ROOMS, adults));
+    onClear() {
+        this._childAgesCached = [[]];
+        this.setState({childrenAgeValues:[[]], adults: 2, rooms: 1, children: 0, hasChildren: false});
+    }
 
+
+    _renderChildren(hasChildren, children) {
         return (
-            <View style={styles.container}>
-              <CloseButton onPress={this.onClose}/>
-              <View style={styles.bodyRows}>
-                <GuestRow title={"Adults"}   min={HOTEL_ROOM_LIMITS.MIN.ADULTS} max={HOTEL_ROOM_LIMITS.MAX.ADULTS} count={adults}     type={"adults"}     onChanged={this.onCountChange} subtitle={'at least 1 adult per room'} />
-                <GuestRow title={"Rooms"}    min={HOTEL_ROOM_LIMITS.MIN.ROOMS}  max={maxRooms}                     count={rooms}      type={"rooms"}      onChanged={this.onCountChange} />
+            <View style={{flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginRight: 60}}>
                 <CheckBox
                     checkboxStyle={styles.withChildrenCheckbox}
                     label={ 'With Children' }
                     checked={ hasChildren }
                     onChange={this.onWithChildrenClick}
                 />
-                <Separator isHR={hasChildren} height={1} margin={10} />
-                <ChildrenRooms data={{children, childrenAgeValues, rooms}} hasChildren={hasChildren}  onCountChange={this.onCountChange} onChildChange={this.onChildChange} />
+                { (hasChildren && children > 0) &&
+                    <Text style={styles.childrenText}>{children}</Text>
+                }
+            </View>
+        )
+    }
+
+    _renderClearButton() {
+        return (
+            <TouchableOpacity onPress={ this.onClear } style={{marginTop: 40, marginRight: 15}} >
+                <Text style={styles.childrenText}>{`Clear`}</Text>
+            </TouchableOpacity>
+        )
+    }
+
+
+    render() {
+        const { childrenAgeValues, children, adults, rooms, hasChildren } = this.state;
+        const maxRooms = (Math.min(HOTEL_ROOM_LIMITS.MAX.ROOMS, adults));
+
+        return (
+            <View style={styles.container}>
+              <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <CloseButton onPress={this.onClose}/>
+                { this._renderClearButton() }
+              </View>
+              <Separator height={20} />
+              <View style={styles.bodyRows}>
+                <GuestRow title={"Adults"}   min={HOTEL_ROOM_LIMITS.MIN.ADULTS} max={HOTEL_ROOM_LIMITS.MAX.ADULTS} count={adults}     type={"adults"}     onChanged={this.onCountChange} subtitle={'at least 1 adult per room'} />
+                <GuestRow title={"Rooms"}    min={HOTEL_ROOM_LIMITS.MIN.ROOMS}  max={maxRooms}                     count={rooms}      type={"rooms"}      onChanged={this.onCountChange} />
+                <Separator isHR height={1} margin={5} />
+                { this._renderChildren(hasChildren, children) }
+                <ChildrenRooms data={{children, childrenAgeValues, rooms}} hasChildren={hasChildren}  onCountChange={this.onCountChange} onChildChange={this.onChildChange} cache={this._childAgesCached} />
               </View>
               <View style={styles.bottomView}>
                 <TouchableOpacity style={styles.doneButtonView} onPress={this.onDone}>
@@ -182,7 +226,7 @@ class Guests extends Component {
                     ref="toast"
                     style={{ backgroundColor: '#DA7B61' }}
                     position='bottom'
-                    positionValue={150}
+                    positionValue={350}
                     fadeInDuration={500}
                     fadeOutDuration={500}
                     opacity={1.0}

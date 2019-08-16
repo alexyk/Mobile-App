@@ -17,11 +17,12 @@ describe('guests related functionalities', () => {
 
       describe('should add 1 child', () => {
         let cache = [[]];
+        let oldValues = [[]];
         let res;
 
         it('adds 1 child to room 1', () => {
           // adding 1 room
-          res = modifyChildrenCountInRoom(0, 1, cache);
+          res = modifyChildrenCountInRoom(0, 1, oldValues, cache);
           expect(res)               .toBeDefined();
           expect(res.length)        .toEqual(1);
           expect(res[0])            .toBeDefined();
@@ -62,7 +63,6 @@ describe('guests related functionalities', () => {
         });
 
         it('should update cache', () => {
-          debugger
           let cacheRes = updateChildAgesCache(1, res, cache);
           expect(cacheRes)       .toBe(cache);
           expect(cacheRes.length).toEqual(2);
@@ -141,24 +141,26 @@ describe('guests related functionalities', () => {
     describe('should modify children age values, by given:', () => {
       it('count and no cache', () => {
         let cachedRooms = [[]];
+        let oldValues = [[]];
 
-        let res = modifyChildrenCountInRoom(0, 1, cachedRooms);
+        let res = modifyChildrenCountInRoom(0, 1, oldValues, cachedRooms);
         expect(res)             .toBeDefined();
         expect(res.length)      .toEqual(1);
         expect(res)             .toEqual([[na]]);
       });
 
       it('count and cache (with cache-length less than count)', () => {
-        let cachedRooms = [[2,8]];
+        cachedRooms = [[2,8]];
+        oldValues = [[2,8]];
 
-        res = modifyChildrenCountInRoom(0, 3, cachedRooms);
+        res = modifyChildrenCountInRoom(0, 3, oldValues, cachedRooms);
         expect(res)             .toBeDefined();
         expect(res.length)      .toEqual(1);
         expect(res[0])          .toBeDefined();
         expect(res[0].length)   .toEqual(3);
         expect(res)             .toEqual( [[2,8,na]] );
 
-        res = modifyChildrenCountInRoom(0,2, cachedRooms);
+        res = modifyChildrenCountInRoom(0,2, oldValues, cachedRooms);
         expect(res)             .toBeDefined();
         expect(res.length)      .toEqual(1);
         expect(res[0])          .toBeDefined();
@@ -168,31 +170,31 @@ describe('guests related functionalities', () => {
       });
 
       it('count and cache', () => {
-        let cachedRooms = [[2,8,na]];
+        cachedRooms = [[2,8,na]];
+        oldValues = [[2,8,na]];
 
-        debugger
-        res = modifyChildrenCountInRoom(0, 0, cachedRooms);
+        res = modifyChildrenCountInRoom(0, 0, oldValues, cachedRooms);
         expect(res)             .toBeDefined();
         expect(res.length)      .toEqual(1);
         expect(res[0])          .toBeDefined();
         expect(res[0].length)   .toEqual(0);
         expect(res)             .toEqual( [[]] );
 
-        res = modifyChildrenCountInRoom(0, 1, cachedRooms);
+        res = modifyChildrenCountInRoom(0, 1, oldValues, cachedRooms);
         expect(res)             .toBeDefined();
         expect(res.length)      .toEqual(1);
         expect(res[0])          .toBeDefined();
         expect(res[0].length)   .toEqual(1);
         expect(res)             .toEqual( [[2]] );
 
-        res = modifyChildrenCountInRoom(0, 4, cachedRooms);
+        res = modifyChildrenCountInRoom(0, 4, oldValues, cachedRooms);
         expect(res)             .toBeDefined();
         expect(res.length)      .toEqual(1);
         expect(res[0])          .toBeDefined();
         expect(res[0].length)   .toEqual(4);
         expect(res)             .toEqual( [[2,8,na,na]] );
 
-        res = modifyChildrenCountInRoom(0, 3, cachedRooms);
+        res = modifyChildrenCountInRoom(0, 3, oldValues, cachedRooms);
         expect(res)             .toBeDefined();
         expect(res.length)      .toEqual(1);
         expect(res[0])          .toBeDefined();

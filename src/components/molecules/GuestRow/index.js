@@ -14,7 +14,10 @@ class GuestRow extends PureComponent {
         count: PropTypes.number.isRequired,
         isChild: PropTypes.bool,
         childAge: PropTypes.number,
-        index: PropTypes.any
+        index: PropTypes.any,
+        containerStyle: PropTypes.any,
+        headerStyle: PropTypes.any,
+        countStyle: PropTypes.any
     };
 
     constructor(props) {
@@ -32,16 +35,17 @@ class GuestRow extends PureComponent {
 
     render() {
         const {
-            title, subtitle, count, min, max
+            title, subtitle, count, min, max,
+            containerStyle, headerStyle, countStyle
         } = this.props;
 
         return (
-            <View style={styles.container}>
-                <View style={styles.headStyle}>
+            <View style={[styles.container,containerStyle]}>
+                <View style={[styles.headStyle,headerStyle]}>
                     <Text style={styles.titleStyle}>{title}</Text>
                     {subtitle != "" && (<Text style={styles.subtitleStyle}>{subtitle}</Text>)}
                 </View>
-                <Counter min={min} max={max} style={styles.countStyle} count={count} onChanged={this.onChanged}/>
+                <Counter min={min} max={max} style={[styles.countStyle, countStyle]} count={count} onChanged={this.onChanged}/>
             </View>
         );
     }

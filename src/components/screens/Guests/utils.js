@@ -1,4 +1,3 @@
-import { isArray } from "../utils";
 import { cloneDeep } from "lodash";
 
 export const INVALID_CHILD_AGE = -1;
@@ -31,11 +30,12 @@ export function modifyRoomsForChildrenData(roomsCount, cachedRooms) {
  * and getting from cache if available
  * @param {Number} roomIndex The room to prepare
  * @param {Number} count The length to reach
- * @param {Array} cached The cache to use
+ * @param {Array} oldValues The last values used
+ * @param {Array} cachedRooms The cache to use if given
  */
-export function modifyChildrenCountInRoom(roomIndex, count, cachedRooms) {
+export function modifyChildrenCountInRoom(roomIndex, count, oldValues, cachedRooms) {
   // prepare result array (create if not created)
-  let result = cloneDeep(cachedRooms);
+  let result = cloneDeep(oldValues);
   if (result[roomIndex] == null) {
     result[roomIndex] = [];
   }
@@ -52,6 +52,18 @@ export function modifyChildrenCountInRoom(roomIndex, count, cachedRooms) {
       if (currentRoom[i] == null) {
         // has no cached value
         currentRoom[i] = INVALID_CHILD_AGE;
+      }
+    }
+  }
+
+  // retrieve values from cache
+  if (cachedRooms && cachedRooms[roomIndex] != null) {
+    for (let i=0; i < count; i++) {
+      const fromCache = cachedRooms[roomIndex][i];
+      if (fromCache != null) {
+        currentRoom[i] = fromCache;
+      } else {
+        break;
       }
     }
   }
@@ -105,4 +117,15 @@ export function updateChildAgesCache(roomIndex, newRooms, cachedRooms) {
   }
 
   return cachedRooms;
+}
+
+
+export function calculateChildrenCount(ageValues) {
+  // Since children are set per room - the count of all children (newValue) is the sum of count in all rooms
+  // So for example a newAgeValues of [ [8,0,1], [10,14,3,5] ] would be 7 (3 children in room 1, and 4 in room 2)
+  // (wasn't like this before - children were just one number)
+  let result = 0;
+  ageValues.forEach(item => result += item.length);
+
+  return result;
 }
