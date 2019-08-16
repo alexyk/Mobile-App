@@ -75,7 +75,7 @@ class Guests extends Component {
      * @param {Number} roomIndex 
      */
     onCountChange(type, count, roomIndex=null) {
-        const { childrenAgeValues } = this.state;
+        const { childrenAgeValues, rooms } = this.state;
         let cache = this._childAgesCached;
 
         let newValue = count;
@@ -94,15 +94,14 @@ class Guests extends Component {
                 break;
         
             case 'rooms':
-                newAgeValues = modifyRoomsForChildrenData(count, cache);
+                newAgeValues = modifyRoomsForChildrenData(count, rooms, childrenAgeValues, cache);
                 extraValues = { childrenAgeValues: newAgeValues };
                 updateChildAgesCache(null, newAgeValues, cache);
                 break;
 
             case 'adults':
-                const { rooms } = this.state;
                 if (newValue < rooms) {
-                    newAgeValues = modifyRoomsForChildrenData(newValue, cache);
+                    newAgeValues = modifyRoomsForChildrenData(newValue, rooms, childrenAgeValues, cache);
                     extraValues = {rooms: newValue, childrenAgeValues: newAgeValues};
                     updateChildAgesCache(null, newAgeValues, cache);
                 }
@@ -112,24 +111,26 @@ class Guests extends Component {
     }
 
     onWithChildrenClick(value) {
+        const { rooms, childrenAgeValues } = this.state;
         const cache = this._childAgesCached;
-        const childrenAgeValues = modifyRoomsForChildrenData(1, cache);
+        const newAgeValues = modifyRoomsForChildrenData(1, rooms, childrenAgeValues, cache);
 
-        updateChildAgesCache(null, childrenAgeValues, cache)
+        updateChildAgesCache(null, newAgeValues, cache)
 
-        let children = (!value ? calculateChildrenCount(childrenAgeValues) : 0);
+        let childrenCount = (!value ? calculateChildrenCount(newAgeValues) : 0);
         
         this.setState({
             hasChildren: !value,
-            childrenAgeValues,
-            children
+            childrenAgeValues: newAgeValues,
+            children: childrenCount
         });
     }
 
     onChildChange(roomIndex, childIndex, age) {
+        const { childrenAgeValues } = this.state;
+        const newValues = modifyChildAgeInRoom(roomIndex, childIndex, age, childrenAgeValues);
+        
         const cache = this._childAgesCached;
-        const newValues = modifyChildAgeInRoom(roomIndex, childIndex, age, cache);
-
         updateChildAgesCache(roomIndex, newValues, cache);
 
         this.setState( {childrenAgeValues: newValues} );

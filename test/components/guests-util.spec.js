@@ -10,6 +10,35 @@ import { log } from '../common-test-utils'
 describe('guests related functionalities', () => {
   const na = INVALID_CHILD_AGE;
 
+  describe('by issue cases', () => {
+    describe('adding rooms from cache after decreasing them', () => {
+      const oldValues = [[na,1],[8,6],[11,17]];
+      let cache = [[8,9],[7,8],[3,5]];
+      let res;
+
+      it('sets rooms from 3 to 2', () => {
+        res = modifyRoomsForChildrenData(2, 3, oldValues, cache);
+        expect(res)               .toBeDefined();
+        expect(res.length)        .toEqual(2);
+        expect(res)               .toEqual( [[na,1], [8,6]] );
+      });
+
+      it('updates cache', () => {
+        let newCache = updateChildAgesCache(null, res, cache);
+        expect(cache)             .toBeDefined();
+        expect(newCache)          .toBe(cache);
+        expect(cache.length)      .toEqual(3);
+        expect(cache)             .toEqual( [[na,1],[8,6],[3,5]] );
+      });
+
+      it('modify a childs age - issue appeared', () => {
+          res = modifyChildAgeInRoom(0, 0, 13, res);
+          expect(res)             .toBeDefined();
+          expect(res.length)      .toEqual(2);
+          expect(res)             .toEqual( [[13,1],[8,6]] );
+      });
+    });
+  });
 
   describe('buy use case', () => {
 
@@ -47,10 +76,10 @@ describe('guests related functionalities', () => {
       describe('should add 1 child to room 1', () => {
         let cache = [[]];
         let cacheTemp = cache;
-        let res;
+        let res = [[]];
 
         it('adds 1 more room - no children yet', () => {
-          res = modifyRoomsForChildrenData(2, cacheTemp);
+          res = modifyRoomsForChildrenData(2, 0, res, cacheTemp);
           expect(res)         .toBeDefined();
           expect(res.length)  .toEqual(2);
           expect(res)         .toEqual([[],[]]);
@@ -72,10 +101,11 @@ describe('guests related functionalities', () => {
 
       describe('should modify child 1 age of room 1', () => {
         let cache = [[]];
+        let oldValues = [[]];
         let res;
 
         it('modify child 1 of room 1 age', () => {
-          res = modifyChildAgeInRoom(0, 0, 13, cache);
+          res = modifyChildAgeInRoom(0, 0, 13, oldValues, cache);
           expect(res)             .toBeDefined();
           expect(res.length)      .toEqual(1);
           expect(res[0])          .toBeDefined();
@@ -117,21 +147,23 @@ describe('guests related functionalities', () => {
       
       it('should update data', () => {
         let cached = [[2,8],[]];
+        let oldData =  [[2,8],[]];
+        let res;
 
-        // add items
-        let res = modifyRoomsForChildrenData(3, cached);
+        // add 1 new room
+        res = modifyRoomsForChildrenData(3, 2, oldData, cached);
         expect(res)           .toBeDefined()
         expect(res.length)    .toEqual(3)
         expect(res)           .toEqual([[2,8],[],[]])
 
-        // delete items
-        res = modifyRoomsForChildrenData(1, cached);
+        // delete one room
+        res = modifyRoomsForChildrenData(1, 2, oldData, cached);
         expect(res)           .toBeDefined()
         expect(res.length)    .toEqual(1)
         expect(res)           .toEqual([[2,8]])
 
         // no change
-        res = modifyRoomsForChildrenData(1, [[]]);
+        res = modifyRoomsForChildrenData(1, 1, [[]], [[]]);
         expect(res)           .toBeDefined()
         expect(res.length)    .toEqual(1)
         expect(res)           .toEqual([[]])
