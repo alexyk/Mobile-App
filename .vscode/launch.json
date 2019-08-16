@@ -5,6 +5,33 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "RN: Attach to packager",
+            "program": "${workspaceRoot}/.vscode/launchReactNative.js",
+            "type": "reactnative",
+            "request": "attach",
+            "sourceMaps": true,
+            "outDir": "${workspaceRoot}/.vscode/.react"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Jest: Current File",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "windows": {
+              "program": "${workspaceFolder}/node_modules/jest/bin/jest",
+            },
+            "args": [
+              "${fileBasenameNoExtension}",
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen",
+            "disableOptimisticBPs": true
+        },
+        {
+            "type": "node",
+            "name": "-----------------------------"
+        },
+        {
             "type": "node",
             "name": "vscode-jest-tests",
             "request": "launch",
@@ -48,21 +75,6 @@
               "${fileBasenameNoExtension}",
               "--config",
               "jest.config.js"
-            ],
-            "console": "integratedTerminal",
-            "internalConsoleOptions": "neverOpen",
-            "disableOptimisticBPs": true
-        },
-        {
-            "type": "node",
-            "request": "launch",
-            "name": "My Jest Current File",
-            "program": "${workspaceFolder}/node_modules/.bin/jest",
-            "windows": {
-              "program": "${workspaceFolder}/node_modules/jest/bin/jest",
-            },
-            "args": [
-              "${fileBasenameNoExtension}",
             ],
             "console": "integratedTerminal",
             "internalConsoleOptions": "neverOpen",
@@ -122,14 +134,6 @@
             "sourceMaps": true,
             "outDir": "${workspaceRoot}/.vscode/.react",
             "preLaunchTask": "select-config-rb"
-        },
-        {
-            "name": "RN: Attach to packager",
-            "program": "${workspaceRoot}/.vscode/launchReactNative.js",
-            "type": "reactnative",
-            "request": "attach",
-            "sourceMaps": true,
-            "outDir": "${workspaceRoot}/.vscode/.react"
         },
         {
             "name": "RN: Debug in Exponent",
