@@ -45,26 +45,28 @@ describe('guests related functionalities', () => {
 
       describe('should add 1 child to room 1', () => {
         let cache = [[]];
+        let cacheTemp = cache;
         let res;
 
         it('adds 1 more room - no children yet', () => {
-          res = modifyRoomsForChildrenData(2, cache);
+          res = modifyRoomsForChildrenData(2, cacheTemp);
           expect(res)         .toBeDefined();
           expect(res.length)  .toEqual(2);
           expect(res)         .toEqual([[],[]]);
         });
 
-        it('should not change cache', () => {
-          expect(cache)       .toBe(cache);
+        it('should not have changed cache', () => {
+          expect(cache)       .toBe(cacheTemp);
           expect(cache.length).toEqual(1);
           expect(cache)       .toEqual([[]]);
         });
 
         it('should update cache', () => {
-          updateChildAgesCache(1, res, cache);
-          expect(cache)       .toBe(cache);
-          expect(cache.length).toEqual(2);
-          expect(cache)       .toEqual([[],[]]);
+          debugger
+          let cacheRes = updateChildAgesCache(1, res, cache);
+          expect(cacheRes)       .toBe(cache);
+          expect(cacheRes.length).toEqual(2);
+          expect(cacheRes)       .toEqual([[],[]]);
         });
       });
 
@@ -94,6 +96,17 @@ describe('guests related functionalities', () => {
           expect(cache)           .toEqual([[13]]);
         });
       });
+    });
+
+    test('updates all cache', () => {
+      let cache = [[8,9,0],[1,4]];
+      let newRooms = [[9,0]];
+
+      let res = updateChildAgesCache(null, newRooms, cache);
+      expect(res)           .toBe(cache);
+      expect(cache.length)  .toEqual(2);
+      // updates only room 1 (index 0)
+      expect(cache)         .toEqual([[9,0],[1,4]]);
     });
   });
 
@@ -194,12 +207,12 @@ describe('guests related functionalities', () => {
 
         updateChildAgesCache(0, [[8,7,12, 1]], cachedRooms);
         expect(cachedRooms)             .toBeDefined();
-        expect(cachedRooms)             .toEqual( [[8,7,12,1]] );
+        expect(cachedRooms)             .toEqual( [[8,7,12,1,0]] );
 
 
         updateChildAgesCache(0, null, cachedRooms);
         expect(cachedRooms)             .toBeDefined();
-        expect(cachedRooms)             .toEqual( [[8,7,12,1]] );
+        expect(cachedRooms)             .toEqual( [[8,7,12,1,0]] );
       });
 
       test('when cachedRooms is null', () => {

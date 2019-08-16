@@ -4,6 +4,7 @@ import { cloneDeep } from "lodash";
 export const INVALID_CHILD_AGE = -1;
 
 /**
+ * Updates count of rooms used for children age data
  * @param {Number} roomsCount How many rooms to prepare for
  * @param {Array} cachedRooms The old array of rooms of children (2d array)
  *
@@ -80,10 +81,27 @@ export function modifyChildAgeInRoom(roomIndex, childIndex, ageValue, roomCache)
  * @param {Array} cachedRooms The old cached value of same array
  */
 export function updateChildAgesCache(roomIndex, newRooms, cachedRooms) {
-  if (cachedRooms == null) {
-    cachedRooms = cloneDeep(newRooms);
-  } else if (newRooms != null) {
-    cachedRooms[roomIndex] = cloneDeep(newRooms[roomIndex]);
+  if (roomIndex == null) {
+    // update all
+    newRooms.forEach((item,index) => cachedRooms[index] = item);
+  } else {
+    if (cachedRooms == null) {
+      cachedRooms = cloneDeep(newRooms);
+    } else if (newRooms != null) {
+      if (cachedRooms[roomIndex] == null) {
+        cachedRooms[roomIndex] = [];
+      }
+      if (newRooms[roomIndex] == null) {
+        newRooms = [];
+      }
+      
+      let current = newRooms[roomIndex];
+      let cached = cachedRooms[roomIndex];
+
+      for (let i=0; i < current.length; i++) {
+        cached[i] = current[i];
+      }
+    }
   }
 
   return cachedRooms;
