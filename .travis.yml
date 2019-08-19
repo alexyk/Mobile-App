@@ -36,6 +36,7 @@ jobs:
         - ssh -o "StrictHostKeyChecking no" $var_799cfba7 "$var2 $dir2" &> /dev/null
         - npm install
         - cd ios
+        - pod repo update
         - pod install
         - cd ..
       script:
