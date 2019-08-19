@@ -50,13 +50,13 @@ const styles = StyleSheet.create({
   },
 
   activeTextStyle: {
-      fontSize: 12,
+      fontSize: 11,
       fontFamily: 'FuturaStd-Light',
       color: '#DA7B61',
       marginTop: 6
   },
   inactiveTextStyle: {
-      fontSize: 12,
+      fontSize: 11,
       fontFamily: 'FuturaStd-Light',
       color: '#646464',
       marginTop: 6
