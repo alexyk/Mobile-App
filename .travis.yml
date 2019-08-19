@@ -6,9 +6,9 @@ node_js:
 
 stages:
   - name: build ios
-    if: branch IN (master, staging, dev)
+    if: branch IN (travis-ci)
   - name: build android
-    if: branch IN (master, staging, dev)
+    if: branch IN (travis-ci)
 
 jobs:
   include:
