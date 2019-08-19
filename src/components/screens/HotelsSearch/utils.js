@@ -362,10 +362,10 @@ export function generateHotelFilterString(page, state) {
 
   // const page = page;//this.listView.getPage();
   const sort = state.orderBy;
-  const pagination = `&page=${page}&sort=${sort}`;
+  const pagination = (page > -1 ? `&page=${page}&sort=${sort}` : `&page=0&sort=${sort}`);
 
-  let filters = `&filters=${encodeURI(JSON.stringify(filtersObj))}` 
-                + (page > -1 ? pagination : ''); //eslint-disable-line
+  const filtersStr = encodeURI(JSON.stringify(filtersObj));
+  let filters = `&filters=${filtersStr}${pagination}`; //eslint-disable-line
 
   return filters;
 }
