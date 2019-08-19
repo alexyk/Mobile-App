@@ -33,7 +33,7 @@ import {
 } from '../utils'
 
 import lang from "../../../../language";
-import { commonText } from "../../../../common.styles"
+import { commonText, commonComponents } from "../../../../common.styles"
 import styles from "./styles";
 
 import { hasValidCoordinatesForMap } from '../utils'
@@ -43,27 +43,23 @@ const { width, height } = Dimensions.get("window");
 
 
 
-export function renderWebViewBack() {
-  // if (this.isWebviewHotelDetail) {
-    return (
-      <View style={{
-          height: 60,
-          flexDirection: 'row',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          marginBottom: 10
-      }}>
-        <BackButton onPress={this.onBackButtonPress} />
-        <Text style={styles.backText}>{"Back to 'Explore'"}</Text>
-      </View>
-    )
-  // } else {
-  //   return null;
-  // }
+export function renderBackButton() {
+  return (
+    <View style={{
+        // height: 50,
+        flexDirection: 'row',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        marginVertical: 10
+    }}>
+      <BackButton onPress={this.onBackButtonPress} style={{marginTop: 0}} />
+      <Text style={styles.backText}>{"Back to 'Explore'"}</Text>
+    </View>
+  )
 }
 
 
-export function renderBackButtonAndSearchField() {
+export function renderSearchField() {
   const dynamicStyle = (this.isWebviewHotelDetail ? {height: 0} : null)
 
   return (
@@ -445,20 +441,17 @@ export function renderFooter() {
     return (
       <View
         style={{
-          // width: "95%",
           height: 30,
           flexDirection: "row",
           justifyContent: "space-evenly",
           alignItems: "flex-end",
           borderBottomWidth: 0.5,
-          // borderWidth: 0.5,
           borderColor: "#777",
           paddingBottom: 5,
           paddingHorizontal: 5,
           borderRadius: 10,
-          // backgroundColor: '#DDD3',
           marginTop: 10,
-          marginHorizontal: 10,
+          marginHorizontal: 0
         }}
       >
 

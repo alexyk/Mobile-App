@@ -36,9 +36,7 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingLeft: 10,
-    paddingRight: 10,
-    marginBottom: 10
+    paddingHorizontal: 10,
   },
   activeIconStyle: {
     fontSize: 25,

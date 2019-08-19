@@ -1,5 +1,4 @@
 import { StyleSheet } from 'react-native';
-import { getSafeBottomOffset } from '../../../utils/designUtils';
 
 export default StyleSheet.create({
     container: {
@@ -7,11 +6,9 @@ export default StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-around',
         alignItems: 'center',
-        height: 80+getSafeBottomOffset(),
         width: '100%',
-        paddingBottom: getSafeBottomOffset(),
-        paddingTop: 20,
-        // backgroundColor: '#fff'
+        paddingBottom: 10,
+        paddingTop: 10,
         backgroundColor: '#fff'
     }
 });

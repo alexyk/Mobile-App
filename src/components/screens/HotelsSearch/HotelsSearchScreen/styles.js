@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         backgroundColor: '#f0f1f3',
-        marginTop: getSafeTopOffset(),
+        marginTop: getSafeTopOffset() + 10,
         marginBottom: getSafeBottomOffset(),
     },
 
@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     backText: {
         ...commonText,
         color: 'black',
-        marginTop: 35,
         marginLeft: 10,
         fontSize: 14,
         // backgroundColor: 'red',

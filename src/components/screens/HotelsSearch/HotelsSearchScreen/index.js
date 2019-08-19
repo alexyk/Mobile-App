@@ -80,8 +80,8 @@ import {
 } from "../../utils"
 
 import {
-  renderWebViewBack,
-  renderBackButtonAndSearchField,
+  renderBackButton,
+  renderSearchField,
   renderCalendarAndFilters,
   renderHotelDetailsAsWebview,
   renderResultsAsList,
@@ -166,8 +166,8 @@ class HotelsSearchScreen extends Component {
     this.onServerSearchError = this.onServerSearchError.bind(this);
 
     // render functions
-    this.renderWebViewBack = renderWebViewBack.bind(this)
-    this.renderBackButtonAndSearchField = renderBackButtonAndSearchField.bind(this)
+    this.renderBackButton = renderBackButton.bind(this)
+    this.renderSearchField = renderSearchField.bind(this)
     this.renderCalendarAndFilters = renderCalendarAndFilters.bind(this)
     this.renderHotelDetailsAsWebview = renderHotelDetailsAsWebview.bind(this)
     this.renderResultsAsList = renderResultsAsList.bind(this)
@@ -1104,8 +1104,8 @@ class HotelsSearchScreen extends Component {
 
     return (
       <View style={styles.container}>
-        {this.renderWebViewBack()}
-        {this.renderBackButtonAndSearchField()}
+        {this.renderBackButton()}
+        {this.renderSearchField()}
         {this.renderCalendarAndFilters()}
 
         <View style={styles.containerHotels}>

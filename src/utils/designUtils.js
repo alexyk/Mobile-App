@@ -26,16 +26,16 @@ export const isIPhoneX = (
 
 export function getSafeTopOffset() {
   if (isIPhoneX) {
-    return 44;
+    return 34;
   } else {
-    return 24;
+    return 0;
   }
 }
 
 
 export function getSafeBottomOffset() {
   if (isIPhoneX) {
-    return 34;
+    return 24;
   } else {
     return 0;
   }

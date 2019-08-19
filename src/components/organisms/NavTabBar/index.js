@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import styles from './styles';
 import SplashScreen from 'react-native-smart-splash-screen';
 import NavButton from '../../atoms/NavButton'
+import Separator from '../../atoms/Separator';
+import { getSafeBottomOffset } from '../../../utils/designUtils';
 
 
 export default class NavTabBar extends Component {
@@ -53,12 +55,15 @@ export default class NavTabBar extends Component {
         const commonProps = {active, navigate};
 
         return (
-            <View style={styles.container}>
-                <NavButton {...commonProps} name={'PROFILE'}   icon={'user'} />
-                <NavButton {...commonProps} name={'MESSAGES'}  icon={'comment'} />
-                <NavButton {...commonProps} name={'MY_TRIPS'}  icon={'suitcase'} />
-                <NavButton {...commonProps} name={'FAVORITES'} icon={'heart'} />
-                <NavButton {...commonProps} name={'EXPLORE'}   icon={'search'} />
+            <View>
+                <View style={styles.container}>
+                    <NavButton {...commonProps} name={'PROFILE'}   icon={'user'} />
+                    <NavButton {...commonProps} name={'MESSAGES'}  icon={'comment'} />
+                    <NavButton {...commonProps} name={'MY_TRIPS'}  icon={'suitcase'} />
+                    <NavButton {...commonProps} name={'FAVORITES'} icon={'heart'} />
+                    <NavButton {...commonProps} name={'EXPLORE'}   icon={'search'} />
+                </View>
+                <Separator height={getSafeBottomOffset()} extraStyle={{backgroundColor:'#EEE'}} />
             </View>
         );
     }
