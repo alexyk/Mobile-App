@@ -555,7 +555,7 @@ class HomesSearchScreen extends Component {
         return (
             <View style={styles.container}>
                 { this.renderHomeTopView() }
-                <View style={{position: 'absolute', top: 100, left: 0, right: 0, bottom: 0, width:'100%'}}>
+                <View style={{position: 'absolute', top: 80, left: 0, right: 0, bottom: 0, width:'100%'}}>
                     {this.renderFilterBar()}
                     <View style={styles.containerHotels}>
                         <UltimateListView

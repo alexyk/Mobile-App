@@ -10,7 +10,7 @@ const styles = StyleSheet.create({
         flex: 1,
         flexDirection: 'column',
         backgroundColor: '#f0f1f3',
-        marginTop: getSafeTopOffset() + 10,
+        marginTop: getSafeTopOffset(),
         marginBottom: getSafeBottomOffset(),
     },
 

@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     countriesSpinner: {
         flex: 1,
         flexDirection: 'row',
-        marginTop: 40,
+        marginTop: getSafeTopOffset() + 10,
         justifyContent: 'flex-end',
         marginLeft: 15,
         marginRight: 15,

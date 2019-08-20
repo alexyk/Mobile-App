@@ -831,6 +831,10 @@ class HotelsSearchScreen extends Component {
       _this.staticDataReceived = true;
       
       res.body.then(function(data) {
+        if (_this.isAllHotelsLoaded) {
+          return;
+        }
+
         // a shortcut to all results
         if (autoGetAllStaticPages && _this.isFirstLoad) {
           _this.isFirstLoad = false;
@@ -846,9 +850,9 @@ class HotelsSearchScreen extends Component {
           _this.pageSize = data.totalElements;
           if (_this.pageSize > 1000) {
             _this.pageSize = 1000;
-          } 
+          }
+
           _this.getNextStaticPage(0, _this.pageSize);
-          return;
         }
 
         _this.isAllPagesDone = data.last;
@@ -859,7 +863,9 @@ class HotelsSearchScreen extends Component {
         
         let hotels = data.content;
         processStaticHotels(hotels, _this.hotelsStaticCacheMap, _this.hotelsIndicesByIdMap, _this.hotelsAll, _this.isAllHotelsLoaded);
-        _this.pagesCached++;
+        if (!autoGetAllStaticPages) {
+          _this.pagesCached++;
+        }
         printCheckHotelDataCache();
 
         
@@ -886,7 +892,7 @@ class HotelsSearchScreen extends Component {
         }
         _this.setState(newState);
 
-        if ( autoGetAllStaticPages || (!_this.isAllPagesDone && _this.pagesLoaded < _this.INITIAL_PAGES) ) {
+        if ( !autoGetAllStaticPages && (!_this.isAllPagesDone && _this.pagesLoaded < _this.INITIAL_PAGES) ) {
           _this.getNextStaticPage(_this.pagesLoaded, _this.pageSize);
         }
 

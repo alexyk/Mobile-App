@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
     searchAreaView: {
         flex:1,
         backgroundColor: '#f0f1f3',
-        marginBottom: 10,
+        marginBottom: 5,
         paddingTop: 10,
         paddingLeft: 15,
         paddingRight: 15
@@ -528,7 +528,7 @@ const styles = StyleSheet.create({
     autocompleteTextWrapper: {
         backgroundColor: '#fff',
         borderColor:'#00000011',
-        width: width - 34,
+        width: width - 30,
         justifyContent: 'center',
         paddingTop: 10,
         paddingBottom: 10,
@@ -664,7 +664,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'flex-end',
         backgroundColor: '#f0f1f3',
-        marginBottom: 10,
+        marginBottom: 5,
         paddingTop: 10,
         paddingLeft: 15,
         paddingRight: 15
