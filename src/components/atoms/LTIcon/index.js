@@ -23,7 +23,7 @@ export default function LTIcon(props) {
   if (size == null) {
     size = 24;
   }
-  if (textStyle != null) {
+  if (textStyle != null && iconSet == null) {
     isAsText = true;
   }
 
@@ -57,7 +57,11 @@ export default function LTIcon(props) {
       switch (iconSet) {
 
         case 'material':
-          renderedIcon = <MaterialIcon name={name} style={style} size={size} color={color} />
+          renderedIcon = (
+            <Text style={textStyle}>
+              <MaterialIcon name={name} style={style} size={size} color={color} />
+            </Text>
+          )
           break;
 
         case 'simple':

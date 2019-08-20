@@ -10,10 +10,10 @@ import { imgHost } from '../../../../config';
 import { processError, rlog } from '../../../../config-debug';
 import requester from '../../../../initDependencies';
 import { WebsocketClient } from '../../../../utils/exchangerWebsocket';
-import ProgressDialog from '../../../atoms/SimpleDialogs/ProgressDialog';
 import DateAndGuestPicker from '../../../organisms/DateAndGuestPicker';
 import HomeItemView from '../../../organisms/HomeItemView';
 import styles from './styles';
+import LTLoader from '../../../molecules/LTLoader';
 
 
 class HomesSearchScreen extends Component {
@@ -24,16 +24,14 @@ class HomesSearchScreen extends Component {
     constructor(props) {
         super(props);
         console.disableYellowBox = true;
-
-        const startDate = moment()
-            .add(1, 'day');
-        const endDate = moment()
-            .add(2, 'day');
         
-        let roomsData = [{
-            adults: 2,
-            children: []
-        }];
+        const {
+            roomsDummyData,
+            guests, adults, children,
+            checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated
+        } = this.props.datesAndGuestsData;
+
+        
 
         this.state = {
             isLoadingDetails: false,
@@ -43,16 +41,11 @@ class HomesSearchScreen extends Component {
             countryId: 0,
             countryName: '',
             home: '',
-            checkInDateFormated: startDate.format('DD/MM/YYYY').toString(),
-            checkOutDateFormated: endDate.format('DD/MM/YYYY').toString(),
-            checkInDate: startDate.format('ddd, DD MMM').toString(),
-            checkOutDate: endDate.format('ddd, DD MMM').toString(),
 
-            guests: 2,
-            adults: 2,
-            children: 0,
             daysDifference: 1,
-            roomsDummyData: encodeURI(JSON.stringify(roomsData)),
+            roomsDummyData,
+            guests, adults, children,
+            checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated,
 
             //filters
             priceRange: [1, 5000],
@@ -502,6 +495,7 @@ class HomesSearchScreen extends Component {
                             <LTIcon
                                 textStyle={styles.leftIconText}
                                 name="arrow-back" size={22} color="#000"
+                                iconSet="material"
                             />
                         </View>
                     </TouchableOpacity>
@@ -580,13 +574,7 @@ class HomesSearchScreen extends Component {
                         />
                     </View>
                 </View>
-                <ProgressDialog
-                    visible={this.state.isLoadingDetails}
-                    title="Please Wait"
-                    message="Loading..."
-                    animationType="slide"
-                    activityIndicatorSize="large"
-                    activityIndicatorColor="black"/>
+                <LTLoader isLoading={this.state.isLoadingDetails} />
                     
                 <Toast
                     ref="toast"
@@ -605,6 +593,7 @@ class HomesSearchScreen extends Component {
 
 let mapStateToProps = (state) => {
     return {
+        datesAndGuestsData: state.userInterface.datesAndGuestsData,
         currency: state.currency.currency,
         countries: state.country.countries
     };

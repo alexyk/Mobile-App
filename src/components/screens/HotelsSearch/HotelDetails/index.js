@@ -1,7 +1,7 @@
 import {
     Dimensions,
     ScrollView,
-    View,
+    View, Image, Text,
     TouchableOpacity,
     Platform, BackHandler
 } from 'react-native';
@@ -13,10 +13,11 @@ import HotelDetailView from '../../../organisms/HotelDetailView';
 import LocationView from '../../../atoms/LocationView';
 import BackButton from '../../../atoms/BackButton';
 import styles from './styles';
-import ImageCarousel from '../../../atoms/ImagePage';
+import SideSwipe from 'react-native-sideswipe';
 import { connect } from 'react-redux';
 import { hotelSearchIsNative } from '../../../../config-settings';
 import { getSafeTopOffset } from '../../../../utils/designUtils';
+import ImageSlides from '../../../molecules/ImageSlides';
 
 
 class HotelDetails extends Component {
@@ -57,7 +58,8 @@ class HotelDetails extends Component {
             hotelRatingStars: params ? params.hotelDetail.stars : 0,
             daysDifference: params ? params.daysDifference : 1,
             canLoadLocation: false,
-            guests, searchString
+            guests, searchString,
+            currentIndex: 0
         }
 
         this.onBackButtonPress = this.onBackButtonPress.bind(this);
@@ -150,30 +152,6 @@ class HotelDetails extends Component {
         )
     }
 
-
-    _renderImages() {
-        const {width, height} = Dimensions.get('window');
-        const logoWidth = width;
-        const logoHeight = (height * 0.3 + getSafeTopOffset());
-
-        //console.log('logo dim',{logoHeight,logoWidth})
-        return (
-            <View style={{ width: logoWidth, height: logoHeight }}>
-                <ImageCarousel
-                    delay={5000}
-                    style={styles.logoImage}
-                    width={logoWidth}
-                    height={logoHeight}
-                    indicatorSize={12.5}
-                    indicatorOffset={20}
-                    indicatorColor="#D87A61"
-                    images={this.state.dataSourcePreview}
-                />
-            </View>
-        )
-    }
-
-
     _renderHotelDetails() {
         const {
             dataSourcePreview, hotel, mainAddress, description
@@ -254,7 +232,7 @@ class HotelDetails extends Component {
             <View style={styles.container}>
                 <ScrollView style={styles.scrollView}>
                     <View style={styles.body}>
-                        { this._renderImages() }
+                        <ImageSlides data={this.state.dataSourcePreview} height={200} />
 
                         { this._renderHotelDetails() }
 

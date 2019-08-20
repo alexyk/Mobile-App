@@ -2,7 +2,7 @@ import {
     Dimensions,
     ScrollView,
     View,
-    Text,
+    Text, Image,
     TouchableOpacity
 } from 'react-native';
 import React, { Component } from 'react';
@@ -13,26 +13,31 @@ import FacilitiesView from '../../../molecules/FacilitiesView';
 import HomeDetailView from '../../../organisms/HomeDetailView';
 import LocationView from '../../../atoms/LocationView';
 import WhiteBackButton from '../../../atoms/WhiteBackButton';
-import ImageCarousel from '../../../atoms/ImagePage';
 import HomeDetailBottomBar from '../../../atoms/HomeDetailBottomBar'
 
 import styles from './styles';
+import ImageSlides from '../../../molecules/ImageSlides';
 
 const dimensionWindows = Dimensions.get('window');
 const logoWidth = dimensionWindows.width;
 const logoHeight = logoWidth * 35 / 54;//eslint-disable-line
 
+
 class HomeDetails extends Component {
     constructor(props) {
         super(props);
-        //console.log("param", props.navigation.state.params);
+
+        this.gotoRequestBooking = this.gotoRequestBooking.bind(this);
+        this.onClose = this.onClose.bind(this);
+        this.onMapTap = this.onMapTap.bind(this);
+        this.onFacilityMore = this.onFacilityMore.bind(this);
     }
 
-    onClose = () => {
+    onClose() {
         this.props.navigation.goBack();
     }
 
-    onMapTap = () => {
+    onMapTap() {
         const { params } = this.props.navigation.state;
 
         this.props.navigation.navigate('MapFullScreen', {
@@ -43,7 +48,7 @@ class HomeDetails extends Component {
         });
     }
 
-    onFacilityMore = () => {
+    onFacilityMore() {
 
     }
 
@@ -63,7 +68,7 @@ class HomeDetails extends Component {
         return price / nights;
     }
 
-    gotoRequestBooking = () => {
+    gotoRequestBooking() {
         const { params } = this.props.navigation.state;
 
         this.props.navigation.navigate('HomeReviewScreen', {
@@ -83,6 +88,7 @@ class HomeDetails extends Component {
         });
     }
 
+
     render() {
         const { params } = this.props.navigation.state;
         const { 
@@ -95,34 +101,17 @@ class HomeDetails extends Component {
         const {currencyCode} = params;
         
         const hasHouseRules = eventsAllowed || smokingAllowed || suitableForPets || suitableForInfants || house_rules;
-        //const houseRules = house_rules && house_rules.split('\r\n');
 
-        const price = this.getPriceForPeriod(params.startDate, params.nights, params.calendar);// * params.rateExchange;
+        const price = this.getPriceForPeriod(params.startDate, params.nights, params.calendar);
 
-        // const {exchangeRates, currency} = this.props;
-        // let defaultDailyPrice = CurrencyConverter.convert(exchangeRates.currencyExchangeRates, currencyCode, currency, price);
-        // let fiatPriceInRoomsXMLCurrency = CurrencyConverter.convert(exchangeRates.currencyExchangeRates, currencyCode, RoomsXMLCurrency.get(), price);
-
-        // console.log("price----------", price, defaultDailyPrice, fiatPriceInRoomsXMLCurrency);
         return (
             <View style={styles.container}>
+                <View style={styles.topButtonContainer}>
+                    <WhiteBackButton onPress={this.onClose} />
+                </View>
                 <ScrollView style={styles.scrollView}>
-                    <View style={styles.topButtonContainer}>
-                        <WhiteBackButton onPress={this.onClose} />
-                    </View>
                     <View style={styles.body}>
-                        <View style={{ width: logoWidth, height: logoHeight }}>
-                            <ImageCarousel
-                                delay={5000}
-                                style={styles.logoImage}
-                                width={logoWidth}
-                                height={logoHeight}
-                                indicatorSize={12.5}
-                                indicatorOffset={20}
-                                indicatorColor="#D87A61"
-                                images={params.homePhotos}
-                            />
-                        </View>
+                        <ImageSlides data={params.homePhotos}  height={200} style={{marginTop: -70}} />
 
                         <HomeDetailView
                             title={params.homeData.name}
@@ -179,26 +168,6 @@ class HomeDetails extends Component {
                         <View style={{ marginBottom: 100 }} /> 
                     </View>
                 </ScrollView>
-                {/* <View style={styles.floatingBar}>
-                    <View style={styles.detailsView}>
-                        <View style={styles.pricePeriodWrapper}>
-                            <Text style={[styles.price,styles.fontFuturaMed]}>{this.props.currencySign}{price.toFixed(2)} </Text>
-                            <Text style={styles.period1}> /per night</Text>
-                        </View>
-                        <View style={styles.pricePeriodWrapper}>
-                            <Text style={[styles.price, styles.fontFuturaStd]}>LOC {parseFloat(price/locRate).toFixed(2)}</Text>
-                            <Text style={styles.period2}> /per night</Text>
-                        </View>
-                    </View>
-                    <View style={styles.payButtonView}>
-                        <TouchableOpacity
-                            style={styles.payButton}
-                            onPress={this.gotoRequestBooking}
-                        >
-                            <Text style={styles.confirmPayText}>Check Availability</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View> */}
                 
                 <HomeDetailBottomBar 
                     price = {price}

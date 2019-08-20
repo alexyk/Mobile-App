@@ -80,6 +80,7 @@
     "react-native-picker-select": "6.3.0",
     "react-native-reanimated": "1.1.0",
     "react-native-remote-svg": "2.0.6",
+    "react-native-sideswipe": "^1.5.0",
     "react-native-simple-toast": "0.1.1",
     "react-native-smart-splash-screen": "git://github.com/alexyk/react-native-smart-splash-screen.git#v2.3.7",
     "react-native-splash-screen": "3.2.0",

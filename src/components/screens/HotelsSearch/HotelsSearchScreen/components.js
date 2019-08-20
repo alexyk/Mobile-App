@@ -50,10 +50,11 @@ export function renderBackButton() {
         flexDirection: 'row',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        marginVertical: 10
+        marginVertical: 10,
+        marginLeft: 10
     }}>
       <BackButton onPress={this.onBackButtonPress} style={{marginTop: 0}} />
-      <Text style={styles.backText}>{"Back to 'Explore'"}</Text>
+      <Text style={styles.backText}>{"Back to Explore"}</Text>
     </View>
   )
 }

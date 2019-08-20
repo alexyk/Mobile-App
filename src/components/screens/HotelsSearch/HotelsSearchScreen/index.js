@@ -20,7 +20,7 @@
  * 
  */
 import React, { Component } from "react";
-import { SafeAreaView, BackHandler } from "react-native";
+import { BackHandler } from "react-native";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import {
@@ -328,8 +328,8 @@ class HotelsSearchScreen extends Component {
     UUIDGenerator
       .getRandomUUID()
       .then(value => {
-        this.uuid = value;
-        const query = `${this.searchString}&uuid=${value}`;
+        this._uuid = value;
+        const query = `${this._searchString}&uuid=${value}`;
 
         this.startSocketConnection();
 
@@ -399,7 +399,7 @@ class HotelsSearchScreen extends Component {
     const headers = { "content-length": false };
 
     //console.log("stompiOSConnect ---------------");
-    clog('socket',`stompiOSConnect`,{socketHost,headers,uuid:this.uuid});
+    clog('socket',`stompiOSConnect`,{socketHost,headers,uuid:this._uuid});
     
     stompiOSClient = stomp.client(socketHost);
     stompiOSClient.debug = (hotelsSearchSocketDebug
@@ -409,7 +409,7 @@ class HotelsSearchScreen extends Component {
     stompiOSClient.connect(
       {},
       frame => {
-        stompiOSClient.subscribe(`search/${this.uuid}`, this.onDataFromSocket);
+        stompiOSClient.subscribe(`search/${this._uuid}`, this.onDataFromSocket);
       },
       error => {
         stompiOSClient.disconnect();
@@ -423,20 +423,24 @@ class HotelsSearchScreen extends Component {
 
     DeviceEventEmitter.removeAllListeners("onStompConnect");
     DeviceEventEmitter.addListener("onStompConnect", () => {
-      //console.log("onStompConnect -------------");
+      console.log("onStompConnect -------------");
     });
 
     DeviceEventEmitter.removeAllListeners("onStompError");
     DeviceEventEmitter.addListener("onStompError", ({ type, message }) => {
-      //console.log("onStompError -------------", type, message);
+      console.log("onStompError -------------", type, message);
     });
 
     DeviceEventEmitter.removeAllListeners("onStompMessage");
     DeviceEventEmitter.addListener("onStompMessage", ({ message }) => {
-      // console.warn('stomp message', message);
+      console.warn('stomp message', message);
       // TODO: (low priority) Solve this difference between iOS and Android
       return this.onDataFromSocket({ body: message });
     });
+
+    const message = `{"uuid":"${this._uuid}","query":"${this._searchString}"}`;
+    const destination = "search/" + this._uuid;
+    stompAndroidClient.getData(message, destination);
   }
 
   onDataFromSocket(data) {
@@ -667,7 +671,7 @@ class HotelsSearchScreen extends Component {
 
         this.setState({ isLoading: true });
         requester
-          .getHotelById(item.id, this.searchString.split("&"))
+          .getHotelById(item.id, this._searchString.split("&"))
           .then(res => {
             //console.log("requester.getHotelById", res);
             // here you set the response in to json
@@ -682,7 +686,7 @@ class HotelsSearchScreen extends Component {
                 this.props.navigation.navigate("HotelDetails", {
                   guests: this.state.guests,
                   hotelDetail: item,
-                  searchString: this.searchString,
+                  searchString: this._searchString,
                   hotelFullDetails: data,
                   dataSourcePreview: hotelPhotos,
                   daysDifference: this.state.daysDifference
@@ -698,7 +702,7 @@ class HotelsSearchScreen extends Component {
 
   
   gotoHotelDetailsPageNative(item) {
-    requester.getHotelById(item.id, this.searchString.split("&")).then(res => {
+    requester.getHotelById(item.id, this._searchString.split("&")).then(res => {
       // here you set the response in to json
       res.body
         .then(data => {
@@ -932,8 +936,8 @@ class HotelsSearchScreen extends Component {
    * // see old code from before 2019-05-15 when it was cleaned by Alex K
    */
   _setSearchString() {
-    this.searchString = generateSearchString(this.state, this.props);
-    this.props.setSearchString(this.searchString);
+    this._searchString = generateSearchString(this.state, this.props);
+    this.props.setSearchString(this._searchString);
   }
 
   gotoFilter = () => {
@@ -1104,7 +1108,7 @@ class HotelsSearchScreen extends Component {
 
     return (
       <View style={styles.container}>
-        {this.renderBackButton()}
+        {this.isWebviewHotelDetail && this.renderBackButton()}
         {this.renderSearchField()}
         {this.renderCalendarAndFilters()}
 

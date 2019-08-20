@@ -1,0 +1,8 @@
+{
+  "timestamp": 1566209409787,
+  "status": 500,
+  "error": "Internal Server Error",
+  "exception": "java.lang.UnsupportedOperationException",
+  "message": "This booking is unavailable.",
+  "path": "/api/hotels/booking"
+}

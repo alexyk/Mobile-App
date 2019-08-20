@@ -12,8 +12,9 @@ const styles = StyleSheet.create({
 
     topButtonContainer: {
         zIndex: 1,
-        flexDirection: 'row',
-        justifyContent:'space-between',
+        left: 0,
+        position: 'absolute',
+        marginVertical: 10
     },
 
     scrollView: {
@@ -21,9 +22,9 @@ const styles = StyleSheet.create({
     },
 
     body: {
-        zIndex: -1,
+        // zIndex: -1,
         flexDirection: 'column',
-        marginTop:-90
+        // marginTop:-90
     },
 
     lineStyle:{
@@ -32,16 +33,16 @@ const styles = StyleSheet.create({
     },
 
     roomfacility: {
-        marginTop:5
+        // marginTop:5
     },
 
     placeholderImageView: {
-        marginTop: 40
+        // marginTop: 40
     },
     placeholderImage: {
         width: 135,
         height: 135,
-        marginTop: 75
+        // marginTop: 75
     },
 
     etcContaner: {

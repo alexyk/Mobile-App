@@ -38,6 +38,7 @@ class SearchBar extends Component {
                         size={22}
                         color="#000"
                         textStyle={styles.leftIconText}
+                        iconSet="material"
                     />
                 </View>
             );

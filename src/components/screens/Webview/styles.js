@@ -1,12 +1,14 @@
 import { StyleSheet } from 'react-native';
 import { commonText } from '../../../common.styles';
+import { getSafeBottomOffset } from '../../../utils/designUtils';
 
 const styles = StyleSheet.create({
     container: {
         width: '100%',
         height: '100%',
         flexDirection: 'column',
-        backgroundColor: '#f0f1f3'
+        backgroundColor: '#f0f1f3',
+        marginBottom: getSafeBottomOffset()
     },
     webviewContainer: {
         flex: 1,

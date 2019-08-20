@@ -660,10 +660,12 @@ const styles = StyleSheet.create({
         width: dimensionWindows.width
     },
     countriesSpinner: {
-        marginTop: 40,
-        flex: 1,
+        flex:1,
         flexDirection: 'column',
         justifyContent: 'flex-end',
+        backgroundColor: '#f0f1f3',
+        marginBottom: 10,
+        paddingTop: 10,
         paddingLeft: 15,
         paddingRight: 15
     },

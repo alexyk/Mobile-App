@@ -28,7 +28,7 @@ export function getSafeTopOffset() {
   if (isIPhoneX) {
     return 34;
   } else {
-    return 0;
+    return 24;
   }
 }
 
