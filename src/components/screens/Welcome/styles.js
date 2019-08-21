@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     },
     facebookButton: {
         backgroundColor: '#223843',
-        elevation: 3
+        // elevation: 3
     },
     createAccountButton: {
         marginTop: 20
