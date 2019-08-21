@@ -423,21 +423,22 @@ class HotelsSearchScreen extends Component {
 
     DeviceEventEmitter.removeAllListeners("onStompConnect");
     DeviceEventEmitter.addListener("onStompConnect", () => {
-      console.log("onStompConnect -------------");
+      // console.log("onStompConnect -------------");
     });
 
     DeviceEventEmitter.removeAllListeners("onStompError");
     DeviceEventEmitter.addListener("onStompError", ({ type, message }) => {
-      console.log("onStompError -------------", type, message);
+      // console.log("onStompError -------------", type, message);
     });
 
     DeviceEventEmitter.removeAllListeners("onStompMessage");
     DeviceEventEmitter.addListener("onStompMessage", ({ message }) => {
-      console.warn('stomp message', message);
+      // console.warn('stomp message', message);
       // TODO: (low priority) Solve this difference between iOS and Android
       return this.onDataFromSocket({ body: message });
     });
 
+    // TODO: Check if subscription can be done without message?
     const message = `{"uuid":"${this._uuid}","query":"${this._searchString}"}`;
     const destination = "search/" + this._uuid;
     stompAndroidClient.getData(message, destination);

@@ -7,8 +7,8 @@ case $1 in
 			echo "    param 1 - config (prod|staging|dev)"
 			echo "    param 2 - apk new name - for upload by Travis CI"
 			echo "			or"
-			echo "    param 2 - apk new name - for upload by Travis CI"
-			echo "    param 3 - optional - if equal to \"no-tag\" then `npm version` is created without without got commit and tag"
+			echo "    param 2 - version to use with 'npm version' command"
+			echo "    param 3 - optional - if equal to \"no-tag\" then 'npm version' is used without git taggging and committing"
 			echo;echo
 			exit 1
 			;;

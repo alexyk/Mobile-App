@@ -220,8 +220,8 @@ dependencies {
     implementation group: 'org.springframework', name: 'spring-websocket', version: '4.3.18.RELEASE'
     implementation "org.glassfish.tyrus.bundles:tyrus-standalone-client:1.13.1"
 
-    implementation 'com.facebook.fresco:fresco:1.9.0'
-    implementation 'com.facebook.fresco:animated-gif:1.9.0'
+    // implementation 'com.facebook.fresco:fresco:1.10.0'
+    // implementation 'com.facebook.fresco:animated-gif:1.10.0'
     
     implementation (project(':react-native-fast-image')) {
         exclude group: "com.android.support"
