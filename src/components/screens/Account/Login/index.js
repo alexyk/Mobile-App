@@ -31,13 +31,20 @@ class Login extends Component {
         }).isRequired
     }
 
-    state = {
-        email: '',
-        password: '',
-        showProgress: false,
-        locationDialogVisible: false,
-        verificationDialogVisible: false,
+    constructor(props) {
+        super(props);
+
+        const { params } = props.navigation.state;
+    
+        this.state = {
+            email: (params && params.email ? params.email : ''),
+            password: '',
+            showProgress: false,
+            locationDialogVisible: false,
+            verificationDialogVisible: false,        
+        }
     }
+    
 
     componentDidMount() {
         console.disableYellowBox = true;
@@ -46,6 +53,12 @@ class Login extends Component {
             duration: 850,
             delay: 500
         });
+
+        // auto focus if email set
+        if (this.state.email != '' && this.passTextRef) {
+            alert('Log in with Facebook was not possible. Please enter your password manually.')
+            setTimeout(() => this.passTextRef.input.focus(), 50);
+        }
     }
 
     // TODO: Need a way to generate a Google ReCAPTCHA token
@@ -162,6 +175,7 @@ class Login extends Component {
 
                         <View style={styles.inputView}>
                             <SmartInput
+                                ref={ref => this.passTextRef = ref}
                                 secureTextEntry
                                 autoCorrect={false}
                                 autoCapitalize="none"
