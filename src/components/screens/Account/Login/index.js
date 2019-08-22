@@ -22,6 +22,7 @@ import { domainPrefix } from "../../../../config";
 import requester from "../../../../initDependencies";
 import LoginLocationDialog from "../../../atoms/LoginLocationDialog";
 import LoginEmailVerifyDialog from "../../../atoms/LoginEmailVerifyDialog";
+import { SERVER_ERROR, serverRequest } from "../../../../services/utilities/serverUtils";
 
 class Login extends Component {
   static propTypes = {
@@ -62,7 +63,7 @@ class Login extends Component {
     }
   }
 
-  // TODO: Need a way to generate a Google ReCAPTCHA token
+  // TODO: Need a way to generate a Google ReCAPTCHA token // old comment by abhi, e5e0b8fa2...
 
   onClickLogIn() {
     // Toast.showWithGravity('Cannot login, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
@@ -83,53 +84,57 @@ class Login extends Component {
 
     this.setState({ showProgress: true });
 
-    requester
-      .login(user, null)
-      .then(res => {
-        //console.log("requester.login", res);
-        this.setState({ showProgress: false });
-        if (res.success) {
-          res.body.then(data => {
-            AsyncStorage.setItem(
-              `${domainPrefix}.auth.locktrip`,
-              data.Authorization
-            );
-            // TODO: Get first name + last name from response included with Authorization token (Backend)
-            AsyncStorage.setItem(`${domainPrefix}.auth.username`, user.email);
-            // this.props.navigation.navigate('MainScreen');
-            let resetAction = StackActions.reset({
-              index: 0,
-              key: null,
-              actions: [NavigationActions.navigate({ routeName: "MainScreen" })]
-            });
-            this.props.navigation.dispatch(resetAction);
-          });
-        } else {
-          res.errors.then(data => {
-            const { errors } = data;
-            //console.log("error", errors);
-            if (errors.hasOwnProperty("CountryNull")) {
-              this.setState({ locationDialogVisible: true });
-            } else if (errors.hasOwnProperty("EmailNotVerified")) {
-              this.setState({ verificationDialogVisible: true });
-            } else {
-              Object.keys(errors).forEach(key => {
-                if (typeof key !== "function") {
-                  // Toast.showWithGravity(errors[key].message, Toast.SHORT, Toast.BOTTOM);
-                  //console.log('Error logging in  :', errors[key].message);
-                  alert(errors[key].message);
-                }
-              });
-            }
-          });
-        }
-      })
-      .catch(err => {
-        this.setState({ showProgress: false });
-        alert("Cannot login, Please check network connection.");
-        //console.log(err);
-      });
+    // prettier-ignore
+    serverRequest(this, requester.login, [user], this.onServerLoginSuccess, this.onServerLoginError);
   }
+
+  onServerLoginSuccess(data) {
+    this.setState({ showProgress: false });
+
+    // TODO: Get first name + last name from response included with Authorization token (Backend) // old comment by Kristyan Serafimov, 3096572...
+    const { email } = this.state;
+    const { Authorization } = data;
+    AsyncStorage.setItem(`${domainPrefix}.auth.username`, email);
+    AsyncStorage.setItem(`${domainPrefix}.auth.locktrip`, Authorization);
+
+    let resetAction = StackActions.reset({
+      index: 0,
+      key: null,
+      actions: [NavigationActions.navigate({ routeName: "MainScreen" })]
+    });
+    this.props.navigation.dispatch(resetAction);
+  }
+
+
+  onServerLoginError(data, errorCode) {
+    this.setState({ showProgress: false });
+
+    switch (errorCode) {
+
+      case SERVER_ERROR.LEVEL_1:
+        alert("Cannot login. Please check network connection.");
+        break;
+      
+      case SERVER_ERROR.LEVEL_3_FROM_SERVER:
+          const { errors } = data;
+
+          if (errors && errors.hasOwnProperty("CountryNull")) {
+            this.setState({ locationDialogVisible: true });
+          } else if (errors && errors.hasOwnProperty("EmailNotVerified")) {
+            this.setState({ verificationDialogVisible: true });
+          } else {
+            Object.keys(errors).forEach(key => {
+              if (typeof key !== "function") {
+                // Toast.showWithGravity(errors[key].message, Toast.SHORT, Toast.BOTTOM);
+                //console.log('Error logging in  :', errors[key].message);
+                alert(errors[key].message);
+              }
+            });
+          }
+          break;
+    }
+  }
+
 
   @autobind
   onChangeHandler(property) {

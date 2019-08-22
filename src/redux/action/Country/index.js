@@ -1,5 +1,6 @@
 import { createAction } from "redux-actions";
 import requester from "../../../initDependencies";
+import { serverRequest } from "../../../services/utilities/serverUtils";
 
 const countryInfo = {
   SET_COUNTRIES: "SET_COUNTRIES"
@@ -7,11 +8,10 @@ const countryInfo = {
 
 export const getCountries = () => {
   return dispatch => {
-    requester.getCountries(true).then(res => {
-      res.body.then(data => {
-        dispatch(setCountries({ countries: data }));
-      });
-    });
+    // prettier-ignore
+    serverRequest('Action getCountries', requester.getCountries, [true],
+      data => dispatch(setCountries({ countries: data }))
+    );
   };
 };
 

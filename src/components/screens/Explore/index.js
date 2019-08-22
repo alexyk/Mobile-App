@@ -40,6 +40,7 @@ import { formatDatesData } from "../Calendar/utils";
 import { hotelSearchIsNative } from "../../../config-settings";
 import { setLoginDetails } from "../../../redux/action/userInterface";
 import { getSafeTopOffset } from "../../../utils/designUtils";
+import { serverRequest } from "../../../services/utilities/serverUtils";
 
 const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
 
@@ -95,20 +96,31 @@ class Explore extends Component {
     // this.props.actions.getCurrency(props.currency, false);//eslint-disable-line
   }
 
-  processUserError(...args) {
-    AsyncStorage.setItem(`${domainPrefix}.auth.username`, "");
+  onServerGetUserInfo(data) {
+    //  with redux cache, for example:
+    this.props.setLoginDetails(data);
+
+    const { email } = data;
+
+    if (email) {
+      AsyncStorage.setItem(`${domainPrefix}.auth.username`, email);
+      this.setState({email});
+    }
+
+    // TODO: Replace all references to user data (async storage)
+    userInstance.setUserData(data);
+  }
+
+  onServerGetUserInfoError(errorData, errorCode) {
+    // AsyncStorage.removeItem(`${domainPrefix}.auth.locktrip`);
+    // AsyncStorage.removeItem(`${domainPrefix}.auth.username`);
     this.props.navigation.navigate("Welcome");
     alert(`Old login data expired.\nPlease log in again ...`);
-    processError(...args);
   }
 
   async componentWillMount() {
-    const token_value = await AsyncStorage.getItem(
-      `${domainPrefix}.auth.locktrip`
-    );
-    const email_value = await AsyncStorage.getItem(
-      `${domainPrefix}.auth.username`
-    );
+    const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
+    const email_value = await AsyncStorage.getItem(`${domainPrefix}.auth.username`);
     const newState = { token: token_value, email: email_value };
     this.setState(newState);
     this.props.setDatesAndGuestsData({
@@ -122,57 +134,13 @@ class Explore extends Component {
 
     // TODO: An old note below. To fix - investigate the commit by abhi when it was added:
     // Below line gives null cannot be casted to string error on ios please look into it
-    requester
-      .getUserInfo()
-      .then(res => {
-        if (!res || !res.body) {
-          this.processUserError(
-            `[Explore::componentWillMount] Error while getting user info - level 3`,
-            { res }
-          );
-          return;
-        } else if (!res.success) {
-          res.errors.then(error => {
-            this.processUserError(
-              `[Explore::componentWillMount] Error while getting user info - level 4`,
-              { res, error }
-            );
-          });
-          return;
-        }
 
-        res.body
-          .then(data => {
-            //  with redux cache, for example:
-            this.props.setLoginDetails(data);
+    // prettier-ignore
+    serverRequest( this, requester.getUserInfo, [],
+      this.onServerGetUserInfo,
+      this.onServerGetUserInfoError
+    );
 
-            if (
-              email_value == undefined ||
-              email_value == null ||
-              email_value == ""
-            ) {
-              AsyncStorage.setItem(`${domainPrefix}.auth.username`, data.email);
-              this.setState({
-                email: email_value
-              });
-            }
-
-            // TODO: Replace all references to user data (async storage)
-            userInstance.setUserData(data);
-          })
-          .catch(error => {
-            this.processUserError(
-              `[Explore::componentWillMount] Error while getting user info - level 2`,
-              { error }
-            );
-          });
-      })
-      .catch(error => {
-        this.processUserError(
-          `[Explore::componentWillMount] Error while getting user info - level 1`,
-          { error }
-        );
-      });
     // TODO: Also there was a merge about 10 months ago - see yuri930 commit for the above code (where the issue is)
     // Best - get rid of AsyncStorage and use redux to clear any cache issues
     this.setCountriesInfo();
@@ -279,8 +247,9 @@ class Explore extends Component {
     if (value === "") {
       this.setState({ cities: [] });
     } else {
-      requester.getRegionsBySearchParameter([`query=${value}`]).then(res => {
-        res.body.then(data => {
+      // prettier-ignore
+      serverRequest(this, requester.getRegionsBySearchParameter, [[`query=${value}`]],
+        data => {
           if (this.state.search != "") {
             this.setState({ cities: data }, () => {
               // enable automatic search
@@ -294,8 +263,8 @@ class Explore extends Component {
               }
             });
           }
-        });
-      });
+        }
+      )
     }
   }
 

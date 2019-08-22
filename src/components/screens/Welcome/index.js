@@ -20,6 +20,7 @@ import {
   GraphRequestManager
 } from "react-native-fbsdk";
 import LTLoader from "../../molecules/LTLoader";
+import { serverRequest, SERVER_ERROR } from "../../../services/utilities/serverUtils";
 
 class Welcome extends Component {
   constructor(props) {
@@ -41,7 +42,6 @@ class Welcome extends Component {
   }
 
   componentDidMount() {
-    //console.log("AppLoading - componentDidMount")
     SplashScreen.close({
       animationType: SplashScreen.animationType.scale,
       duration: 0,
@@ -68,51 +68,13 @@ class Welcome extends Component {
         user.country = countryID;
       }
 
-      requester
-        .login(user, null)
-        .then(res => {
-          _this.setState({ showProgress: false });
-
-          if (res.success) {
-            this.setState({ message: "" });
-
-            res.body.then(data => {
-              AsyncStorage.setItem(
-                `${domainPrefix}.auth.locktrip`,
-                data.Authorization
-              );
-              // TODO: Get first name + last name from response included with Authorization token (Backend)
-              AsyncStorage.setItem(`${domainPrefix}.auth.username`, email);
-              _this.props.navigation.navigate("MainScreen");
-            });
-          } else {
-            this.setState({ message: "" });
-            res.errors.then(data => {
-              const { errors } = data;
-
-              if (errors.hasOwnProperty("CountryNull")) {
-                _this.setState({ locationDialogVisible: true });
-              } else {
-                let keys = Object.keys(errors);
-                let keysNoF = keys.filter(item => typeof item !== "function");
-
-                if (keysNoF.includes("IncorrectPassword")) {
-                  if (_this.fbInfo.email != null) {
-                    this.setState({ message: "" });
-                    _this.props.navigation.navigate("Login", { email });
-                  }
-                } else {
-                  _this.tryRegister();
-                }
-              }
-            });
-          }
-        })
-        .catch(err => {
-          _this.setState({ showProgress: false, message: "" });
-          alert("Cannot login. Please check network connection.");
-          //console.log(err);
-        });
+      serverRequest(
+        this,
+        requester.login,
+        [user],
+        this.onFBLoginSuccess,
+        this.onFBLoginError
+      );
     } else {
       const user = {
         authId: "fid" + this.fbInfo.id,
@@ -122,53 +84,14 @@ class Welcome extends Component {
       if (countryID != null) {
         user.country = countryID;
       }
-      //console.log("uerer-------------", user);
-      requester
-        .login(user, null)
-        .then(res => {
-          //console.log("login by auth_id", res);
-          this.setState({ showProgress: false });
-          if (res.success) {
-            //console.log("Success");
-            res.body.then(data => {
-              //console.log(data);
-              AsyncStorage.setItem(
-                `${domainPrefix}.auth.locktrip`,
-                data.Authorization
-              );
-              // // TODO: Get first name + last name from response included with Authorization token (Backend)
-              // AsyncStorage.setItem(`${domainPrefix}.auth.username`, fbInfo.email);
-              this.props.navigation.navigate("MainScreen");
-            });
-          } else {
-            res.errors.then(data => {
-              const { errors } = data;
 
-              if (errors.hasOwnProperty("CountryNull")) {
-                this.setState({ locationDialogVisible: true });
-              } else {
-                Object.keys(errors).forEach(key => {
-                  if (typeof key !== "function") {
-                    if (errors[key].message == "Incorrect password") {
-                      alert(
-                        "You already registered using email, so please try to login using email."
-                      );
-                    } else {
-                      this.tryRegister();
-                    }
-                    // alert(errors[key].message);
-                    //console.log('Error logging in  :', errors[key].message);
-                  }
-                });
-              }
-            });
-          }
-        })
-        .catch(err => {
-          this.setState({ showProgress: false });
-          alert("Cannot login, Please check network connection.");
-          //console.log(err);
-        });
+      serverRequest(
+        this,
+        requester.login,
+        [[user, null]],
+        this.onLoginSuccess,
+        this.onLoginError
+      );
     }
   }
 
@@ -281,6 +204,68 @@ class Welcome extends Component {
   gotoRecover() {
     // TODO: Move this to a native version - two calls: (1) send e-mail, (2) send token from e-mail
     Linking.openURL(`${basePath}recover`);
+  }
+
+  onFBLoginSuccess() {
+    this.setState({ message: "" });
+
+    res.body.then(data => {
+      AsyncStorage.setItem(`${domainPrefix}.auth.locktrip`, data.Authorization);
+      // TODO: Get first name + last name from response included with Authorization token (Backend)
+      AsyncStorage.setItem(`${domainPrefix}.auth.username`, email);
+      _this.props.navigation.navigate("MainScreen");
+    });
+  }
+
+  onFBLoginError(data, errorCode) {
+    this.setState({ message: "", showProgress: false });
+
+    switch (errorCode) {
+
+      case SERVER_ERROR.LEVEL_3_FROM_SERVER:
+        const { errors } = data;
+        if (errors && errors.hasOwnProperty("CountryNull")) {
+          _this.setState({ locationDialogVisible: true });
+        } else if (errors && errors.hasOwnProperty("IncorrectPassword")) {
+          if (this.fbInfo.email != null) {
+            this.props.navigation.navigate("Login", { email });
+          }
+        } else {
+          this.tryRegister();
+        }
+        break;
+
+      default:
+        alert("Cannot login. Please check network connection.");
+        break;
+
+    }
+  }
+
+  onLoginSuccess(data) {
+    this.setState({ showProgress: false });
+    AsyncStorage.setItem(`${domainPrefix}.auth.locktrip`, data.Authorization);
+    // // TODO: Get first name + last name from response included with Authorization token (Backend)
+    // AsyncStorage.setItem(`${domainPrefix}.auth.username`, fbInfo.email);
+    this.props.navigation.navigate("MainScreen");
+  }
+
+  onLoginError(data) {
+    const { errors } = data;
+
+    if (errors.hasOwnProperty("CountryNull")) {
+      this.setState({ locationDialogVisible: true });
+    } else {
+      let keys = Object.keys(errors);
+      let keysNoF = keys.filter(item => typeof item !== "function");
+
+      if (keysNoF.includes("IncorrectPassword")) {
+        // prettier-ignore
+        alert("You already registered using email, so please try to login using email.");
+      } else {
+        this.tryRegister();
+      }
+    }
   }
 
   _renderButtons() {

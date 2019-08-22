@@ -51,6 +51,8 @@ export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
 export const consoleShowTimeInLogs              = true;    // prepend with time
+export const serverLogRequesting                = false;
+export const serverExpandErrors                 = false;
   // other
 export const webviewDebugEnabled                = false;
 export const hotelsSearchMapDebugEnabled        = false;
@@ -75,6 +77,7 @@ export const offlineTimeInSeconds = {
   getWalletFromEtherJS1: 0,
   getWalletFromEtherJS2: 0,
   getStaticHotels: 0,
+  getSearchHotelResults: 0,
   getMapInfo: 0,
   getHotelRooms: 0,
   getHotelById: 0,
@@ -256,7 +259,7 @@ function configureReactotron() {
  * @param {String} description Information about the error
  * @param {Object} data Not shown in release
  */
-export function processError(description, data) {
+export function processError(description, data, errorCode = null) {
   if (!__DEV__) {
 
     console.warn(description);
@@ -265,11 +268,15 @@ export function processError(description, data) {
 
     switch (errorLevel) {
       case 0:
-        console.warn(description, data);
+        if (serverExpandErrors) {
+          console.warn.apply(null, [description, ...Object.values(data), `, code ${errorCode}`]);
+        } else {
+          console.warn(`${description}, error code ${errorCode}`, data);
+        }
         break;
 
       case 1:
-        console.error(description, data);
+        console.error(description, data, errorCode);
         break;
 
       case 2:
@@ -280,7 +287,7 @@ export function processError(description, data) {
         break;
 
       default:      
-        console.error(description, data);
+        console.error(description, data, errorCode);
 
         if (data.error) {
           throw data.error;

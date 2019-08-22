@@ -12,6 +12,7 @@ export const hotelSearchIsNative = {
   step4Payment: false
 };
 export const HOTELS_MINIMUM_RESULTS = 5;
+export const HOTELS_INITIAL_ITEMS_TO_LOAD = 40;
 export const HOTEL_ROOM_LIMITS = {
   MIN: {
     ROOMS: 1,
@@ -31,4 +32,4 @@ export const showNumberOnHotelItem = __DEV__ && false;
 export const showBothMapAndListHotelSearch = false;
 export const showSimpleFooterHotelSearch = true;
 export const isFontScalingEnabled = false;
-export const autoGetAllStaticPages = true;
+export const autoGetAllStaticPages = false;

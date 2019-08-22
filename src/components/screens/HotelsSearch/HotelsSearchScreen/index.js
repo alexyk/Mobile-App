@@ -3,11 +3,11 @@
  * 
  * ==== Variant 2 - quicker search results (when 30 prices loaded) ====
  * ==== (using footer in simple mode - one simple text field) ====
- * 1) onStaticData
+ * 1) onServerStaticHotels
  *    This is the initial load of static hotel data (name,description,image)
  *    5 pages are initially loaded
  
- * 2) onDataFromSocket
+ * 2) onServerHotelsFromSocket
  *    Loading prices from socket and updating hotel search
  *    Shown in footer: "N matches" (renderFooter)
  * 
@@ -38,7 +38,8 @@ import {
   HOTELS_SOCKET_CONNECTION_UPDATE_TICK,
   HOTELS_MINIMUM_RESULTS,
   autoGetAllStaticPages,
-  hotelSearchIsNative
+  hotelSearchIsNative,
+  HOTELS_INITIAL_ITEMS_TO_LOAD
 } from "../../../../config-settings";
 import {
   isOnline,
@@ -101,13 +102,13 @@ import {
 import stomp from "stomp-websocket-js";
 import { setIsApplyingFilter } from "../../../../redux/action/userInterface";
 import { setSearch, setSearchString } from "../../../../redux/action/hotels";
+import { serverRequest } from "../../../../services/utilities/serverUtils";
 
 let stompiOSClient = undefined;
 let stompAndroidClient = undefined;
 
 class HotelsSearchScreen extends Component {
   PAGE_LIMIT = 10;
-  INITIAL_PAGES = 5;
 
   constructor(props) {
     super(props);
@@ -123,7 +124,7 @@ class HotelsSearchScreen extends Component {
     this.pageLimit = this.PAGE_LIMIT;
     this.pagesLoaded = 0;
     this.pagesCached = 0;
-    this.pageSize = 10;
+    this.pageSize = HOTELS_INITIAL_ITEMS_TO_LOAD;
     this.isAllPagesDone = false;
     this.totalElements = 0;
     this.isMinimumResultLoaded = false;
@@ -162,8 +163,8 @@ class HotelsSearchScreen extends Component {
     this.unsubscribe = this.stopSocketConnection.bind(this);
     this.updateCoords = this.updateCoords.bind(this);
     this.onBackButtonPress = this.onBackButtonPress.bind(this);
-    this.onDataFromSocket = this.onDataFromSocket.bind(this);
-    this.onStaticData = this.onStaticData.bind(this);
+    this.onServerHotelsFromSocket = this.onServerHotelsFromSocket.bind(this);
+    this.onServerStaticHotels = this.onServerStaticHotels.bind(this);
     this.onFilteredData = this.onFilteredData.bind(this);
     this.onFetchNewListViewData = this.onFetchNewListViewData.bind(this);
     this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(
@@ -296,9 +297,12 @@ class HotelsSearchScreen extends Component {
     }
 
     this.startStaticDataConnectionTimeOut();
-    requester
-      .getStaticHotels(this.state.regionId, page, elementsCount)
-      .then(this.onStaticData);
+
+    const { regionId } = this.state;
+    serverRequest(this, requester.getStaticHotels, [regionId, page, elementsCount],
+      this.onServerStaticHotels,
+      this.onServerStaticHotelsError
+    );
   }
 
   getStaticHotelsData() {
@@ -312,7 +316,6 @@ class HotelsSearchScreen extends Component {
     this.setState(
       // change state function
       function(prevState, updatedProps) {
-        //console.log('SET_STATE 1', {prevState,updatedProps})
         return {
           displayMode:
             prevState.displayMode == DISPLAY_MODE_NONE
@@ -326,7 +329,7 @@ class HotelsSearchScreen extends Component {
 
       // callback (after change state above)
       function() {
-        _this.getNextStaticPage(_this.pagesLoaded);
+        _this.getNextStaticPage(0, HOTELS_INITIAL_ITEMS_TO_LOAD);
       }
     );
     //console.log("#hotel-search# 4.2/6 [HotelsSearchScreen] getStaticHotelsData");
@@ -348,10 +351,8 @@ class HotelsSearchScreen extends Component {
       this.startSocketConnection();
 
       // initiate search
-      requester
-        .getSearchHotelResults(query)
-        .then(this.onServerSearchStarted)
-        .catch(this.onServerSearchError);
+      // prettier-ignore
+      serverRequest(this, requester.getSearchHotelResults, [query], this.onServerStaticHotels, this.onServerStaticHotelsError);
     });
   }
 
@@ -371,7 +372,7 @@ class HotelsSearchScreen extends Component {
         this.stompAndroidConnect();
       }
     } else {
-      requester.startSocketConnection(this.onDataFromSocket, this);
+      requester.startSocketConnection(this.onServerHotelsFromSocket, this);
     }
   }
 
@@ -424,7 +425,10 @@ class HotelsSearchScreen extends Component {
     stompiOSClient.connect(
       {},
       frame => {
-        stompiOSClient.subscribe(`search/${this._uuid}`, this.onDataFromSocket);
+        stompiOSClient.subscribe(
+          `search/${this._uuid}`,
+          this.onServerHotelsFromSocket
+        );
       },
       error => {
         stompiOSClient.disconnect();
@@ -450,7 +454,7 @@ class HotelsSearchScreen extends Component {
     DeviceEventEmitter.addListener("onStompMessage", ({ message }) => {
       // console.warn('stomp message', message);
       // TODO: (low priority) Solve this difference between iOS and Android
-      return this.onDataFromSocket({ body: message });
+      return this.onServerHotelsFromSocket({ body: message });
     });
 
     // TODO: Check if subscription can be done without message?
@@ -459,12 +463,12 @@ class HotelsSearchScreen extends Component {
     stompAndroidClient.getData(message, destination);
   }
 
-  onDataFromSocket(data) {
-    clog("socket-data", `onDataFromSocket`, { data });
+  onServerHotelsFromSocket(data) {
+    // clog("socket-data", `onServerHotelsFromSocket`, { data });
 
     if (!this || !this.listViewRef || this.isUnmounted) {
       console.warn(
-        `[HotelsSearchScreen::onDataFromSocket] Is screen unmounted: ${
+        `[HotelsSearchScreen::onServerHotelsFromSocket] Is screen unmounted: ${
           this ? this.isUnmounted : "n/a"
         }`,
         {
@@ -476,7 +480,7 @@ class HotelsSearchScreen extends Component {
       return;
     }
 
-    console.time("*** onDataFromSocket");
+    console.time("*** onServerHotelsFromSocket");
 
     const { body } = data;
 
@@ -527,7 +531,7 @@ class HotelsSearchScreen extends Component {
           this.hotelsSocketCacheMap[id] = parsedHotelData;
           checkHotelData(parsedHotelData, "socket-parsed");
         }
-        //log('socket-data',`onDataFromSocket ${id}, price-parced:${price} price-raw:${hotelData.price}`, {hotelData,parsedHotelData})
+        //log('socket-data',`onServerHotelsFromSocket ${id}, price-parced:${price} price-raw:${hotelData.price}`, {hotelData,parsedHotelData})
 
         if (!isNaN(price)) {
           // update socket prices loaded in footer
@@ -555,7 +559,7 @@ class HotelsSearchScreen extends Component {
             // optimise execution with delaying some parts
             const delayedFunc = () => {
               newState = { ...newState, ...this.onSocketUpdateTick() };
-              // log('state-update',`onDataFromSocket`,{newState,oldState:this.state,initialCoord})//, ${Object.keys(newState).map(key => `${key}:${newState[key]}`)}`, {newState, all:this.hotelsAll, socket:this.hotelsSocketCacheMap, static:this.hotelsStaticCacheMap})
+              // log('state-update',`onServerHotelsFromSocket`,{newState,oldState:this.state,initialCoord})//, ${Object.keys(newState).map(key => `${key}:${newState[key]}`)}`, {newState, all:this.hotelsAll, socket:this.hotelsSocketCacheMap, static:this.hotelsStaticCacheMap})
               this.setState(newState);
             };
             setTimeout(delayedFunc, 100);
@@ -567,12 +571,12 @@ class HotelsSearchScreen extends Component {
       }
     } catch (error) {
       processError(
-        `[HotelsSearchScreen] Error while processing in onDataFromSocket: ${error.message}`,
+        `[HotelsSearchScreen] Error while processing in onServerHotelsFromSocket: ${error.message}`,
         { error }
       );
     }
 
-    console.timeEnd("*** onDataFromSocket");
+    console.timeEnd("*** onServerHotelsFromSocket");
   }
 
   /**
@@ -890,12 +894,18 @@ class HotelsSearchScreen extends Component {
     }
   }
 
-  onStaticData(res) {
-    const isSkipping = !this || !this.listViewRef || this.isUnmounted;
+  onServerStaticHotelsError(errorData, errorCode) {
+    this.listStartFetch([], 0);
+    this.setState({isLoading: false});
+    alert('There was a network issue. Please try searching again.');
+  }
+
+  onServerStaticHotels(data) {
+    const isSkipping = (!this || !this.listViewRef || this.isUnmounted);
 
     if (isSkipping) {
       console.warn(
-        `[HotelsSearchScreen::onStaticData] Is screen unmounted: ${
+        `[HotelsSearchScreen::onServerStaticHotels] Is screen unmounted: ${
           this ? this.isUnmounted : "n/a"
         }`,
         {
@@ -908,92 +918,47 @@ class HotelsSearchScreen extends Component {
     }
     const _this = this;
 
-    if (res.success) {
-      _this.staticDataReceived = true;
-
-      res.body.then(function(data) {
-        if (_this.isAllHotelsLoaded) {
-          return;
-        }
-
-        // a shortcut to all results
-        if (autoGetAllStaticPages && _this.isFirstLoad) {
-          _this.isFirstLoad = false;
-          const newState = {
-            totalHotels: data.totalElements,
-            totalPages: data.totalPages,
-            displayMode: DISPLAY_MODE_RESULTS_AS_LIST
-          };
-          if (_this.isSocketDown) {
-            _this.startSearch();
-          }
-          _this.setState(newState);
-          _this.pageSize = data.totalElements;
-          if (_this.pageSize > 1000) {
-            _this.pageSize = 1000;
-          }
-
-          _this.getNextStaticPage(0, _this.pageSize);
-        }
-
-        _this.isAllPagesDone = data.last;
-
-        if (_this.pagesCached == 0) {
-          _this.totalElements = data.totalElements;
-        }
-
-        let hotels = data.content;
-        processStaticHotels(
-          hotels,
-          _this.hotelsStaticCacheMap,
-          _this.hotelsIndicesByIdMap,
-          _this.hotelsAll,
-          _this.isAllHotelsLoaded
-        );
-        if (!autoGetAllStaticPages) {
-          _this.pagesCached++;
-        }
-        printCheckHotelDataCache();
-
-        if (_this.isAllHotelsLoaded) {
-          // this prevents slow static data to overwrite prices data
-          //_this.listUpdateDataSource(_this.hotelsAll);
-          console.warn(
-            `[HotelsSearchScreen] Skipping static data - page ${_this.pagesCached} (loaded: ${_this.pagesLoaded})`
-          );
-          return;
-        }
-        _this.pagesLoaded++;
-
-        const newState = {
-          totalHotels: data.totalElements,
-          totalPages: data.totalPages
-        };
-
-        // start socket connection if first static load
-        if (_this.isFirstLoad) {
-          _this.isFirstLoad = false;
-          if (_this.isSocketDown) {
-            _this.startSearch();
-          }
-          newState.displayMode = DISPLAY_MODE_RESULTS_AS_LIST;
-        }
-        _this.setState(newState);
-
-        if (
-          !autoGetAllStaticPages &&
-          (!_this.isAllPagesDone && _this.pagesLoaded < _this.INITIAL_PAGES)
-        ) {
-          _this.getNextStaticPage(_this.pagesLoaded, _this.pageSize);
-        }
-      }); // res.body.then
-    } else {
-      this.listStartFetch([], 0);
-      processError(
-        `[HotelsSearchScreen] Could not fetch Static Data for hotels`,
-        { res }
-      );
+    _this.staticDataReceived = true;
+    if (_this.isAllHotelsLoaded) {
+      return;
     }
+
+    const newState = {
+      totalHotels: data.totalElements,
+      totalPages: data.totalPages,
+      displayMode: DISPLAY_MODE_RESULTS_AS_LIST
+    };
+    if (_this.isSocketDown) {
+      _this.startSearch();
+    }
+    _this.setState(newState);
+
+    if (autoGetAllStaticPages && _this.isFirstLoad) {
+      _this.pageSize = data.totalElements;
+      if (_this.pageSize > 1000) {
+        _this.pageSize = 1000;
+      }
+      _this.getNextStaticPage(0, _this.pageSize);
+    }
+
+    _this.isAllPagesDone = data.last;
+
+    if (_this.pagesCached == 0) {
+      _this.totalElements = data.totalElements;
+    }
+
+    let hotels = data.content;
+    processStaticHotels(
+      hotels,
+      _this.hotelsStaticCacheMap,
+      _this.hotelsIndicesByIdMap,
+      _this.hotelsAll,
+      _this.isAllHotelsLoaded
+    );
+    printCheckHotelDataCache();
+
+    _this.pagesCached++;
+    _this.isFirstLoad = false;
   }
 
   listAbortFetch() {

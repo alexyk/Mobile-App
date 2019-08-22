@@ -1,5 +1,6 @@
 import { createAction } from "redux-actions";
 import requester from "../../../initDependencies";
+import { serverRequest } from "../../../services/utilities/serverUtils";
 
 const exchangeRatesInfoType = {
   SET_CURRENCY_EXCHANGE_RATES: "SET_CURRENCY_EXCHANGE_RATES",
@@ -19,21 +20,21 @@ export const setLocRateFiatAmount = createAction(
 
 export const getCurrencyRates = () => {
   return dispatch => {
-    requester.getCurrencyRates().then(res => {
-      res.body.then(currencyExchangeRates => {
-        dispatch(setCurrencyExchangeRates(currencyExchangeRates));
-      });
-    });
+    // prettier-ignore
+    serverRequest("Action getCurrencyRates", requester.getCurrencyRates,[],
+      currencyExchangeRates => dispatch(setCurrencyExchangeRates(currencyExchangeRates))
+    );
   };
 };
 
 export const getLocRate = baseCurrency => {
   return dispatch => {
-    requester.getLocRateByCurrency(baseCurrency).then(res => {
-      res.body.then(data => {
+    // prettier-ignore
+    serverRequest("Action getLocRate", requester.getLocRateByCurrency, [baseCurrency],
+      data => {
         const parsedValue = 1 / parseFloat(data);
         dispatch(setLocEurRate(parsedValue));
-      });
-    });
+      }
+    );
   };
 };
