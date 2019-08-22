@@ -15,6 +15,7 @@
     "jest": "24.8.0",
     "jest-react-native": "18.0.0",
     "metro-react-native-babel-preset": "0.55.0",
+    "prettier": "^1.18.2",
     "react-test-renderer": "16.8.6",
     "reactotron-react-native": "3.6.4",
     "redux-devtools-extension": "2.13.8",
@@ -25,6 +26,7 @@
     "start": "react-native start",
     "android": "react-native run-android",
     "ios": "react-native run-ios",
+    "prettier": "prettier 'src/**/*.js'",
     "test": "node node_modules/jest/bin/jest.js",
     "lint": "./node_modules/.bin/eslint .",
     "test-debug": "node --inspect node_modules/.bin/jest --watch --runInBand"

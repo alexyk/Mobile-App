@@ -66,15 +66,19 @@ export const isOnline = (!isOffline);
 export const autoLoginInOfflineMode             = true;
 export var validationStateOfflineWallet         = -1;  // -1: none, 0: invalid, 1: valid
 export const offlineTimeInSeconds = {
-  getCountries: 0.1,
-  getCurrencyRates: 0.1,
-  login: 0.1,
-  getUserInfo: 0.1,
-  getLocRateByCurrency: 0.1,
-  getMyHotelBookings: 0.1,
-  getMyConversations: 0.1,
-  getWalletFromEtherJS1: 1,
-  getWalletFromEtherJS2: 0.2
+  getCountries: 0,
+  getCurrencyRates: 0,
+  login: 0,
+  getUserInfo: 0,
+  getLocRateByCurrency: 0,
+  getMyHotelBookings: 0,
+  getMyConversations: 0,
+  getWalletFromEtherJS1: 0,
+  getWalletFromEtherJS2: 0,
+  getStaticHotels: 0,
+  getMapInfo: 0,
+  getHotelRooms: 0,
+  getHotelById: 0,
 }
   // automated flows
     // hotels search
