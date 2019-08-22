@@ -19,7 +19,7 @@ import styles from "./styles";
 import SideSwipe from "react-native-sideswipe";
 import { connect } from "react-redux";
 import { hotelSearchIsNative } from "../../../../config-settings";
-import { getSafeTopOffset } from "../../../../utils/designUtils";
+import { getSafeTopOffset, SCREEN_SIZE } from "../../../../utils/designUtils";
 import ImageSlides from "../../../molecules/ImageSlides";
 
 class HotelDetails extends Component {
@@ -258,7 +258,7 @@ class HotelDetails extends Component {
       <View style={styles.container}>
         <ScrollView style={styles.scrollView}>
           <View style={styles.body}>
-            <ImageSlides data={this.state.dataSourcePreview} height={200} />
+            <ImageSlides data={this.state.dataSourcePreview} height={SCREEN_SIZE.H / 3} />
 
             {this._renderHotelDetails()}
 

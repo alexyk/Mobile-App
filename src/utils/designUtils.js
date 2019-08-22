@@ -11,6 +11,10 @@ const PAD_WIDTH = 768;
 const PAD_HEIGHT = 1024;
 
 const { height: D_HEIGHT, width: D_WIDTH } = Dimensions.get("window");
+export const SCREEN_SIZE = {
+  W: D_WIDTH,
+  H: D_HEIGHT
+};
 
 export const pixelRatio = PixelRatio.getPixelSizeForLayoutSize(100) / 100;
 

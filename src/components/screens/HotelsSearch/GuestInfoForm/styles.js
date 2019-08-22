@@ -82,11 +82,9 @@ const styles = StyleSheet.create({
     marginTop: 10
   },
   firstNameFlex: {
-    flex: 1,
     marginBottom: 5
   },
   lastNameFlex: {
-    flex: 1,
     marginBottom: 5
   },
   gender: {
@@ -121,16 +119,14 @@ const styles = StyleSheet.create({
     marginRight: 10
   },
   guestInfoWrapper: {
-    marginTop: 15,
-    marginBottom: 30,
-    flex: 1
+    marginVertical: 15
   },
   titleContainer: {
-    marginLeft: 8,
+    width: 80,
     marginBottom: 5,
     justifyContent: "flex-end",
     alignItems: "center",
-    width: 80
+    backgroundColor: "#CCC8"
   },
   listItem: {
     width: "100%",
@@ -171,23 +167,18 @@ export default styles;
 export const titleSelectorStyles = StyleSheet.create({
   inputIOS: {
     height: 50,
+    width: "100%",
     fontSize: 16,
     color: "black",
     alignSelf: "flex-end",
     justifyContent: "flex-end",
-    alignItems: "flex-start",
-    width: "100%"
-    //     backgroundColor: 'red'
+    alignItems: "flex-start"
   },
   inputAndroid: {
     height: 50,
     width: 70,
-    //fontSize: 16,
-    // color: 'black',
     alignSelf: "flex-end",
     justifyContent: "flex-end",
-    alignItems: "flex-start",
-    width: "100%"
-    //     backgroundColor: 'red'
+    alignItems: "flex-start"
   }
 });

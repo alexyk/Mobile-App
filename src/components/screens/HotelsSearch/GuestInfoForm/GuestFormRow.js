@@ -5,7 +5,6 @@ import RNPickerSelect from "react-native-picker-select";
 import PropTypes from "prop-types";
 import styles from "./styles";
 import { orderbyPickerSelectStyles } from "../HotelFilters/styles";
-import { clog } from "../../../../config-debug";
 import Separator from "../../../atoms/Separator";
 
 export default class GuestFormRow extends Component {
@@ -106,8 +105,6 @@ export default class GuestFormRow extends Component {
 
     return (
       <View style={styles.guestInfoWrapper} key={`${itemIndex}`}>
-        {/* <ScrollView> */}
-
         <Text style={styles.labelGuest}>Guest {no}</Text>
         <Separator isHR height={1} />
         <View style={styles.inputFieldsView}>
@@ -115,8 +112,6 @@ export default class GuestFormRow extends Component {
           {this._renderFirstName()}
           {this._renderLastName()}
         </View>
-        {/* </KeyboardAvoidingView> */}
-        {/* </ScrollView> */}
       </View>
     );
   }

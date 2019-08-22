@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import {
   View,
   Text,
-  FlatList,
   KeyboardAvoidingView,
+  ScrollView,
   BackHandler,
   Platform
 } from "react-native";
@@ -495,16 +495,9 @@ class GuestInfoForm extends Component {
 
   _renderGuests() {
     return (
-      <FlatList
-        style={styles.flatList}
-        data={this.state.guests}
-        keyExtractor={(item, index) => item.key}
-        renderItem={({ item, index }) => (
-          <KeyboardAvoidingView
-            keyboardVerticalOffset={-50}
-            behavior="position"
-            enabled
-          >
+      <View style={{ backgroundColor: "#f0f1f3" }}>
+        {this.state.guests &&
+          this.state.guests.map((item, index) => (
             <GuestFormRow
               guest={item}
               itemIndex={index}
@@ -512,9 +505,8 @@ class GuestInfoForm extends Component {
               onFirstNameChange={this._onFirstNameChange}
               onLastNameChange={this._onLastNameChange}
             />
-          </KeyboardAvoidingView>
-        )}
-      />
+          ))}
+      </View>
     );
   }
 
@@ -540,17 +532,18 @@ class GuestInfoForm extends Component {
         <BookingSteps items={lang.TEXT.BOOKING_STEPS} selectedIndex={0} />
         <Separator height={10} />
 
-        <View style={styles.content}>
+        <ScrollView style={styles.content}>
           <Text style={styles.heading}>Provide guest information</Text>
-
           {this._renderHotelInfo(params)}
           <Separator height={20} />
           {this._renderRoomType()}
           {this._renderDates()}
           {this._renderGuestsCount(guestsCount)}
           <Separator height={10} />
-          {this._renderGuests()}
-        </View>
+          <KeyboardAvoidingView behavior="position" enabled>
+            {this._renderGuests()}
+          </KeyboardAvoidingView>
+        </ScrollView>
 
         <HotelDetailBottomBar
           price={price}
