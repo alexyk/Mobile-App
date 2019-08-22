@@ -5,7 +5,11 @@ import Image from "react-native-remote-svg";
 import CardView from "react-native-cardview";
 import PropTypes from "prop-types";
 import { imgHost } from "../../../config";
-import { DEFAULT_HOTEL_PNG, showNumberOnHotelItem, hotelSearchIsNative } from "../../../config-settings";
+import {
+  DEFAULT_HOTEL_PNG,
+  showNumberOnHotelItem,
+  hotelSearchIsNative
+} from "../../../config-settings";
 import _ from "lodash";
 import FastImage from "react-native-fast-image";
 import { RoomsXMLCurrency } from "../../../services/utilities/roomsXMLCurrency";
@@ -15,7 +19,6 @@ import LocPrice from "../../atoms/LocPrice";
 import styles from "./styles";
 import lang from "../../../language";
 import LTIcon from "../../atoms/LTIcon";
-
 
 class HotelItemView extends Component {
   static propTypes = {
@@ -37,21 +40,21 @@ class HotelItemView extends Component {
     this.onPress = this.onPress.bind(this);
   }
 
-
   componentDidCatch(error, errorInfo) {
-    processError(`[HotelItemView] Error in component: ${error.message}`, {error,errorInfo});
+    processError(`[HotelItemView] Error in component: ${error.message}`, {
+      error,
+      errorInfo
+    });
   }
 
-  
   shouldComponentUpdate(newProps, newState, newContext) {
     const { item } = newProps;
     const oldItem = this.props.item;
     const oldIsDoneSocket = this.props.isDoneSocket;
 
     return (
-      oldItem.price != item.price
-        || oldIsDoneSocket != newProps.isDoneSocket
-    )
+      oldItem.price != item.price || oldIsDoneSocket != newProps.isDoneSocket
+    );
   }
 
   onPress = event => {
@@ -87,18 +90,18 @@ class HotelItemView extends Component {
     for (let i = 0; i < count; i++) {
       indents.push(
         <LTIcon
-            key={`star - ${i}`}
-            textStyle={{ color: '#a3c5c0' }}
-            name={'star'}
+          key={`star - ${i}`}
+          textStyle={{ color: "#a3c5c0" }}
+          name={"star"}
         />
       );
     }
     for (let i = count; i < 5; i++) {
       indents.push(
         <LTIcon
-            key={`star - ${i}`}
-            textStyle={{ color: '#dddddd' }}
-            name={'star'}
+          key={`star - ${i}`}
+          textStyle={{ color: "#dddddd" }}
+          name={"star"}
         />
       );
     }
@@ -109,7 +112,7 @@ class HotelItemView extends Component {
     const { exchangeRates, currency, item, currencySign } = this.props;
 
     let price = item.price;
-    let isPriceReady = (price != null);
+    let isPriceReady = price != null;
     let fiatPrice = 0;
     let priceToFixed2 = 0;
 
@@ -119,7 +122,12 @@ class HotelItemView extends Component {
 
     let content = null;
 
-    const converted = CurrencyConverter.convert(rates, roomCurrency, currency, price);
+    const converted = CurrencyConverter.convert(
+      rates,
+      roomCurrency,
+      currency,
+      price
+    );
     if (converted != null) {
       price = (converted / days).toFixed(2);
     } else {
@@ -129,7 +137,7 @@ class HotelItemView extends Component {
     if (isPriceReady) {
       fiatPrice = (price / days).toFixed(0);
       priceToFixed2 = parseFloat(price).toFixed(2);
-      
+
       //const { props, state, isAllHotelsLoaded } = this.props.parent;
       //log('@@hotel-item', `Item price, fiatPrice:${fiatPrice}, days:${days}, priceToFixed2:${priceToFixed2}, price-ready:${isPriceReady}`, {props,state,item,currencySign,converted,days,price,fiatPrice,days,priceToFixed2})
 
@@ -153,9 +161,9 @@ class HotelItemView extends Component {
       content = (
         <View style={styles.costView}>
           <Text style={styles.cost} numberOfLines={1} ellipsizeMode="tail">
-                {this.props.isDoneSocket 
-                    ? lang.TEXT.SEARCH_HOTEL_ITEM_PRICE_NA
-                    : lang.TEXT.SEARCH_HOTEL_ITEM_PRICE_LOADING}
+            {this.props.isDoneSocket
+              ? lang.TEXT.SEARCH_HOTEL_ITEM_PRICE_NA
+              : lang.TEXT.SEARCH_HOTEL_ITEM_PRICE_LOADING}
           </Text>
         </View>
       );
@@ -163,58 +171,58 @@ class HotelItemView extends Component {
 
     return content;
   }
-  
+
   renderThumbnail(urlThumbnail) {
-  	if (urlThumbnail != null && urlThumbnail != "") {
-  		return (
-				<FastImage
-					style={{ flex: 1, borderRadius: 5 }}
-					source={{
-						uri: urlThumbnail,
-						priority: FastImage.priority.high
-					}}
-					resizeMode={FastImage.resizeMode.cover}
-				/>
-			)
-  	} else {
-  		return null;
-  	}
+    if (urlThumbnail != null && urlThumbnail != "") {
+      return (
+        <FastImage
+          style={{ flex: 1, borderRadius: 5 }}
+          source={{
+            uri: urlThumbnail,
+            priority: FastImage.priority.high
+          }}
+          resizeMode={FastImage.resizeMode.cover}
+        />
+      );
+    } else {
+      return null;
+    }
   }
-  
+
   renderIndex(isEnabled) {
-    const {no,id} = this.props.item;
+    const { no, id } = this.props.item;
 
     // log('renderIndex',`id: ${id} no: ${no}`,{item:this.props.item});
-    
-	  const result = (
-			<View style={styles.index}>
-				<Text style={styles.indexText}>{no}</Text>
-			</View>
-  	)
-  	
-  	if (isEnabled) {
-	  	return result
-  	} else {
-  		return null;
-  	}
+
+    const result = (
+      <View style={styles.index}>
+        <Text style={styles.indexText}>{no}</Text>
+      </View>
+    );
+
+    if (isEnabled) {
+      return result;
+    } else {
+      return null;
+    }
   }
 
   renderHeart(isEnabled) {
-	  const result = (
-			<TouchableOpacity style={styles.favoritesButton}>
-				<Image
-					source={require("../../../assets/png/heart.png")}
-					style={styles.favoriteIcon}
-					resizeMode="contain"
-				/>
-			</TouchableOpacity>
-  	)
-  	
-  	if (isEnabled) {
-	  	return result
-  	} else {
-  		return null;
-  	}
+    const result = (
+      <TouchableOpacity style={styles.favoritesButton}>
+        <Image
+          source={require("../../../assets/png/heart.png")}
+          style={styles.favoriteIcon}
+          resizeMode="contain"
+        />
+      </TouchableOpacity>
+    );
+
+    if (isEnabled) {
+      return result;
+    } else {
+      return null;
+    }
   }
 
   render() {
@@ -229,20 +237,22 @@ class HotelItemView extends Component {
       photo != null
         ? _.isString(photo)
           ? photo
-          : photo.url != ''
-              ? photo.url
-              : thumb != null && thumb != ''
-              	? _.isString(thumb)
-              			? thumb 
-              			: thumb.url && thumb.url != '' ? thumb.url : ''
-                : ''
-        : ''
-    if (urlThumbnail == '') {
-    	urlThumbnail = DEFAULT_HOTEL_PNG
+          : photo.url != ""
+          ? photo.url
+          : thumb != null && thumb != ""
+          ? _.isString(thumb)
+            ? thumb
+            : thumb.url && thumb.url != ""
+            ? thumb.url
+            : ""
+          : ""
+        : "";
+    if (urlThumbnail == "") {
+      urlThumbnail = DEFAULT_HOTEL_PNG;
     }
-    urlThumbnail = imgHost + urlThumbnail
-    
-    let {name, stars} = item;
+    urlThumbnail = imgHost + urlThumbnail;
+
+    let { name, stars } = item;
 
     return (
       <TouchableOpacity onPress={this.onPress}>
@@ -253,8 +263,8 @@ class HotelItemView extends Component {
           cornerRadius={0}
         >
           <View style={styles.popularHotelsImage}>
-            { this.renderThumbnail(urlThumbnail) }            
-            { this.renderHeart(false) }
+            {this.renderThumbnail(urlThumbnail)}
+            {this.renderHeart(false)}
           </View>
 
           <View style={styles.cardContent}>

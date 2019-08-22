@@ -1,13 +1,9 @@
-import {
-  LOCTokenContract
-} from '../config/contracts-config.js';
-import ethers from 'ethers';
+import { LOCTokenContract } from "../config/contracts-config.js";
+import ethers from "ethers";
 
-const ERROR = require('./../config/errors.json');
-
+const ERROR = require("./../config/errors.json");
 
 export class TokenValidators {
-
   static async validateLocBalance(account, locAmount) {
     //     const gasAmountApprove = ethers.utils.bigNumberify(gasConfig.approve);
     //     const gasAmountAction = ethers.utils.bigNumberify(actionGas);

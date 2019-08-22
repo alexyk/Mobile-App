@@ -1,22 +1,21 @@
-import React from 'react';
-import {
-    TouchableOpacity,
-    View,
-    Text
-} from 'react-native';
+import React from "react";
+import { TouchableOpacity, View, Text } from "react-native";
 
-import styles from './styles';
+import styles from "./styles";
 
 const defaulProps = {
-    title: '',
-    info:'',
+  title: "",
+  info: ""
 };
 /* eslint-disable */
-const UserPropertyItemTypeInfo = (props) => (
-      <TouchableOpacity style={[styles.container, props.styles]} onPress={props.onPress}>
-          <Text style={styles.title}>{props.title}</Text>
-          <Text style={styles.info}>{props.info}</Text>
-      </TouchableOpacity>
+const UserPropertyItemTypeInfo = props => (
+  <TouchableOpacity
+    style={[styles.container, props.styles]}
+    onPress={props.onPress}
+  >
+    <Text style={styles.title}>{props.title}</Text>
+    <Text style={styles.info}>{props.info}</Text>
+  </TouchableOpacity>
 );
 
 UserPropertyItemTypeInfo.defaulProps = defaulProps;

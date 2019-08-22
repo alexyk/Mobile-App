@@ -11,7 +11,12 @@ export const INVALID_CHILD_AGE = -1;
  *
  *  @returns {Array} A new deep copy of array with removed/added items to match roomsCount
  */
-export function modifyRoomsForChildrenData(roomsCount, oldRoomsCount, ageValues, cachedAgeValues) {
+export function modifyRoomsForChildrenData(
+  roomsCount,
+  oldRoomsCount,
+  ageValues,
+  cachedAgeValues
+) {
   let result = cloneDeep(ageValues);
 
   if (roomsCount < result.length) {
@@ -25,7 +30,13 @@ export function modifyRoomsForChildrenData(roomsCount, oldRoomsCount, ageValues,
   }
 
   if (roomsCount > oldRoomsCount) {
-    retrieveRoomFromCache(oldRoomsCount, 0, HOTEL_ROOM_LIMITS.MAX.CHILDREN_PER_ROOM, ageValues, cachedAgeValues)
+    retrieveRoomFromCache(
+      oldRoomsCount,
+      0,
+      HOTEL_ROOM_LIMITS.MAX.CHILDREN_PER_ROOM,
+      ageValues,
+      cachedAgeValues
+    );
   }
 
   return result;
@@ -39,7 +50,12 @@ export function modifyRoomsForChildrenData(roomsCount, oldRoomsCount, ageValues,
  * @param {Array} ageValues The last values used
  * @param {Array} cachedAgeValues The cache to use if given
  */
-export function modifyChildrenCountInRoom(roomIndex, count, ageValues, cachedAgeValues) {
+export function modifyChildrenCountInRoom(
+  roomIndex,
+  count,
+  ageValues,
+  cachedAgeValues
+) {
   // prepare result array (create if not created)
   let result = cloneDeep(ageValues);
   if (result[roomIndex] == null) {
@@ -54,7 +70,7 @@ export function modifyChildrenCountInRoom(roomIndex, count, ageValues, cachedAge
     currentRoom.splice(count, currentCount - count);
   } else {
     // add
-    for (let i=0; i < count; i++) {
+    for (let i = 0; i < count; i++) {
       if (currentRoom[i] == null) {
         // has no cached value
         currentRoom[i] = INVALID_CHILD_AGE;
@@ -66,7 +82,6 @@ export function modifyChildrenCountInRoom(roomIndex, count, ageValues, cachedAge
 
   return result;
 }
-
 
 /**
  * Used to set age value (@ageValue) per child (@childIndex) in a certain room (@roomIndex)
@@ -83,7 +98,6 @@ export function modifyChildAgeInRoom(roomIndex, childIndex, value, ageValues) {
   return result;
 }
 
-
 /**
  * Modifies cache to update it ONLY if length is below count
  * @param {Array} ageValues The new value of the 2d array of rooms of children ages
@@ -92,7 +106,7 @@ export function modifyChildAgeInRoom(roomIndex, childIndex, value, ageValues) {
 export function updateChildAgesCache(roomIndex, ageValues, cachedAgeValues) {
   if (roomIndex == null) {
     // update all
-    ageValues.forEach((item,index) => cachedAgeValues[index] = item);
+    ageValues.forEach((item, index) => (cachedAgeValues[index] = item));
   } else {
     if (cachedAgeValues == null) {
       cachedAgeValues = cloneDeep(ageValues);
@@ -103,11 +117,11 @@ export function updateChildAgesCache(roomIndex, ageValues, cachedAgeValues) {
       if (ageValues[roomIndex] == null) {
         ageValues = [];
       }
-      
+
       let current = ageValues[roomIndex];
       let cached = cachedAgeValues[roomIndex];
 
-      for (let i=0; i < current.length; i++) {
+      for (let i = 0; i < current.length; i++) {
         cached[i] = current[i];
       }
     }
@@ -116,8 +130,13 @@ export function updateChildAgesCache(roomIndex, ageValues, cachedAgeValues) {
   return cachedAgeValues;
 }
 
-
-function retrieveRoomFromCache(roomIndex, startIndex, count, ageValues, cachedAgeValues) {
+function retrieveRoomFromCache(
+  roomIndex,
+  startIndex,
+  count,
+  ageValues,
+  cachedAgeValues
+) {
   let currentRoom = ageValues[roomIndex];
   if (currentRoom == null) {
     currentRoom = [];
@@ -130,7 +149,7 @@ function retrieveRoomFromCache(roomIndex, startIndex, count, ageValues, cachedAg
 
   // retrieve values from cache
 
-  for (let i=startIndex; i < count; i++) {
+  for (let i = startIndex; i < count; i++) {
     const fromCache = cachedRoom[i];
     if (fromCache != null) {
       currentRoom[i] = fromCache;
@@ -142,13 +161,12 @@ function retrieveRoomFromCache(roomIndex, startIndex, count, ageValues, cachedAg
   return currentRoom;
 }
 
-
 export function calculateChildrenCount(ageValues) {
   // Since children are set per room - the count of all children (newValue) is the sum of count in all rooms
   // So for example a newAgeValues of [ [8,0,1], [10,14,3,5] ] would be 7 (3 children in room 1, and 4 in room 2)
   // (wasn't like this before - children were just one number)
   let result = 0;
-  ageValues.forEach(item => result += item.length);
+  ageValues.forEach(item => (result += item.length));
 
   return result;
 }

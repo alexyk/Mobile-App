@@ -1,11 +1,10 @@
-import React from 'react';
-import { Text } from 'react-native';
+import React from "react";
+import { Text } from "react-native";
 
-import FontAwesome, { Icons } from 'react-native-fontawesome';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
-import SimpleIcon from 'react-native-vector-icons/SimpleLineIcons';
-import { iconsDebugEnabled } from '../../../config-debug';
-
+import FontAwesome, { Icons } from "react-native-fontawesome";
+import MaterialIcon from "react-native-vector-icons/MaterialIcons";
+import SimpleIcon from "react-native-vector-icons/SimpleLineIcons";
+import { iconsDebugEnabled } from "../../../config-debug";
 
 export default function LTIcon(props) {
   let { name, style, size, textStyle, color, iconSet, key, isText } = props;
@@ -16,9 +15,8 @@ export default function LTIcon(props) {
    * (where LTIcon is imported) and it is among characters (Example: <Text>USD - <LTIcon isText name={'usd'} /> </Text>)
    */
   if (isText) {
-    return <FontAwesome>{Icons[name]}</FontAwesome>
+    return <FontAwesome>{Icons[name]}</FontAwesome>;
   }
-
 
   if (size == null) {
     size = 24;
@@ -33,7 +31,6 @@ export default function LTIcon(props) {
   if (name == null) {
     return null;
   }
-  
 
   /**
    * Inside a <Text> component tag - case 2, when <Text> is created here
@@ -44,40 +41,46 @@ export default function LTIcon(props) {
     if (__DEV__ && !Icons[name] && iconsDebugEnabled) {
       console.warn(`[LTIcon] Icon '${name}' as text not found`, props);
     }
-    
+
     renderedResult = (
       // <Text style={[textStyle, {color}]} key={key}>
       <Text style={textStyle} key={key}>
         <FontAwesome>{Icons[name]}</FontAwesome>
       </Text>
-    )
+    );
   } else {
     let isDefault = false;
     if (iconSet != null) {
       switch (iconSet) {
-
-        case 'material':
+        case "material":
           renderedIcon = (
             <Text style={textStyle}>
-              <MaterialIcon name={name} style={style} size={size} color={color} />
+              <MaterialIcon
+                name={name}
+                style={style}
+                size={size}
+                color={color}
+              />
             </Text>
-          )
+          );
           break;
 
-        case 'simple':
-          renderedIcon = <SimpleIcon name={name} size={size} color={color} />
+        case "simple":
+          renderedIcon = <SimpleIcon name={name} size={size} color={color} />;
           break;
-    
+
         default:
           isDefault = true;
-          console.warn(`[LTIcon] Icon '${name}' of set '${iconSet}' wanted`, props);
+          console.warn(
+            `[LTIcon] Icon '${name}' of set '${iconSet}' wanted`,
+            props
+          );
           break;
-
       }
     } else {
       isDefault = true;
     }
-    
+
     if (isDefault) {
       let extraStyle = {};
       if (size != null) {
@@ -87,12 +90,13 @@ export default function LTIcon(props) {
         extraStyle.color = color;
       }
 
-      renderedIcon = <FontAwesome style={[style,extraStyle]}>{Icons[name]}</FontAwesome>
+      renderedIcon = (
+        <FontAwesome style={[style, extraStyle]}>{Icons[name]}</FontAwesome>
+      );
     }
 
     renderedResult = renderedIcon;
   }
-
 
   return renderedResult;
 }

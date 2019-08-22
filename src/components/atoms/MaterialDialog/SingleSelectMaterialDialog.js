@@ -1,11 +1,18 @@
-import React, { Component } from 'react';
-import PropTypes from 'prop-types';
-import { StyleSheet, Text, TouchableOpacity, View, ListView, Platform } from 'react-native';
-import { material } from 'react-native-typography';
-import MaterialDialog from './MaterialDialog';
+import React, { Component } from "react";
+import PropTypes from "prop-types";
+import {
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ListView,
+  Platform
+} from "react-native";
+import { material } from "react-native-typography";
+import MaterialDialog from "./MaterialDialog";
 
-import colors from './colors';
-import { FlatList } from 'react-native-gesture-handler';
+import colors from "./colors";
+import { FlatList } from "react-native-gesture-handler";
 
 export default class SingleSelectMaterialDialog extends Component {
   constructor(props) {
@@ -22,15 +29,17 @@ export default class SingleSelectMaterialDialog extends Component {
     const { items } = this.props;
 
     this.setState({ selectedIndex: index });
-    this.props.onOk( { selectedItem: items[index] } );
+    this.props.onOk({ selectedItem: items[index] });
   }
 
-  renderItem({item, index}) {
-    const isSelected = (index == this.state.selectedIndex);
+  renderItem({ item, index }) {
+    const isSelected = index == this.state.selectedIndex;
 
     return (
       <TouchableOpacity key={item.value} onPress={() => this.onRowPress(index)}>
-        <View style={isSelected ? styles.rowContainerSelected : styles.rowContainer}>
+        <View
+          style={isSelected ? styles.rowContainerSelected : styles.rowContainer}
+        >
           {/* <View style={styles.iconContainer}>
             <Icon
               name={row.selected ? 'radio-button-checked' : 'radio-button-unchecked'}
@@ -38,15 +47,23 @@ export default class SingleSelectMaterialDialog extends Component {
               size={24}
             />
           </View> */}
-          <Text style={[material.subheading, {fontSize:15}]}>{item.label}</Text>
+          <Text style={[material.subheading, { fontSize: 15 }]}>
+            {item.label}
+          </Text>
         </View>
       </TouchableOpacity>
-    )
+    );
   }
 
   render() {
     const {
-      title, titleColor, colorAccent, visible, scrolled, onCancel, items
+      title,
+      titleColor,
+      colorAccent,
+      visible,
+      scrolled,
+      onCancel,
+      items
     } = this.props;
     const { selectedIndex } = this.state;
 
@@ -69,24 +86,24 @@ const styles = StyleSheet.create({
   rowContainer: {
     height: 40,
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "flex-start",
     paddingHorizontal: 15,
-    alignItems: 'center',
+    alignItems: "center"
   },
   rowContainerSelected: {
     height: 40,
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "center",
     paddingHorizontal: 15,
     borderRadius: 10,
-    backgroundColor: '#5551'
+    backgroundColor: "#5551"
   },
   iconContainer: {
-    marginRight: 16,
-  },
+    marginRight: 16
+  }
 });
 
 SingleSelectMaterialDialog.propTypes = {
@@ -94,7 +111,7 @@ SingleSelectMaterialDialog.propTypes = {
   items: PropTypes.arrayOf(PropTypes.object).isRequired,
   selectedItem: PropTypes.shape({
     value: PropTypes.any.isRequired,
-    label: PropTypes.string.isRequired,
+    label: PropTypes.string.isRequired
   }),
   title: PropTypes.string,
   titleColor: PropTypes.string,
@@ -103,7 +120,7 @@ SingleSelectMaterialDialog.propTypes = {
   onOk: PropTypes.func.isRequired,
   cancelLabel: PropTypes.string,
   okLabel: PropTypes.string,
-  scrolled: PropTypes.bool,
+  scrolled: PropTypes.bool
 };
 
 SingleSelectMaterialDialog.defaultProps = {
@@ -113,5 +130,5 @@ SingleSelectMaterialDialog.defaultProps = {
   colorAccent: colors.androidColorAccent,
   cancelLabel: undefined,
   okLabel: undefined,
-  scrolled: false,
+  scrolled: false
 };

@@ -2,87 +2,85 @@ import { isMoment } from "moment";
 import { basePath } from "../../config";
 import { StyleSheet } from "react-native";
 
+export function validateObject(sourceData, props, index = -1, path = "") {
+  let result = "";
+  const space = "  ";
 
-export function validateObject(sourceData, props, index=-1, path='') {
-  let result = '';
-  const space = '  ';
+  if (sourceData == null) {
+    result = `<null_object>;` + space;
+  } else if (!isObject(sourceData)) {
+    result = `<not_an_object>_${typeof sourceData};` + space;
+  }
+  if (result.length > 0) {
+    if (path.length > 0) {
+      return `${path}:${result}`;
+    } else {
+      return result;
+    }
+  }
 
-	if (sourceData == null) {
-		result = `<null_object>;` + space;
-	} else if (!isObject(sourceData)) {
-		result = `<not_an_object>_${typeof(sourceData)};` + space;
-	}
-	if (result.length > 0) {
-		if (path.length > 0) {
-				return `${path}:${result}`;
-			} else {
-				return result;
-			}
-	}
+  let data = Object.assign({}, sourceData); // create a copy to remove used props thus leave new only
+  const na = "__n/a__";
 
-  let data = Object.assign({}, sourceData) // create a copy to remove used props thus leave new only
-  const na = '__n/a__';
+  if (path.length > 0) path += ".";
 
-	if (path.length > 0) path += '.';
-	
   for (let n in props) {
-    const item = (data.hasOwnProperty(n) ? data[n] : na);
+    const item = data.hasOwnProperty(n) ? data[n] : na;
     let type1 = props[n];
-    let type2 = (item !== null ? typeof(item) : 'null');
-    let doDelete = true
+    let type2 = item !== null ? typeof item : "null";
+    let doDelete = true;
 
     let types;
-		if (isArray(type1)) {
+    if (isArray(type1)) {
       types = type1;
       if (types.indexOf(type2) > -1) {
-				// nothing to do
-			} else {
+        // nothing to do
+      } else {
         //TODO: Implement Array of types
         /*let is
         if (condition) {
           
         }*/
-				result += `${path}${n}:not_in_[${[type1.join(',')]}]_${type2};` + space;
-			}
-		} else if (isString(type1) && type1.indexOf(',') > 0) {
-			types = type1.split(',')
-			if (types.indexOf(type2) > -1) {
-				// nothing to do
-			} else {
-				result += `${path}${n}:not_in_[${type1}]_${type2};` + space;
-			}
-    } else if (type1 == 'any') {
-    	// nothing to do
-    } else if ( item == na ) {
+        result += `${path}${n}:not_in_[${[type1.join(",")]}]_${type2};` + space;
+      }
+    } else if (isString(type1) && type1.indexOf(",") > 0) {
+      types = type1.split(",");
+      if (types.indexOf(type2) > -1) {
+        // nothing to do
+      } else {
+        result += `${path}${n}:not_in_[${type1}]_${type2};` + space;
+      }
+    } else if (type1 == "any") {
+      // nothing to do
+    } else if (item == na) {
       result += `${path}${n}:na_${type1};` + space;
       doDelete = false;
-    } else if (isObject(type1)) {      
+    } else if (isObject(type1)) {
       result += validateObject(item, type1, -1, `${n}`);
-    } else if (type2 == 'string' && item.length == 0) {
+    } else if (type2 == "string" && item.length == 0) {
       result += `${path}${n}:empty_str;` + space;
-    } else if (type2 == 'number') {
+    } else if (type2 == "number") {
       if (isNaN(item)) result += `${path}${n}:NaN;` + space;
     } else if (type1 != type2) {
       result += `${path}${n}:${type2};` + space;
     }
-    
+
     if (doDelete) {
-    	// filtering out checked prop
-    	delete data[n];
+      // filtering out checked prop
+      delete data[n];
     }
   }
-  
+
   // checking for new fields in data that are not defined in props
   for (let n in data) {
-    const type2 = typeof(data[n]);
-    result += `${n}:new_${type2};` + space;  	
-	}
+    const type2 = typeof data[n];
+    result += `${n}:new_${type2};` + space;
+  }
 
   if (result.length > 0) {
     // remove last space
-    result = result.substr(0,result.length - space.length);
+    result = result.substr(0, result.length - space.length);
   }
-
 
   return result;
 }
@@ -96,13 +94,12 @@ export function generateSearchStringFromAll(obj) {
   return search;
 }
 
-
-export function generateSearchString(state, props, doDecodeRooms=false) {
+export function generateSearchString(state, props, doDecodeRooms = false) {
   let search = `?region=${state.regionId}`;
   search += `&currency=${props.currency}`;
   search += `&startDate=${state.checkInDateFormated}`;
   search += `&endDate=${state.checkOutDateFormated}`;
-  
+
   if (state.roomsDummyData) {
     if (doDecodeRooms) {
       search += `&rooms=${decodeURI(state.roomsDummyData)}`;
@@ -111,12 +108,16 @@ export function generateSearchString(state, props, doDecodeRooms=false) {
     }
   }
 
-  search += '&nat=-1';
+  search += "&nat=-1";
 
   return search;
 }
 
-export function generateWebviewInitialState(params, state = null, skipWebViewURL = false) {
+export function generateWebviewInitialState(
+  params,
+  state = null,
+  skipWebViewURL = false
+) {
   if (state) {
     params = {
       ...params,
@@ -137,7 +138,7 @@ export function generateWebviewInitialState(params, state = null, skipWebViewURL
     checkInDateFormated,
     checkOutDateFormated,
     roomsDummyData,
-    currency: params.currency ? params.currency : (state ? state.currency : null),
+    currency: params.currency ? params.currency : state ? state.currency : null,
     email: params ? params.email : "",
     token: params ? params.token : "",
     propertyName: params ? params.propertyName : "",
@@ -155,22 +156,23 @@ export function generateWebviewInitialState(params, state = null, skipWebViewURL
       initialState.webViewUrl = params.webViewUrl;
     }
   } else {
-    const webViewUrl = basePath + (
-      params.webViewUrl
-        ?
-          params.webViewUrl
-        :
-          generateWebviewUrl(
+    const webViewUrl =
+      basePath +
+      (params.webViewUrl
+        ? params.webViewUrl
+        : generateWebviewUrl(
             initialState,
             roomsDummyData,
             params && params.baseUrl ? params.baseUrl : null
-          )
-    )
-    
+          ));
+
     initialState.webViewUrl = webViewUrl;
   }
-  
-  console.info(`[utils::generateWebviewInitialState] webViewUrl: ${initialState.webViewUrl}`, {webViewUrl:initialState.webViewUrl,initialState, params, state})
+
+  console.info(
+    `[utils::generateWebviewInitialState] webViewUrl: ${initialState.webViewUrl}`,
+    { webViewUrl: initialState.webViewUrl, initialState, params, state }
+  );
 
   return initialState;
 }
@@ -227,53 +229,51 @@ export function getWebviewExtraData(state, extraData = {}) {
 }
 
 // TODO: Refactor this to use a simple & obvious params flow (examples: url, searchParams, cache)
-export function gotoWebview(state, navigation, extraData = {}, useCachedSearchString=false) {
+export function gotoWebview(
+  state,
+  navigation,
+  extraData = {},
+  useCachedSearchString = false
+) {
   navigation.navigate("WebviewScreen", {
     ...getWebviewExtraData(state, extraData),
     useCachedSearchString
   });
 }
 
-
 export function isArray(value) {
-  return (value instanceof Array)
+  return value instanceof Array;
 }
 
-
 export function stringifyRoomsData(roomsData) {
-  const result = encodeURI(
-    JSON.stringify( roomsData )
-  );
+  const result = encodeURI(JSON.stringify(roomsData));
 
   return result;
 }
 
-
-export function isObject(value, className=null) {
-  let result = (typeof(value) == 'object')
+export function isObject(value, className = null) {
+  let result = typeof value == "object";
   if (!result) {
-    className = ( className ? className : getObjectClassName(value) );
-    result = ( ['Symbol','Object'].includes(className) );
+    className = className ? className : getObjectClassName(value);
+    result = ["Symbol", "Object"].includes(className);
   }
   return result;
 }
 
-
 export function isNumber(value) {
-  return (typeof(value) == 'number')
+  return typeof value == "number";
 }
-
 
 export function isString(value) {
-  return (typeof(value) == 'string')
+  return typeof value == "string";
 }
 
-export function isSymbol(obj, className=null) {
-  return ( (className || getObjectClassName(obj)) == 'Symbol');
+export function isSymbol(obj, className = null) {
+  return (className || getObjectClassName(obj)) == "Symbol";
 }
 
 export function getObjectKeysCount(obj) {
-  const result = ( (obj && Object.keys(obj).length) || -1);
+  const result = (obj && Object.keys(obj).length) || -1;
   return result;
 }
 
@@ -281,15 +281,26 @@ export function getObjectClassName(obj) {
   let result = null;
 
   try {
-    if (isMoment(obj))          { result = 'moment'; }
-    if (obj instanceof Symbol)  { result = 'Symbol'; }
-    if (!result)                { result = (
-                                  (obj && obj.constructor)
-                                    && (obj.constructor.name || obj.constructor.className || null)
-                                );}
-    if (!result)                { result = typeof(obj); }
+    if (isMoment(obj)) {
+      result = "moment";
+    }
+    if (obj instanceof Symbol) {
+      result = "Symbol";
+    }
+    if (!result) {
+      result =
+        obj &&
+        obj.constructor &&
+        (obj.constructor.name || obj.constructor.className || null);
+    }
+    if (!result) {
+      result = typeof obj;
+    }
   } catch (error) {
-    processError(`[screens::utils::getObjectClassName] Error: ${error.message}`,{error,obj});
+    processError(
+      `[screens::utils::getObjectClassName] Error: ${error.message}`,
+      { error, obj }
+    );
   }
   return result;
 }
@@ -302,6 +313,6 @@ export function styleToNumber(style) {
   if (isNumber(style)) {
     return style;
   } else {
-    return StyleSheet.create({style}).style;
+    return StyleSheet.create({ style }).style;
   }
 }

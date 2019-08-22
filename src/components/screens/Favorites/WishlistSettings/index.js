@@ -1,44 +1,50 @@
-import PropTypes from 'prop-types';
-import React, { Component } from 'react';
-import { Image, StyleSheet, Text, View, FlatList,TouchableOpacity } from 'react-native';
-import styles from './styles';
-
+import PropTypes from "prop-types";
+import React, { Component } from "react";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity
+} from "react-native";
+import styles from "./styles";
 
 class WishlistSettings extends Component {
-    static propTypes = {
-        navigation: PropTypes.shape({
-            navigate: PropTypes.func
-        })
+  static propTypes = {
+    navigation: PropTypes.shape({
+      navigate: PropTypes.func
+    })
+  };
+
+  static defaultProps = {
+    navigation: {
+      navigate: () => {}
     }
+  };
 
-    static defaultProps = {
-        navigation: {
-            navigate: () => {}
-        }
-    }
+  constructor() {
+    super();
+  }
 
-    constructor() {
-        super();
-    }
+  componentDidMount() {}
 
-    componentDidMount() {
+  render() {
+    const { navigate } = this.props.navigation;
+    return (
+      <View style={styles.container}>
+        <View style={styles.chatToolbar}>
+          <TouchableOpacity onPress={this.onBackPress}>
+            <Image
+              style={styles.btn_backImage}
+              source={require("../../../../src/assets/icons/icon-back-white.png")}
+            />
+          </TouchableOpacity>
+          <Text style={styles.title}>Wishlist Settings</Text>
+        </View>
 
-    }
-
-    render() {
-        const { navigate } = this.props.navigation;
-        return (
-            <View style={styles.container}>
-               <View style={styles.chatToolbar}>
-                                <TouchableOpacity onPress={this.onBackPress}>
-                                  <Image style={styles.btn_backImage} source={require('../../../../src/assets/icons/icon-back-white.png')}/>
-                                </TouchableOpacity>
-                               <Text style={styles.title}>Wishlist Settings</Text>
-                 </View>
-    
-                        <View>
-
-                                    {/*<View style={{flex: 1, flexDirection: 'row'}}>
+        <View>
+          {/*<View style={{flex: 1, flexDirection: 'row'}}>
                                    
                                         <View>
                                            <Text style={styles.subtext}>Dates</Text>
@@ -50,17 +56,14 @@ class WishlistSettings extends Component {
                                            
                                         </View>
                                     </View>*/}
-                                </View>
-                     
-            </View>
-        )
-    }
-    onStartExploring = () =>{
-    }
-    onBackPress = () => {
-        this.props.navigation.navigate('EXPLORE');
-    }
+        </View>
+      </View>
+    );
+  }
+  onStartExploring = () => {};
+  onBackPress = () => {
+    this.props.navigation.navigate("EXPLORE");
+  };
 }
-
 
 export default WishlistSettings;

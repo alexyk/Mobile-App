@@ -1,22 +1,23 @@
-import React from 'react';
-import { View } from 'react-native';
-import PropTypes from 'prop-types';
-import Image from 'react-native-remote-svg';
+import React from "react";
+import { View } from "react-native";
+import PropTypes from "prop-types";
+import Image from "react-native-remote-svg";
 
-import styles from './styles';
+import styles from "./styles";
 
-const LoadingView = (props) => {
-    return (
-        <View style={[styles.container, props.style]}>
-             <Image style={styles.gifView} source={require('../../../assets/loader.gif')} />
-        </View>
-    );
+const LoadingView = props => {
+  return (
+    <View style={[styles.container, props.style]}>
+      <Image
+        style={styles.gifView}
+        source={require("../../../assets/loader.gif")}
+      />
+    </View>
+  );
 };
 
-LoadingView.propTypes = {
-};
+LoadingView.propTypes = {};
 
-LoadingView.defaultProps = {
-};
+LoadingView.defaultProps = {};
 
 export default LoadingView;

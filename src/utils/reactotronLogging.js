@@ -1,15 +1,16 @@
 // import Reactotron, {openInEditor,trackGlobalErrors} from 'reactotron-react-native'
-import {Platform} from 'react-native'
+import { Platform } from "react-native";
 
-const r = require('reactotron-react-native')
+const r = require("reactotron-react-native");
 const Reactotron = r.default;
-const {openInEditor,trackGlobalErrors} = r;
+const { openInEditor, trackGlobalErrors } = r;
 
-Reactotron
-  .configure({
-    name: `Locktrip - Mobile App (${(Platform.OS == 'android' ? 'Android' : 'iOS')})`,
-    host: "localhost"
-  })
+Reactotron.configure({
+  name: `Locktrip - Mobile App (${
+    Platform.OS == "android" ? "Android" : "iOS"
+  })`,
+  host: "localhost"
+})
   .useReactNative({
     // asyncStorage: false, // there are more options to the async storage.
     // networking: { // optionally, you can turn it off with false.

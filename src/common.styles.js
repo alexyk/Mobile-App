@@ -1,10 +1,10 @@
 export const commonText = {
-    fontFamily: 'FuturaStd-Medium',
-}
+  fontFamily: "FuturaStd-Medium"
+};
 
 export const commonComponents = {
-    backButton: {
-        marginLeft:10,
-        marginTop: 35        
-    }
-}
+  backButton: {
+    marginLeft: 10,
+    marginTop: 35
+  }
+};

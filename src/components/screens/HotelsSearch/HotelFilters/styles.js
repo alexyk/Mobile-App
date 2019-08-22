@@ -1,60 +1,60 @@
-import {StyleSheet, Dimensions, Platform} from 'react-native';
-const { width } = Dimensions.get('screen');
-const dimensionWindows = Dimensions.get('window');
+import { StyleSheet, Dimensions, Platform } from "react-native";
+const { width } = Dimensions.get("screen");
+const dimensionWindows = Dimensions.get("window");
 
 export default styles = StyleSheet.create({
   container: {
-    height: '100%',
-    backgroundColor: '#eee'
+    height: "100%",
+    backgroundColor: "#eee"
   },
-  backButton:{
-    alignItems: 'center',
-    flexDirection: 'row',
+  backButton: {
+    alignItems: "center",
+    flexDirection: "row",
     marginTop: 25,
-    marginLeft: 15,
+    marginLeft: 15
   },
-  btn_backImage:{
+  btn_backImage: {
     height: 24,
     width: 24,
-    resizeMode: 'contain'
-    },
-    titleText: {
-    color: '#000',
+    resizeMode: "contain"
+  },
+  titleText: {
+    color: "#000",
     fontSize: 22,
-    fontFamily: 'FuturaStd-Light',
-    marginLeft: 20,
+    fontFamily: "FuturaStd-Light",
+    marginLeft: 20
   },
   closeView: {
     height: 80,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
     paddingLeft: 18
   },
   closeSvg: {
     height: 25,
-    width:25
+    width: 25
   },
   bottomBar: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     height: 80,
-    alignItems: 'center',
+    alignItems: "center",
     padding: 15
   },
   doneButton: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#cc8068',
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#cc8068"
   },
   doneButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontFamily: 'FuturaStd-Light'
+    fontFamily: "FuturaStd-Light"
   },
   header: {
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    flexDirection: 'row',
+    justifyContent: "center",
+    alignItems: "flex-end",
+    flexDirection: "row",
     // borderBottomColor: '#d4d4d4',
     // borderBottomWidth: 1,
     paddingBottom: 15
@@ -67,70 +67,70 @@ export default styles = StyleSheet.create({
     height: 80,
     width: 80,
     borderRadius: 50,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center'
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center"
   },
   residenceType: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 10,
-    color: '#656565',
-    fontFamily: 'FuturaStd-Light'
+    color: "#656565",
+    fontFamily: "FuturaStd-Light"
   },
   filterComponentHorizontalContainer: {
-    width: '100%',
-    flexDirection: 'row', 
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
     // backgroundColor: 'red'
   },
   separator: {
     width: "100%",
     height: 1,
     borderTopWidth: 1,
-    borderTopColor: "#b1b1b1",
+    borderTopColor: "#b1b1b1"
   },
   residenceView: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexDirection: 'column',
-    borderBottomColor: '#d4d4d4',
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+    borderBottomColor: "#d4d4d4",
     borderBottomWidth: 1,
     paddingBottom: 15
   },
   tick: {
     width: 20,
     height: 20,
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0
   },
   selected: {
-    borderColor: '#cc8068'
+    borderColor: "#cc8068"
   },
   starRatingView: {
     padding: 15
   },
   starRatingText: {
     fontSize: 18,
-    fontFamily: 'FuturaStd-Medium',
+    fontFamily: "FuturaStd-Medium"
   },
   starView: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingTop: 15,
-    justifyContent: 'space-between'
+    justifyContent: "space-between"
   },
   starBox: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     height: 70,
-    width: (Dimensions.get('window').width - 50)/5,
-    alignItems: 'center',
-    justifyContent: 'center'
+    width: (Dimensions.get("window").width - 50) / 5,
+    alignItems: "center",
+    justifyContent: "center"
   },
   ratingNumber: {
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 18,
-    color: '#999999'
+    color: "#999999"
   },
   star: {
     height: 20,
@@ -138,90 +138,90 @@ export default styles = StyleSheet.create({
     marginTop: 5
   },
   activeRating: {
-    backgroundColor: '#cc8068'
+    backgroundColor: "#cc8068"
   },
   activeRatingText: {
-    color: '#fff'
+    color: "#fff"
   },
   nameView: {
     paddingLeft: 15,
     paddingTop: 15,
     paddingBottom: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    flex: 0.4,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    flex: 0.4
     // backgroundColor: 'red'
     // borderTopWidth: 1,
     // borderTopColor: '#c6c6c6'
   },
   nameTextInput: {
-  	flex:0.6,
-  	height: 40,
-  	margin: 15,
-  	borderColor: 'grey',
-  	borderWidth: 1,
-  	borderRadius: 5,
-  	paddingLeft: 5
+    flex: 0.6,
+    height: 40,
+    margin: 15,
+    borderColor: "grey",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingLeft: 5
   },
   pricingView: {
     padding: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between"
     // borderTopWidth: 1,
     // borderTopColor: '#c6c6c6'
   },
   orderByTitle: {
     padding: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-		width: "60%",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "60%"
     //backgroundColor: 'blue'
     // borderTopWidth: 1,
     // borderTopColor: '#c6c6c6'
   },
   emptyPricingView: {
-    height : 0,
-    width : 0
+    height: 0,
+    width: 0
   },
   pricingText: {
     fontSize: 18,
-    fontFamily: 'FuturaStd-Medium',
-    width:"50%"
+    fontFamily: "FuturaStd-Medium",
+    width: "50%"
   },
   set: {
-    alignSelf: 'stretch',
+    alignSelf: "stretch",
     paddingHorizontal: 18,
-    height: '60%',
+    height: "60%"
   },
   group: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingVertical: 25
   },
   type: {
     flex: 1,
-    justifyContent: 'center'
+    justifyContent: "center"
   },
   countView: {
     flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center"
   },
   typeText: {
-    fontFamily: 'FuturaStd-Light',
+    fontFamily: "FuturaStd-Light",
     fontSize: 18
   },
   minusButton: {
     height: 34,
     width: 34,
     borderRadius: 17,
-    backgroundColor: '#fff',
-    alignItems: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
     borderWidth: 2,
-    borderColor: '#cc8068'
+    borderColor: "#cc8068"
   },
   minusText: {
-    color: '#cc8068',
+    color: "#cc8068",
     fontSize: 30,
     marginTop: -5
   },
@@ -229,39 +229,39 @@ export default styles = StyleSheet.create({
     height: 34,
     width: 34,
     borderRadius: 17,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 2,
-    borderColor: '#cc8068'
+    borderColor: "#cc8068"
   },
   plusText: {
-    color: '#cc8068',
+    color: "#cc8068",
     fontSize: 20,
     marginTop: -5
   },
   countText: {
     marginHorizontal: 18,
-    fontFamily: 'FuturaStd-Light',
+    fontFamily: "FuturaStd-Light",
     fontSize: 20,
     marginTop: 5
   },
   typeSubText: {
     fontSize: 11,
-    fontFamily: 'FuturaStd-Light',
-    color: '#6e6e6e'
+    fontFamily: "FuturaStd-Light",
+    color: "#6e6e6e"
   },
   borderBottom: {
-    borderBottomColor: '#e2e2e2',
+    borderBottomColor: "#e2e2e2",
     borderBottomWidth: 1
   },
-  orderyByPickerWrap:{
+  orderyByPickerWrap: {
     // paddingTop: 10,
     // paddingRight: 17,
     marginLeft: 8,
-    justifyContent: 'flex-end',  
-    alignItems: 'center',
-		width: "40%",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    width: "40%"
   },
   inputIOS: {
     height: 50,
@@ -269,50 +269,49 @@ export default styles = StyleSheet.create({
     paddingTop: 13,
     paddingHorizontal: 10,
     paddingBottom: 12,
-    backgroundColor: 'white',
-    color: 'black'
+    backgroundColor: "white",
+    color: "black"
   },
   searchButtonView: {
-    backgroundColor: '#DA7B61',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#DA7B61",
+    alignItems: "center",
+    justifyContent: "center",
     flex: 1,
-    height: dimensionWindows.height*0.08,
+    height: dimensionWindows.height * 0.08,
     marginTop: 10,
     marginBottom: 10,
     marginLeft: 17,
     marginRight: 17
   },
   searchButtonText: {
-    color: '#fff',
-    fontFamily: 'FuturaStd-Light',
+    color: "#fff",
+    fontFamily: "FuturaStd-Light",
     fontSize: dimensionWindows.width * 0.05,
     padding: 14
-  },
-})
-
+  }
+});
 
 export const orderbyPickerSelectStyles = StyleSheet.create({
   inputIOS: {
     height: 50,
     fontSize: 16,
-    color: 'black',
-    alignSelf: 'flex-end',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
-    width: "100%",
-//     backgroundColor: 'red'
+    color: "black",
+    alignSelf: "flex-end",
+    justifyContent: "flex-end",
+    alignItems: "flex-start",
+    width: "100%"
+    //     backgroundColor: 'red'
   },
   inputAndroid: {
     height: 50,
     width: 70,
     //fontSize: 16,
     // color: 'black',
-    alignSelf: 'flex-end',
-    justifyContent: 'flex-end',
-    alignItems: 'flex-start',
+    alignSelf: "flex-end",
+    justifyContent: "flex-end",
+    alignItems: "flex-start",
     width: "100%",
-    backgroundColor: '#FFF1'
+    backgroundColor: "#FFF1"
   }
 });
 
@@ -324,26 +323,26 @@ export const priceMultiSliderStyle = StyleSheet.create({
         width: 30,
         borderRadius: 30,
         borderWidth: 1,
-        borderColor: '#DDDDDD',
-        backgroundColor: '#FFFFFF',
-        shadowColor: '#000000',
+        borderColor: "#DDDDDD",
+        backgroundColor: "#FFFFFF",
+        shadowColor: "#000000",
         shadowOffset: {
           width: 0,
-          height: 3,
+          height: 3
         },
         shadowRadius: 1,
-        shadowOpacity: 0.2,
+        shadowOpacity: 0.2
       },
       android: {
         height: 30,
         width: 30,
         borderRadius: 30,
-        backgroundColor: '#FFF',
-        borderColor: '#555',
-        borderWidth: 2,
+        backgroundColor: "#FFF",
+        borderColor: "#555",
+        borderWidth: 2
         // elevation: 5
-      },
-    }),
+      }
+    })
   },
   pressedMarkerStyle: {
     ...Platform.select({
@@ -351,9 +350,9 @@ export const priceMultiSliderStyle = StyleSheet.create({
       android: {
         height: 33,
         width: 33,
-        borderRadius: 33,
+        borderRadius: 33
         // elevation: 5
-      },
-    }),
+      }
+    })
   }
-})
+});

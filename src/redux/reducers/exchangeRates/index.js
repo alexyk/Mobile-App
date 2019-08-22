@@ -1,30 +1,30 @@
-import { handleActions } from 'redux-actions';
+import { handleActions } from "redux-actions";
 import {
-    setCurrencyExchangeRates,
-    setLocEurRate,
-    setLocRateFiatAmount
- } from '../../action/exchangeRates';
+  setCurrencyExchangeRates,
+  setLocEurRate,
+  setLocRateFiatAmount
+} from "../../action/exchangeRates";
 
-const initialState  = {
-    currencyExchangeRates: null,
-    locEurRate: null,
-    locRateFiatAmount: 1000
+const initialState = {
+  currencyExchangeRates: null,
+  locEurRate: null,
+  locRateFiatAmount: 1000
 };
-  
+
 export default handleActions(
-    {
-        [setCurrencyExchangeRates]: (state, {payload}) => {
-            return { ...state, currencyExchangeRates: payload};
-        },
-
-        [setLocEurRate]: (state, {payload}) => {
-            return { ...state, locEurRate: payload};
-        },
-
-        [setLocRateFiatAmount]: (state, {payload}) => {
-            //console.log("setLocRateFiatAmount---------", payload);
-            return { ...state, locRateFiatAmount: payload};
-        },
+  {
+    [setCurrencyExchangeRates]: (state, { payload }) => {
+      return { ...state, currencyExchangeRates: payload };
     },
-    initialState
+
+    [setLocEurRate]: (state, { payload }) => {
+      return { ...state, locEurRate: payload };
+    },
+
+    [setLocRateFiatAmount]: (state, { payload }) => {
+      //console.log("setLocRateFiatAmount---------", payload);
+      return { ...state, locRateFiatAmount: payload };
+    }
+  },
+  initialState
 );

@@ -5,7 +5,6 @@ import PropTypes from "prop-types";
 import styles from "./styles";
 import productVersion, { debugVersion } from "../../../version";
 
-
 class VersionText extends PureComponent {
   static propTypes = {
     color: PropTypes.string,
@@ -56,10 +55,9 @@ class VersionText extends PureComponent {
       let tmp = debugVersion.split("\n");
       let asArr = [];
       tmp.forEach(item => {
-          asArr.push(item);
-          asArr.push("\n");
-      })
-
+        asArr.push(item);
+        asArr.push("\n");
+      });
 
       this.tapsCount = -1; // stop showing this
       this.setState({
@@ -68,7 +66,6 @@ class VersionText extends PureComponent {
       });
     }
   }
-
 
   onVersionStringTapped(event) {
     if (this.tapsCount != -1) {
@@ -81,7 +78,6 @@ class VersionText extends PureComponent {
       this.lastTimeout = setTimeout(func, 200);
     }
   }
-
 
   _renderText(value) {
     let result = (

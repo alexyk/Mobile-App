@@ -1,9 +1,9 @@
-import { createAction } from 'redux-actions';
-import requester from '../../../initDependencies';
+import { createAction } from "redux-actions";
+import requester from "../../../initDependencies";
 
 const currencyInfo = {
-    SET_CURRENCY: 'SET_CURRENCY',
-    // SET_LOCRATE: 'SET_LOCRATE',
+  SET_CURRENCY: "SET_CURRENCY"
+  // SET_LOCRATE: 'SET_LOCRATE',
 };
 
 // export const getCurrency = (currency, isRefresh = true) => {

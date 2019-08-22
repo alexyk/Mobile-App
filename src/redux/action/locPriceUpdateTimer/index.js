@@ -1,8 +1,8 @@
-import { createAction } from 'redux-actions';
+import { createAction } from "redux-actions";
 
 const locPriceUpdateTimerInfoType = {
-    SET_SECONDS: 'SET_SECONDS',
-    RESET: 'RESET',
+  SET_SECONDS: "SET_SECONDS",
+  RESET: "RESET"
 };
 
 export const setSeconds = createAction(locPriceUpdateTimerInfoType.SET_SECONDS);

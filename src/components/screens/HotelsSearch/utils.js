@@ -1,15 +1,26 @@
-
 import lodash from "lodash";
-import { validateObject, isObject, isNumber, isString, isArray } from '../utils'
-import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config-settings";
-import { rlog, checkHotelsDataWithTemplates, processError } from "../../../config-debug";
+import {
+  validateObject,
+  isObject,
+  isNumber,
+  isString,
+  isArray
+} from "../utils";
+import {
+  showNumberOnHotelItem,
+  DEFAULT_HOTEL_PNG
+} from "../../../config-settings";
+import {
+  rlog,
+  checkHotelsDataWithTemplates,
+  processError
+} from "../../../config-debug";
 
 export const DISPLAY_MODE_NONE = "mode_none";
 export const DISPLAY_MODE_SEARCHING = "mode_searching";
 export const DISPLAY_MODE_RESULTS_AS_LIST = "mode_results_as_list";
 export const DISPLAY_MODE_RESULTS_AS_MAP = "mode_results_as_map";
 export const DISPLAY_MODE_HOTEL_DETAILS = "mode_hotel_details";
-
 
 var ids = {
   DAY_ID: 0,
@@ -18,36 +29,44 @@ var ids = {
   MAP_MARKER_ID: 0,
   SLIDE_SHOW_ID: 0,
   AVAILABLE_ROOMS_ID: 0
-}
-export function generateListItemKey(prop, prefix='', doReset=false) {
+};
+export function generateListItemKey(prop, prefix = "", doReset = false) {
   let id = ids[prop];
   if (id == null) {
     if (prop == null) {
-      wlog(`[Calendar::utils::generateListItemKey] Name 'prop' is null - using 'NA' instead`)
-      prop = 'NA';
+      wlog(
+        `[Calendar::utils::generateListItemKey] Name 'prop' is null - using 'NA' instead`
+      );
+      prop = "NA";
     } else {
-      wlog(`[Calendar::utils::generateListItemKey] Name '${prop}' not found in ids - creating it`)
+      wlog(
+        `[Calendar::utils::generateListItemKey] Name '${prop}' not found in ids - creating it`
+      );
     }
     ids[prop] = 0;
   } else if (doReset) {
     id = 0;
   }
-  
+
   id++;
   if (id == Number.MAX_VALUE) {
-      id = 0;
+    id = 0;
   }
   ids[prop] = id;
 
   return `${prefix}_${id}`;
 }
 
-
 export function createHotelSearchInitialState(params, reduxCache) {
   const {
     roomsDummyData,
-    guests, adults, children,
-    checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated
+    guests,
+    adults,
+    children,
+    checkInDate,
+    checkOutDate,
+    checkInDateFormated,
+    checkOutDateFormated
   } = reduxCache;
 
   let initialState = {
@@ -74,9 +93,14 @@ export function createHotelSearchInitialState(params, reduxCache) {
 
     isLoading: true, // progress dialog
 
-    checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated,
+    checkInDate,
+    checkOutDate,
+    checkInDateFormated,
+    checkOutDateFormated,
 
-    guests, adults, children,
+    guests,
+    adults,
+    children,
     daysDifference: 1,
     roomsDummyData,
 
@@ -118,12 +142,11 @@ export function createHotelSearchInitialState(params, reduxCache) {
   return initialState;
 }
 
-
 export function hasValidCoordinatesForMap(data, isInitial = false) {
   //log('utils', `hasValidCoordinatesForMap(), data: ${data} isInitital: ${isInitial}, useLongCoordinates: ${useLongCoordinates}`,{data,useLongCoordinates})
   if (data == null) return false;
-  
-  let lat,lon;
+
+  let lat, lon;
   try {
     if (isInitial) {
       lat = data.initialLat;
@@ -137,99 +160,103 @@ export function hasValidCoordinatesForMap(data, isInitial = false) {
         lon = data.lon;
       }
     }
-  }
-  catch (e) {
-    rlog('error-coordinates',`[utils::hasValidCoordinatesForMap] error in calculating coordinates`,e)
+  } catch (e) {
+    rlog(
+      "error-coordinates",
+      `[utils::hasValidCoordinatesForMap] error in calculating coordinates`,
+      e
+    );
   }
 
   //log('utils', `hasValidCoordinatesForMap(), lat/lon: ${lat}/${lon}`,{lat,lon})
-  const result = (lat != null && lon != null && isNumber(lat) && isNumber(lon));
+  const result = lat != null && lon != null && isNumber(lat) && isNumber(lon);
   //log('utils', `hasValidCoordinatesForMap(), result: ${result}, isInitial: ${isInitial}`,{data,result,lat,lon})
-  
+
   return result;
 }
 
-
-
-
 export function applyHotelsSearchFilter(data, filter) {
-  console.time('*** utils::applyHotelsSearchFilter()')
+  console.time("*** utils::applyHotelsSearchFilter()");
 
-  const doFilter = function(data,type,value, showUnAvailable) {
-    const tmp = (isString(value) ? value.split(',') : [value])
-    const value1 = tmp[0]
-    const value2 = (tmp.length == 2 ? tmp[1] : null)
+  const doFilter = function(data, type, value, showUnAvailable) {
+    const tmp = isString(value) ? value.split(",") : [value];
+    const value1 = tmp[0];
+    const value2 = tmp.length == 2 ? tmp[1] : null;
     let result = data;
-    
-    switch (type) {
 
-      case 'orderBy':
-        if (value1 == 'priceForSort') {
-            if (value2 == 'asc') {
-              result.sort((a,b) => (a.price > b.price))
-            } else {
-              result.sort((a,b) => (a.price < b.price))
-            }
-				} else {
-            //log('TODO',`Not implemented filter: '${value1}':'${value2}'   //   TYPE: '${type}'`,null,true)
+    switch (type) {
+      case "orderBy":
+        if (value1 == "priceForSort") {
+          if (value2 == "asc") {
+            result.sort((a, b) => a.price > b.price);
+          } else {
+            result.sort((a, b) => a.price < b.price);
+          }
+        } else {
+          //log('TODO',`Not implemented filter: '${value1}':'${value2}'   //   TYPE: '${type}'`,null,true)
         }
         break;
 
-      case 'nameFilter':
+      case "nameFilter":
         const nameFilter = value1.toLowerCase();
         if (nameFilter) {
           //log('doFilter-name',`items: ${data?data.length:'n/a'}`,{data})
           result = data.filter(item => {
             if (item && item.name && item) {
-              result = (item.name.toLowerCase().indexOf(nameFilter) > -1);
+              result = item.name.toLowerCase().indexOf(nameFilter) > -1;
             } else {
               result = true;
             }
             return result;
-          })
+          });
         }
         break;
 
-      case 'priceRange':
-        const v1 = parseFloat(value[0])
-        const v2 = parseFloat(value[1])
-        result = data.filter((item) => ((v1 <= item.price && item.price <= v2) || (item.price == null && showUnAvailable)) )
+      case "priceRange":
+        const v1 = parseFloat(value[0]);
+        const v2 = parseFloat(value[1]);
+        result = data.filter(
+          item =>
+            (v1 <= item.price && item.price <= v2) ||
+            (item.price == null && showUnAvailable)
+        );
         //log('utils',`Filter priceRange, ${value}`, {value,data,result,v1,v2},true)
         break;
 
-      case 'selectedRating':
+      case "selectedRating":
         let hasStarToFilter = false;
-      	value.map((item,index) => ( hasStarToFilter = (item ?  true : hasStarToFilter) ))
-				if (hasStarToFilter) {
-					result = data.filter((item) => value[item.stars-1])
-				}
-      	break
-      	
+        value.map(
+          (item, index) => (hasStarToFilter = item ? true : hasStarToFilter)
+        );
+        if (hasStarToFilter) {
+          result = data.filter(item => value[item.stars - 1]);
+        }
+        break;
+
       default:
         //log('TODO',`Not implemented filter: '${value1}':'${value2}'`)   //   TYPE: '${type}'`,null,true)
-        break
-
+        break;
     }
-      
+
     //log('utils',`Filter Applied '${type}', value: '${value}' | in: ${data.length} out: ${result.length}`, {value,data,result},true)
 
-    return result
-  }
-  
-  let filtered = data.concat() // make a shallow copy
+    return result;
+  };
+
+  let filtered = data.concat(); // make a shallow copy
   for (let prop in filter) {
-    if (prop == 'showUnAvailable') {
+    if (prop == "showUnAvailable") {
       // priceRange used for this one
       continue;
     }
-  	const value = filter[prop];
+    const value = filter[prop];
     filtered = doFilter(filtered, prop, value, filter.showUnAvailable);
   }
-  
+
   //log('utils',`applyHotelsSearchFilter(): ${filtered.length} / ${data.length}`, {filter,data,result:filtered},true)
-  
-  console.timeEnd('*** utils::applyHotelsSearchFilter()')
-  return filtered
+
+  console.timeEnd("*** utils::applyHotelsSearchFilter()");
+  return filtered;
 }
 
 /**
@@ -237,17 +264,17 @@ export function applyHotelsSearchFilter(data, filter) {
  */
 export function hotelsTemporaryFilterAndSort(hotels) {
   // filter out items without price
-  let result = hotels.filter(item => (!isNaN(item.price)))
-  
+  let result = hotels.filter(item => !isNaN(item.price));
+
   // sort by price, ascending
-  result.sort((a,b) => (a.price > b.price))
+  result.sort((a, b) => a.price > b.price);
 
   // add index
   if (__DEV__ && showNumberOnHotelItem) {
-    result.forEach( (item,index) => {
-      item.no = (index + 1);
+    result.forEach((item, index) => {
+      item.no = index + 1;
       return item;
-    })
+    });
   }
 
   return result;
@@ -258,15 +285,21 @@ export function hotelsTemporaryFilterAndSort(hotels) {
  * priceMin, priceMax, newIdsMap,
  * minLat, maxLat, minLon, maxLon
  */
-export function processFilteredHotels(filtered, hotelsOld, hotelsOldIdsMap, priceMinOld, priceMaxOld) {
+export function processFilteredHotels(
+  filtered,
+  hotelsOld,
+  hotelsOldIdsMap,
+  priceMinOld,
+  priceMaxOld
+) {
   let priceMin = priceMinOld;
   let priceMax = priceMaxOld;
-  let newIdsMap = {}
+  let newIdsMap = {};
   let minLat, maxLat, minLon, maxLon;
 
   // calculate min &max price
-  filtered.map((item,index) => {
-    const {price, latitude, longitude} = item;
+  filtered.map((item, index) => {
+    const { price, latitude, longitude } = item;
 
     // log('processing',`${index}, id:${item.id}, name:'${item.name}', price:${price}, min:${priceMin} max:${priceMax}`)
     newIdsMap[item.id] = index;
@@ -301,21 +334,26 @@ export function processFilteredHotels(filtered, hotelsOld, hotelsOldIdsMap, pric
         priceMin = price;
       }
     }
-    return null
-  })
+    return null;
+  });
 
   // process images
   // log('processing',`priceMin:${priceMin}, priceMax:${priceMax}`,{priceMin, priceMax, newIdsMap})
 
   return {
-    priceMin, priceMax, newIdsMap,
-    minLat, maxLat, minLon, maxLon
-  }
+    priceMin,
+    priceMax,
+    newIdsMap,
+    minLat,
+    maxLat,
+    minLon,
+    maxLon
+  };
 }
 
-export function generateFilterInitialData(showUnAvailable=false, state) {
+export function generateFilterInitialData(showUnAvailable = false, state) {
   const priceRange = state.priceRange;
-  
+
   return {
     showUnAvailable,
     nameFilter: state.nameFilter,
@@ -362,7 +400,8 @@ export function generateHotelFilterString(page, state) {
 
   // const page = page;//this.listView.getPage();
   const sort = state.orderBy;
-  const pagination = (page > -1 ? `&page=${page}&sort=${sort}` : `&page=0&sort=${sort}`);
+  const pagination =
+    page > -1 ? `&page=${page}&sort=${sort}` : `&page=0&sort=${sort}`;
 
   const filtersStr = encodeURI(JSON.stringify(filtersObj));
   let filters = `&filters=${filtersStr}${pagination}`; //eslint-disable-line
@@ -373,24 +412,27 @@ export function generateHotelFilterString(page, state) {
 /**
  * Merging all data from getting static hotels (getStaticHotels), through socket messages
  * and finally - filtered (getMapInfo)
- * @param {Array} filtered 
+ * @param {Array} filtered
  * @param {Object} socketMap A map {id: hotelData, ...}
  * @param {Object} staticMap A map {id: hotelData, ...}
  */
 export function mergeAllHotelData(filtered, socketMap, staticMap) {
   let result = filtered;
   try {
-    result.forEach((item,index) => {
-      const socketData = (socketMap ? socketMap[item.id] : null);
-      const staticData = (staticMap ? staticMap[item.id] : null);
-      
+    result.forEach((item, index) => {
+      const socketData = socketMap ? socketMap[item.id] : null;
+      const staticData = staticMap ? staticMap[item.id] : null;
+
       // Safe parse hotelData
       let mergedData;
       try {
-        mergedData = parseFilterHotelData(item, socketData, staticData)
+        mergedData = parseFilterHotelData(item, socketData, staticData);
       } catch (parseError) {
         mergedData = null;
-        processError(`[HotelsSearch::utils] Parse error in parseFilterHotelData: ${parseError.message}`, {parseError,mergedData});
+        processError(
+          `[HotelsSearch::utils] Parse error in parseFilterHotelData: ${parseError.message}`,
+          { parseError, mergedData }
+        );
       }
 
       if (mergedData) {
@@ -400,20 +442,27 @@ export function mergeAllHotelData(filtered, socketMap, staticMap) {
       }
 
       return mergedData;
-    })
+    });
   } catch (e) {
-    processError(`[HotelsSearch::utils] Error in mergeAllHotelData: ${e.message}`, {error:e, filtered, socketMap, staticMap})
+    processError(
+      `[HotelsSearch::utils] Error in mergeAllHotelData: ${e.message}`,
+      { error: e, filtered, socketMap, staticMap }
+    );
   }
   return result;
 }
 
-
-
-export function processStaticHotels(hotels, hotelsStaticCacheMap, hotelsIndicesByIdMap, hotelsAll, isAllHotelsLoaded) {
-  hotels.forEach( (item, index) => {
+export function processStaticHotels(
+  hotels,
+  hotelsStaticCacheMap,
+  hotelsIndicesByIdMap,
+  hotelsAll,
+  isAllHotelsLoaded
+) {
+  hotels.forEach((item, index) => {
     hotelsStaticCacheMap[item.id] = item;
-    checkHotelData(item,'static',index);
-    parseStaticHotel(item,index);
+    checkHotelData(item, "static", index);
+    parseStaticHotel(item, index);
 
     // patch with data
     if (isAllHotelsLoaded) {
@@ -422,11 +471,10 @@ export function processStaticHotels(hotels, hotelsStaticCacheMap, hotelsIndicesB
       if (itemInList) {
         itemInList.hotelPhoto = item.hotelPhoto;
       }
-      checkHotelData(itemInList,'static-patched',index)
+      checkHotelData(itemInList, "static-patched", index);
     }
   });
 }
-
 
 /**
  *  --------------   Parsing Functions ----------------
@@ -435,61 +483,62 @@ export function processStaticHotels(hotels, hotelsStaticCacheMap, hotelsIndicesB
  * parseFilterHotelData(filterData,socketData,staticData)
  */
 
-function parseStaticHotel(hotel,index) {
+function parseStaticHotel(hotel, index) {
   if (hotel.star != null) delete hotel.star;
-  checkHotelData(hotel,'static-parsed',index)
+  checkHotelData(hotel, "static-parsed", index);
 }
 
-
-
 /**
- * 
- * @param {*} socketData 
- * @param {*} staticData 
+ *
+ * @param {*} socketData
+ * @param {*} staticData
  * @returns (Object) The result has the following properties: {hotelData:Object, initialCoord: {initialLat:Number,initialLon:Number}}
  */
-const useLongCoordinates = true;  // used in parse functions (long is latitude/longitude and short is lat/lon)
+const useLongCoordinates = true; // used in parse functions (long is latitude/longitude and short is lat/lon)
 export function parseSocketHotelData(socketData, staticData) {
-  let hotelData = Object.assign({},socketData);
+  let hotelData = Object.assign({}, socketData);
   if (hotelData.lat) {
     delete hotelData.lat;
     delete hotelData.lon;
   }
 
   // parse images
-  const hasSocketPhoto = hasValidImageData(socketData,'hotelPhoto');
-  const hasSocketThumb = hasValidImageData(socketData,'thumbnail');
-  const hasStaticPhoto = hasValidImageData(staticData,'hotelPhoto');
-  const hasStaticThumb = hasValidImageData(staticData,'thumbnail');
+  const hasSocketPhoto = hasValidImageData(socketData, "hotelPhoto");
+  const hasSocketThumb = hasValidImageData(socketData, "thumbnail");
+  const hasStaticPhoto = hasValidImageData(staticData, "hotelPhoto");
+  const hasStaticThumb = hasValidImageData(staticData, "thumbnail");
   if (!hasSocketPhoto) {
-    hotelData.hotelPhoto = (
-      hasStaticPhoto
-        ? staticData.hotelPhoto
-        : hasSocketThumb
-          ? socketData.thumbnail
-          : hasStaticThumb ? staticData.thumbnail : DEFAULT_HOTEL_PNG
-    );
+    hotelData.hotelPhoto = hasStaticPhoto
+      ? staticData.hotelPhoto
+      : hasSocketThumb
+      ? socketData.thumbnail
+      : hasStaticThumb
+      ? staticData.thumbnail
+      : DEFAULT_HOTEL_PNG;
   }
   if (!hasSocketThumb) {
     hotelData.thumbnail = hotelData.hotelPhoto;
   }
 
-  const {star,stars} = socketData;
+  const { star, stars } = socketData;
 
-  hotelData.stars = ( star!=null ? parseInt(star) : (isArray(stars) ? stars.length : stars) );
+  hotelData.stars =
+    star != null ? parseInt(star) : isArray(stars) ? stars.length : stars;
   if (hotelData.stars == null && staticData) {
-    const {star:s2,stars:s3} = staticData;
-    hotelData.stars = (s2!=null ? parseInt(s2) : (s3!=null && isArray(s3) ? s3.length : 0));
+    const { star: s2, stars: s3 } = staticData;
+    hotelData.stars =
+      s2 != null ? parseInt(s2) : s3 != null && isArray(s3) ? s3.length : 0;
   }
   if (star) {
     delete hotelData.star;
   }
-  
+
   // parse coordinates
-  let lat = (socketData.latitude != null ? socketData.latitude : socketData.lat);
-  let lon = (socketData.longitude != null ? socketData.longitude : socketData.lon);
-  lat = (lat != null ? parseFloat(lat) : null);
-  lon = (lon != null ? parseFloat(lon) : null);
+  let lat = socketData.latitude != null ? socketData.latitude : socketData.lat;
+  let lon =
+    socketData.longitude != null ? socketData.longitude : socketData.lon;
+  lat = lat != null ? parseFloat(lat) : null;
+  lon = lon != null ? parseFloat(lon) : null;
   hotelData.latitude = lat;
   hotelData.longitude = lon;
   let initialCoord = {
@@ -506,28 +555,30 @@ export function parseSocketHotelData(socketData, staticData) {
   };
 }
 
-
-function parseFilterHotelData(filterData,socketData,staticData) {
+function parseFilterHotelData(filterData, socketData, staticData) {
   let hotelData = Object.assign(filterData);
 
   if (isString(hotelData.latitude)) {
     if (useLongCoordinates) {
-      hotelData.latitude = parseFloat(hotelData.latitude)
-      hotelData.longitude = parseFloat(hotelData.longitude)
+      hotelData.latitude = parseFloat(hotelData.latitude);
+      hotelData.longitude = parseFloat(hotelData.longitude);
     } else {
-      hotelData.lat = parseFloat(hotelData.latitude)
-      hotelData.lon = parseFloat(hotelData.longitude)
-      delete hotelData.latitude
-      delete hotelData.longitude
+      hotelData.lat = parseFloat(hotelData.latitude);
+      hotelData.lon = parseFloat(hotelData.longitude);
+      delete hotelData.latitude;
+      delete hotelData.longitude;
     }
   }
 
-  const hasPhoto = hasValidImageData(hotelData,'hotelPhoto');
-  const hasThumb = hasValidImageData(hotelData,'thumbnail');
-  const hasStaticPhoto = hasValidImageData(staticData,'hotelPhoto');
-  const hasSocketThumb = hasValidImageData(socketData,'thumbnail');
-  const patchedThumb = (hasSocketThumb ? socketData.thumbnail : null);
-  if (!hasPhoto) hotelData.hotelPhoto = (hasStaticPhoto ? staticData.hotelPhoto : patchedThumb);
+  const hasPhoto = hasValidImageData(hotelData, "hotelPhoto");
+  const hasThumb = hasValidImageData(hotelData, "thumbnail");
+  const hasStaticPhoto = hasValidImageData(staticData, "hotelPhoto");
+  const hasSocketThumb = hasValidImageData(socketData, "thumbnail");
+  const patchedThumb = hasSocketThumb ? socketData.thumbnail : null;
+  if (!hasPhoto)
+    hotelData.hotelPhoto = hasStaticPhoto
+      ? staticData.hotelPhoto
+      : patchedThumb;
   if (!hasThumb) hotelData.thumbnail = patchedThumb;
   if (hotelData.hotelPhoto == null && hotelData.thumbnail == null) {
     hotelData.hotelPhoto = DEFAULT_HOTEL_PNG;
@@ -545,26 +596,23 @@ function parseFilterHotelData(filterData,socketData,staticData) {
     hotelData.stars = parseInt(hotelData.star);
     delete hotelData.star;
   }
-  
-  return hotelData
-}
 
+  return hotelData;
+}
 
 /**
- * Checks whether data is null, an empty string or an object with 
+ * Checks whether data is null, an empty string or an object with
  * a property url null or an empty string
  */
-function hasValidImageData(data,type) {
-  return (! (!data || !data[type] || (isObject(data[type]) && !data[type].url)) )
+function hasValidImageData(data, type) {
+  return !(!data || !data[type] || (isObject(data[type]) && !data[type].url));
 }
 
-
-function newObject(source, extra=null) {
-	return lodash.merge({}, source, extra)
+function newObject(source, extra = null) {
+  return lodash.merge({}, source, extra);
 }
 
-
-var checkHotelDataCache = {}
+var checkHotelDataCache = {};
 export function checkHotelDataPrepare() {
   if (__DEV__) {
     checkHotelDataCache = {};
@@ -575,165 +623,160 @@ export function printCheckHotelDataCache() {
     try {
       const keys = Object.keys(checkHotelDataCache);
       let totalErrors = 0;
-      const summary = ( keys.length == 0 ? '<empty>' : keys.map(key => {
-        const currentErrorsCount = checkHotelDataCache[key].errors.length;
-        totalErrors += currentErrorsCount;
-        return `${key}:${currentErrorsCount}`;
-      }).join('    ') )
-      if (totalErrors>0) {
-        console.info(`[checkHotelData] Printing errors cache - ${summary}`, {checkHotelDataCache});
-        rlog('X-cache',`checkHotelData - ${totalErrors} errors found  -  ${summary}`, {checkHotelDataCache}, true);
+      const summary =
+        keys.length == 0
+          ? "<empty>"
+          : keys
+              .map(key => {
+                const currentErrorsCount =
+                  checkHotelDataCache[key].errors.length;
+                totalErrors += currentErrorsCount;
+                return `${key}:${currentErrorsCount}`;
+              })
+              .join("    ");
+      if (totalErrors > 0) {
+        console.info(`[checkHotelData] Printing errors cache - ${summary}`, {
+          checkHotelDataCache
+        });
+        rlog(
+          "X-cache",
+          `checkHotelData - ${totalErrors} errors found  -  ${summary}`,
+          { checkHotelDataCache },
+          true
+        );
       } else {
         console.info(`[checkHotelData] Printing errors cache - no errors`);
-        rlog('X-cache',`checkHotelData - no errors`);
+        rlog("X-cache", `checkHotelData - no errors`);
       }
-    } catch  (error) {
-      processError(`printCheckHotelDataCache - ${error.message}`, {error})
-      rlog('X-cache-error',`checkHotelData - error printing: ${error.message}`, {error}, true);
-    };
+    } catch (error) {
+      processError(`printCheckHotelDataCache - ${error.message}`, { error });
+      rlog(
+        "X-cache-error",
+        `checkHotelData - error printing: ${error.message}`,
+        { error },
+        true
+      );
+    }
   }
 }
 
-
 export function checkHotelData(data, type, index) {
-  if (!__DEV__ 
-        || checkHotelsDataWithTemplates == false
-        || ( isString(checkHotelsDataWithTemplates) && checkHotelsDataWithTemplates.indexOf(type) == -1 )
-      )
-  {
+  if (
+    !__DEV__ ||
+    checkHotelsDataWithTemplates == false ||
+    (isString(checkHotelsDataWithTemplates) &&
+      checkHotelsDataWithTemplates.indexOf(type) == -1)
+  ) {
     return;
   }
-  
-	const isArrayInstance = (data instanceof Array);
-  let result = '';
+
+  const isArrayInstance = data instanceof Array;
+  let result = "";
   let props;
   if (!checkHotelDataCache[type]) {
-    checkHotelDataCache[type] = {errors:[], errorIndexes:[], success:[]};
+    checkHotelDataCache[type] = { errors: [], errorIndexes: [], success: [] };
   }
 
   if (isArrayInstance) {
-    data.forEach((item,index) => {
-      checkHotelData(item,type,index)
-    })
+    data.forEach((item, index) => {
+      checkHotelData(item, type, index);
+    });
   } else {
-		let commonData = {
-			id:'number',
-			name:'string',
-		};
-		
+    let commonData = {
+      id: "number",
+      name: "string"
+    };
+
     switch (type) {
-
-      case 'static':
-        props = newObject(
-        	commonData,
-   				{
-						generalDescription:'string',
-            hotelPhoto:{url:'string'},
-            star:'number'
-          }
-        );
+      case "static":
+        props = newObject(commonData, {
+          generalDescription: "string",
+          hotelPhoto: { url: "string" },
+          star: "number"
+        });
         result = validateObject(data, props);
         break;
 
-      case 'static-parsed':
-        props = newObject(
-        	commonData,
-   				{
-						generalDescription:'string',
-   					hotelPhoto:'object',
-          }
-        );
+      case "static-parsed":
+        props = newObject(commonData, {
+          generalDescription: "string",
+          hotelPhoto: "object"
+        });
         result = validateObject(data, props);
         break;
 
-      case 'static-patched':
-        props = newObject(
-        	commonData,
-   				{
-						generalDescription:'string',
-   					hotelPhoto:{url:'string'},
-            stars:'number',
-          }
-        );
+      case "static-patched":
+        props = newObject(commonData, {
+          generalDescription: "string",
+          hotelPhoto: { url: "string" },
+          stars: "number"
+        });
         result = validateObject(data, props);
         break;
 
-
-      case 'socket':
-        props = newObject(
-					commonData,
-					{
-						price:'number',
-						// dynamic
-						externalId:'number,null',
-						longitude:'null,string',
-						latitude:'null,string',
-						thumbnail:'object,null',
-						star:'string,null',
-						stars:'number,null',
-						lon:'string,null',
-						lat:'string,null',
-					}
-				);
+      case "socket":
+        props = newObject(commonData, {
+          price: "number",
+          // dynamic
+          externalId: "number,null",
+          longitude: "null,string",
+          latitude: "null,string",
+          thumbnail: "object,null",
+          star: "string,null",
+          stars: "number,null",
+          lon: "string,null",
+          lat: "string,null"
+        });
         result = validateObject(data, props);
         break;
 
-      case 'socket-parsed':
-        props = newObject(
-					commonData,
-					{
-            price:'number',
-            stars: 'number',
-            // dynamic
-						externalId:'number',
-						longitude:'number,null',
-						latitude:'number,null',
-						hotelPhoto:'string,object',//[{url:'string'},'string'],
-						thumbnail:'object,string',
-					}
-				)
+      case "socket-parsed":
+        props = newObject(commonData, {
+          price: "number",
+          stars: "number",
+          // dynamic
+          externalId: "number",
+          longitude: "number,null",
+          latitude: "number,null",
+          hotelPhoto: "string,object", //[{url:'string'},'string'],
+          thumbnail: "object,string"
+        });
         result = validateObject(data, props);
         break;
 
-      case 'filter':
-        props = newObject(
-					commonData,
-					{
-						star:'number',
-						price:'number',
-						priceForSort:'number',
-						// dynamic
-						generalDescription: 'string,null',
-						longitude:'string,null',
-						latitude:'string,null',
-						hotelPhoto: 'string,null',
-						// thumbnail: {url:'string'},
-						price: 'number,null'
-					}
-				)
+      case "filter":
+        props = newObject(commonData, {
+          star: "number",
+          price: "number",
+          priceForSort: "number",
+          // dynamic
+          generalDescription: "string,null",
+          longitude: "string,null",
+          latitude: "string,null",
+          hotelPhoto: "string,null",
+          // thumbnail: {url:'string'},
+          price: "number,null"
+        });
         result = validateObject(data, props);
         break;
 
-        case 'filter-parsed':
-          props = newObject(
-            commonData,
-            {
-              no:'number',
-              price:'number',
-              priceForSort:'number',
-              // required
-              stars:'number',
-              generalDescription: 'null,string',
-              longitude:'number,null',
-              latitude:'number,null',
-              hotelPhoto: 'string',
-              thumbnail: 'string',
-              // thumbnail: {url:'string'},
-              price: 'number,null'
-            }
-          )
-          result = validateObject(data, props);
-          break;
+      case "filter-parsed":
+        props = newObject(commonData, {
+          no: "number",
+          price: "number",
+          priceForSort: "number",
+          // required
+          stars: "number",
+          generalDescription: "null,string",
+          longitude: "number,null",
+          latitude: "number,null",
+          hotelPhoto: "string",
+          thumbnail: "string",
+          // thumbnail: {url:'string'},
+          price: "number,null"
+        });
+        result = validateObject(data, props);
+        break;
     }
   }
 
@@ -743,10 +786,9 @@ export function checkHotelData(data, type, index) {
     //rlog(`X-${type}`, `@${result}@, index: ${index} failed: ${isArrayInstance ? failed : 'n/a'}, isArray: ${isArrayInstance}`,{invalid_types:result,data,type,props, isArrayInstance},false);
     //console.warn(`[utils::checkHotelData] @${result}@, index: ${index}`,{result,data,type,props})
   } else {
-    checkHotelDataCache[type].success.push({data,type,index});
+    checkHotelDataCache[type].success.push({ data, type, index });
   }
 }
-
 
 export function debugHotelData(hotelData, hotelsInfo, index, funcName) {
   console.warn(
@@ -784,16 +826,30 @@ export function debugHotelData(hotelData, hotelsInfo, index, funcName) {
 /**
  * Used for optimising Map Marker rendering
  */
-export function calculateCoordinatesGridPosition(lat, lon, regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep) {
+export function calculateCoordinatesGridPosition(
+  lat,
+  lon,
+  regionLat,
+  regionLatDelta,
+  regionLon,
+  regionLonDelta,
+  latStep,
+  lonStep
+) {
   let regionStartLat = regionLat - regionLatDelta,
-      regionEndLat   = regionLat + regionLatDelta,
-      regionStartLon = regionLon - regionLonDelta,
-      regionEndLon   = regionLon + regionLonDelta;
-  
+    regionEndLat = regionLat + regionLatDelta,
+    regionStartLon = regionLon - regionLonDelta,
+    regionEndLon = regionLon + regionLonDelta;
+
   // console.log(`regionLat: ${regionStartLat} / ${regionEndLat} regionLon: ${regionStartLon} / ${regionEndLon}`)
 
   // quick return if not in range
-  if (lat < regionStartLat || lat > regionEndLat || lon < regionStartLon || lon > regionEndLon) {
+  if (
+    lat < regionStartLat ||
+    lat > regionEndLat ||
+    lon < regionStartLon ||
+    lon > regionEndLon
+  ) {
     return null;
   }
 
@@ -801,18 +857,21 @@ export function calculateCoordinatesGridPosition(lat, lon, regionLat, regionLatD
   let latIndex = 0;
   let lonIndex = 0;
   let currentLat = regionStartLat,
-      currentLon = regionStartLon;
+    currentLon = regionStartLon;
 
   while (currentLat <= regionEndLat) {
     currentLon = regionStartLon;
     while (currentLon <= regionEndLon) {
-      if (currentLat >= lat && currentLat < lat + latStep
-          && currentLon >= lon && currentLon < lon + lonStep)
-      {
+      if (
+        currentLat >= lat &&
+        currentLat < lat + latStep &&
+        currentLon >= lon &&
+        currentLon < lon + lonStep
+      ) {
         result = {
           latIndex,
           lonIndex
-        }
+        };
         break;
       } else {
         currentLon += lonStep;

@@ -1,5 +1,5 @@
-const constants = require('./../config/constants.json');
-const moment = require('moment');
+const constants = require("./../config/constants.json");
+const moment = require("moment");
 
 export function formatTimestamp(timestamp) {
   let result = moment.unix(timestamp);
@@ -41,6 +41,6 @@ export function addDaysToNow(days) {
 }
 
 export function formatTimestampToDays(timestamp) {
-  const day = 24 * 60 * 60
+  const day = 24 * 60 * 60;
   return (timestamp / day) | 0;
 }

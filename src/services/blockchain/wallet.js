@@ -1,15 +1,13 @@
-import ethers from 'ethers';
-import {
-  BaseValidators
-} from './validators/baseValidators';
+import ethers from "ethers";
+import { BaseValidators } from "./validators/baseValidators";
 import {
   LOCTokenContract,
   getNodeProvider
-} from './config/contracts-config.js';
-import crypto from 'react-native-fast-crypto';
+} from "./config/contracts-config.js";
+import crypto from "react-native-fast-crypto";
 
 // import ERROR from './config/errors.json';
-const ERROR = require('./config/errors.json');
+const ERROR = require("./config/errors.json");
 
 class Wallet {
   static async getTokenBalance(address) {
@@ -28,7 +26,9 @@ class Wallet {
   static async createFromPassword(password) {
     BaseValidators.validatePassword(password);
 
-    const mnemonic = await ethers.HDNode.entropyToMnemonic(ethers.utils.randomBytes(16));
+    const mnemonic = await ethers.HDNode.entropyToMnemonic(
+      ethers.utils.randomBytes(16)
+    );
 
     //return await this.generateAccountFromMnemonicEthers(mnemonic, password, () => { });
     return await this.generateAccountFromMnemonicEthersDef(mnemonic, password);
@@ -40,7 +40,10 @@ class Wallet {
     this.validateMnemonic(mnemonic);
 
     //let result = await this.generateAccountFromMnemonicEthers(mnemonic, password, () => { });
-    let result = await this.generateAccountFromMnemonicEthersDef(mnemonic, password);
+    let result = await this.generateAccountFromMnemonicEthersDef(
+      mnemonic,
+      password
+    );
 
     if (result.address !== address) {
       throw ERROR.INVALID_RECOVERED_ADDRESS;
@@ -48,7 +51,11 @@ class Wallet {
     return result;
   }
 
-  static async generateAccountFromMnemonicEthers(mnemonic, _newPassword, progressCallback) {
+  static async generateAccountFromMnemonicEthers(
+    mnemonic,
+    _newPassword,
+    progressCallback
+  ) {
     const wallet = ethers.Wallet.fromMnemonic(mnemonic);
 
     const encryptPromise = wallet.encrypt(_newPassword, progressCallback);
@@ -56,35 +63,78 @@ class Wallet {
     const json = await encryptPromise;
     return {
       address: wallet.address,
-      fileName: JSON.parse(json)['x-ethers'].gethFilename,
+      fileName: JSON.parse(json)["x-ethers"].gethFilename,
       jsonFile: JSON.parse(json),
       mnemonic
     };
   }
 
   static async generateAccountFromMnemonicEthersDef(mnemonic, _newPassword) {
-    let fromPassword, fromSalt, fromN, fromR, fromP, fromDkLen, fromClient, fromEntropy, fromPrivateKey, fromIV, fromUuidRandom;
+    let fromPassword,
+      fromSalt,
+      fromN,
+      fromR,
+      fromP,
+      fromDkLen,
+      fromClient,
+      fromEntropy,
+      fromPrivateKey,
+      fromIV,
+      fromUuidRandom;
     const wallet = ethers.Wallet.fromMnemonic(mnemonic);
-    wallet.encryptDef(_newPassword, (passwd, salt, N=16384, r=8, p=1, dkLen=64, client, entropy, privateKey, iv, uuidRandom) => {
-      fromPassword = passwd;
-      fromSalt = salt;
-      fromN = N;
-      fromR = r;
-      fromP = p;
-      fromDkLen = dkLen;
-      
-      fromClient = client;
-      fromEntropy = entropy;
-      fromPrivateKey = privateKey;
-      fromIV = iv;
-      fromUuidRandom = uuidRandom;
-    });
-    const key = await crypto.scrypt(fromPassword, fromSalt, fromN, fromR, fromP, fromDkLen);
-    const encryptPromise = wallet.encryptContinue(fromSalt, fromN, fromR, fromP, fromClient, fromEntropy, key, fromPrivateKey, fromIV, fromUuidRandom);
+    wallet.encryptDef(
+      _newPassword,
+      (
+        passwd,
+        salt,
+        N = 16384,
+        r = 8,
+        p = 1,
+        dkLen = 64,
+        client,
+        entropy,
+        privateKey,
+        iv,
+        uuidRandom
+      ) => {
+        fromPassword = passwd;
+        fromSalt = salt;
+        fromN = N;
+        fromR = r;
+        fromP = p;
+        fromDkLen = dkLen;
+
+        fromClient = client;
+        fromEntropy = entropy;
+        fromPrivateKey = privateKey;
+        fromIV = iv;
+        fromUuidRandom = uuidRandom;
+      }
+    );
+    const key = await crypto.scrypt(
+      fromPassword,
+      fromSalt,
+      fromN,
+      fromR,
+      fromP,
+      fromDkLen
+    );
+    const encryptPromise = wallet.encryptContinue(
+      fromSalt,
+      fromN,
+      fromR,
+      fromP,
+      fromClient,
+      fromEntropy,
+      key,
+      fromPrivateKey,
+      fromIV,
+      fromUuidRandom
+    );
     const json = encryptPromise;
     return {
       address: wallet.address,
-      fileName: JSON.parse(json)['x-ethers'].gethFilename,
+      fileName: JSON.parse(json)["x-ethers"].gethFilename,
       jsonFile: JSON.parse(json),
       mnemonic
     };
@@ -99,4 +149,4 @@ class Wallet {
   }
 }
 
-export {Wallet};
+export { Wallet };

@@ -1,10 +1,9 @@
-import React, {PureComponent} from "react"
-import { View, Text } from 'react-native'
+import React, { PureComponent } from "react";
+import { View, Text } from "react-native";
 import Image from "react-native-remote-svg";
-import {commonText} from '../../../common.styles'
+import { commonText } from "../../../common.styles";
 import { BarIndicator } from "react-native-indicators";
-import PropTypes from 'prop-types';
-
+import PropTypes from "prop-types";
 
 export default class LTLoader extends PureComponent {
   static propTypes = {
@@ -12,7 +11,7 @@ export default class LTLoader extends PureComponent {
     isLoading: PropTypes.bool,
     message: PropTypes.string,
     opacity: PropTypes.string,
-    style: PropTypes.object,
+    style: PropTypes.object
   };
 
   static defaultProps = {
@@ -20,21 +19,30 @@ export default class LTLoader extends PureComponent {
     isLockTripIcon: false,
     message: null,
     opacity: null,
-    style: null,
-  }
+    style: null
+  };
 
   constructor(props) {
     super(props);
   }
 
   renderMessage() {
-    const {message} = this.props;
+    const { message } = this.props;
     if (message) {
       return (
-        <Text style={{...commonText, position:'absolute', top:"60%", width:"100%", textAlign:'center', fontSize:19}}>
+        <Text
+          style={{
+            ...commonText,
+            position: "absolute",
+            top: "60%",
+            width: "100%",
+            textAlign: "center",
+            fontSize: 19
+          }}
+        >
           {message}
         </Text>
-      )
+      );
     } else {
       return null;
     }
@@ -42,34 +50,32 @@ export default class LTLoader extends PureComponent {
 
   render() {
     if (this.props.isLoading) {
-      const opacity = (this.props.opacity != null ? this.props.opacity : 'F8')
+      const opacity = this.props.opacity != null ? this.props.opacity : "F8";
       const defaultStyle = {
-        position:'absolute',
+        position: "absolute",
         width: "100%",
         height: "100%",
-        
-        flexDirection: 'column',
-        justifyContent: 'space-between', 
-        alignItems: 'center',
-        
-        display: (this.props.isLoading ? "flex" : 'none'),
-        
-        backgroundColor: `#FFFFFF${opacity}`
-      }
 
-      const style = (
-        this.props.style
-          ? {
-              ...defaultStyle,
-              ...this.props.style
-            }
-          : defaultStyle
-      )
-      
+        flexDirection: "column",
+        justifyContent: "space-between",
+        alignItems: "center",
+
+        display: this.props.isLoading ? "flex" : "none",
+
+        backgroundColor: `#FFFFFF${opacity}`
+      };
+
+      const style = this.props.style
+        ? {
+            ...defaultStyle,
+            ...this.props.style
+          }
+        : defaultStyle;
+
       return (
         <View style={style}>
-          { this.renderAnimation() }
-	        { this.renderMessage() }
+          {this.renderAnimation()}
+          {this.renderMessage()}
         </View>
       );
     } else {
@@ -86,7 +92,7 @@ export default class LTLoader extends PureComponent {
           style={{ width: 35, height: 35 }}
           source={require("../../../assets/loader.gif")}
         />
-      )
+      );
     } else {
       return (
         <BarIndicator
@@ -95,7 +101,7 @@ export default class LTLoader extends PureComponent {
           size={50}
           animationDuration={2107}
         />
-      )
+      );
     }
   }
 }

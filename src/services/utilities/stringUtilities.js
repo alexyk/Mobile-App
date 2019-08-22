@@ -14,20 +14,19 @@ export default class StringUtils {
    * @param {Number} length
    * @param {Number} indexCorrection Add or subtract from index (indexOf position)
    */
-  static subBeforeIndexOf(sourceStr, toIndexOfStr, indexCorrection=0) {
+  static subBeforeIndexOf(sourceStr, toIndexOfStr, indexCorrection = 0) {
     if (!sourceStr || !toIndexOfStr) {
-      return '';
+      return "";
     }
 
     const index = sourceStr.indexOf(toIndexOfStr);
 
     if (index == -1) {
-      return '';
+      return "";
     } else {
-      return sourceStr.substr(0, index+indexCorrection);
+      return sourceStr.substr(0, index + indexCorrection);
     }
   }
-  
 
   /**
    * Returns a substring of a string based on @sourceStr -> indexOf( @fromIndexOfStr ) and @length
@@ -36,18 +35,22 @@ export default class StringUtils {
    * @param {Number} length
    * @param {Number} indexCorrection Add or subtract from index (indexOf position)
    */
-  static subFromIndexOf(sourceStr, fromIndexOfStr, length, indexCorrection=0) {
+  static subFromIndexOf(
+    sourceStr,
+    fromIndexOfStr,
+    length,
+    indexCorrection = 0
+  ) {
     if (!sourceStr || !fromIndexOfStr) {
-      return '';
+      return "";
     }
 
     const index = sourceStr.indexOf(fromIndexOfStr);
 
     if (index == -1) {
-      return '';
+      return "";
     } else {
-      return sourceStr.substr(index+indexCorrection,length);
+      return sourceStr.substr(index + indexCorrection, length);
     }
   }
-
 }

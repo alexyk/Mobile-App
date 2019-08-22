@@ -1,33 +1,32 @@
-import React from 'react';
-import { View, TouchableOpacity } from 'react-native';
-import PropTypes from 'prop-types';
-import Image from 'react-native-remote-svg';
+import React from "react";
+import { View, TouchableOpacity } from "react-native";
+import PropTypes from "prop-types";
+import Image from "react-native-remote-svg";
 
-import styles from './styles';
-import { styleToNumber } from '../../screens/utils';
+import styles from "./styles";
+import { styleToNumber } from "../../screens/utils";
 
-const SVGButton = (props) => {
-    let extraStyle = styleToNumber(props.style);
-    let imageStyle = styleToNumber(props.imageStyle);
+const SVGButton = props => {
+  let extraStyle = styleToNumber(props.style);
+  let imageStyle = styleToNumber(props.imageStyle);
 
-
-    return (
-        <TouchableOpacity onPress={props.onPress}>
-            <View style={[styles.container, extraStyle]}>
-                <Image source={props.image} style={[styles.image,imageStyle]}/>
-            </View>
-        </TouchableOpacity>
-    );
-}
+  return (
+    <TouchableOpacity onPress={props.onPress}>
+      <View style={[styles.container, extraStyle]}>
+        <Image source={props.image} style={[styles.image, imageStyle]} />
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 SVGButton.propTypes = {
-    onPress: PropTypes.func,
-    style: PropTypes.oneOfType([PropTypes.number, PropTypes.object]),
-    imageStyle: PropTypes.number
+  onPress: PropTypes.func,
+  style: PropTypes.oneOfType([PropTypes.number, PropTypes.object]),
+  imageStyle: PropTypes.number
 };
 
 SVGButton.defaultProps = {
-    onPress: () => {}
+  onPress: () => {}
 };
 
 export default SVGButton;
