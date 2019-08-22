@@ -1,73 +1,69 @@
-import { Platform } from "react-native";
-import {
-  isObject,
-  isString,
-  getObjectClassName,
-  isSymbol
-} from "./components/screens/utils";
-import lodash from "lodash";
-import moment, { isMoment } from "moment";
-import { printAny } from "../test/common-test-utils";
+import { Platform } from 'react-native';
+import { isObject, isString, getObjectClassName, isSymbol } from './components/screens/utils';
+import lodash from 'lodash';
+import moment, { isMoment } from 'moment';
+import { printAny } from '../test/common-test-utils';
 
 // TODO: Check if there is a better way to know if the code is in testing mode (jest etc.)
 // Currently using Platform.Version and (__MYDEV__ === undefined || __TEST__) to know that it is testing (functions loose their context scope)
-// Example usage emptyFuncWithDescr,
-//
+// Example usage emptyFuncWithDescr, 
+// 
 
-/**
+
+/** 
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * FORCE modes - possible in RELEASE                               *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * ALL MUST BE FALSE!!!      (unless you know what you are doing)  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-export const __MYDEV__ = __DEV__ && true;
-export const __TEST__ = Platform.Version == undefined;
-export const reactotronLoggingInReleaseForceEnabled = false;
-export const forceOffline = false;
+export const __MYDEV__                               = (__DEV__ && true);
+export const __TEST__                                = (Platform.Version == undefined);
+export const reactotronLoggingInReleaseForceEnabled  = false;
+export const forceOffline                            = false;
 
-/**
+
+/**  
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Error handling
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * errorLevel: Number
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- *
+ * 
  *    0   console.warn (message & data)
  *    1   console.error
  *    2   reactotron.error
- *
- */
+ * 
+*/
 export const errorLevel = 0;
 
-// reactotron
-export const reactotronLoggingEnabled = false;
-export const logConverterErrorToReactrotron = false;
-export const showTypesInReactotronLog = true;
-export const warnOnReactotronDisabledCalls = false;
-// redux
-export const reduxConsoleLoggingEnabled = false;
-export const reduxConsoleCollapsedLogging = true;
-export const reduxReactotronLoggingEnabled = false;
-// console
-export const raiseConverterExceptions = false;
-export const logConverterError = false;
-export const consoleTimeCalculations = false; // enable/disable "console.time" & "console.timeEnd" calls
-export const consoleShowTimeInLogs = true; // prepend with time
-// other
-export const webviewDebugEnabled = false;
-export const hotelsSearchMapDebugEnabled = false;
-export const hotelsSearchSocketDebug = false;
-export const checkHotelsDataWithTemplates =
-  "static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed"; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
-// offline mode
-// Enabled if: (__DEV__ == true) and (isOffline == true)
-let isOffline = false;
-if (forceOffline) isOffline = forceOffline;
-if (!__DEV__) isOffline = false;
-export const isOnline = !isOffline;
-export const autoLoginInOfflineMode = true;
-export var validationStateOfflineWallet = -1; // -1: none, 0: invalid, 1: valid
+  // reactotron
+export const reactotronLoggingEnabled           = false;
+export const logConverterErrorToReactrotron     = false;
+export const showTypesInReactotronLog           = true;
+export const warnOnReactotronDisabledCalls      = false;
+  // redux
+export const reduxConsoleLoggingEnabled         = false;
+export const reduxConsoleCollapsedLogging       = true;
+export const reduxReactotronLoggingEnabled      = false;
+  // console
+export const raiseConverterExceptions           = false;
+export const logConverterError                  = false;
+export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
+export const consoleShowTimeInLogs              = true;    // prepend with time
+  // other
+export const webviewDebugEnabled                = false;
+export const hotelsSearchMapDebugEnabled        = false;
+export const hotelsSearchSocketDebug            = false;
+export const checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
+  // offline mode
+  // Enabled if: (__DEV__ == true) and (isOffline == true)
+                                let isOffline   = false;
+  if (forceOffline) isOffline = forceOffline;
+  if (!__DEV__) isOffline = false;
+export const isOnline = (!isOffline);
+export const autoLoginInOfflineMode             = true;
+export var validationStateOfflineWallet         = -1;  // -1: none, 0: invalid, 1: valid
 export const offlineTimeInSeconds = {
   getCountries: 0,
   getCurrencyRates: 0,
@@ -81,18 +77,18 @@ export const offlineTimeInSeconds = {
   getStaticHotels: 0,
   getMapInfo: 0,
   getHotelRooms: 0,
-  getHotelById: 0
-};
-// automated flows
-// hotels search
-export const autoHotelSearch = false;
-export const autoHotelSearchFocus = false;
-export const autoHotelSearchPlace = "sofia";
-// homes search
-export const autoHomeSearch = false;
-export const autoHomeSearchPlace = "uk1";
-// calendar
-export const autoCalendar = false;
+  getHotelById: 0,
+}
+  // automated flows
+    // hotels search
+export const autoHotelSearch                    = false;
+export const autoHotelSearchFocus               = false;
+export const autoHotelSearchPlace               = 'sofia'
+    // homes search
+export const autoHomeSearch                     = false;
+export const autoHomeSearchPlace                = 'uk1'
+  // calendar
+export const autoCalendar                       = false;
 // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
@@ -108,16 +104,14 @@ export const autoCalendar = false;
       and a rule - only one line logs (for easy ato deletion in release -> select_config.rb)
 */
 
-// ui
-export const iconsDebugEnabled = false;
+  // ui
+export const iconsDebugEnabled                  = false;    
+
 
 // ---------------  function definitions  -----------------
 
 const emptyFunc = function() {};
-function emptyFuncWithDescr(descr) {
-  if (__MYDEV__ !== undefined && console.warn != null)
-    console.warn(` Call of '${descr}' is disabled - see '__MYDEV__'`);
-}
+function emptyFuncWithDescr(descr) { if (__MYDEV__ !== undefined && console.warn != null) console.warn(` Call of '${descr}' is disabled - see '__MYDEV__'`) };
 
 function addTime(all) {
   if (consoleShowTimeInLogs) {
@@ -126,24 +120,13 @@ function addTime(all) {
   }
 }
 export var dlog = dlogFunc;
-export function clog(...all) {
-  addTime(all);
-  console.log(...all);
-}
-export function ilog(...all) {
-  addTime(all);
-  console.info(...all);
-}
-export function wlog(...all) {
-  addTime(all);
-  console.warn(...all);
-}
-export function elog(...all) {
-  addTime(all);
-  console.error(...all);
-}
-export var tslog = consoleTimeCalculations ? console.time : emptyFunc;
-export var telog = consoleTimeCalculations ? console.timeEnd : emptyFunc;
+export function clog(...all) {addTime(all); console.log(...all)};
+export function ilog(...all) {addTime(all); console.info(...all)}
+export function wlog(...all) {addTime(all); console.warn(...all)}
+export function elog(...all) {addTime(all); console.error(...all)}
+export var tslog = (consoleTimeCalculations ? console.time : emptyFunc);
+export var telog = (consoleTimeCalculations ? console.timeEnd : emptyFunc);
+
 
 /**
  * Print moment object in a formated way
@@ -156,6 +139,8 @@ function configureConsole() {
     return;
   }
 
+
+
   if (!__DEV__ && !__MYDEV__) {
     clog = emptyFunc;
     ilog = emptyFunc;
@@ -163,7 +148,7 @@ function configureConsole() {
     wlog = emptyFunc;
     elog = emptyFunc;
     mlog = emptyFunc;
-  } else if (!__MYDEV__) {
+  } else  if (!__MYDEV__) {
     clog = emptyFuncWithDescr("clog");
     ilog = emptyFuncWithDescr("ilog");
     dlog = emptyFuncWithDescr("dlog");
@@ -180,27 +165,26 @@ function configureConsole() {
 
     if (__DEV__) {
       if (warnOnReactotronDisabledCalls) {
-        func = method =>
-          console.warn(
-            "[config-debug] Reactotron is disabled, but still calling it as " +
-              `console.tron.${method}`
-          );
+      func = (method) => console.warn(
+        '[config-debug] Reactotron is disabled, but still calling it as '+
+        `console.tron.${method}`
+      )
       } else {
         func = emptyFunc;
       }
     } else if (reactotronLoggingInReleaseForceEnabled) {
-      func = (method, ...args) => {
-        switch (method) {
-          case "display":
-            console.log(`[REACTOTRON ][${method}] ${args[0].name}`, args[0]);
-            break;
+        func = (method,...args) => {
+          switch (method) {
+            case 'display':
+              console.log(`[REACTOTRON ][${method}] ${args[0].name}`, args[0])
+              break;
+          }
         }
-      };
     } else {
       func = emptyFunc;
     }
     console.tron = {
-      ...console.tron,
+        ...console.tron,
       log: (...args) => func("log", ...args),
       logImportant: (...args) => func("logImportant", ...args),
       debug: (...args) => func("debug", ...args),
@@ -211,7 +195,7 @@ function configureConsole() {
       mylog: (...args) => func("mylog", ...args),
       mylogd: (...args) => func("mylogd", ...args)
     };
-  }
+  }  
 
   // in case any forgotten console calls crash the build
   if (!console.time) {
@@ -220,24 +204,19 @@ function configureConsole() {
     tslog = emptyFunc;
     telog = emptyFunc;
     // When console.time is n/a so is console.group etc. (I don't remember the example /Alex K)
-    console.group = console.log ? console.log : emptyFunc;
-    console.groupEnd = console.log ? console.log : emptyFunc;
-    console.groupCollapsed = console.log ? console.log : emptyFunc;
-    if (console.warn)
-      console.warn(
-        "[config-debug] console.time is not available - disabling console.time(End) and console.group(End|Collapsed) families of calls"
-      );
+    console.group = (console.log ? console.log : emptyFunc);
+    console.groupEnd = (console.log ? console.log : emptyFunc);
+    console.groupCollapsed = (console.log ? console.log : emptyFunc);
+    if (console.warn) console.warn('[config-debug] console.time is not available - disabling console.time(End) and console.group(End|Collapsed) families of calls');
   } else if (!consoleTimeCalculations || !__MYDEV__) {
     console.time = emptyFunc;
     console.timeEnd = emptyFunc;
     tslog = emptyFunc;
     telog = emptyFunc;
-    if (__MYDEV__ !== undefined && console.warn != null)
-      console.warn(
-        `[config-debug] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`
-      );
+    if (__MYDEV__ !== undefined && console.warn != null) console.warn(`[config-debug] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
   }
 }
+
 
 function configureReactotron() {
   // if testing with jest - return
@@ -245,33 +224,30 @@ function configureReactotron() {
     return;
   }
 
+
   // if in dev mode or forceReactotronLogging
-  if (
-    (__DEV__ && reactotronLoggingEnabled) ||
-    reactotronLoggingInReleaseForceEnabled
-  ) {
+  if ((__DEV__ && reactotronLoggingEnabled) || reactotronLoggingInReleaseForceEnabled) {
     // Reactotron config
     try {
-      require("./utils/reactotronLogging");
-      const r = require("reactotron-react-native");
+      require('./utils/reactotronLogging')
+      const r = require('reactotron-react-native')
       const Reactotron = r.default;
       console.tron = Reactotron;
       console.tron.mylog = rlog;
       console.tron.mylogd = rlogd;
-      ilog("Reactotron connected");
+      ilog('Reactotron connected');
     } catch (e) {
-      if (__MYDEV__ !== undefined && !__TEST__)
-        console.warn("Reactotron could not be enabled - " + e.message);
+      if (__MYDEV__ !== undefined && !__TEST__) console.warn('Reactotron could not be enabled - ' + e.message);
     }
+
   } else {
     if (__MYDEV__ !== undefined && !__TEST__) {
       console.disableYellowBox = true;
-      ilog(
-        `Reactotron is disabled - release=${reactotronLoggingInReleaseForceEnabled} dev=${reactotronLoggingEnabled}`
-      );
+      ilog(`Reactotron is disabled - release=${reactotronLoggingInReleaseForceEnabled} dev=${reactotronLoggingEnabled}`);
     }
   }
 }
+
 
 // ---------------     exports     -----------------
 
@@ -282,8 +258,11 @@ function configureReactotron() {
  */
 export function processError(description, data) {
   if (!__DEV__) {
+
     console.warn(description);
+
   } else {
+
     switch (errorLevel) {
       case 0:
         console.warn(description, data);
@@ -300,15 +279,16 @@ export function processError(description, data) {
         }
         break;
 
-      default:
+      default:      
         console.error(description, data);
 
         if (data.error) {
           throw data.error;
         } else {
-          throw new Error(description);
-        }
+        throw new Error(description);
     }
+    }
+
   }
 }
 
@@ -316,15 +296,11 @@ export function processError(description, data) {
  * Print object in console log having in mind moment
  * @param {Object} obj
  */
-function mlogFunc(
-  momentObj,
-  title = `Moment is`,
-  format = `YYYY-MM-DD HH:mm:ss.SSS [GMT]ZZ [T] ddd,MMM`
-) {
-  if (momentObj == null) momentObj = { format: () => "moment is null" };
-  console.log(`[mlog] ${title} ${momentObj.format(format)}`);
+function mlogFunc(momentObj, title=`Moment is`, format=`YYYY-MM-DD HH:mm:ss.SSS [GMT]ZZ [T] ddd,MMM`) {
+  if (momentObj == null) momentObj = {format:()=>'moment is null'};
+  console.log(`[mlog] ${title} ${momentObj.format(format)}`)
 }
-function dlogFunc(obj, title = null, isInternal = false, indent = " ") {
+function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
   // reverse params if needed
   if (isObject(title) && isString(obj)) {
     let tmp = title;
@@ -339,16 +315,11 @@ function dlogFunc(obj, title = null, isInternal = false, indent = " ") {
     let item = obj[i];
 
     if (isMoment(item)) {
-      result +=
-        indent +
-        `${i}: ${item.format(
-          "YYYY-MM-DD HH:mm:ss.SSS GMTZ, ddd, MMM"
-        )} (moment)\n`;
+      result += indent + `${i}: ${item.format('YYYY-MM-DD HH:mm:ss.SSS GMTZ, ddd, MMM')} (moment)\n`;
     } else if (isObject(item)) {
-      result +=
-        indent + `${i}: {\n  ${dlog(item, i, true, indent)}${indent}}\n`;
+      result += indent + `${i}: {\n  ${dlog(item,i,true,indent)}${indent}}\n`;
     } else {
-      result += indent + `${i}: ${item} (${typeof item})\n`;
+      result += indent + `${i}: ${item} (${typeof(item)})\n`;
     }
     if (isFirst) {
       if (isInternal) indent += "  ";
@@ -370,10 +341,10 @@ function dlogFunc(obj, title = null, isInternal = false, indent = " ") {
 
 /**
  * Reactotron logging - for temporary debug
- * @param {String} tag
- * @param {String} description
- * @param {any} data
- * @param {Boolean} isImportant
+ * @param {String} tag 
+ * @param {String} description 
+ * @param {any} data 
+ * @param {Boolean} isImportant 
  */
 export function rlogd(tag, description, data, isImportant = false) {
   // if testing in jest etc.
@@ -387,6 +358,7 @@ export function rlogd(tag, description, data, isImportant = false) {
   }
 }
 
+
 /**
  * Reactotron custom logging using Reactotron.display
  * @param {String/Object} tag Tag as in ERROR, API, DEBUG etc. / Can be just an object to trace
@@ -397,29 +369,26 @@ export function rlogd(tag, description, data, isImportant = false) {
 export function rlog(tag, description, data, isImportant = false) {
   // if testing in jest etc.
   if (__MYDEV__ == undefined || __TEST__) {
-    console.log(
-      `[rlog] ${tag}`,
-      printAny(data ? { [description]: data } : description)
-    );
+    console.log(`[rlog] ${tag}`, printAny(data ? {[description]:data} : description));
     return;
   }
 
   let params = {};
   let doParsing = true;
-
+  
   if (typeof tag == "object") {
     if (!tag.name && !tag.preview) {
       const isArray = tag.length != null;
       params.important = true;
       params.name = isArray ? `array: ${tag.length}` : "object";
       if (isArray) {
-        params.value = { Array: tag, length: tag.length };
+        params.value = {Array:tag, length: tag.length};
       } else {
         let keys = "";
         for (let prop in tag) keys += `${prop}, `;
         keys = keys.substr(0, keys.length - 2);
         params.preview = `Object keys: ${keys.substr(0, 90)} ...`;
-        params.value = { Object: tag, keys };
+        params.value = {Object:tag, keys};
       }
     } else {
       params = tag;
@@ -429,7 +398,7 @@ export function rlog(tag, description, data, isImportant = false) {
     params.name = "LOG";
     params.preview = tag;
     doParsing = false;
-  }
+  } 
   if (typeof description == "object") {
     const obj = description;
     params.value = obj;
@@ -437,10 +406,10 @@ export function rlog(tag, description, data, isImportant = false) {
   }
 
   if (doParsing) {
-    if (tag) params.name = tag;
-    if (description) params.preview = description;
-    if (data) params.value = data;
-    if (isImportant) params.important = true;
+    if (tag)          params.name       = tag;
+    if (description)  params.preview    = description;
+    if (data)         params.value      = data;
+    if (isImportant)  params.important  = true;
   }
 
   if (params["value"] == null) {
@@ -448,7 +417,7 @@ export function rlog(tag, description, data, isImportant = false) {
   }
 
   params.value["_preview"] = params.preview;
-
+  
   // types parsing
   if (params.value && showTypesInReactotronLog && (__DEV__ && __MYDEV__)) {
     let parseObjTypes;
@@ -462,18 +431,13 @@ export function rlog(tag, description, data, isImportant = false) {
           if (isSymbol(item, className) || prop[0] == "_") {
             result[`${prop}:${className}`] = `[instance of ${className}]`;
           } else {
-            lodash.merge(result, {
-              [`${prop}:${className}`]: parseObjTypes(item)
-            });
+            lodash.merge(result,{[`${prop}:${className}`]:parseObjTypes(item)});
           }
         } else {
           try {
             result[prop] = `${item} (${className})`;
           } catch (error) {
-            processError(
-              `[config-debug::rlog::parseObjTypes] Error while setting result['${prop}']: ${error.message}`,
-              { error, item, result }
-            );
+            processError(`[config-debug::rlog::parseObjTypes] Error while setting result['${prop}']: ${error.message}`,{error,item,result})
           }
         }
       }
@@ -486,10 +450,11 @@ export function rlog(tag, description, data, isImportant = false) {
   console.tron.display(params);
 }
 
+
 export function configureDebug() {
   configureReactotron();
   configureConsole();
-
+  
   // axios debug
   //try { require('locktrip-svc-layer').setServiceDebug(false); } catch (error) {console.error('Error while setting debug to axios-requester',{error})}
 }
