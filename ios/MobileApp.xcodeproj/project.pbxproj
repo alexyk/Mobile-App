@@ -29,9 +29,6 @@
 		84000E4621D089EA000CD1D3 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
 		84000E7C21D08A65000CD1D3 /* libFastImage.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84000E7B21D08A5F000CD1D3 /* libFastImage.a */; };
 		8406846120EBD6F700C1BE01 /* Bolts.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8406845D20EBD6F700C1BE01 /* Bolts.framework */; };
-		8406846220EBD6F700C1BE01 /* FBSDKCoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8406845E20EBD6F700C1BE01 /* FBSDKCoreKit.framework */; };
-		8406846320EBD6F700C1BE01 /* FBSDKShareKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8406845F20EBD6F700C1BE01 /* FBSDKShareKit.framework */; };
-		8406846420EBD6F700C1BE01 /* FBSDKLoginKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8406846020EBD6F700C1BE01 /* FBSDKLoginKit.framework */; };
 		840DF36720D597F2005853D1 /* FuturaStd-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 840DF33120D59754005853D1 /* FuturaStd-Medium.otf */; };
 		8425DB49215A9AF100FD60FB /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8425DB3A215A9AAA00FD60FB /* libRNVectorIcons.a */; };
 		8425DB9C215A9EFF00FD60FB /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 8425DB8E215A9EFE00FD60FB /* Entypo.ttf */; };
@@ -416,9 +413,6 @@
 		84000E1B21D0838B000CD1D3 /* libreact-native-fast-image.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = "libreact-native-fast-image.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		84000E7521D08A5E000CD1D3 /* FastImage.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = FastImage.xcodeproj; path = "../node_modules/react-native-fast-image/ios/FastImage.xcodeproj"; sourceTree = "<group>"; };
 		8406845D20EBD6F700C1BE01 /* Bolts.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Bolts.framework; path = Frameworks/Bolts.framework; sourceTree = "<group>"; };
-		8406845E20EBD6F700C1BE01 /* FBSDKCoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKCoreKit.framework; path = Frameworks/FBSDKCoreKit.framework; sourceTree = "<group>"; };
-		8406845F20EBD6F700C1BE01 /* FBSDKShareKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKShareKit.framework; path = Frameworks/FBSDKShareKit.framework; sourceTree = "<group>"; };
-		8406846020EBD6F700C1BE01 /* FBSDKLoginKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = FBSDKLoginKit.framework; path = Frameworks/FBSDKLoginKit.framework; sourceTree = "<group>"; };
 		840DF33120D59754005853D1 /* FuturaStd-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "FuturaStd-Medium.otf"; sourceTree = "<group>"; };
 		8425DB09215A9AAA00FD60FB /* RNVectorIcons.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RNVectorIcons.xcodeproj; path = "../node_modules/react-native-vector-icons/RNVectorIcons.xcodeproj"; sourceTree = "<group>"; };
 		8425DB8E215A9EFE00FD60FB /* Entypo.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = Entypo.ttf; sourceTree = "<group>"; };
@@ -461,10 +455,8 @@
 				84B015A420D5B399004ED6EF /* libLRDRCTSimpleToast.a in Frameworks */,
 				46A6F58F204F4FBC00BF95D4 /* libRCTSplashScreen.a in Frameworks */,
 				ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */,
-				8406846220EBD6F700C1BE01 /* FBSDKCoreKit.framework in Frameworks */,
 				84000E4621D089EA000CD1D3 /* libRCTAnimation.a in Frameworks */,
 				146834051AC3E58100842450 /* libReact.a in Frameworks */,
-				8406846420EBD6F700C1BE01 /* FBSDKLoginKit.framework in Frameworks */,
 				00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */,
 				00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */,
 				00C302E81ABCBA2D00DB3ED1 /* libRCTImage.a in Frameworks */,
@@ -473,7 +465,6 @@
 				139105C61AF99C1200B5F7CC /* libRCTSettings.a in Frameworks */,
 				832341BD1AAA6AB300B99B32 /* libRCTText.a in Frameworks */,
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
-				8406846320EBD6F700C1BE01 /* FBSDKShareKit.framework in Frameworks */,
 				1805953097984CE2835EA643 /* libRNUUIDGenerator.a in Frameworks */,
 				99776688F31153BD51E7152E /* libPods-MobileApp.a in Frameworks */,
 			);
@@ -588,9 +579,6 @@
 			children = (
 				84000E1B21D0838B000CD1D3 /* libreact-native-fast-image.a */,
 				8406845D20EBD6F700C1BE01 /* Bolts.framework */,
-				8406845E20EBD6F700C1BE01 /* FBSDKCoreKit.framework */,
-				8406846020EBD6F700C1BE01 /* FBSDKLoginKit.framework */,
-				8406845F20EBD6F700C1BE01 /* FBSDKShareKit.framework */,
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
 				ED2971642150620600B7C4FE /* JavaScriptCore.framework */,
 				2D16E6891FA4F8E400B85C8A /* libReact.a */,
@@ -1312,10 +1300,12 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-MobileApp/Pods-MobileApp-resources.sh",
+				"${PODS_ROOT}/FBSDKCoreKit/FacebookSDKStrings.bundle",
 				"${PODS_ROOT}/GoogleMaps/Maps/Frameworks/GoogleMaps.framework/Resources/GoogleMaps.bundle",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/FacebookSDKStrings.bundle",
 				"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/GoogleMaps.bundle",
 			);
 			runOnlyForDeploymentPostprocessing = 0;

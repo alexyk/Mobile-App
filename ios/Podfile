@@ -49,6 +49,8 @@ target 'MobileApp' do
 
   pod 'RNReanimated', :path => '../node_modules/react-native-reanimated'
 
+  pod 'react-native-fbsdk', :path => '../node_modules/react-native-fbsdk'
+
 end
 
 post_install do |installer|
