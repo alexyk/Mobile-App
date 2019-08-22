@@ -97,11 +97,15 @@ const styles = StyleSheet.create({
 export const htmlViewStyleSheet = StyleSheet.create({
   body: {
     fontFamily: "FuturaStd-Light",
-    textAlign: "justify"
+    textAlign: "justify",
+    fontSize: 15
   },
   b: {
     fontWeight: "bold",
-    fontFamily: "FuturaStd-Light"
+  },
+  h2: {
+    fontWeight: "bold",
+    fontSize: 17
   }
 });
 
