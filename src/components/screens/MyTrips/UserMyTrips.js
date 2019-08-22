@@ -225,7 +225,7 @@ class UserMyTrips extends Component {
         const dateFormat = 'DD MMM, YYYY'; // example: "01 Oct, 2019"
         const dateFrom = arrivalDate.format(dateFormat).toString();
         const dateTo = arrivalDate.add(item.item.nights, 'day').format(dateFormat).toString();
-        const arrow = (<LTIcon name={'longArrowRight'} />);
+        const arrow = (<LTIcon name={'longArrowRight'} size={12} />);
 
         return {
             hotelImageURL,
