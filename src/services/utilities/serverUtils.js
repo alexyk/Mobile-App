@@ -1,18 +1,19 @@
 import requester from "../../initDependencies";
-import { processError, ilog, clog, serverLogRequesting } from "../../config-debug";
+import { processError, ilog, serverLogRequesting } from "../../config-debug";
 import { getObjectClassName, isString } from "../../components/screens/utils";
 
 export const SERVER_ERROR = {
-  LEVEL_3_DATA_PROCESSING:          "LEVEL_3_DATA_PROCESSING",
   LEVEL_3_IN_REQUEST:               "LEVEL_3_IN_REQUEST",
   LEVEL_3_FROM_SERVER:              "LEVEL_3_FROM_SERVER",
   LEVEL_3_GETTING_SERVER_ERROR:     "LEVEL_3_GETTING_SERVER_ERROR",
   LEVEL_3_BODY_ERROR:               "LEVEL_3_BODY_ERROR",
   LEVEL_3_BODY_AS_ERROR:            "LEVEL_3_BODY_AS_ERROR",
   LEVEL_3_GETTING_BODY_ERROR:       "LEVEL_3_GETTING_BODY_ERROR",
-  LEVEL_2:                          "LEVEL_2",
   LEVEL_3_HTML_RESULT_FROM_SERVER:  "LEVEL_3_HTML_RESULT_FROM_SERVER",
-  LEVEL_1:                          "LEVEL_1"
+  LEVEL_2:                          "LEVEL_2",
+  LEVEL_1:                          "LEVEL_1",
+  SUCCESS_CALLBACK:                 "SUCCESS_CALLBACK",
+  ERROR_CALLBACK:                   "ERROR_CALLBACK",
 };
 
 /**
@@ -41,9 +42,28 @@ export function serverRequest(
     callerName = `${callerClassName}::${callerMethodName}`;
   }
 
+  const errorFunctionWrapped = function(thisObject, errorData, errorCode, message) {
+    let hasError = false;
+    try {
+      errorFunction.call(thisObject, errorData, errorCode);
+    } 
+    catch (error) {
+      hasError = true;
+      errorData = { errorDataOrig: errorData, error }
+    }
+    finally {
+      if (hasError) {
+        errorCode = SERVER_ERROR.ERROR_CALLBACK;
+        processError(`[serverUtils] [${callerName}] Error processing request ${requestName} - thrown in error callback: ${errorData.error.message}`, errorData, errorCode);  
+      } else {
+        processError(`[serverUtils] [${callerName}] ${message}`, errorData, errorCode);
+      }
+    }
+  }
+
   if (callFunction == null) {
     if (errorFunction) {
-      errorFunction.call(thisObject, new Error(`[serverRequest][${callerName}] The call does not exist in requester`));
+      errorFunctionWrapped(thisObject, new Error(`[serverRequest][${callerName}] The call does not exist in requester`));
     }
     return;
   }
@@ -64,16 +84,14 @@ export function serverRequest(
               successFunction.call(thisObject, data);
             } catch (error) {
               errorData = { error };
-              errorCode = SERVER_ERROR.LEVEL_3_DATA_PROCESSING;
-              errorFunction.call(thisObject, errorData, errorCode);
-              processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 3, data processing: ${error.message}`, errorData, errorCode);
+              errorCode = SERVER_ERROR.SUCCESS_CALLBACK;
+              errorFunctionWrapped(thisObject, errorData, errorCode,`Error processing request ${requestName} - error in success callback: ${error.message}`);
             }
           })
           .catch(function(error) {
             errorData = { error };
             errorCode = SERVER_ERROR.LEVEL_3_IN_REQUEST;
-            errorFunction.call(thisObject, errorData, errorCode);
-            processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 3 - in request: ${error.message}`, errorData, errorCode);
+            errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 3 - in request: ${error.message}`);
           });
       } else {
         if (res.errors && res.errors instanceof Promise) {
@@ -82,55 +100,45 @@ export function serverRequest(
               errorData = error;
               if (error.jsonError) {
                 errorCode = SERVER_ERROR.LEVEL_3_HTML_RESULT_FROM_SERVER;
-                errorFunction.call(thisObject, errorData, errorCode);
-                processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 2 - HTML data`, errorData, errorCode);
+                errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 2 - HTML data`);
               } else {      
                 errorCode = SERVER_ERROR.LEVEL_3_FROM_SERVER;
-                errorFunction.call(thisObject, errorData, errorCode);
-                processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 3 - errors from server`, errorData, errorCode);
+                errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 3 - errors from server`);
               }
             })
             .catch(function(error) {
               errorData = { error };
               errorCode = SERVER_ERROR.LEVEL_3_GETTING_SERVER_ERROR;
-              errorFunction.call(thisObject, errorData, errorCode);
-              processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 3 - getting errors from server`, errorData, errorCode);
+              errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 3 - getting errors from server`);
             });
         } else if (res.body instanceof Promise) {
           if (res.body._55 instanceof Error) {
             errorData = { error:res.body._55 };
             errorCode = SERVER_ERROR.LEVEL_3_BODY_AS_ERROR;
-            errorFunction.call(thisObject, errorData, errorCode);
-            processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 3 - body error`, errorData, errorCode);
+            errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 3 - body error`);
           } else {
             res.body
               then(function(errors) {
                 errorData = { errors };
                 errorCode = SERVER_ERROR.LEVEL_3_BODY_ERROR;
-                errorFunction.call(thisObject, errorData, errorCode);
-                processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 3 - body error`, errorData, errorCode);
+                errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 3 - body error`);
               })
               .catch(function(error) {
                 errorData = { errors };
                 errorCode = SERVER_ERROR.LEVEL_3_GETTING_BODY_ERROR;
-                errorFunction.call(thisObject, errorData, errorCode);
-                processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 2 - getting body error`, errorData, errorCode);
+                errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 2 - getting body error`);
               });
           }
         } else {
           errorData = { res };
           errorCode = SERVER_ERROR.LEVEL_2;
-          errorFunction.call(thisObject, errorData, errorCode);
-          processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 2`, errorData, errorCode);
+          errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 2`);
         }
       }
-    }, function(...args) {
-      clog('[serverRequest] reject',args)
     })
     .catch(function(error) {
       errorData = { error };
       errorCode = SERVER_ERROR.LEVEL_1;
-      errorFunction.call(thisObject, errorData, errorCode);
-      processError(`[serverUtils] [${callerName}] Error when requesting ${requestName} from server - level 1: ${error.message}`, errorData, errorCode);
+      errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 1: ${error.message}`);
     });
 }

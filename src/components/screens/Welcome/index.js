@@ -227,7 +227,8 @@ class Welcome extends Component {
         if (errors && errors.hasOwnProperty("CountryNull")) {
           _this.setState({ locationDialogVisible: true });
         } else if (errors && errors.hasOwnProperty("IncorrectPassword")) {
-          if (this.fbInfo.email != null) {
+          const { email } = this.fbInfo;
+          if (email != null) {
             this.props.navigation.navigate("Login", { email });
           }
         } else {

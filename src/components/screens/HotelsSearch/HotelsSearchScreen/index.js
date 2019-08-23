@@ -352,7 +352,7 @@ class HotelsSearchScreen extends Component {
 
       // initiate search
       // prettier-ignore
-      serverRequest(this, requester.getSearchHotelResults, [query], this.onServerStaticHotels, this.onServerStaticHotelsError);
+      serverRequest(this, requester.getSearchHotelResults, [query], this.onServerStartSearch, this.onServerStartSearchError);
     });
   }
 
@@ -604,6 +604,17 @@ class HotelsSearchScreen extends Component {
       hotelsInfoForMap: hotelsToRender,
       pricesFromSocketValid
     };
+  }
+
+  onServerStartSearch(data) {
+    const { search_started: isSearchStarted } = data;
+    if (!isSearchStarted) {
+      processError('[HotelsSearchScreen::onServerStartSearch] Search seems to have not been started', data);
+    }
+  }
+  
+  onServerStartSearchError(errorData, errorCode) {
+    // nothing so far
   }
 
   onDoneSocket = data => {
