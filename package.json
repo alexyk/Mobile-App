@@ -1,6 +1,6 @@
 {
   "name": "Mobile-App",
-  "version": "1.0.24",
+  "version": "1.1.0-rc1",
   "private": true,
   "devDependencies": {
     "@babel/core": "7.5.5",
@@ -47,7 +47,7 @@
     "immutability-helper": "3.0.1",
     "immutable": "3.8.2",
     "javascript-time-ago": "2.0.1",
-    "locktrip-svc-layer": "git+https://github.com/LockTrip/Service-Layer.git#v1.1.4",
+    "locktrip-svc-layer": "git+https://github.com/LockTrip/Service-Layer.git#v1.1.5-mobile",
     "lodash": "4.17.15",
     "missing": "0.0.1",
     "moment": "2.24.0",

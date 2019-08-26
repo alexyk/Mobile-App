@@ -38,7 +38,7 @@ git add src/version.js
 git add src/config.js
 
 # version
-if [ $2 != "" ]; then
+if [ "$2" != "" ]; then
 	ver=$2
 	extra_params="-f"
 	[ $3 == "no-tag" ] && extra_params="-f --no-git-tag-version"
