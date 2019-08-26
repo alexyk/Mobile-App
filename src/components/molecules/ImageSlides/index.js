@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { View, Text, Dimensions, Image } from "react-native";
 import SideSwipe from "react-native-sideswipe";
 import { getSafeTopOffset } from "../../../utils/designUtils";
+import { commonText } from "../../../common.styles";
 
 export default class ImageSlides extends Component {
   constructor(props) {
@@ -63,13 +64,23 @@ export default class ImageSlides extends Component {
     const logoHeight =
       height != null ? height : windowHeight * 0.3 + getSafeTopOffset();
 
-    const hasItems = data != null && data.length > 0;
+    const hasItems = (data != null && data.length > 0);
 
-    return (
-      <View style={style}>
-        {this._renderImageSlides(data, logoWidth, logoHeight)}
-        {this._renderSlideNumber(currentIndex + 1, hasItems ? data.length : 0)}
-      </View>
-    );
+    if (hasItems) {
+      return (
+        <View style={style}>
+          {this._renderImageSlides(data, logoWidth, logoHeight)}
+          {this._renderSlideNumber(currentIndex + 1, hasItems ? data.length : 0)}
+        </View>
+      );
+    } else {
+      // prettier-ignore
+      return (
+        <View style={{height:logoHeight+70, top: 70, alignItems: 'center', justifyContent: 'center', width: "100%", ...style}}>
+          <Text style={{...commonText, color: '#5557', fontSize: 16}}>{`No images found for this hotel`}</Text>
+        </View>
+      );    
+    }
+
   }
 }

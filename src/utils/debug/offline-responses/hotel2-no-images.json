@@ -1,0 +1,143 @@
+{
+  "id": 342294,
+  "name": "Far Home Plaza Mayor Hostal",
+  "country": "Spain",
+  "city": "Madrid",
+  "star": 0,
+  "latitude": "40.412866",
+  "longitude": "-3.703826",
+  "externalId": 51420203,
+  "hotelPhotos": [],
+  "additionalInfo": {
+    "email": "plazamayor@farhomehostels.com",
+    "zip": "",
+    "fax": null,
+    "tel": "+34933694694",
+    "mainAddress": "Calle del Doctor Cortezo, 15, Madrid, Spain",
+    "secondAddress": null,
+    "url": "plazamayor@farhomehostels.com"
+  },
+  "generalDescription": "<h4>Location</h4>\n<p>Hotel Hostal Far Home Plaza Mayor is situated in the historic center of Madrid.</p>\n<h4>Hotel features</h4>\n<p>Wi-Fi is available throghout the property. Friendly staff at the 24-hour front desk will be glad to answer your questions. Room service is provided round-the-clock. The entire hotel is non-smoking.</p>\n<h4>Important - Please Note</h4><p><p>Know Before You Go</p>\n<p>Cash transactions at this property cannot exceed EUR 2500, due to national regulations. For further details, please contact the property using information in the booking confirmation.</p>\n<p>Only registered guests are allowed in the guestrooms.</p>\n<p>No pets and no service animals are allowed at this property.</p>\n",
+  "hotelAmenities": [
+    {
+      "id": 1178,
+      "text": "Laundry ",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 23,
+      "text": "Air Conditioning",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 1076,
+      "text": "Internet Access",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 1442,
+      "text": "On Shuttle Route",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 2147,
+      "text": "Vending Machine(s)",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 2196,
+      "text": "Wakeup Service",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 439,
+      "text": "Computer",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 249,
+      "text": "Braille Coded Exits",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 1190,
+      "text": "Library",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 1409,
+      "text": "Non Smoking Rooms",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 1895,
+      "text": "Smoke-Free Building",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 423,
+      "text": "Common Kitchen",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 1233,
+      "text": "Luggage Storage",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 40,
+      "text": "Airport Transfer",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 1825,
+      "text": "Shower",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 1726,
+      "text": "Room Service",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 677,
+      "text": "Elevator/Lifts",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 931,
+      "text": "Heating ",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 2010,
+      "text": "TV",
+      "code": null,
+      "picture": null
+    },
+    {
+      "id": 2249,
+      "text": "Wi-Fi",
+      "code": null,
+      "picture": null
+    }
+  ]
+}
