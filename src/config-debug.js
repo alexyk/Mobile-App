@@ -92,6 +92,8 @@ export const autoHomeSearch                     = false;
 export const autoHomeSearchPlace                = 'uk1'
   // calendar
 export const autoCalendar                       = false;
+  // webview
+export const simpleWebviewTest                  = false; //"https://patrickhlauke.github.io/recaptcha/";
 // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log

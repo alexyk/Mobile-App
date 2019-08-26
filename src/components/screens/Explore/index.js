@@ -23,7 +23,7 @@ import {
   isOnline,
   processError,
   ilog,
-  clog
+  simpleWebviewTest
 } from "../../../config-debug";
 import requester from "../../../initDependencies";
 import lang from "../../../language";
@@ -34,7 +34,7 @@ import LocRateButton from "../../atoms/LocRateButton";
 import SingleSelectMaterialDialog from "../../atoms/MaterialDialog/SingleSelectMaterialDialog";
 import SearchBar from "../../molecules/SearchBar";
 import DateAndGuestPicker from "../../organisms/DateAndGuestPicker";
-import { gotoWebview, stringifyRoomsData } from "../utils";
+import { gotoWebview, stringifyRoomsData, gotoWebviewSimple } from "../utils";
 import styles from "./styles";
 import { formatDatesData } from "../Calendar/utils";
 import { hotelSearchIsNative } from "../../../config-settings";
@@ -104,7 +104,7 @@ class Explore extends Component {
 
     if (email) {
       AsyncStorage.setItem(`${domainPrefix}.auth.username`, email);
-      this.setState({email});
+      this.setState({ email });
     }
 
     // TODO: Replace all references to user data (async storage)
@@ -119,8 +119,12 @@ class Explore extends Component {
   }
 
   async componentWillMount() {
-    const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
-    const email_value = await AsyncStorage.getItem(`${domainPrefix}.auth.username`);
+    const token_value = await AsyncStorage.getItem(
+      `${domainPrefix}.auth.locktrip`
+    );
+    const email_value = await AsyncStorage.getItem(
+      `${domainPrefix}.auth.username`
+    );
     const newState = { token: token_value, email: email_value };
     this.setState(newState);
     this.props.setDatesAndGuestsData({
@@ -325,6 +329,39 @@ class Explore extends Component {
   }
 
   gotoSearch() {
+    // prettier-ignore
+    if (__DEV__ && simpleWebviewTest) {
+      // prettier-ignore
+      gotoWebviewSimple({
+        url: simpleWebviewTest,
+        message: `Loading webview test ...\n\nFor details - see simpleWebviewTest\nin config-debug.js`,
+        injectJS: `
+          window.ReactNativeWebView.postMessage("Hello Inject!");
+          true;
+        `,
+        injectedJS: `
+                      window.document.addEventListener('click', function (event) {
+                        console.log(event);
+                        console.info(event.target);
+                        window.ReactNativeWebView.postMessage("history++")
+                      }, false);
+                      window.ReactNativeWebView.postMessage("Hello Injected! (1 time)")
+                    `
+      });
+      // fetch(simpleWebviewTest)
+      //   .then(response => {
+      //     if (response.ok) {
+      //       response
+      //         .text()
+      //         .then(data => {
+      //           gotoWebviewSimple({ body: data });
+      //         });
+      //     }
+      //   });
+
+      return;
+    }
+
     const delayedFunction = () => {
       const extraParams = this._cacheLoginAndRegion();
       console.log(

@@ -74,6 +74,7 @@ import HomeReview from "../components/screens/HomeSearch/HomeReview";
 import HomeRequestConfirm from "../components/screens/HomeSearch/HomeRequestConfirm";
 
 import MapFullScreen from "../components/screens/MapFullScreen";
+import navigationService from "../services/navigationService";
 
 export const MyTripNavigator = createStackNavigator(
   {
@@ -199,7 +200,13 @@ class ReduxNavigation extends PureComponent {
     const { visibleConfirmDialog } = this.state;
     return (
       <View style={{ flex: 1 }}>
-        <AppWithNavigationState dispatch={dispatch} state={state} />
+        <AppWithNavigationState
+          ref={navigatorRef => {
+            navigationService.setTopLevelNavigator(navigatorRef);
+          }}
+          dispatch={dispatch}
+          state={state}
+        />
         <ExitConfirmDialog
           title={"Confirm"}
           visible={visibleConfirmDialog}

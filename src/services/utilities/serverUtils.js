@@ -1,6 +1,6 @@
 import requester from "../../initDependencies";
 import { processError, ilog, serverLogRequesting } from "../../config-debug";
-import { getObjectClassName, isString } from "../../components/screens/utils";
+import { getObjectClassName, isString, gotoWebviewSimple } from "../../components/screens/utils";
 
 export const SERVER_ERROR = {
   LEVEL_3_IN_REQUEST:               "LEVEL_3_IN_REQUEST",
@@ -97,9 +97,11 @@ export function serverRequest(
         if (res.errors && res.errors instanceof Promise) {
           res.errors
             .then(function(error) {
+              const { responseAsRawText, jsonError } = error;
               errorData = error;
-              if (error.jsonError) {
+              if (jsonError) {
                 errorCode = SERVER_ERROR.LEVEL_3_HTML_RESULT_FROM_SERVER;
+                gotoWebviewSimple({body: responseAsRawText});
                 errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 2 - HTML data`);
               } else {      
                 errorCode = SERVER_ERROR.LEVEL_3_FROM_SERVER;

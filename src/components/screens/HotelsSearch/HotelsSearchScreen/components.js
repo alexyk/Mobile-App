@@ -516,9 +516,9 @@ export function renderPreloader() {
       : ''
   )*/
   const propertiesText =
-    this.state.pricesFromSocketValid > 0
+    /* this.state.pricesFromSocketValid > 0
       ? `\n\n${this.state.pricesFromSocketValid} found ${totalText}`
-      : "";
+      : */ "";
   const message =
     isList || isMap
       ? isFiltering

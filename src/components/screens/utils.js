@@ -1,6 +1,7 @@
 import { isMoment } from "moment";
 import { basePath } from "../../config";
 import { StyleSheet } from "react-native";
+import navigationService from "../../services/navigationService";
 
 export function validateObject(sourceData, props, index = -1, path = "") {
   let result = "";
@@ -228,7 +229,6 @@ export function getWebviewExtraData(state, extraData = {}) {
   };
 }
 
-// TODO: Refactor this to use a simple & obvious params flow (examples: url, searchParams, cache)
 export function gotoWebview(
   state,
   navigation,
@@ -239,6 +239,14 @@ export function gotoWebview(
     ...getWebviewExtraData(state, extraData),
     useCachedSearchString
   });
+}
+
+/**
+ * 
+ * @param {Object} simpleParams The object has the following properties: {body, url, message, injectJS, injectedJS}
+ */
+export function gotoWebviewSimple(simpleParams) {
+  navigationService.navigate("WebviewScreen", { simpleParams });
 }
 
 export function isArray(value) {
