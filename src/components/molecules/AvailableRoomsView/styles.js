@@ -17,15 +17,12 @@ const styles = StyleSheet.create({
 
   listItem: {
     width: "100%",
-    height: 75,
     flexDirection: "column",
     marginTop: 5,
     marginBottom: 5,
     paddingLeft: 10,
     paddingRight: 10,
     backgroundColor: "#ffffff"
-    // borderWidth:0.3,
-    // borderColor:'#cccccc',
   },
 
   name: {
