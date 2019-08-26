@@ -253,6 +253,21 @@ export function isArray(value) {
   return value instanceof Array;
 }
 
+export function processGuestsData(adults, rooms, childrenAgeValuesByRoom) {
+  let result = [];
+  let averageAdults = Math.floor(adults/rooms);
+  let firstRoomAdults = (averageAdults + (adults % rooms));
+
+  childrenAgeValuesByRoom.forEach((item, index) => {
+    result.push({
+      adults: (index == 0 ? firstRoomAdults : averageAdults),
+      children: item
+    });
+  });
+
+  return result;
+}
+
 export function stringifyRoomsData(roomsData) {
   const result = encodeURI(JSON.stringify(roomsData));
 

@@ -34,7 +34,12 @@ import LocRateButton from "../../atoms/LocRateButton";
 import SingleSelectMaterialDialog from "../../atoms/MaterialDialog/SingleSelectMaterialDialog";
 import SearchBar from "../../molecules/SearchBar";
 import DateAndGuestPicker from "../../organisms/DateAndGuestPicker";
-import { gotoWebview, stringifyRoomsData, gotoWebviewSimple } from "../utils";
+import {
+  gotoWebview,
+  stringifyRoomsData,
+  gotoWebviewSimple,
+  processGuestsData
+} from "../utils";
 import styles from "./styles";
 import { formatDatesData } from "../Calendar/utils";
 import { hotelSearchIsNative } from "../../../config-settings";
@@ -280,13 +285,8 @@ class Explore extends Component {
   updateData(data) {
     const { adults, children, childrenAgeValues, rooms } = data;
 
-    let roomsData = {};
-    roomsData["adults"] = adults;
-    roomsData["children"] = [];
-    for (let i = 0; i < children; i++) {
-      roomsData["children"].push({ age: childrenAgeValues[i] });
-    }
-    let roomsDummyData = stringifyRoomsData([roomsData]);
+    let parsedData = processGuestsData(adults, rooms, childrenAgeValues);
+    let roomsDummyData = stringifyRoomsData(parsedData);
 
     const newState = {
       adults,
