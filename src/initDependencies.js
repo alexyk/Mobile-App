@@ -1,13 +1,15 @@
 import { apiHost, domainPrefix, xDeviceVersion } from "./config";
 import { isOnline } from "./config-debug";
+import { NETWORK_CONNECTION_TIMEOUT } from "./config-settings";
 
 import { AsyncStorage } from "react-native";
 import Requester from "locktrip-svc-layer";
 import requesterOffline from "./utils/debug/offline";
 
 let config = {
-  apiHost: apiHost,
-  domainPrefix: domainPrefix
+  apiHost,
+  domainPrefix,
+  connectionTimeout: NETWORK_CONNECTION_TIMEOUT * 1000
 };
 
 let requester;

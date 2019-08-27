@@ -11,6 +11,7 @@ export const SERVER_ERROR = {
   LEVEL_3_GETTING_BODY_ERROR:       "LEVEL_3_GETTING_BODY_ERROR",
   LEVEL_3_HTML_RESULT_FROM_SERVER:  "LEVEL_3_HTML_RESULT_FROM_SERVER",
   LEVEL_2:                          "LEVEL_2",
+  LEVEL_1_TIMEOUT:                  "LEVEL_1_TIMEOUT",
   LEVEL_1:                          "LEVEL_1",
   SUCCESS_CALLBACK:                 "SUCCESS_CALLBACK",
   ERROR_CALLBACK:                   "ERROR_CALLBACK",
@@ -140,7 +141,12 @@ export function serverRequest(
     })
     .catch(function(error) {
       errorData = { error };
-      errorCode = SERVER_ERROR.LEVEL_1;
-      errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 1: ${error.message}`);
+      if (error.message == "timeout") {
+        errorCode = SERVER_ERROR.LEVEL_1_TIMEOUT;
+        errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 1 - network timeout: ${error.message}`);        
+      } else {
+        errorCode = SERVER_ERROR.LEVEL_1;
+        errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 1: ${error.message}`);
+      }
     });
 }
