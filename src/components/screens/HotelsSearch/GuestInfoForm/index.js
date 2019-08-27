@@ -4,7 +4,6 @@ import {
   Text,
   KeyboardAvoidingView,
   ScrollView,
-  BackHandler,
   Platform
 } from "react-native";
 
@@ -84,10 +83,6 @@ class GuestInfoForm extends Component {
   componentWillMount() {
     this.prepareGuestsData();
     this._serviceRequestSCMode();
-
-    if (Platform.OS == "android") {
-      BackHandler.addEventListener("hardwareBackPress", this._onBackPress);
-    }
   }
 
   componentDidMount() {
@@ -96,9 +91,6 @@ class GuestInfoForm extends Component {
 
   componentWillUnmount() {
     WebsocketClient.startGrouping();
-    if (Platform.OS == "android") {
-      BackHandler.removeEventListener("hardwareBackPress", this._onBackPress);
-    }
   }
 
   _getRoomType(roomDetail) {
@@ -424,9 +416,6 @@ class GuestInfoForm extends Component {
 
   _onBackPress() {
     this.props.navigation.goBack();
-    if (Platform.OS == "android") {
-      return true;
-    }
   }
 
   _renderHotelInfo(params) {

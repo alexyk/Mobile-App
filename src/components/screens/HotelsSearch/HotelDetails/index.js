@@ -1,13 +1,4 @@
-import {
-  Dimensions,
-  ScrollView,
-  View,
-  Image,
-  Text,
-  TouchableOpacity,
-  Platform,
-  BackHandler
-} from "react-native";
+import { ScrollView, View, TouchableOpacity } from "react-native";
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 import AvailableRoomsView from "../../../molecules/AvailableRoomsView";
@@ -16,10 +7,9 @@ import HotelDetailView from "../../../organisms/HotelDetailView";
 import LocationView from "../../../atoms/LocationView";
 import BackButton from "../../../atoms/BackButton";
 import styles from "./styles";
-import SideSwipe from "react-native-sideswipe";
 import { connect } from "react-redux";
 import { hotelSearchIsNative } from "../../../../config-settings";
-import { getSafeTopOffset, SCREEN_SIZE } from "../../../../utils/designUtils";
+import { SCREEN_SIZE } from "../../../../utils/designUtils";
 import ImageSlides from "../../../molecules/ImageSlides";
 
 class HotelDetails extends Component {
@@ -68,21 +58,6 @@ class HotelDetails extends Component {
     };
 
     this.onBackButtonPress = this.onBackButtonPress.bind(this);
-  }
-
-  componentWillMount() {
-    if (Platform.OS == "android") {
-      BackHandler.addEventListener("hardwareBackPress", this.onBackButtonPress);
-    }
-  }
-
-  componentWillUnmount() {
-    if (Platform.OS == "android") {
-      BackHandler.removeEventListener(
-        "hardwareBackPress",
-        this.onBackButtonPress
-      );
-    }
   }
 
   componentDidMount() {

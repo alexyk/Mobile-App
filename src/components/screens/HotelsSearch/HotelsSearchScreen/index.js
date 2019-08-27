@@ -20,7 +20,6 @@
  * 
  */
 import React, { Component } from "react";
-import { BackHandler } from "react-native";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import {
@@ -220,12 +219,6 @@ class HotelsSearchScreen extends Component {
     }
   }
 
-  componentWillMount() {
-    if (Platform.OS == "android") {
-      BackHandler.addEventListener("hardwareBackPress", this.onBackButtonPress);
-    }
-  }
-
   componentWillUnmount() {
     this.isUnmounted = true;
     this.isSocketDown = true;
@@ -234,13 +227,6 @@ class HotelsSearchScreen extends Component {
     clearTimeout(this.staticTimeoutId);
 
     this.stopSocketConnection();
-
-    if (Platform.OS == "android") {
-      BackHandler.removeEventListener(
-        "hardwareBackPress",
-        this.onBackButtonPress
-      );
-    }
   }
 
   startSocketDataConnectionTimeOut() {
@@ -689,10 +675,6 @@ class HotelsSearchScreen extends Component {
           break;
       }
     }
-
-    if (Platform.OS == "android") {
-      return true;
-    }
   }
 
   onToggleMapOrListResultsView() {
@@ -737,57 +719,53 @@ class HotelsSearchScreen extends Component {
         });
       } else {
         this.setState({ isLoading: true });
-        requester
-          .getHotelById(item.id, this._searchString.split("&"))
-          .then(res => {
-            //console.log("requester.getHotelById", res);
-            // here you set the response in to json
-            res.body
-              .then(data => {
-                console.log("requester.getHotelById data", data);
-                const hotelPhotos = [];
-                for (let i = 0; i < data.hotelPhotos.length; i++) {
-                  hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
-                }
-                this.setState({ isLoading: false });
-                this.props.navigation.navigate("HotelDetails", {
-                  guests: this.state.guests,
-                  hotelDetail: item,
-                  searchString: this._searchString,
-                  hotelFullDetails: data,
-                  dataSourcePreview: hotelPhotos,
-                  daysDifference: this.state.daysDifference
-                });
-              })
-              .catch(err => {
-                //console.log(err);
-              });
-          });
+
+        serverRequest(this, requester.getHotelById, [item.id, this._searchString.split("&")],
+          data => {
+            console.log("requester.getHotelById data", data);
+            const hotelPhotos = [];
+            for (let i = 0; i < data.hotelPhotos.length; i++) {
+              hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
+            }
+            this.setState({ isLoading: false });
+
+            this.props.navigation.navigate("HotelDetails", {
+              guests: this.state.guests,
+              hotelDetail: item,
+              searchString: this._searchString,
+              hotelFullDetails: data,
+              dataSourcePreview: hotelPhotos,
+              daysDifference: this.state.daysDifference
+            });
+          },
+          errorData => {
+            //
+          }
+        );
       }
     }
-  };
+  }
 
   gotoHotelDetailsPageNative(item) {
-    requester.getHotelById(item.id, this._searchString.split("&")).then(res => {
-      // here you set the response in to json
-      res.body
-        .then(data => {
-          const hotelPhotos = [];
-          for (let i = 0; i < data.hotelPhotos.length; i++) {
-            hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
-          }
-          this.setState({ isLoading: false });
-          this.props.navigation.navigate("HotelDetails", {
-            hotelDetail: item,
-            hotelFullDetails: data,
-            dataSourcePreview: hotelPhotos,
-            daysDifference: this.state.daysDifference
-          });
-        })
-        .catch(err => {
-          //console.log(err);
+    serverRequest(this, requester.getHotelById, [item.id, this._searchString.split("&")],
+      data => {
+        const hotelPhotos = [];
+        for (let i = 0; i < data.hotelPhotos.length; i++) {
+          hotelPhotos.push({ uri: imgHost + data.hotelPhotos[i].url });
+        }
+        this.setState({ isLoading: false });
+
+        this.props.navigation.navigate("HotelDetails", {
+          hotelDetail: item,
+          hotelFullDetails: data,
+          dataSourcePreview: hotelPhotos,
+          daysDifference: this.state.daysDifference
         });
-    });
+      }, 
+      errorData => {
+        //
+      }
+    );
   }
 
   onFilteredData(res) {
