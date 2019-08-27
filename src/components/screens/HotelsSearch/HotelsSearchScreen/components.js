@@ -171,7 +171,7 @@ export function renderResultsAsList() {
         // //console.log(`### [HotelsSearchScreen] item:${item}: index:${index}`)
         return `${index} - ${item}`;
       }} // this is required when you are using FlatList
-      refreshableMode={"basic"}
+      refreshable={false}
       numColumns={1} // to use grid layout, simply set gridColumn > 1
       item={this.renderListItem} // this takes three params (item, index, separator)
       paginationFetchingView={this.renderPaginationFetchingView}
