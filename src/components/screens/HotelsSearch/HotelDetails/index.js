@@ -24,7 +24,6 @@ class HotelDetails extends Component {
       navigate: () => {}
     }
   };
-  guests;
 
   constructor(props) {
     super(props);
