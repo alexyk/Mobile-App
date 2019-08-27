@@ -102,6 +102,7 @@ import stomp from "stomp-websocket-js";
 import { setIsApplyingFilter } from "../../../../redux/action/userInterface";
 import { setSearch, setSearchString } from "../../../../redux/action/hotels";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
+import { DURATION } from "react-native-easy-toast";
 
 let stompiOSClient = undefined;
 let stompAndroidClient = undefined;
@@ -165,6 +166,7 @@ class HotelsSearchScreen extends Component {
     this.onServerHotelsFromSocket = this.onServerHotelsFromSocket.bind(this);
     this.onServerStaticHotels = this.onServerStaticHotels.bind(this);
     this.onFilteredData = this.onFilteredData.bind(this);
+    this.onFilteredDataError = this.onFilteredDataError.bind(this);
     this.onFetchNewListViewData = this.onFetchNewListViewData.bind(this);
     this.onToggleMapOrListResultsView = this.onToggleMapOrListResultsView.bind(
       this
@@ -285,7 +287,10 @@ class HotelsSearchScreen extends Component {
     this.startStaticDataConnectionTimeOut();
 
     const { regionId } = this.state;
-    serverRequest(this, requester.getStaticHotels, [regionId, page, elementsCount],
+    serverRequest(
+      this,
+      requester.getStaticHotels,
+      [regionId, page, elementsCount],
       this.onServerStaticHotels,
       this.onServerStaticHotelsError
     );
@@ -595,10 +600,13 @@ class HotelsSearchScreen extends Component {
   onServerStartSearch(data) {
     const { search_started: isSearchStarted } = data;
     if (!isSearchStarted) {
-      processError('[HotelsSearchScreen::onServerStartSearch] Search seems to have not been started', data);
+      processError(
+        "[HotelsSearchScreen::onServerStartSearch] Search seems to have not been started",
+        data
+      );
     }
   }
-  
+
   onServerStartSearchError(errorData, errorCode) {
     // nothing so far
   }
@@ -720,7 +728,10 @@ class HotelsSearchScreen extends Component {
       } else {
         this.setState({ isLoading: true });
 
-        serverRequest(this, requester.getHotelById, [item.id, this._searchString.split("&")],
+        serverRequest(
+          this,
+          requester.getHotelById,
+          [item.id, this._searchString.split("&")],
           data => {
             console.log("requester.getHotelById data", data);
             const hotelPhotos = [];
@@ -744,10 +755,13 @@ class HotelsSearchScreen extends Component {
         );
       }
     }
-  }
+  };
 
   gotoHotelDetailsPageNative(item) {
-    serverRequest(this, requester.getHotelById, [item.id, this._searchString.split("&")],
+    serverRequest(
+      this,
+      requester.getHotelById,
+      [item.id, this._searchString.split("&")],
       data => {
         const hotelPhotos = [];
         for (let i = 0; i < data.hotelPhotos.length; i++) {
@@ -761,14 +775,24 @@ class HotelsSearchScreen extends Component {
           dataSourcePreview: hotelPhotos,
           daysDifference: this.state.daysDifference
         });
-      }, 
+      },
       errorData => {
         //
       }
     );
   }
 
-  onFilteredData(res) {
+  onFilteredDataError(errorData) {
+    this.props.setIsApplyingFilter(false);
+    this.setState({ error: lang.TEXT.SEARCH_HOTEL_FILTER_ERROR });
+
+    this.refs.toast.show(
+      `There was an error while applying filters.\nPlease check your connection and try searching again.`,
+      DURATION.FOREVER
+    );
+  }
+
+  onFilteredData(data) {
     const _this = this;
     if (!this || !(this instanceof HotelsSearchScreen) || this.isUnmounted) {
       console.warn(
@@ -777,120 +801,99 @@ class HotelsSearchScreen extends Component {
       return;
     }
 
-    if (res.success) {
-      res.body.then(data => {
-        // not used so far
-        // const isCacheExpired = data.isCacheExpired;
-        const count = data.content.length;
-        const hotelsAll = data.content;
-        checkHotelData(hotelsAll, "filter");
-        printCheckHotelDataCache();
-        rlog(
-          "@@filter-on-server",
-          `${count} filtered hotels, before parsing`,
-          { hotelsAll },
-          true
-        );
+    // not used so far
+    // const isCacheExpired = data.isCacheExpired;
+    const count = data.content.length;
+    const hotelsAll = data.content;
+    checkHotelData(hotelsAll, "filter");
+    printCheckHotelDataCache();
+    rlog(
+      "@@filter-on-server",
+      `${count} filtered hotels, before parsing`,
+      { hotelsAll },
+      true
+    );
 
-        // parse data
-        mergeAllHotelData(
-          hotelsAll,
-          this.hotelsSocketCacheMap,
-          this.hotelsStaticCacheMap
-        );
-        checkHotelData(hotelsAll, "filter-parsed");
-        printCheckHotelDataCache();
-        // log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
+    // parse data
+    mergeAllHotelData(
+      hotelsAll,
+      this.hotelsSocketCacheMap,
+      this.hotelsStaticCacheMap
+    );
+    checkHotelData(hotelsAll, "filter-parsed");
+    printCheckHotelDataCache();
+    // log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
 
-        const oldHotels = this.hotelsAll;
-        if (this.isFirstFilter) {
-          // caching to:
-          // an immediately available var
-          this.hotelsAll = hotelsAll;
-          // Redux
-          this.props.setSearch(hotelsAll);
-        }
-
-        // pagination of list component (renderResultsAsList)
-        this.listSetPageLimit(count, this.PAGE_LIMIT);
-
-        // log('filtered-hotels',`before processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax})
-        const { priceMin, priceMax, newIdsMap } = processFilteredHotels(
-          hotelsAll,
-          oldHotels,
-          this.hotelsIndicesByIdMap,
-          this.priceMin,
-          this.priceMax
-        );
-        this.priceMin = priceMin;
-        this.priceMax = priceMax;
-        this.hotelsIndicesByIdMap = newIdsMap;
-        // log('filtered-hotels',`after processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax,fromSocket:this.hotelsSocketCacheMap})
-
-        // update state with new hotels
-        this.setState(
-          // state update
-          prevState => {
-            this.listUpdateDataSource(hotelsAll);
-            const newState = {
-              hotelsInfo: hotelsAll,
-              hotelsInfoForMap: hotelsAll,
-              totalHotels: count,
-              isLoading: false
-            };
-            return newState;
-          },
-          // callback after state update
-          () => {
-            if (_this.filtersCallback) {
-              const func = () => {
-                _this.filtersCallback();
-                _this.filtersCallback = null;
-                _this.props.setIsApplyingFilter(false);
-                if (_this.isFirstFilter) {
-                  _this.isFirstFilter = false;
-                }
-              };
-              setTimeout(func, 100);
-            } else {
-              if (_this.isFirstFilter) {
-                _this.isFirstFilter = false;
-              }
-            }
-          }
-        );
-      });
-    } else {
-      // //console.log('Search expired');
-      this.props.setIsApplyingFilter(false);
-      this.setState({
-        error: lang.TEXT.SEARCH_HOTEL_FILTER_ERROR.replace("%1", res.message)
-      });
-      if (res.errors) {
-        res.errors.then(data => {
-          let { message } = data;
-          if (!message) {
-            message = `${data}`;
-          }
-          processError(`[HotelsSearchScreen] Filter error: ${message}`, {
-            res,
-            data
-          });
-        });
-      } else {
-        console.error("[HotelsSearchScreen] Filter error", { res });
-      }
+    const oldHotels = this.hotelsAll;
+    if (this.isFirstFilter) {
+      // caching to:
+      // an immediately available var
+      this.hotelsAll = hotelsAll;
+      // Redux
+      this.props.setSearch(hotelsAll);
     }
+
+    // pagination of list component (renderResultsAsList)
+    this.listSetPageLimit(count, this.PAGE_LIMIT);
+
+    // log('filtered-hotels',`before processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax})
+    const { priceMin, priceMax, newIdsMap } = processFilteredHotels(
+      hotelsAll,
+      oldHotels,
+      this.hotelsIndicesByIdMap,
+      this.priceMin,
+      this.priceMax
+    );
+    this.priceMin = priceMin;
+    this.priceMax = priceMax;
+    this.hotelsIndicesByIdMap = newIdsMap;
+    // log('filtered-hotels',`after processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax,fromSocket:this.hotelsSocketCacheMap})
+
+    // update state with new hotels
+    this.setState(
+      // state update
+      prevState => {
+        this.listUpdateDataSource(hotelsAll);
+        const newState = {
+          hotelsInfo: hotelsAll,
+          hotelsInfoForMap: hotelsAll,
+          totalHotels: count,
+          isLoading: false
+        };
+        return newState;
+      },
+      // callback after state update
+      () => {
+        if (_this.filtersCallback) {
+          const func = () => {
+            _this.filtersCallback();
+            _this.filtersCallback = null;
+            _this.props.setIsApplyingFilter(false);
+            if (_this.isFirstFilter) {
+              _this.isFirstFilter = false;
+            }
+          };
+          setTimeout(func, 100);
+        } else {
+          if (_this.isFirstFilter) {
+            _this.isFirstFilter = false;
+          }
+        }
+      }
+    );
   }
 
   onServerStaticHotelsError(errorData, errorCode) {
     this.listStartFetch([], 0);
-    this.setState({isLoading: false});
-    alert('There was a network issue. Please try searching again.');
+    this.setState({ isLoading: false });
+    this.refs.toast.show(
+      "There was a network issue. Please try searching again.",
+      DURATION.FOREVER
+    );
   }
 
   onServerStaticHotels(data) {
-    const isSkipping = (!this || !this.listViewRef || this.isUnmounted);
+    const isSkipping = !this || !this.listViewRef || this.isUnmounted;
 
     if (isSkipping) {
       console.warn(
@@ -1007,7 +1010,6 @@ class HotelsSearchScreen extends Component {
     );
 
     if (this.state.isLoading || this.props.isApplyingFilter) {
-      //log('[HotelsSearch] gotoFilter::toast', {state:this.state, props:this.props})
       this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTER_NA, 3000);
     } else {
       if (this.state.allElements) {
@@ -1135,10 +1137,14 @@ class HotelsSearchScreen extends Component {
     //      .getMapInfo( strSearch + strFilters )
     //      .then(this.onFilteredData);
 
-    requester
-      // .getLastSearchHotelResultsByFilter(strSearch, strFilters)
-      .getMapInfo(strSearch + strFilters)
-      .then(this.onFilteredData);
+    // .getLastSearchHotelResultsByFilter(strSearch, strFilters)
+    serverRequest(
+      this,
+      requester.getMapInfo,
+      [strSearch + strFilters],
+      this.onFilteredData,
+      this.onFilteredDataError
+    );
   };
 
   onWebViewLoadStart() {
