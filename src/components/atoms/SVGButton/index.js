@@ -22,7 +22,7 @@ const SVGButton = props => {
 SVGButton.propTypes = {
   onPress: PropTypes.func,
   style: PropTypes.oneOfType([PropTypes.number, PropTypes.object]),
-  imageStyle: PropTypes.number
+  imageStyle: PropTypes.any
 };
 
 SVGButton.defaultProps = {
