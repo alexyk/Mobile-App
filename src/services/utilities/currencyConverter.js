@@ -15,7 +15,7 @@ class CurrencyConverter {
       exchangeRates &&
       from &&
       to &&
-      quantity &&
+      quantity != null &&
       exchangeRates[from] &&
       exchangeRates[from][to]
     ) {
