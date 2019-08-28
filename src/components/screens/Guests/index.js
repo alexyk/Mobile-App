@@ -126,12 +126,8 @@ class Guests extends Component {
   onWithChildrenClick(value) {
     const { rooms, childrenAgeValues } = this.state;
     const cache = this._childAgesCached;
-    const newAgeValues = modifyRoomsForChildrenData(
-      1,
-      rooms,
-      childrenAgeValues,
-      cache
-    );
+    // prettier-ignore
+    const newAgeValues = modifyRoomsForChildrenData(rooms, rooms, childrenAgeValues, cache);
 
     updateChildAgesCache(null, newAgeValues, cache);
 
