@@ -22,6 +22,7 @@ import { SC_NAME, DEFAULT_CRYPTO_CURRENCY } from "../../../../config-settings";
 import { processError, rlog } from "../../../../config-debug";
 import { gotoWebview } from "../../utils";
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
+import { cloneDeep } from "lodash";
 
 import Image from "react-native-remote-svg";
 import GuestFormRow from "./GuestFormRow";
@@ -34,12 +35,13 @@ import StringUtils from "../../../../services/utilities/stringUtilities";
 import TopBar from "../../../molecules/TopBar";
 import { setGuestData } from "../../../../redux/action/hotels";
 import lang from "../../../../language";
+import { serverRequest } from "../../../../services/utilities/serverUtils";
 
 class GuestInfoForm extends Component {
   constructor(props) {
     super(props);
 
-    const { guestData } = props; // retrieve from redux cache
+    const { guestData } = props; // retrieved from redux cache
     const { params } = props.navigation.state;
     const { startDateText, endDateText } = props.datesAndGuestsData;
 
@@ -50,7 +52,7 @@ class GuestInfoForm extends Component {
       scMode: false,
       buttonLabel: "Loading ...",
 
-      guests: guestData ? guestData.concat() : null,
+      guests: guestData ? cloneDeep(guestData) : null,
       roomType: this._getRoomType(params.roomDetail),
       datesText: lang.TEXT.WAITING_FOR_RESERVATION_CREATION,
       arrivalDate: startDateText,
@@ -66,10 +68,7 @@ class GuestInfoForm extends Component {
 
     this._bookingParams = null;
     this._guestsCollection = [];
-    const guestsCount = params.guests;
-    for (let i = 0; i < guestsCount; i++) {
-      this._guestsCollection.push({ title: "Mr", firstName: "", lastName: "" });
-    }
+    // this._initialGuestsData(roomsData);
 
     this._serviceRequestSCMode = this._serviceRequestSCMode.bind(this);
     this._onGuestTitleUpdate = this._onGuestTitleUpdate.bind(this);
@@ -80,8 +79,36 @@ class GuestInfoForm extends Component {
     this._onWebviewRightPress = this._onWebviewRightPress.bind(this);
   }
 
+  _initialGuestsData(roomsData) {
+    roomsData.forEach((room, roomIndex) => {
+      let { adults, children } = room;
+      let currentRoom = [];
+
+      for (let i = 0; i < adults; i++) {
+        currentRoom.push({
+          title: "Mr",
+          firstName: "",
+          lastName: "",
+          roomIndex
+        });
+      }
+
+      for (let childAge of children) {
+        currentRoom.push({
+          age: childAge,
+          firstName: "",
+          lastName: "",
+          roomIndex
+        });
+      }
+
+      this._guestsCollection.push(currentRoom);
+      roomIndex++;
+    });
+  }
+
   componentWillMount() {
-    this.prepareGuestsData();
+    this._prepareInitialGuestsData();
     this._serviceRequestSCMode();
   }
 
@@ -113,70 +140,171 @@ class GuestInfoForm extends Component {
     return roomType;
   }
 
-  async prepareGuestsData() {
+  async _prepareInitialGuestsData() {
     const { guests } = this.state;
     var preparedGuests = [];
 
     if (guests != null) {
-      this._guestsCollection = guests.concat(); // retrieved from cache in constructor
+      this._guestsCollection = cloneDeep(guests); // retrieved from cache in constructor
       this.setState({ isLoading: false });
     } else {
-      const { guests: guestsCount } = this.props.navigation.state.params;
+      const { rooms, roomsData } = props.datesAndGuestsData;
 
       let userFirstName = await userInstance.getFirstName();
       let userLastName = await userInstance.getLastName();
-      // let userGender = await userInstance.getGender();
 
-      for (var i = 0; i < guestsCount; i++) {
-        let firstName = "";
-        let lastName = "";
-        if (i == 0) {
-          if (userFirstName != null) firstName = userFirstName;
-          if (userLastName != null) lastName = userLastName;
+      roomsData.forEach((room, roomIndex) => {
+        let { adults, children } = room;
+        let currentRoom = [];
+
+        for (let index = 0; index < adults; index++) {
+          let firstName = "";
+          let lastName = "";
+
+          if (roomIndex == 0 && index == 0) {
+            if (userFirstName != null) firstName = userFirstName;
+            if (userLastName != null) lastName = userLastName;
+          }
+
+          currentRoom.push({
+            key: `${index}`,
+            title: "Mr",
+            roomIndex,
+            firstName,
+            lastName
+          });
+
+          this._onFirstNameChange(roomIndex, index, firstName, true);
+          this._onLastNameChange(roomIndex, index, lastName, true);
         }
 
-        preparedGuests.push({
-          key: `${i}`,
-          title: "Mr",
-          firstName,
-          lastName
+        children.forEach((childAge, index) => {
+          currentRoom.push({
+            key: `${index}`,
+            age: childAge,
+            firstName: "",
+            lastName: "",
+            roomIndex
+          });
+
+          this._onFirstNameChange(roomIndex, index, "", true);
+          this._onLastNameChange(roomIndex, index, "", true);
         });
 
-        this._onFirstNameChange(i, firstName, true);
-        this._onLastNameChange(i, lastName, true);
-      }
+        this._guestsCollection.push(currentRoom);
+      });
 
       this.setState({ guests: preparedGuests, isLoading: false });
     }
   }
 
   _serviceRequestSCMode() {
-    requester
-      .getConfigVarByName(SC_NAME)
-      .then(res => {
-        if (res.success) {
-          res.body.then(data => {
-            this.setState({
-              scMode: data.value === "true",
-              isLoading: false,
-              buttonLabel: "Proceed"
-            });
-          });
-        } else {
-          res.errors.then(error => {
-            processError(
-              `[GuestInfoForm] SC mode error level 2 - ${error.message}`,
-              { error }
-            );
+    serverRequest(
+      this,
+      requester.getConfigVarByName,
+      [SC_NAME],
+      data => {
+        this.setState({
+          scMode: data.value === "true",
+          isLoading: false,
+          buttonLabel: "Proceed"
+        });
+      },
+      errorData => {
+        //
+      }
+    );
+  }
+
+  onReservationError(errorData, errorCode) {
+    const { errors } = errorData;
+
+    if (errors.hasOwnProperty("RoomsXmlResponse")) {
+      if (
+        errors["RoomsXmlResponse"].message.indexOf("QuoteNotAvailable:") !== -1
+      ) {
+        this.refs.toast.show(data.errors.RoomsXmlResponse.message, 5000, () => {
+          this.props.navigation.pop(3);
+        });
+      }
+    } else {
+      for (let key in errors) {
+        if (typeof errors[key] !== "function") {
+          this.refs.toast.show(errors[key].message, 5000, () => {
+            this.props.navigation.pop(3);
           });
         }
-      })
-      .catch(error =>
-        processError(
-          `[GuestInfoForm] SC mode error level 1 - ${error.message}`,
-          { error }
-        )
-      );
+      }
+    }
+  }
+
+  onReservationSuccess(data) {
+    //rlog('case 2')
+    // console.log("createReservation  ---", data)
+    const quoteBookingCandidate = {
+      bookingId: data.preparedBookingId
+    };
+
+    serverRequest(
+      this,
+      requester.quoteBooking,
+      [quoteBookingCandidate],
+      success => {
+        if (success.is_successful_quoted) {
+          const bookingId = data.preparedBookingId;
+          const hotelBooking = data.booking.hotelBooking[0];
+          const startDate = moment(
+            data.booking.hotelBooking[0].creationDate,
+            "YYYY-MM-DD"
+          );
+          const endDate = moment(
+            data.booking.hotelBooking[0].arrivalDate,
+            "YYYY-MM-DD"
+          );
+          const leavingDate = moment(
+            data.booking.hotelBooking[0].arrivalDate,
+            "YYYY-MM-DD"
+          ).add(data.booking.hotelBooking[0].nights, "days");
+          this.setState(
+            {
+              roomType: data.booking.hotelBooking[0].room.roomType.text,
+              //arrivalDate: endDate.format('DD MMM'),
+              //leavingDate: leavingDate.format('DD MMM'),
+              cancelationDate: endDate.format("DD MMM YYYY"),
+              creationDate: startDate.format("DD MMM"),
+              cancellationPrice: data.fiatPrice,
+              bookingId: bookingId,
+              hotelBooking: hotelBooking,
+              booking: value,
+              data,
+              isLoading: false,
+              isConfirmed: true,
+              buttonLabel: "Proceed"
+            },
+            () => {
+              const { currencyExchangeRates } = this.props.exchangeRates;
+              const fiatPriceRoomsXML = this.props.navigation.state.params
+                .price;
+              const fiatPriceRoomsXMLInEur =
+                currencyExchangeRates &&
+                CurrencyConverter.convert(
+                  currencyExchangeRates,
+                  RoomsXMLCurrency.get(),
+                  DEFAULT_CRYPTO_CURRENCY,
+                  fiatPriceRoomsXML
+                );
+              this.props.setLocRateFiatAmount(fiatPriceRoomsXMLInEur);
+              this._onReservationReady();
+            }
+          );
+          //rlog('case 4')
+        } else {
+          this.props.navigation.navigation.pop(3);
+          //rlog('case 5')
+        }
+      },
+      () => {}
+    );
   }
 
   serviceCreateReservation(quoteId, currency, guestRecord) {
@@ -192,129 +320,13 @@ class GuestInfoForm extends Component {
     };
     this.setState({ isLoading: true, buttonLabel: "Processing ..." });
 
-    requester
-      .createReservation(value)
-      .then(res => {
-        if (res && res.success) {
-          //rlog('case 1')
-          res.body
-            .then(data => {
-              //rlog('case 2')
-              // console.log("createReservation  ---", data)
-              const quoteBookingCandidate = {
-                bookingId: data.preparedBookingId
-              };
-              requester
-                .quoteBooking(quoteBookingCandidate)
-                .then(res => {
-                  //rlog('case 3')
-                  res.body
-                    .then(success => {
-                      if (success.is_successful_quoted) {
-                        const bookingId = data.preparedBookingId;
-                        const hotelBooking = data.booking.hotelBooking[0];
-                        const startDate = moment(
-                          data.booking.hotelBooking[0].creationDate,
-                          "YYYY-MM-DD"
-                        );
-                        const endDate = moment(
-                          data.booking.hotelBooking[0].arrivalDate,
-                          "YYYY-MM-DD"
-                        );
-                        const leavingDate = moment(
-                          data.booking.hotelBooking[0].arrivalDate,
-                          "YYYY-MM-DD"
-                        ).add(data.booking.hotelBooking[0].nights, "days");
-                        this.setState(
-                          {
-                            roomType:
-                              data.booking.hotelBooking[0].room.roomType.text,
-                            //arrivalDate: endDate.format('DD MMM'),
-                            //leavingDate: leavingDate.format('DD MMM'),
-                            cancelationDate: endDate.format("DD MMM YYYY"),
-                            creationDate: startDate.format("DD MMM"),
-                            cancellationPrice: data.fiatPrice,
-                            bookingId: bookingId,
-                            hotelBooking: hotelBooking,
-                            booking: value,
-                            data,
-                            isLoading: false,
-                            isConfirmed: true,
-                            buttonLabel: "Proceed"
-                          },
-                          () => {
-                            const {
-                              currencyExchangeRates
-                            } = this.props.exchangeRates;
-                            const fiatPriceRoomsXML = this.props.navigation
-                              .state.params.price;
-                            const fiatPriceRoomsXMLInEur =
-                              currencyExchangeRates &&
-                              CurrencyConverter.convert(
-                                currencyExchangeRates,
-                                RoomsXMLCurrency.get(),
-                                DEFAULT_CRYPTO_CURRENCY,
-                                fiatPriceRoomsXML
-                              );
-                            this.props.setLocRateFiatAmount(
-                              fiatPriceRoomsXMLInEur
-                            );
-                            this._onReservationReady();
-                          }
-                        );
-                        //rlog('case 4')
-                      } else {
-                        this.props.navigation.navigation.pop(3);
-                        //rlog('case 5')
-                      }
-                    })
-                    .catch(error => rlog(`case 6 - error - ${error.message}`));
-                })
-                .catch(error => rlog(`case 7 - error - ${error.message}`));
-            })
-            .catch(error => {
-              // rlog(`case 8 - ${error.message}`);
-              processError(
-                `[GuestInfoForm] Error in creating reservation level 2.1 - ${error.message}`,
-                { error }
-              );
-            });
-        } else {
-          res.errors.then(data => {
-            const errors = data.errors;
-            if (errors.hasOwnProperty("RoomsXmlResponse")) {
-              if (
-                errors["RoomsXmlResponse"].message.indexOf(
-                  "QuoteNotAvailable:"
-                ) !== -1
-              ) {
-                this.refs.toast.show(
-                  data.errors.RoomsXmlResponse.message,
-                  5000,
-                  () => {
-                    this.props.navigation.pop(3);
-                  }
-                );
-              }
-            } else {
-              for (let key in errors) {
-                if (typeof errors[key] !== "function") {
-                  this.refs.toast.show(errors[key].message, 5000);
-                }
-              }
-            }
-          });
-        }
-      })
-      .catch(error => {
-        this.refs.toast.show("Unknown Error! Please try again.", 5000, () => {
-          this.props.navigation.goBack();
-        });
-        processError(
-          `[GuestInfoForm] Error in creating reservation level 1 - ${error.message}`,
-          { error }
-        );
-      });
+    serverRequest(
+      this,
+      requester.createReservation,
+      [value],
+      this.onReservationSuccess,
+      this.onReservationError
+    );
   }
 
   gotoWebViewPayment() {
@@ -345,7 +357,7 @@ class GuestInfoForm extends Component {
     const resParams = {
       quoteId,
       currency,
-      guestRecord: this._guestsCollection.concat()
+      guestRecord: cloneDeep(this._guestsCollection)
     };
     this.gotoWebViewPayment(resParams);
   }
@@ -354,31 +366,31 @@ class GuestInfoForm extends Component {
     this.props.navigation.pop(2);
   }
 
-  _onGuestTitleUpdate(index, title) {
+  _onGuestTitleUpdate(roomIndex, index, title) {
     this._guestsCollection[index].title = title;
-    this.props.setGuestData(this._guestsCollection.concat());
+    this.props.setGuestData(cloneDeep(this._guestsCollection));
   }
 
-  _onFirstNameChange(key, text, isInit) {
+  _onFirstNameChange(roomIndex, key, text, isInit) {
     if (text === "") {
       text = "Optional";
     }
 
-    this._guestsCollection[key].firstName = text;
+    this._guestsCollection[roomIndex][key].firstName = text;
 
     if (!isInit) {
-      this.props.setGuestData(this._guestsCollection.concat());
+      this.props.setGuestData(cloneDeep(this._guestsCollection));
     }
   }
 
-  _onLastNameChange(key, text, isInit = false) {
+  _onLastNameChange(roomIndex, key, text, isInit = false) {
     if (text === "") {
       text = "Optional";
     }
-    this._guestsCollection[key].lastName = text;
+    this._guestsCollection[roomIndex][key].lastName = text;
 
     if (!isInit) {
-      this.props.setGuestData(this._guestsCollection.concat());
+      this.props.setGuestData(cloneDeep(this._guestsCollection));
     }
   }
 
@@ -409,7 +421,7 @@ class GuestInfoForm extends Component {
       this.serviceCreateReservation(
         quoteId,
         currency,
-        this._guestsCollection.concat()
+        cloneDeep(this._guestsCollection)
       );
     }
   };
@@ -490,6 +502,7 @@ class GuestInfoForm extends Component {
             <GuestFormRow
               guest={item}
               itemIndex={index}
+              roomIndex={item.roomIndex}
               onGuestTitleUpdate={this._onGuestTitleUpdate}
               onFirstNameChange={this._onFirstNameChange}
               onLastNameChange={this._onLastNameChange}

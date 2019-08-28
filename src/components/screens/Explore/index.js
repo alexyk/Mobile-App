@@ -285,16 +285,17 @@ class Explore extends Component {
   updateData(data) {
     const { adults, children, childrenAgeValues, rooms } = data;
 
-    let parsedData = processGuestsData(adults, rooms, childrenAgeValues);
-    let roomsDummyData = stringifyRoomsData(parsedData);
+    let roomsData = processGuestsData(adults, rooms, childrenAgeValues);
+    let roomsDummyData = stringifyRoomsData(roomsData);
 
     const newState = {
       adults,
       children,
-      rooms,
       childrenAgeValues,
-      guests: adults + children,
-      roomsDummyData: roomsDummyData
+      rooms,
+      roomsData,
+      roomsDummyData,
+      guests: adults + children
     };
     this.setState(newState);
     this.props.setDatesAndGuestsData(newState);
