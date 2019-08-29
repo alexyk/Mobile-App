@@ -1,6 +1,11 @@
 import { gotoWebviewSimple } from "../../../../components/screens/utils";
 import { testFlowURL } from "../../../../config-debug";
 
+/**
+ * Communicates to webview in both ways:
+ *  - injectJS      - executed only once (in the beginning)
+ *  - injectedJS    - executed many times
+ */
 // prettier-ignore
 export default function webview() { 
   gotoWebviewSimple({

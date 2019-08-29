@@ -1,5 +1,5 @@
 import { StyleSheet } from "react-native";
-import { clog } from "../../../config-debug";
+import { clog } from "../../../utils/debug/debug-tools";
 
 export const walletBoxHeight = 190;
 export const loaderPreloaderBottom = "20%";

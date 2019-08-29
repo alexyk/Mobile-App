@@ -1,13 +1,6 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
-import {
-  Platform,
-  NativeModules,
-  AsyncStorage,
-  StatusBar,
-  StyleSheet,
-  View
-} from "react-native";
+import { Platform, NativeModules, AsyncStorage, StatusBar, StyleSheet, View } from "react-native";
 import { StackActions, NavigationActions } from "react-navigation";
 import { setCurrency } from "../../redux/action/Currency";
 
@@ -18,7 +11,8 @@ import { bindActionCreators } from "redux";
 import { getCountries } from "../../redux/action/Country";
 import { getCurrencyRates, getLocRate } from "../../redux/action/exchangeRates";
 import { socketHost, ROOMS_XML_CURRENCY } from "../../config";
-import { processError, autoLoginInOfflineMode, ilog } from "../../config-debug";
+import { autoLoginInOfflineMode } from "../../config-debug";
+import { ilog, processError } from "../../utils/debug/debug-tools";
 
 const androidStomp = NativeModules.StompModule;
 
@@ -58,22 +52,13 @@ class AppLoading extends Component {
 
     // TODO: Fix double caching? Is this outside of Redux cache?
     const keys = await AsyncStorage.getAllKeys();
-    const isLoggedIn =
-      keys.includes(`${domainPrefix}.auth.locktrip`) &&
-      keys.includes(`${domainPrefix}.auth.username`);
+    const isLoggedIn = keys.includes(`${domainPrefix}.auth.locktrip`) && keys.includes(`${domainPrefix}.auth.username`);
 
     // enable auto login on reload
     if (__DEV__ && !isLoggedIn && autoLoginInOfflineMode) {
-      ilog(
-        `[AppLoading] Auto logging in - please reload the app to take effect`
-      );
-      AsyncStorage.multiSet(
-        [
-          [`${domainPrefix}.auth.locktrip`, "oa*erh$oaeksnrtmok"],
-          [`${domainPrefix}.auth.username`, "theUserName"]
-        ],
-        (...args) =>
-          processError("error setting auth.username/locktrip", { args })
+      ilog(`[AppLoading] Auto logging in - please reload the app to take effect`);
+      AsyncStorage.multiSet([[`${domainPrefix}.auth.locktrip`, "oa*erh$oaeksnrtmok"], [`${domainPrefix}.auth.username`, "theUserName"]], (...args) =>
+        processError("error setting auth.username/locktrip", { args })
       );
     }
 
@@ -81,7 +66,7 @@ class AppLoading extends Component {
     if (Platform.OS === "android") {
       androidStomp.connect(socketHost);
     }
-    
+
     SplashScreen.close({
       animationType: SplashScreen.animationType.scale,
       duration: 0,
@@ -106,11 +91,7 @@ class AppLoading extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <StatusBar
-          backgroundColor="rgba(0,0,0,0)"
-          translucent
-          barStyle="light-content"
-        />
+        <StatusBar backgroundColor="rgba(0,0,0,0)" translucent barStyle="light-content" />
       </View>
     );
   }

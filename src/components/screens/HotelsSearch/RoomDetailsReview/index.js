@@ -28,7 +28,6 @@ import { imgHost, basePath } from "../../../../config";
 import styles from "./styles";
 import { hotelSearchIsNative } from "../../../../config-settings";
 import { gotoWebview } from "../../utils";
-import { rlog } from "../../../../config-debug";
 import StringUtils from "../../../../services/utilities/stringUtilities";
 
 const SAFECHARGE_VAR = "SCPaymentModeOn";

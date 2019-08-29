@@ -2,7 +2,7 @@ import moment from "moment";
 import PropTypes from "prop-types";
 import React, { PureComponent } from "react";
 import { FlatList, View, Dimensions } from "react-native";
-import { processError } from "../../../config-debug";
+import { processError } from "../../../utils/debug/debug-tools";
 import Day from "../../atoms/Day";
 import { dayHeight } from "../../atoms/Day/styles";
 import Month from "../../molecules/Month";

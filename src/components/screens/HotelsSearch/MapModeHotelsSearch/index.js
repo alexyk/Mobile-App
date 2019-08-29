@@ -8,15 +8,12 @@ import { connect } from "react-redux";
 import blue_marker from "../../../../assets/blue_marker.png";
 import red_marker from "../../../../assets/red_marker.png";
 import { imgHost } from "../../../../config";
-import { processError, rlog, telog, tslog } from "../../../../config-debug";
+import { processError, rlog, telog, tslog } from "../../../../utils/debug/debug-tools";
 import lang from "../../../../language";
 import { CurrencyConverter } from "../../../../services/utilities/currencyConverter";
 import { RoomsXMLCurrency } from "../../../../services/utilities/roomsXMLCurrency";
 import LocPrice from "../../../atoms/LocPrice";
-import {
-  calculateCoordinatesGridPosition,
-  generateListItemKey
-} from "../utils";
+import { calculateCoordinatesGridPosition, generateListItemKey } from "../utils";
 import styles from "./styles";
 import { DEFAULT_HOTEL_PNG } from "../../../../config-settings";
 
@@ -73,9 +70,7 @@ class MapModeHotelsSearch extends Component {
   componentDidMount() {
     if (this._map != null) {
       this._map.animateToRegion(this.state.selectedRegion, 0);
-      const { newList: renderedMarkers, map: markersMap } = this.prepareMarkers(
-        this.state.selectedRegion
-      );
+      const { newList: renderedMarkers, map: markersMap } = this.prepareMarkers(this.state.selectedRegion);
       this.setState({ renderedMarkers, markersMap });
     }
   }
@@ -86,13 +81,8 @@ class MapModeHotelsSearch extends Component {
     const { hotelsInfo: hotelsNew } = newProps;
 
     // force markers re-rendering if hotelsInfo ref or length changed
-    if (
-      hotelsOld !== hotelsNew ||
-      (hotelsOld && hotelsNew && hotelsOld.length != hotelsNew.length)
-    ) {
-      const { newList: renderedMarkers, map: markersMap } = this.prepareMarkers(
-        prevState.selectedRegion
-      );
+    if (hotelsOld !== hotelsNew || (hotelsOld && hotelsNew && hotelsOld.length != hotelsNew.length)) {
+      const { newList: renderedMarkers, map: markersMap } = this.prepareMarkers(prevState.selectedRegion);
       this.setState({ renderedMarkers, markersMap });
     }
   }
@@ -101,13 +91,7 @@ class MapModeHotelsSearch extends Component {
     let thumbnailURL;
     const { thumbnail } = hotel;
 
-    thumbnailURL =
-      imgHost +
-      (thumbnail && thumbnail.url
-        ? thumbnail.url
-        : thumbnail
-        ? thumbnail
-        : DEFAULT_HOTEL_PNG);
+    thumbnailURL = imgHost + (thumbnail && thumbnail.url ? thumbnail.url : thumbnail ? thumbnail : DEFAULT_HOTEL_PNG);
 
     if (Platform.OS == "android") {
       return (
@@ -145,19 +129,12 @@ class MapModeHotelsSearch extends Component {
         result = (
           <Text style={styles.ratingsMap}>
             {arr.map((item, index) => (
-              <LTIcon
-                isText
-                key={`star_${index}_${this.itemId}`}
-                name={"starO"}
-              />
+              <LTIcon isText key={`star_${index}_${this.itemId}`} name={"starO"} />
             ))}
           </Text>
         );
       } catch (error) {
-        processError(
-          `[MapModeHotelsSearch] Error rendering stars in callout: ${error.message}`,
-          { error }
-        );
+        processError(`[MapModeHotelsSearch] Error rendering stars in callout: ${error.message}`, { error });
       }
     }
     return result;
@@ -168,38 +145,28 @@ class MapModeHotelsSearch extends Component {
       return null;
     }
 
-    const {
-      currencySign,
-      exchangeRates,
-      currency,
-      daysDifference
-    } = this.props;
+    const { currencySign, exchangeRates, currency, daysDifference } = this.props;
 
     let price = null;
     try {
       price =
         exchangeRates.currencyExchangeRates &&
-        (
-          CurrencyConverter.convert(
-            exchangeRates.currencyExchangeRates,
-            RoomsXMLCurrency.get(),
-            currency,
-            hotel.price
-          ) / daysDifference
-        ).toFixed(2);
+        (CurrencyConverter.convert(exchangeRates.currencyExchangeRates, RoomsXMLCurrency.get(), currency, hotel.price) / daysDifference).toFixed(2);
     } catch (error) {
-      processError(
-        `[MapModeHotelsSearch::renderCallout] Error calculating price: ${error.message}`,
-        { error, price, currency, daysDifference, currencySign, hotel }
-      );
+      processError(`[MapModeHotelsSearch::renderCallout] Error calculating price: ${error.message}`, {
+        error,
+        price,
+        currency,
+        daysDifference,
+        currencySign,
+        hotel
+      });
     }
 
     return (
       <MapView.Callout tooltip={false}>
         <View style={styles.map_item}>
-          <View style={{ width: 120, height: 90, backgroundColor: "#fff" }}>
-            {hotel.thumbnail != null && this.renderImageInCallout(hotel)}
-          </View>
+          <View style={{ width: 120, height: 90, backgroundColor: "#fff" }}>{hotel.thumbnail != null && this.renderImageInCallout(hotel)}</View>
           <Text style={styles.location} numberOfLines={1} ellipsizeMode="tail">
             {hotel.name}
           </Text>
@@ -211,11 +178,7 @@ class MapModeHotelsSearch extends Component {
                 {currencySign}
                 {price}{" "}
               </Text>
-              <LocPrice
-                style={styles.description}
-                fiat={hotel.price}
-                fromParentType={0}
-              />
+              <LocPrice style={styles.description} fiat={hotel.price} fromParentType={0} />
               <Text style={styles.description}> / Night</Text>
             </View>
           )}
@@ -307,8 +270,7 @@ class MapModeHotelsSearch extends Component {
         isHotel: true
       };
 
-      const func = () =>
-        this.props.gotoHotelDetailsPage(item, state, extraParams);
+      const func = () => this.props.gotoHotelDetailsPage(item, state, extraParams);
       setTimeout(func);
     }
   }
@@ -341,12 +303,7 @@ class MapModeHotelsSearch extends Component {
     tslog("*** MapModeHotelsSearch::prepareMarkers");
 
     let optimisationMap = {};
-    const {
-      latitude: regionLat,
-      latitudeDelta: regionLatDelta,
-      longitude: regionLon,
-      longitudeDelta: regionLonDelta
-    } = region;
+    const { latitude: regionLat, latitudeDelta: regionLatDelta, longitude: regionLon, longitudeDelta: regionLonDelta } = region;
     let divisorH = 11;
     let divisorW = 20;
     let latStep = regionLatDelta != null ? regionLatDelta / divisorW : -1;
@@ -369,20 +326,8 @@ class MapModeHotelsSearch extends Component {
 
         // if region is not set or the map is too zoomed in
         let grid;
-        if (
-          regionLatDelta != null &&
-          (count > 50 || (this.props.optimiseMarkers && regionLatDelta > 0.03))
-        ) {
-          grid = calculateCoordinatesGridPosition(
-            latitude,
-            longitude,
-            regionLat,
-            regionLatDelta,
-            regionLon,
-            regionLonDelta,
-            latStep,
-            lonStep
-          );
+        if (regionLatDelta != null && (count > 50 || (this.props.optimiseMarkers && regionLatDelta > 0.03))) {
+          grid = calculateCoordinatesGridPosition(latitude, longitude, regionLat, regionLatDelta, regionLon, regionLonDelta, latStep, lonStep);
           if (grid != null) {
             let { latIndex, lonIndex } = grid;
             let name = `${latIndex}_${lonIndex}`;
@@ -474,11 +419,7 @@ class MapModeHotelsSearch extends Component {
     let newState;
     if (isRefreshMarkers) {
       const isZoomOut = deltaDiff < 0;
-      const { newList: renderedMarkers, map: markersMap } = this.prepareMarkers(
-        region,
-        isZoomOut,
-        oldMap
-      );
+      const { newList: renderedMarkers, map: markersMap } = this.prepareMarkers(region, isZoomOut, oldMap);
       const oldMap = this.state.prevMarkersMap;
 
       if (!isZoomOut) {

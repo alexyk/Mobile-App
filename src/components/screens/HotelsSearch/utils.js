@@ -1,20 +1,8 @@
 import lodash from "lodash";
-import {
-  validateObject,
-  isObject,
-  isNumber,
-  isString,
-  isArray
-} from "../utils";
-import {
-  showNumberOnHotelItem,
-  DEFAULT_HOTEL_PNG
-} from "../../../config-settings";
-import {
-  rlog,
-  checkHotelsDataWithTemplates,
-  processError
-} from "../../../config-debug";
+import { validateObject, isObject, isNumber, isString, isArray } from "../utils";
+import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config-settings";
+import { checkHotelsDataWithTemplates } from "../../../config-debug";
+import { rlog, processError } from "../../../utils/debug/debug-tools";
 
 export const DISPLAY_MODE_NONE = "mode_none";
 export const DISPLAY_MODE_SEARCHING = "mode_searching";

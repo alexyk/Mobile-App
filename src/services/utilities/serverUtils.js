@@ -1,5 +1,6 @@
 import requester from "../../initDependencies";
-import { processError, ilog, serverLogRequesting } from "../../config-debug";
+import { serverLogRequesting } from "../../config-debug";
+import { processError, ilog } from "../../utils/debug/debug-tools";
 import { getObjectClassName, isString, gotoWebviewSimple } from "../../components/screens/utils";
 
 export const SERVER_ERROR = {

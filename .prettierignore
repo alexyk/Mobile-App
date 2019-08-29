@@ -1,3 +1,4 @@
 src/config-debug.js
 src/services/utilities/serverUtils.js
 src/utils/debug/**/*.js
+src/version.js

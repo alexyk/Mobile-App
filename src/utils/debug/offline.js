@@ -1,6 +1,7 @@
-import { autoHotelSearchPlace, autoHomeSearchPlace, rlog, processError, validationStateOfflineWallet, offlineTimeInSeconds } from '../../config-debug'
+import { autoHotelSearchPlace, autoHomeSearchPlace, validationStateOfflineWallet, offlineTimeInSeconds } from '../../config-debug';
+import { rlog, processError } from '../../utils/debug/debug-tools';
 import { isObject } from '../../components/screens/utils'
-import { SERVER_ERROR } from '../../services/utilities/serverUtils';
+
 
 const offlinePacksHomes = {
   'uk1': require('./offline-responses/homes-uk-1.json'),
@@ -132,6 +133,8 @@ export default function createOfflineRequester() {
 	const offlineRequester = {
     // fake test calls
 		testCall: (caseNo) 				              => new Promise( (resolve, reject) => { 
+                                                  const resultPromise = new Promise( () => ({body: 'done (1st resolve)', ok:true}) );
+
                                                   switch (caseNo) {
                                                     case 0:
                                                       reject(new Error('level 0 error'));
@@ -140,8 +143,6 @@ export default function createOfflineRequester() {
                                                       resolve(resultPromise)
                                                       break;
                                                   }
-
-                                                  const resultPromise = new Promise( () => ({body: 'done (1st resolve)', ok:true}) );
 
                                                   new Promise((resolve,reject) => {                                                    
                                                     setTimeout(resolve, 500, (caseNo == 1 ? 'done (2nd resolve)' : 'done'));

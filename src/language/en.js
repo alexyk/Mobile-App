@@ -31,14 +31,12 @@ const TEXT = {
   SEARCH_HOTEL_RESULTS_PRICES_TIMEOUT: "Price service is slow",
   SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT: "Hotels service is slow",
   SEARCH_HOTEL_RESULTS_FILTERED: "%1 matches",
-  SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS:
-    "Loading all available matches",
+  SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS: "Loading all available matches",
   SEARCH_HOTEL_RESULTS_APPLYING_FILTER: "Applying filters",
   SEARCH_HOTEL_RESULTS_LOADING: "%1 matches and loading...",
   SEARCH_HOTEL_FILTER_NA: "Filtering is disabled while loading in progress",
   SEARCH_HOTEL_FILTER_ERROR: "Filter error",
-  SEARCH_HOTEL_FILTERED_MSG:
-    "Filtering out hotels that are not available for your dates",
+  SEARCH_HOTEL_FILTERED_MSG: "Filtering out hotels that are not available for your dates",
   SEARCH_HOTEL_ITEM_PRICE_NA: "Price unavailable",
   SEARCH_HOTEL_ITEM_PRICE_LOADING: "",
   BOOKING_STEPS: ["Guest Info", "Confirm and Pay"],

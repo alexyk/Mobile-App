@@ -1,4 +1,4 @@
-import { processError, wlog } from "../../../config-debug";
+import { processError, wlog } from "../../../utils/debug/debug-tools";
 import { I18N_MAP } from "./i18n";
 import { generateListItemKey } from "../HotelsSearch/utils";
 

@@ -1,11 +1,5 @@
 import React, { Component } from "react";
-import {
-  View,
-  Text,
-  KeyboardAvoidingView,
-  ScrollView,
-  Platform
-} from "react-native";
+import { View, Text, KeyboardAvoidingView, ScrollView, Platform } from "react-native";
 
 import PropTypes from "prop-types";
 import moment from "moment";
@@ -19,7 +13,7 @@ import requester from "../../../../initDependencies";
 import { userInstance } from "../../../../utils/userInstance";
 import { imgHost } from "../../../../config";
 import { SC_NAME, DEFAULT_CRYPTO_CURRENCY } from "../../../../config-settings";
-import { processError, rlog } from "../../../../config-debug";
+import { processError, rlog } from "../../../../utils/debug/debug-tools";
 import { gotoWebview } from "../../utils";
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
 import { cloneDeep } from "lodash";
@@ -94,18 +88,11 @@ class GuestInfoForm extends Component {
 
   _getRoomType(roomDetail) {
     let roomType = "n/a";
-    if (
-      roomDetail &&
-      roomDetail.roomsResults &&
-      roomDetail.roomsResults.length > 0
-    ) {
+    if (roomDetail && roomDetail.roomsResults && roomDetail.roomsResults.length > 0) {
       try {
         roomType = roomDetail.roomsResults[0].name;
       } catch (error) {
-        processError(
-          `[GuestInfoForm] Error trying to get room type - ${error.message}`,
-          { error, roomDetail }
-        );
+        processError(`[GuestInfoForm] Error trying to get room type - ${error.message}`, { error, roomDetail });
       }
     }
 
@@ -168,7 +155,7 @@ class GuestInfoForm extends Component {
         });
       });
 
-      _this.setState({ guests: (cloneDeep(preparedGuests)), isLoading: false });
+      _this.setState({ guests: cloneDeep(preparedGuests), isLoading: false });
     }
   }
 
@@ -194,9 +181,7 @@ class GuestInfoForm extends Component {
     const { errors } = errorData;
 
     if (errors.hasOwnProperty("RoomsXmlResponse")) {
-      if (
-        errors["RoomsXmlResponse"].message.indexOf("QuoteNotAvailable:") !== -1
-      ) {
+      if (errors["RoomsXmlResponse"].message.indexOf("QuoteNotAvailable:") !== -1) {
         this.refs.toast.show(data.errors.RoomsXmlResponse.message, 5000, () => {
           this.props.navigation.pop(3);
         });
@@ -227,18 +212,9 @@ class GuestInfoForm extends Component {
         if (success.is_successful_quoted) {
           const bookingId = data.preparedBookingId;
           const hotelBooking = data.booking.hotelBooking[0];
-          const startDate = moment(
-            data.booking.hotelBooking[0].creationDate,
-            "YYYY-MM-DD"
-          );
-          const endDate = moment(
-            data.booking.hotelBooking[0].arrivalDate,
-            "YYYY-MM-DD"
-          );
-          const leavingDate = moment(
-            data.booking.hotelBooking[0].arrivalDate,
-            "YYYY-MM-DD"
-          ).add(data.booking.hotelBooking[0].nights, "days");
+          const startDate = moment(data.booking.hotelBooking[0].creationDate, "YYYY-MM-DD");
+          const endDate = moment(data.booking.hotelBooking[0].arrivalDate, "YYYY-MM-DD");
+          const leavingDate = moment(data.booking.hotelBooking[0].arrivalDate, "YYYY-MM-DD").add(data.booking.hotelBooking[0].nights, "days");
           this.setState(
             {
               roomType: data.booking.hotelBooking[0].room.roomType.text,
@@ -257,16 +233,10 @@ class GuestInfoForm extends Component {
             },
             () => {
               const { currencyExchangeRates } = this.props.exchangeRates;
-              const fiatPriceRoomsXML = this.props.navigation.state.params
-                .price;
+              const fiatPriceRoomsXML = this.props.navigation.state.params.price;
               const fiatPriceRoomsXMLInEur =
                 currencyExchangeRates &&
-                CurrencyConverter.convert(
-                  currencyExchangeRates,
-                  RoomsXMLCurrency.get(),
-                  DEFAULT_CRYPTO_CURRENCY,
-                  fiatPriceRoomsXML
-                );
+                CurrencyConverter.convert(currencyExchangeRates, RoomsXMLCurrency.get(), DEFAULT_CRYPTO_CURRENCY, fiatPriceRoomsXML);
               this.props.setLocRateFiatAmount(fiatPriceRoomsXMLInEur);
               this._onReservationReady();
             }
@@ -294,13 +264,7 @@ class GuestInfoForm extends Component {
     };
     this.setState({ isLoading: true, buttonLabel: "Processing ..." });
 
-    serverRequest(
-      this,
-      requester.createReservation,
-      [value],
-      this.onReservationSuccess,
-      this.onReservationError
-    );
+    serverRequest(this, requester.createReservation, [value], this.onReservationSuccess, this.onReservationError);
   }
 
   gotoWebViewPayment() {
@@ -311,9 +275,7 @@ class GuestInfoForm extends Component {
     const { currency } = this.props;
     const { token, email } = this.props.loginDetails;
     const rooms = JSON.stringify(booking.rooms);
-    const search =
-      StringUtils.subBeforeIndexOf(searchString, "&rooms=") +
-      `&quoteId=${quoteId}&rooms=${rooms}&authToken=${token}&authEmail=${email}`;
+    const search = StringUtils.subBeforeIndexOf(searchString, "&rooms=") + `&quoteId=${quoteId}&rooms=${rooms}&authToken=${token}&authEmail=${email}`;
     const state = { currency, token, email };
     const extra = {
       webViewUrl: `mobile/hotels/listings/book/${bookingId}/confirm${search}`,
@@ -361,7 +323,7 @@ class GuestInfoForm extends Component {
     // if (text === "") {
     //   text = "Optional";
     // }
-    
+
     this._guestsCollection[roomIndex][key].lastName = text;
 
     if (!isInit) {
@@ -386,18 +348,11 @@ class GuestInfoForm extends Component {
     if (this._guestsCollection.length != this.state.guests.length) {
       this.refs.toast.show("Please enter details for all the guests", 2000);
     } else if (!isValid) {
-      this.refs.toast.show(
-        "Names should be at least 1 characters long and contain only characters.",
-        2000
-      );
+      this.refs.toast.show("Names should be at least 1 characters long and contain only characters.", 2000);
     } else {
       const { quoteId } = this.props.navigation.state.params.roomDetail;
       const { currency } = this.props;
-      this.serviceCreateReservation(
-        quoteId,
-        currency,
-        cloneDeep(this._guestsCollection)
-      );
+      this.serviceCreateReservation(quoteId, currency, cloneDeep(this._guestsCollection));
     }
   };
 
@@ -412,10 +367,7 @@ class GuestInfoForm extends Component {
     return (
       <View style={styles.hotelInfoContainer}>
         <View style={styles.hotelThumbView}>
-          <Image
-            source={{ uri: imgHost + hotelImg }}
-            style={styles.hotelThumb}
-          />
+          <Image source={{ uri: imgHost + hotelImg }} style={styles.hotelThumb} />
         </View>
         <View style={styles.hotelInfoView}>
           <Text style={styles.hotelName}>{name}</Text>
@@ -440,10 +392,7 @@ class GuestInfoForm extends Component {
 
   _renderDates() {
     const { arrivalDate, leavingDate, datesText } = this.state;
-    const text =
-      arrivalDate != null && leavingDate != null
-        ? `${arrivalDate} - ${leavingDate}`
-        : datesText;
+    const text = arrivalDate != null && leavingDate != null ? `${arrivalDate} - ${leavingDate}` : datesText;
     return (
       <View style={styles.listItem}>
         <View style={styles.listItemNameWrapper}>
@@ -560,8 +509,7 @@ const mapStateToProps = state => {
     currency: state.currency.currency,
     currencySign: state.currency.currencySign,
 
-    isLocPriceWebsocketConnected:
-      state.exchangerSocket.isLocPriceWebsocketConnected,
+    isLocPriceWebsocketConnected: state.exchangerSocket.isLocPriceWebsocketConnected,
     locAmounts: state.locAmounts,
     exchangeRates: state.exchangeRates,
 

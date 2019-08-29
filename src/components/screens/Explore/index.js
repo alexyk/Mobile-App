@@ -5,16 +5,8 @@ import RNPickerSelect from "react-native-picker-select"; //eslint-disable-line
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { domainPrefix } from "../../../config";
-import {
-  autoHomeSearch,
-  autoHotelSearch,
-  autoHotelSearchFocus,
-  autoHotelSearchPlace,
-  isOnline,
-  processError,
-  ilog,
-  testFlow,
-} from "../../../config-debug";
+import { autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace, isOnline, testFlow } from "../../../config-debug";
+import { processError, ilog, clog } from "../../../utils/debug/debug-tools";
 import requester from "../../../initDependencies";
 import lang from "../../../language";
 import { setCurrency } from "../../../redux/action/Currency";
@@ -24,13 +16,15 @@ import LocRateButton from "../../atoms/LocRateButton";
 import SingleSelectMaterialDialog from "../../atoms/MaterialDialog/SingleSelectMaterialDialog";
 import SearchBar from "../../molecules/SearchBar";
 import DateAndGuestPicker from "../../organisms/DateAndGuestPicker";
-import { gotoWebview, stringifyRoomsData, gotoWebviewSimple, processGuestsData } from "../utils";
+import { gotoWebview, stringifyRoomsData, processGuestsData } from "../utils";
 import styles from "./styles";
 import { formatDatesData } from "../Calendar/utils";
 import { hotelSearchIsNative } from "../../../config-settings";
 import { setLoginDetails } from "../../../redux/action/userInterface";
 import { getSafeTopOffset } from "../../../utils/designUtils";
 import { serverRequest } from "../../../services/utilities/serverUtils";
+import navigationService from "../../../services/navigationService";
+import { getObjectClassName } from "../utils";
 
 const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
 
@@ -138,11 +132,20 @@ class Explore extends Component {
 
   async componentDidMount() {
     console.disableYellowBox = true;
-
     // prettier-ignore
-    if (__DEV__ && testFlow) {
+    if (__DEV__ && true) {
+      // run a test flow - for easy debug/development/testing
+      try {
+        let tf = require("test-flows").default;
+        tf.setConfig({ getObjectClassName, serverRequest, requester, navigationService });
+        if (tf.flows.guestInfo) tf.flows.guestInfo.exec()
+      } catch (error) {
+        //
+      }
+    } else if (__DEV__ && testFlow) {
       // run a test flow - for easy debug/development/testing
       let flow = require("../../../utils/debug/test-flows").default;
+      flow.setConfig({ getObjectClassName, serverRequest, requester });
       testFlow
         .split(".")
         .forEach(item => (flow = flow[item]));
@@ -150,7 +153,7 @@ class Explore extends Component {
 
       return;
     } else if (__DEV__ && autoHotelSearch) {
-    // enable automatic search
+      // enable automatic search
       setTimeout(() => {
         this.onSearchHandler(autoHotelSearchPlace);
       }, 100);
@@ -442,17 +445,8 @@ class Explore extends Component {
               //eslint-disable-line
               <TouchableOpacity
                 key={result.id}
-                style={
-                  i == nCities - 1
-                    ? [
-                        styles.autocompleteTextWrapper,
-                        { borderBottomWidth: 1, elevation: 1 }
-                      ]
-                    : styles.autocompleteTextWrapper
-                }
-                onPress={() =>
-                  this.handleAutocompleteSelect(result.id, result.query)
-                }
+                style={i == nCities - 1 ? [styles.autocompleteTextWrapper, { borderBottomWidth: 1, elevation: 1 }] : styles.autocompleteTextWrapper}
+                onPress={() => this.handleAutocompleteSelect(result.id, result.query)}
               >
                 <Text style={styles.autocompleteText}>{result.query}</Text>
               </TouchableOpacity>

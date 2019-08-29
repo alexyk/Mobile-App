@@ -7,7 +7,7 @@ import { UltimateListView } from "react-native-ultimate-listview";
 import LTIcon from "../../../atoms/LTIcon";
 import { connect } from "react-redux";
 import { imgHost } from "../../../../config";
-import { processError, rlog } from "../../../../config-debug";
+import { processError, rlog } from "../../../../utils/debug/debug-tools";
 import requester from "../../../../initDependencies";
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
 import DateAndGuestPicker from "../../../organisms/DateAndGuestPicker";
@@ -141,12 +141,7 @@ class HomesSearchScreen extends Component {
     //console.log("searchTerms", searchTerms);
 
     requester.getListingsByFilter(searchTerms).then(res => {
-      rlog(
-        "homes-1",
-        "requester.getListingsByFilter",
-        { searchTerms, res },
-        true
-      );
+      rlog("homes-1", "requester.getListingsByFilter", { searchTerms, res }, true);
 
       res.body.then(data => {
         rlog("homes-2", "requester.getListingsByFilter", { data }, true);
@@ -201,11 +196,7 @@ class HomesSearchScreen extends Component {
         requester.getListingsByFilter(searchTerms).then(res => {
           //console.log("onFetch - requester.getListingsByFilter", res);
           res.body.then(data => {
-            startFetch(
-              data.filteredListings.content,
-              data.filteredListings.content.length,
-              false
-            );
+            startFetch(data.filteredListings.content, data.filteredListings.content.length, false);
           });
         });
       } else {
@@ -302,10 +293,7 @@ class HomesSearchScreen extends Component {
   };
 
   updateData = data => {
-    if (
-      this.state.adults === data.adults &&
-      this.state.children === data.children
-    ) {
+    if (this.state.adults === data.adults && this.state.children === data.children) {
       return;
     }
 
@@ -380,18 +368,13 @@ class HomesSearchScreen extends Component {
   };
 
   calculateCheckInOuts(listing) {
-    let checkInStart =
-      listing.checkinStart && Number(listing.checkinStart.substring(0, 2));
-    let checkInEnd =
-      listing.checkinEnd && Number(listing.checkinEnd.substring(0, 2));
+    let checkInStart = listing.checkinStart && Number(listing.checkinStart.substring(0, 2));
+    let checkInEnd = listing.checkinEnd && Number(listing.checkinEnd.substring(0, 2));
     checkInEnd = checkInEnd && checkInStart < checkInEnd ? checkInEnd : 24;
 
-    let checkOutStart =
-      listing.checkoutStart && Number(listing.checkoutStart.substring(0, 2));
-    let checkOutEnd =
-      listing.checkoutEnd && Number(listing.checkoutEnd.substring(0, 2));
-    checkOutStart =
-      checkOutStart && checkOutStart < checkOutEnd ? checkOutStart : 0;
+    let checkOutStart = listing.checkoutStart && Number(listing.checkoutStart.substring(0, 2));
+    let checkOutEnd = listing.checkoutEnd && Number(listing.checkoutEnd.substring(0, 2));
+    checkOutStart = checkOutStart && checkOutStart < checkOutEnd ? checkOutStart : 0;
 
     let checks = {
       checkInStart,
@@ -433,9 +416,7 @@ class HomesSearchScreen extends Component {
 
       //console.log("searchTermMap", searchTermMap);
 
-      const resCalendar = await requester.getCalendarByListingIdAndDateRange(
-        searchTermMap
-      );
+      const resCalendar = await requester.getCalendarByListingIdAndDateRange(searchTermMap);
       //console.log("resCalendar", resCalendar);
       const dataCalendar = await resCalendar.body;
       //console.log("dataCalendar", dataCalendar);
@@ -480,13 +461,7 @@ class HomesSearchScreen extends Component {
   };
 
   renderItem = item => {
-    return (
-      <HomeItemView
-        item={item}
-        gotoHomeDetailPage={this.gotoHomeDetailPage}
-        daysDifference={this.state.daysDifference}
-      />
-    );
+    return <HomeItemView item={item} gotoHomeDetailPage={this.gotoHomeDetailPage} daysDifference={this.state.daysDifference} />;
   };
 
   renderPaginationFetchingView = () => {
@@ -527,13 +502,7 @@ class HomesSearchScreen extends Component {
         <View style={styles.countriesSpinner}>
           <TouchableOpacity onPress={this.onCancel}>
             <View style={styles.leftIconView}>
-              <LTIcon
-                textStyle={styles.leftIconText}
-                name="arrow-back"
-                size={22}
-                color="#000"
-                iconSet="material"
-              />
+              <LTIcon textStyle={styles.leftIconText} name="arrow-back" size={22} color="#000" iconSet="material" />
             </View>
           </TouchableOpacity>
           <View style={styles.pickerWrapHomes}>
@@ -566,13 +535,7 @@ class HomesSearchScreen extends Component {
 
   renderFilterBar() {
     return (
-      <View
-        style={
-          this.state.isNewSearch
-            ? { height: 190, width: "100%" }
-            : { height: 70, width: "100%" }
-        }
-      >
+      <View style={this.state.isNewSearch ? { height: 190, width: "100%" } : { height: 70, width: "100%" }}>
         <DateAndGuestPicker
           checkInDate={this.state.checkInDate}
           checkOutDate={this.state.checkOutDate}

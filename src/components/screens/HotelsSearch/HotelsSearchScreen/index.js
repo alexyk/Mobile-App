@@ -40,14 +40,8 @@ import {
   hotelSearchIsNative,
   HOTELS_INITIAL_ITEMS_TO_LOAD
 } from "../../../../config-settings";
-import {
-  isOnline,
-  rlog,
-  processError,
-  hotelsSearchSocketDebug,
-  clog,
-  elog
-} from "../../../../config-debug";
+import { rlog, processError, clog, elog, wlog } from "../../../../utils/debug/debug-tools";
+import { isOnline, hotelsSearchSocketDebug } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -443,7 +437,7 @@ class HotelsSearchScreen extends Component {
 
     DeviceEventEmitter.removeAllListeners("onStompMessage");
     DeviceEventEmitter.addListener("onStompMessage", ({ message }) => {
-      // console.warn('stomp message', message);
+      // wlog('stomp message', message);
       // TODO: (low priority) Solve this difference between iOS and Android
       return this.onServerHotelsFromSocket({ body: message });
     });
@@ -458,7 +452,7 @@ class HotelsSearchScreen extends Component {
     // clog("socket-data", `onServerHotelsFromSocket`, { data });
 
     if (!this || !this.listViewRef || this.isUnmounted) {
-      console.warn(
+      wlog(
         `[HotelsSearchScreen::onServerHotelsFromSocket] Is screen unmounted: ${
           this ? this.isUnmounted : "n/a"
         }`,
@@ -648,7 +642,7 @@ class HotelsSearchScreen extends Component {
             const priceRange = [this.priceMin, this.priceMax];
             this.setState({ priceRange, priceRangeSelected: priceRange });
           } else {
-            console.warn(
+            wlog(
               "[HotelsSearchScreen::filtersCallback] this.listViewRef seems null - is screen unmounted?",
               {
                 thisNull: this == null,
@@ -795,7 +789,7 @@ class HotelsSearchScreen extends Component {
   onFilteredData(data) {
     const _this = this;
     if (!this || !(this instanceof HotelsSearchScreen) || this.isUnmounted) {
-      console.warn(
+      wlog(
         `[HotelsSearchScreen] Skipping onFilteredData - screen seems unmounted`
       );
       return;
@@ -896,7 +890,7 @@ class HotelsSearchScreen extends Component {
     const isSkipping = !this || !this.listViewRef || this.isUnmounted;
 
     if (isSkipping) {
-      console.warn(
+      wlog(
         `[HotelsSearchScreen::onServerStaticHotels] Is screen unmounted: ${
           this ? this.isUnmounted : "n/a"
         }`,

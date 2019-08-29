@@ -1,6 +1,7 @@
 import { Platform, Dimensions, PixelRatio, StyleSheet } from "react-native";
-import { rlogd } from "../config-debug";
 import { isFontScalingEnabled } from "../config-settings";
+import { rlog } from "./debug/debug-tools";
+
 
 // See https://mydevice.io/devices/ for device dimensions
 const X_WIDTH = 375;
@@ -22,8 +23,7 @@ export const isIPhoneX =
   Platform.OS === "ios" &&
   ((D_HEIGHT === X_HEIGHT && D_WIDTH === X_WIDTH) ||
     (D_HEIGHT === X_WIDTH && D_WIDTH === X_HEIGHT) ||
-    ((D_HEIGHT === XSMAX_HEIGHT && D_WIDTH === XSMAX_WIDTH) ||
-      (D_HEIGHT === XSMAX_WIDTH && D_WIDTH === XSMAX_HEIGHT)));
+    ((D_HEIGHT === XSMAX_HEIGHT && D_WIDTH === XSMAX_WIDTH) || (D_HEIGHT === XSMAX_WIDTH && D_WIDTH === XSMAX_HEIGHT)));
 
 export function getSafeTopOffset() {
   if (isIPhoneX) {
@@ -67,11 +67,13 @@ export function getFontSize(value, caller = "") {
   let result = PixelRatio.roundToNearestPixel(asFloat);
 
   if (__DEV__) {
-    rlogd(
-      "getFontSizeByWidth",
-      `[designUtils] ${caller} result:${result} asFloat:${asFloat.toFixed(2)}`,
-      { asFloat, result, value, caller }
-    );
+    rlog("design-utils", `[designUtils] ${caller} result:${result} asFloat:${asFloat.toFixed(2)}`, {
+      methodName: "getFontSizeByWidth",
+      asFloat,
+      result,
+      value,
+      caller
+    });
   }
 
   return result;

@@ -26,8 +26,7 @@ export const HOTEL_ROOM_LIMITS = {
     CHILDREN_PER_ROOM: 4
   }
 };
-export const DEFAULT_HOTEL_PNG =
-  "listings/images/listing_thumbnail_1529077862408_default.png";
+export const DEFAULT_HOTEL_PNG = "listings/images/listing_thumbnail_1529077862408_default.png";
 export const DEFAULT_CRYPTO_CURRENCY = "EUR";
 export const showNumberOnHotelItem = __DEV__ && false;
 export const showBothMapAndListHotelSearch = false;

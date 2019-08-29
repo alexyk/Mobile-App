@@ -1,7 +1,7 @@
 import { gotoWebviewSimple } from "../../../../components/screens/utils";
-import { testFlowURL, rlog } from "../../../../config-debug";
+import { testFlowURL } from "../../../../config-debug";
+import { rlog } from "../../../../utils/debug/debug-tools";
 
-// prettier-ignore
 export default function webviewHTML() {
   fetch(testFlowURL)
     .then(response => {

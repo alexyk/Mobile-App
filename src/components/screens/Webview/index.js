@@ -1,18 +1,12 @@
 /**
  * Note:
  *     No need for function.bind(this) for render* functions (except for renderItem)
- *     There are several render* functions below not binded in constructor
- *     for this reason. The one binded - renderItem - is not called in render
+ *     There are several render* functions below not bound in constructor
+ *     for this reason. The one bound - renderItem - is not called in render
  *     method, but it is called by the component UltimateListView.
  */
 
-import {
-  BackHandler,
-  Platform,
-  View,
-  Text,
-  TouchableOpacity
-} from "react-native";
+import { BackHandler, Platform, View, Text, TouchableOpacity } from "react-native";
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import WebView from "react-native-webview";
@@ -20,10 +14,10 @@ import WebView from "react-native-webview";
 import styles from "./styles";
 
 import { generateWebviewInitialState } from "../utils";
-import { webviewDebugEnabled, rlog } from "../../../config-debug";
+import { webviewDebugEnabled } from "../../../config-debug";
+import { rlog } from "../../../utils/debug/debug-tools";
 import LTLoader from "../../molecules/LTLoader";
 import TopBar from "../../molecules/TopBar";
-
 
 // TODO: Clean and test - the implementation is not cleaned since migration from previous developers. Tests were not added when migrating
 class WebviewScreen extends Component {
@@ -34,13 +28,12 @@ class WebviewScreen extends Component {
     ref: null
   };
 
-
   constructor(props) {
     super(props);
 
     const { params } = props.navigation.state;
     const { simpleParams, useCachedSearchString, message } = params;
-    const isSimple = (simpleParams != null);
+    const isSimple = simpleParams != null;
 
     const allParams = Object.assign({}, params, { currency: props.currency });
     const skipWebViewURL = params.useCachedSearchString || params.webViewURL;
@@ -50,13 +43,15 @@ class WebviewScreen extends Component {
       WebviewScreen.useDelay = false;
       const { url, body, message: simpleMessage, injectJS, injectedJS } = simpleParams;
       this.state = {
-        message: (simpleMessage != null ? simpleMessage : 'Loading ...'),
+        message: simpleMessage != null ? simpleMessage : "Loading ...",
         webViewUrl: url,
-        body, injectJS, injectedJS
+        body,
+        injectJS,
+        injectedJS
       };
     } else {
       this.state = generateWebviewInitialState(allParams, null, skipWebViewURL);
-      this.state.message = (message != null ? message : 'Loading ...');
+      this.state.message = message != null ? message : "Loading ...";
       if (useCachedSearchString) {
         this.state.webViewUrl = props.allState.userInterface.webViewURL;
       }
@@ -70,7 +65,7 @@ class WebviewScreen extends Component {
       window.document.addEventListener('click', function (event) {
         window.ReactNativeWebView.postMessage("history++")
       }, false);
-      `
+      `;
     }
 
     this.onBackPress = this.onBackPress.bind(this);
@@ -141,9 +136,9 @@ class WebviewScreen extends Component {
   onBackPress(event) {
     const { canGoBack, history } = this.state;
 
-    if (canGoBack && history>0 && this && this.webViewRef.ref) {
+    if (canGoBack && history > 0 && this && this.webViewRef.ref) {
       this.webViewRef.ref.goBack();
-      this.setState({history: history - 1});
+      this.setState({ history: history - 1 });
     } else {
       this.props.navigation.goBack();
     }
@@ -160,7 +155,7 @@ class WebviewScreen extends Component {
   }
 
   onWebViewLoadStart(event) {
-    rlog('weview-load-end', `onLoadEnd from webview`, {event})
+    rlog("weview-load-end", `onLoadEnd from webview`, { event });
 
     this.setState({
       canGoToResults: true
@@ -169,21 +164,19 @@ class WebviewScreen extends Component {
 
   onWebViewMessage(event) {
     const { data, canGoBack, canGoForward } = event.nativeEvent;
-    rlog('weview-message', `${data}`, {title: 'onWebviewMessage', event, canGoBack, canGoForward})
-    
+    rlog("weview-message", `${data}`, { title: "onWebviewMessage", event, canGoBack, canGoForward });
+
     const s = this.state;
     if (s.canGoBack != canGoBack || s.canGoForward != canGoForward) {
-      this.setState({canGoBack, canGoForward});
+      this.setState({ canGoBack, canGoForward });
     }
 
     // Default cases of HTML/JS to Native communication
     // See also - injectedJS in constructor and onBackPress
     switch (data) {
-
-      case 'history++':
-        this.setState({history: s.history + 1})
+      case "history++":
+        this.setState({ history: s.history + 1 });
         break;
-
     }
   }
 
@@ -191,7 +184,7 @@ class WebviewScreen extends Component {
     const target = event.target;
     const { nativeEvent } = target;
 
-    rlog('weview-load-end', `onLoadEnd from webview`, {event, nativeEvent, target})
+    rlog("weview-load-end", `onLoadEnd from webview`, { event, nativeEvent, target });
 
     if (this.useDelay) {
       if (this.state.isLoading) {
@@ -203,8 +196,8 @@ class WebviewScreen extends Component {
   }
 
   onWebViewNavigationState(navState) {
-    const {navigationType, url, canGoBack, canGoForward } = navState;
-    rlog('weview-navigation', (navigationType ? `${navigationType} -> ${url}` : 'n/a'), {navState})
+    const { navigationType, url, canGoBack, canGoForward } = navState;
+    rlog("weview-navigation", navigationType ? `${navigationType} -> ${url}` : "n/a", { navState });
 
     this.webViewRef.canGoBackAndroid = canGoBack;
     this.setState({ canGoForward, canGoBack });
@@ -230,21 +223,11 @@ class WebviewScreen extends Component {
   }
 
   render() {
-    const {
-      isLoading,
-      message,
-      webViewUrl,
-      body,
-      injectJS,
-      injectedJS
-    } = this.state;
+    const { isLoading, message, webViewUrl, body, injectJS, injectedJS } = this.state;
     const { backText, rightText, onRightPress } = this.state.params; // navigation params
 
     if (injectJS && this.webViewRef.ref) {
-      setTimeout(
-        () => this && this.webViewRef.ref && this.webViewRef.ref.injectJavaScript(injectJS),
-        300
-      );
+      setTimeout(() => this && this.webViewRef.ref && this.webViewRef.ref.injectJavaScript(injectJS), 300);
     }
 
     return (
@@ -262,7 +245,7 @@ class WebviewScreen extends Component {
             scalesPageToFit={true}
             javaScriptEnabled={true}
             javaScriptEnabledAndroid={true}
-            ref={webViewRef => this.webViewRef.ref = webViewRef}
+            ref={webViewRef => (this.webViewRef.ref = webViewRef)}
             onNavigationStateChange={this.onWebViewNavigationState}
             onLoadStart={this.onWebViewLoadStart}
             onLoadEnd={this.onWebViewLoadEnd}
@@ -273,12 +256,7 @@ class WebviewScreen extends Component {
           />
         </View>
 
-        <LTLoader
-          isLoading={isLoading}
-          message={message}
-          opacity={"FA"}
-          style={{ height: "90%", top: "10%" }}
-        />
+        <LTLoader isLoading={isLoading} message={message} opacity={"FA"} style={{ height: "90%", top: "10%" }} />
       </View>
     );
   }

@@ -1,6 +1,6 @@
 import { serverRequest } from "../../../../services/utilities/serverUtils";
 import requester from "../../../../initDependencies";
-import { rlog } from "../../../../config-debug";
+import { rlog } from "../../../../utils/debug/debug-tools";
 
 
 const tester = {
