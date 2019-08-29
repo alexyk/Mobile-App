@@ -15,6 +15,7 @@ export const SERVER_ERROR = {
   LEVEL_1:                          "LEVEL_1",
   SUCCESS_CALLBACK:                 "SUCCESS_CALLBACK",
   ERROR_CALLBACK:                   "ERROR_CALLBACK",
+  REQUESTER_CALL:                   "REQUESTER_CALL",
 };
 
 /**
@@ -62,15 +63,18 @@ export function serverRequest(
     }
   }
 
+  let errorData, errorCode;
+
   if (callFunction == null) {
     if (errorFunction) {
-      errorFunctionWrapped(thisObject, new Error(`[serverRequest][${callerName}] The call does not exist in requester`));
+      errorData = { error: new Error(`[serverRequest][${callerName}] The call does not exist in requester`) };
+      errorCode = SERVER_ERROR.REQUESTER_CALL;
+      errorFunctionWrapped(thisObject, errorData, errorCode);
     }
     return;
   }
 
   let requestName = callFunction.name;  
-  let errorData, errorCode;
 
   // prettier-ignore
   if (serverLogRequesting) ilog(`[serverUtils] [${callerName}] Requesting ${requestName}`, {callerName, requestName, callParams});

@@ -1,0 +1,5 @@
+printWidth: 150
+quoteProps: "as-needed"
+bracketSpacing: true
+requirePragma: false
+endOfLine: "lf"

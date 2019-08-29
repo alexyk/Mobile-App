@@ -1,15 +1,5 @@
 import React, { Component } from "react";
-import {
-  AsyncStorage,
-  Image,
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  StatusBar
-} from "react-native";
+import { AsyncStorage, Image, Keyboard, ScrollView, StyleSheet, Text, TouchableOpacity, View, StatusBar } from "react-native";
 import Toast from "react-native-easy-toast"; //eslint-disable-line
 import RNPickerSelect from "react-native-picker-select"; //eslint-disable-line
 import { connect } from "react-redux";
@@ -23,7 +13,7 @@ import {
   isOnline,
   processError,
   ilog,
-  simpleWebviewTest
+  testFlow,
 } from "../../../config-debug";
 import requester from "../../../initDependencies";
 import lang from "../../../language";
@@ -34,12 +24,7 @@ import LocRateButton from "../../atoms/LocRateButton";
 import SingleSelectMaterialDialog from "../../atoms/MaterialDialog/SingleSelectMaterialDialog";
 import SearchBar from "../../molecules/SearchBar";
 import DateAndGuestPicker from "../../organisms/DateAndGuestPicker";
-import {
-  gotoWebview,
-  stringifyRoomsData,
-  gotoWebviewSimple,
-  processGuestsData
-} from "../utils";
+import { gotoWebview, stringifyRoomsData, gotoWebviewSimple, processGuestsData } from "../utils";
 import styles from "./styles";
 import { formatDatesData } from "../Calendar/utils";
 import { hotelSearchIsNative } from "../../../config-settings";
@@ -124,12 +109,8 @@ class Explore extends Component {
   }
 
   async componentWillMount() {
-    const token_value = await AsyncStorage.getItem(
-      `${domainPrefix}.auth.locktrip`
-    );
-    const email_value = await AsyncStorage.getItem(
-      `${domainPrefix}.auth.username`
-    );
+    const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
+    const email_value = await AsyncStorage.getItem(`${domainPrefix}.auth.username`);
     const newState = { token: token_value, email: email_value };
     this.setState(newState);
     this.props.setDatesAndGuestsData({
@@ -158,8 +139,18 @@ class Explore extends Component {
   async componentDidMount() {
     console.disableYellowBox = true;
 
+    // prettier-ignore
+    if (__DEV__ && testFlow) {
+      // run a test flow - for easy debug/development/testing
+      let flow = require("../../../utils/debug/test-flows").default;
+      testFlow
+        .split(".")
+        .forEach(item => (flow = flow[item]));
+      setTimeout(flow, 500);
+
+      return;
+    } else if (__DEV__ && autoHotelSearch) {
     // enable automatic search
-    if (__DEV__ && autoHotelSearch) {
       setTimeout(() => {
         this.onSearchHandler(autoHotelSearchPlace);
       }, 100);
@@ -216,12 +207,7 @@ class Explore extends Component {
     try {
       const { checkInMoment, checkOutMoment, inputFormat, today } = inputData;
       const daysDifference = checkOutMoment.diff(checkInMoment, "days");
-      const formattedDates = formatDatesData(
-        today.year(),
-        checkInMoment,
-        checkOutMoment,
-        inputFormat
-      );
+      const formattedDates = formatDatesData(today.year(), checkInMoment, checkOutMoment, inputFormat);
       const newState = { ...formattedDates, daysDifference };
       const newCache = { ...inputData, ...formattedDates };
 
@@ -236,10 +222,7 @@ class Explore extends Component {
       setTimeout(() => this.setState(newState));
       setTimeout(() => this.props.setDatesAndGuestsData(newCache));
     } catch (error) {
-      processError(
-        `[Explore::onDateSelect] Error while setting date: ${error.message}`,
-        { error }
-      );
+      processError(`[Explore::onDateSelect] Error while setting date: ${error.message}`, { error });
     }
   }
 
@@ -309,6 +292,7 @@ class Explore extends Component {
 
   _cacheLoginAndRegion() {
     const { token, email, isHotel, search } = this.state;
+    // prettier-ignore
     const extraParams = {
       isHotel,
       token: token,
@@ -330,45 +314,9 @@ class Explore extends Component {
   }
 
   gotoSearch() {
-    // prettier-ignore
-    if (__DEV__ && simpleWebviewTest) {
-      // prettier-ignore
-      gotoWebviewSimple({
-        url: simpleWebviewTest,
-        message: `Loading webview test ...\n\nFor details - see simpleWebviewTest\nin config-debug.js`,
-        injectJS: `
-          window.ReactNativeWebView.postMessage("Hello Inject!");
-          true;
-        `,
-        injectedJS: `
-                      window.document.addEventListener('click', function (event) {
-                        console.log(event);
-                        console.info(event.target);
-                        window.ReactNativeWebView.postMessage("history++")
-                      }, false);
-                      window.ReactNativeWebView.postMessage("Hello Injected! (1 time)")
-                    `
-      });
-      // fetch(simpleWebviewTest)
-      //   .then(response => {
-      //     if (response.ok) {
-      //       response
-      //         .text()
-      //         .then(data => {
-      //           gotoWebviewSimple({ body: data });
-      //         });
-      //     }
-      //   });
-
-      return;
-    }
-
     const delayedFunction = () => {
       const extraParams = this._cacheLoginAndRegion();
-      console.log(
-        `#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`,
-        { extraParams }
-      );
+      console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`, { extraParams });
 
       if (hotelSearchIsNative.step1Results) {
         const {
@@ -392,10 +340,7 @@ class Explore extends Component {
           // TODO: Cache these to redux and re-use
 
           if (regionId === "" || regionId === 0) {
-            this.refs.toast.show(
-              "Please input location to search hotels.",
-              2500
-            );
+            this.refs.toast.show("Please input location to search hotels.", 2500);
             return;
           }
 
@@ -652,13 +597,7 @@ class Explore extends Component {
   }
 
   renderDateAndGuestsPicker() {
-    const {
-      guests,
-      children,
-      adults,
-      startDateText,
-      endDateText
-    } = this.props.datesAndGuestsData;
+    const { guests, children, adults, startDateText, endDateText } = this.props.datesAndGuestsData;
 
     return (
       <View style={styles.scrollViewContentMain}>
@@ -682,6 +621,7 @@ class Explore extends Component {
   }
 
   render() {
+    // prettier-ignore
     return (
       <View style={styles.container}>
         <StatusBar barStyle="dark-content" backgroundColor="#f0f1f3" />
@@ -696,25 +636,13 @@ class Explore extends Component {
           textStyle={{ color: "white", fontFamily: "FuturaStd-Light" }}
         />
 
-        {this.state.isHotel
-          ? this.renderHotelTopView()
-          : this.renderHomeTopView()}
+        {this.state.isHotel ? this.renderHotelTopView() : this.renderHomeTopView()}
         {this.renderAutocomplete()}
 
-        <ScrollView
-          style={styles.scrollView}
-          automaticallyAdjustContentInsets={true}
-        >
+        <ScrollView style={styles.scrollView} automaticallyAdjustContentInsets={true}>
           {this.renderDateAndGuestsPicker()}
 
-          <Text
-            style={[
-              styles.scrollViewTitles,
-              { marginBottom: 10, marginTop: 5 }
-            ]}
-          >
-            Discover
-          </Text>
+          <Text style={[styles.scrollViewTitles, { marginBottom: 10, marginTop: 5 }]}>Discover</Text>
 
           <View>
             <View

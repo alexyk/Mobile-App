@@ -1,5 +1,6 @@
 import { autoHotelSearchPlace, autoHomeSearchPlace, rlog, processError, validationStateOfflineWallet, offlineTimeInSeconds } from '../../config-debug'
 import { isObject } from '../../components/screens/utils'
+import { SERVER_ERROR } from '../../services/utilities/serverUtils';
 
 const offlinePacksHomes = {
   'uk1': require('./offline-responses/homes-uk-1.json'),
@@ -77,6 +78,10 @@ export default function createOfflineRequester() {
 
   const getOfflineResponse = function(title) {
     switch (title) {
+      // test/fake
+      case 'testCall':                      return {}
+      case 'mobileLogin':                   return require('./offline-responses/login.json')
+      // regular
       case 'login':                         return require('./offline-responses/login.json')
       case 'getUserInfo':                   return (value =>
         {
@@ -105,7 +110,7 @@ export default function createOfflineRequester() {
     }
   }
     
-	const genPromise = (args, title, delay = 0.1) => {
+	const genPromise = (args, title, delay = 0.1, returnError = false) => {
     if (offlineTimeInSeconds[title] != null) {
       delay = offlineTimeInSeconds[title];
     }
@@ -113,18 +118,52 @@ export default function createOfflineRequester() {
     const delayInMS = 1000*delay;
     const promise = promiseRes(data,title);
 
-    return new Promise(
-		(success, reject) => {
-			// setTimeout(() => success(promiseRes(data,title)), delayInMS);
-			setTimeout(() => success(promise), delayInMS);
+    return new Promise( (success, reject) => {
+      if (returnError) {
+        reject(new Error(`[${title}] Thrown in offline::genPromise() because of parameter returnError}`));
+      }
 
-			// rlog(title,`Success::START`,{data,args})
-			//console.tron.logImportant(`[${title}] reject`,{args})
+			setTimeout(() => success(promise), delayInMS);
 		}
   )};
   
+  // prettier-ignore
   const socketDelay = 10; // in milliseconds
 	const offlineRequester = {
+    // fake test calls
+		testCall: (caseNo) 				              => new Promise( (resolve, reject) => { 
+                                                  switch (caseNo) {
+                                                    case 0:
+                                                      reject(new Error('level 0 error'));
+                                                      break;
+                                                    case 1:
+                                                      resolve(resultPromise)
+                                                      break;
+                                                  }
+
+                                                  const resultPromise = new Promise( () => ({body: 'done (1st resolve)', ok:true}) );
+
+                                                  new Promise((resolve,reject) => {                                                    
+                                                    setTimeout(resolve, 500, (caseNo == 1 ? 'done (2nd resolve)' : 'done'));
+                                                  })
+                                                    .then(response => {
+                                                      switch (caseNo) {
+                                                        case -1:
+                                                          throw new Error ('[offline] Unhandled exception in then');
+                                                        case -2:
+                                                          throw new Error ('[offline] Unhandled exception - to go to catch - and throw again from catch');
+                                                      }
+                                                      return response;
+                                                    })
+                                                    .catch(error => {
+                                                      if (caseNo == -2) {
+                                                        throw new Error (`[offline] Unhandled exception in catch (${error.message})`);
+                                                      }
+
+                                                      return error;
+                                                    })
+                                                }),
+		mobileLogin: (...args) 				          => genPromise(args,'mobileLogin', 0.1, true),
 		// http calls
 		login: (...args) 				                => genPromise(args,'login', 0.1),
 		getUserInfo: (...args)	                => genPromise(args,'getUserInfo', 2.5),

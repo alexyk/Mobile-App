@@ -68,43 +68,15 @@ class GuestInfoForm extends Component {
 
     this._bookingParams = null;
     this._guestsCollection = [];
-    // this._initialGuestsData(roomsData);
 
     this._serviceRequestSCMode = this._serviceRequestSCMode.bind(this);
+    this._prepareInitialGuestsData = this._prepareInitialGuestsData.bind(this);
     this._onGuestTitleUpdate = this._onGuestTitleUpdate.bind(this);
     this._onFirstNameChange = this._onFirstNameChange.bind(this);
     this._onLastNameChange = this._onLastNameChange.bind(this);
     this._onReservationReady = this._onReservationReady.bind(this);
     this._onBackPress = this._onBackPress.bind(this);
     this._onWebviewRightPress = this._onWebviewRightPress.bind(this);
-  }
-
-  _initialGuestsData(roomsData) {
-    roomsData.forEach((room, roomIndex) => {
-      let { adults, children } = room;
-      let currentRoom = [];
-
-      for (let i = 0; i < adults; i++) {
-        currentRoom.push({
-          title: "Mr",
-          firstName: "",
-          lastName: "",
-          roomIndex
-        });
-      }
-
-      for (let childAge of children) {
-        currentRoom.push({
-          age: childAge,
-          firstName: "",
-          lastName: "",
-          roomIndex
-        });
-      }
-
-      this._guestsCollection.push(currentRoom);
-      roomIndex++;
-    });
   }
 
   componentWillMount() {
@@ -148,14 +120,18 @@ class GuestInfoForm extends Component {
       this._guestsCollection = cloneDeep(guests); // retrieved from cache in constructor
       this.setState({ isLoading: false });
     } else {
-      const { rooms, roomsData } = props.datesAndGuestsData;
+      const { roomsData } = this.props.datesAndGuestsData;
 
       let userFirstName = await userInstance.getFirstName();
       let userLastName = await userInstance.getLastName();
+      const _this = this;
 
       roomsData.forEach((room, roomIndex) => {
         let { adults, children } = room;
         let currentRoom = [];
+
+        _this._guestsCollection.push(currentRoom);
+        preparedGuests.push(currentRoom);
 
         for (let index = 0; index < adults; index++) {
           let firstName = "";
@@ -174,8 +150,8 @@ class GuestInfoForm extends Component {
             lastName
           });
 
-          this._onFirstNameChange(roomIndex, index, firstName, true);
-          this._onLastNameChange(roomIndex, index, lastName, true);
+          _this._onFirstNameChange(roomIndex, index, firstName, true);
+          _this._onLastNameChange(roomIndex, index, lastName, true);
         }
 
         children.forEach((childAge, index) => {
@@ -187,14 +163,12 @@ class GuestInfoForm extends Component {
             roomIndex
           });
 
-          this._onFirstNameChange(roomIndex, index, "", true);
-          this._onLastNameChange(roomIndex, index, "", true);
+          _this._onFirstNameChange(roomIndex, index, "", true);
+          _this._onLastNameChange(roomIndex, index, "", true);
         });
-
-        this._guestsCollection.push(currentRoom);
       });
 
-      this.setState({ guests: preparedGuests, isLoading: false });
+      _this.setState({ guests: (cloneDeep(preparedGuests)), isLoading: false });
     }
   }
 
@@ -372,9 +346,9 @@ class GuestInfoForm extends Component {
   }
 
   _onFirstNameChange(roomIndex, key, text, isInit) {
-    if (text === "") {
-      text = "Optional";
-    }
+    // if (text === "") {
+    //   text = "Optional";
+    // }
 
     this._guestsCollection[roomIndex][key].firstName = text;
 
@@ -384,9 +358,10 @@ class GuestInfoForm extends Component {
   }
 
   _onLastNameChange(roomIndex, key, text, isInit = false) {
-    if (text === "") {
-      text = "Optional";
-    }
+    // if (text === "") {
+    //   text = "Optional";
+    // }
+    
     this._guestsCollection[roomIndex][key].lastName = text;
 
     if (!isInit) {
