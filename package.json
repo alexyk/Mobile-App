@@ -5,6 +5,7 @@
   "devDependencies": {
     "@babel/core": "7.5.5",
     "@babel/plugin-proposal-decorators": "7.4.4",
+    "@babel/plugin-proposal-throw-expressions": "7.2.0",
     "@babel/runtime": "7.5.5",
     "babel-eslint": "10.0.2",
     "eslint": "6.1.0",
@@ -27,6 +28,8 @@
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "prettier": "prettier 'src/**/*.js'",
+    "prettier-file": "prettier --write $1",
+    "prettier-write": "prettier 'src/**/*.js' --write",
     "test": "node node_modules/jest/bin/jest.js",
     "lint": "./node_modules/.bin/eslint .",
     "test-debug": "node --inspect node_modules/.bin/jest --watch --runInBand"
