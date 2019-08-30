@@ -13,7 +13,7 @@ import requester from "../../../../initDependencies";
 import { userInstance } from "../../../../utils/userInstance";
 import { imgHost } from "../../../../config";
 import { SC_NAME, DEFAULT_CRYPTO_CURRENCY } from "../../../../config-settings";
-import { processError, rlog } from "../../../../utils/debug/debug-tools";
+import { processError, rlog, clog } from "../../../../utils/debug/debug-tools";
 import { gotoWebview } from "../../utils";
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
 import { cloneDeep } from "lodash";
@@ -30,6 +30,7 @@ import TopBar from "../../../molecules/TopBar";
 import { setGuestData } from "../../../../redux/action/hotels";
 import lang from "../../../../language";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
+
 
 class GuestInfoForm extends Component {
   constructor(props) {
@@ -62,7 +63,9 @@ class GuestInfoForm extends Component {
 
     this._bookingParams = null;
     this._guestsCollection = [];
+    this._editingTimeout;
 
+    this._updateCache = this._updateCache.bind(this);
     this._serviceRequestSCMode = this._serviceRequestSCMode.bind(this);
     this._prepareInitialGuestsData = this._prepareInitialGuestsData.bind(this);
     this._onGuestTitleUpdate = this._onGuestTitleUpdate.bind(this);
@@ -136,9 +139,6 @@ class GuestInfoForm extends Component {
             firstName,
             lastName
           });
-
-          _this._onFirstNameChange(roomIndex, index, firstName, true);
-          _this._onLastNameChange(roomIndex, index, lastName, true);
         }
 
         children.forEach((childAge, index) => {
@@ -149,9 +149,6 @@ class GuestInfoForm extends Component {
             lastName: "",
             roomIndex
           });
-
-          _this._onFirstNameChange(roomIndex, index, "", true);
-          _this._onLastNameChange(roomIndex, index, "", true);
         });
       });
 
@@ -159,6 +156,20 @@ class GuestInfoForm extends Component {
     }
   }
 
+  _updateCache() {
+    const _this = this;
+
+    if (this._editingTimeout != null) {
+      clearTimeout(this._editingTimeout);
+    }
+
+    this._editingTimeout = setTimeout(() => {
+      _this.props.setGuestData(cloneDeep(_this._guestsCollection), 700)
+      clearTimeout(_this._editingTimeout);
+      _this._editingTimeout = null;
+    });
+  }
+  
   _serviceRequestSCMode() {
     serverRequest(
       this,
@@ -307,28 +318,16 @@ class GuestInfoForm extends Component {
     this.props.setGuestData(cloneDeep(this._guestsCollection));
   }
 
-  _onFirstNameChange(roomIndex, key, text, isInit) {
-    // if (text === "") {
-    //   text = "Optional";
-    // }
-
-    this._guestsCollection[roomIndex][key].firstName = text;
-
-    if (!isInit) {
-      this.props.setGuestData(cloneDeep(this._guestsCollection));
-    }
+  _onFirstNameChange(roomIndex, key, text) {
+    let item = this._guestsCollection[roomIndex];
+    item = item[parseInt(key)]
+    item.firstName = text; // (text === "" ? "Optional" : text)
+    this._updateCache();
   }
-
-  _onLastNameChange(roomIndex, key, text, isInit = false) {
-    // if (text === "") {
-    //   text = "Optional";
-    // }
-
-    this._guestsCollection[roomIndex][key].lastName = text;
-
-    if (!isInit) {
-      this.props.setGuestData(cloneDeep(this._guestsCollection));
-    }
+  
+  _onLastNameChange(roomIndex, key, text) {
+    this._guestsCollection[roomIndex][parseInt(key)].lastName = text; // (text === "" ? "Optional" : text)
+    this._updateCache();
   }
 
   onProceedPress = () => {
@@ -419,20 +418,34 @@ class GuestInfoForm extends Component {
   }
 
   _renderGuests() {
+    const _this = this;
+    let guestsRendered = [];
+
+    if (this.state.guests) {
+      this.state.guests.forEach(
+        (room, roomIndex) => (
+          room.forEach((item, index) => {
+            clog({item,index,roomIndex,room})
+            guestsRendered.push(
+              <GuestFormRow
+                key={`${index}_${item.roomIndex}`}
+                guest={item}
+                itemIndex={index}
+                roomIndex={roomIndex}
+                onGuestTitleUpdate={_this._onGuestTitleUpdate}
+                onFirstNameChange={(index, text) => _this._onFirstNameChange(roomIndex, index, text)}
+                onLastNameChange={(index, text) => _this._onLastNameChange(roomIndex, index, text)}
+              />
+            )
+          })
+        )
+      )
+    }
+
+
     return (
       <View style={{ backgroundColor: "#f0f1f3" }}>
-        {this.state.guests &&
-          this.state.guests.map((item, index) => (
-            <GuestFormRow
-              key={`${index}_${item.roomIndex}`}
-              guest={item}
-              itemIndex={index}
-              roomIndex={item.roomIndex}
-              onGuestTitleUpdate={this._onGuestTitleUpdate}
-              onFirstNameChange={this._onFirstNameChange}
-              onLastNameChange={this._onLastNameChange}
-            />
-          ))}
+        {guestsRendered}
       </View>
     );
   }

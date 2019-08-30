@@ -48,18 +48,22 @@ export default class GuestFormRow extends Component {
     this.setState({ firstName: text });
   }
 
-  _renderGender() {
-    return (
-      <View style={styles.titleContainer}>
-        <RNPickerSelect
-          placeholder={{ label: "", value: null }}
-          style={orderbyPickerSelectStyles}
-          value={this.state.title}
-          items={this.state.titleSelectItems}
-          onValueChange={this._onGenderChange}
-        />
-      </View>
-    );
+  _renderGenderOrAge(isAChild, age) {
+    if (isAChild) {
+      return null;
+    } else {
+      return (
+        <View style={styles.titleContainer}>
+          <RNPickerSelect
+            placeholder={{ label: "", value: null }}
+            style={orderbyPickerSelectStyles}
+            value={this.state.title}
+            items={this.state.titleSelectItems}
+            onValueChange={this._onGenderChange}
+          />
+        </View>
+      );
+    }
   }
 
   _renderFirstName() {
@@ -99,16 +103,26 @@ export default class GuestFormRow extends Component {
     );
   }
 
+  _renderType(isAChild, age, no, roomIndex) {
+    if (isAChild) {
+      return <Text style={styles.labelGuest}>Room {roomIndex + 1}, Child at {age}</Text>
+    } else {
+      return <Text style={styles.labelGuest}>Room {roomIndex + 1}, Guest {no}</Text>
+    }
+  }
+
   render() {
-    const { itemIndex } = this.props;
+    const { itemIndex, guest } = this.props;
+    const { age, roomIndex } = guest;
     const no = parseInt(itemIndex) + 1;
+    const isAChild = (age != null);
 
     return (
       <View style={styles.guestInfoWrapper} key={`${itemIndex}`}>
-        <Text style={styles.labelGuest}>Guest {no}</Text>
+        {this._renderType(isAChild, age, no, roomIndex)}
         <Separator isHR height={1} />
         <View style={styles.inputFieldsView}>
-          {this._renderGender()}
+          {this._renderGenderOrAge(isAChild, age)}
           {this._renderFirstName()}
           {this._renderLastName()}
         </View>
