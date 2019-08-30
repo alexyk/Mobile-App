@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { domainPrefix } from "../../../config";
 import { autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace, isOnline, testFlow } from "../../../config-debug";
-import { processError, ilog, clog } from "../../../utils/debug/debug-tools";
+import { testFlowExec, processError, ilog } from "../../../utils/debug/debug-tools";
 import requester from "../../../initDependencies";
 import lang from "../../../language";
 import { setCurrency } from "../../../redux/action/Currency";
@@ -23,8 +23,7 @@ import { hotelSearchIsNative } from "../../../config-settings";
 import { setLoginDetails } from "../../../redux/action/userInterface";
 import { getSafeTopOffset } from "../../../utils/designUtils";
 import { serverRequest } from "../../../services/utilities/serverUtils";
-import navigationService from "../../../services/navigationService";
-import { getObjectClassName } from "../utils";
+
 
 const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
 
@@ -133,24 +132,9 @@ class Explore extends Component {
   async componentDidMount() {
     console.disableYellowBox = true;
     // prettier-ignore
-    if (__DEV__ && true) {
+    if (__DEV__ && testFlow) {
       // run a test flow - for easy debug/development/testing
-      try {
-        let tf = require("test-flows").default;
-        tf.setConfig({ getObjectClassName, serverRequest, requester, navigationService });
-        if (tf.flows.guestInfo) tf.flows.guestInfo.exec()
-      } catch (error) {
-        //
-      }
-    } else if (__DEV__ && testFlow) {
-      // run a test flow - for easy debug/development/testing
-      let flow = require("../../../utils/debug/test-flows").default;
-      flow.setConfig({ getObjectClassName, serverRequest, requester });
-      testFlow
-        .split(".")
-        .forEach(item => (flow = flow[item]));
-      setTimeout(flow, 500);
-
+      testFlowExec(testFlow, {setDatesAndGuestsData: this.props.setDatesAndGuestsData});
       return;
     } else if (__DEV__ && autoHotelSearch) {
       // enable automatic search
@@ -317,6 +301,10 @@ class Explore extends Component {
   }
 
   gotoSearch() {
+    if (__DEV__ && testFlow) {
+      testFlowExec(testFlow, {setDatesAndGuestsData: this.props.setDatesAndGuestsData});
+    }
+
     const delayedFunction = () => {
       const extraParams = this._cacheLoginAndRegion();
       console.log(`#hotel-search# 1/5 gotoSearch, ${this.state.checkOutDateFormated}, ${this.state.checkInDateFormated}`, { extraParams });

@@ -1,7 +1,14 @@
 import { isObject, isString, getObjectClassName, isSymbol } from '../../../components/screens/utils';
 import lodash from 'lodash';
 import moment, { isMoment } from 'moment';
-import { __MYDEV__, __TEST__, consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs, errorLevel, serverExpandErrors, showTypesInReactotronLog } from '../../../config-debug';
+import navigationService from '../../../services/navigationService';
+import { serverRequest } from '../../../services/utilities/serverUtils';
+import requester from "../../../initDependencies";
+import { __MYDEV__, __TEST__,
+  consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs,
+  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls
+} from '../../../config-debug';
+
 
 
 // ---------------  function definitions  -----------------
@@ -62,7 +69,7 @@ function configureConsole() {
     if (__DEV__) {
       if (warnOnReactotronDisabledCalls) {
       func = (method) => console.warn(
-        '[config-debug] Reactotron is disabled, but still calling it as '+
+        '[debug-tools] Reactotron is disabled, but still calling it as '+
         `console.tron.${method}`
       )
       } else {
@@ -103,13 +110,13 @@ function configureConsole() {
     console.group = (console.log ? console.log : emptyFunc);
     console.groupEnd = (console.log ? console.log : emptyFunc);
     console.groupCollapsed = (console.log ? console.log : emptyFunc);
-    if (console.warn) console.warn('[config-debug] console.time is not available - disabling console.time(End) and console.group(End|Collapsed) families of calls');
+    if (console.warn) console.warn('[debug-tools] console.time is not available - disabling console.time(End) and console.group(End|Collapsed) families of calls');
   } else if (!consoleTimeCalculations || !__MYDEV__) {
     console.time = emptyFunc;
     console.timeEnd = emptyFunc;
     tslog = emptyFunc;
     telog = emptyFunc;
-    if (__MYDEV__ !== undefined && console.warn != null) console.warn(`[config-debug] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
+    if (__MYDEV__ !== undefined && console.warn != null) console.warn(`[debug-tools] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
   }
 }
 
@@ -336,7 +343,7 @@ export function rlog(tag, description, data, isImportant = false) {
           try {
             result[prop] = `${item} (${className})`;
           } catch (error) {
-            processError(`[config-debug::rlog::parseObjTypes] Error while setting result['${prop}']: ${error.message}`,{error,item,result})
+            processError(`[debug-tools::rlog::parseObjTypes] Error while setting result['${prop}']: ${error.message}`,{error,item,result})
           }
         }
       }
@@ -360,3 +367,32 @@ export function configureDebug() {
 
 // debug settings
 configureDebug();
+
+export function testFlowExec(type, extraConfig={}) {
+  if (type == null) {
+    type = testFlow;
+  }
+
+  switch (type) {
+    case 'current':
+      let lib;
+      try {
+        lib = require("test-flows").default;
+        lib.setConfig({ getObjectClassName, serverRequest, requester, navigationService, ...extraConfig });
+        if (lib.flows.guestInfoSimple) lib.flows.guestInfoSimple.exec()       
+      } catch (error) {
+        wlog(`[debug-tools::testFlowExec] Couldn't execute flow '${type}'`, {error,lib})
+      }
+      break;
+  
+    default:
+      // run a test flow - for easy debug/development/testing
+      let flow = require("../../../utils/debug/test-flows").default;
+      flow.setConfig({ getObjectClassName, serverRequest, requester });
+      testFlow
+        .split(".")
+        .forEach(item => (flow = flow[item]));
+      setTimeout(flow, 500);
+      break;
+  }
+}
