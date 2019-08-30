@@ -134,7 +134,7 @@ class Explore extends Component {
     // prettier-ignore
     if (__DEV__ && testFlow) {
       // run a test flow - for easy debug/development/testing
-      testFlowExec(testFlow, {setDatesAndGuestsData: this.props.setDatesAndGuestsData});
+      testFlowExec(testFlow, {reduxAction: this.props.setDatesAndGuestsData});
       return;
     } else if (__DEV__ && autoHotelSearch) {
       // enable automatic search
@@ -302,7 +302,8 @@ class Explore extends Component {
 
   gotoSearch() {
     if (__DEV__ && testFlow) {
-      testFlowExec(testFlow, {setDatesAndGuestsData: this.props.setDatesAndGuestsData});
+      testFlowExec(testFlow, {reduxAction: this.props.setDatesAndGuestsData});
+      return;
     }
 
     const delayedFunction = () => {

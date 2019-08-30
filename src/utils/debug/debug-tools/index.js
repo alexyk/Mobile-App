@@ -8,7 +8,7 @@ import { __MYDEV__, __TEST__,
   consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs,
   errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls
 } from '../../../config-debug';
-
+import reduxStore from "../../../redux/store";
 
 
 // ---------------  function definitions  -----------------
@@ -369,6 +369,13 @@ export function configureDebug() {
 configureDebug();
 
 export function testFlowExec(type, extraConfig={}) {
+  try {
+    testFlowExecSafe(type, extraConfig);
+  } catch (error) {
+    wlog(`[Error] Could not execute test-flow ${type} - ${error.message}`)
+  }
+}
+function testFlowExecSafe(type, extraConfig={}) {
   if (type == null) {
     type = testFlow;
   }
@@ -378,10 +385,70 @@ export function testFlowExec(type, extraConfig={}) {
       let lib;
       try {
         lib = require("test-flows").default;
-        lib.setConfig({ getObjectClassName, serverRequest, requester, navigationService, ...extraConfig });
-        if (lib.flows.guestInfoSimple) lib.flows.guestInfoSimple.exec()       
+        const jsonData = require('../../debug/test-flows/data/guest-info-3a-4ch.json');
+
+        const getParams = (flow) => function (name) {
+          let result = [];
+
+          switch (name) {
+            case 'hotels-search':
+              let query1 = `?region=1937`;
+              query1 += "&currency=EUR";
+              query1 += "&startDate=27/09/2019";
+              query1 += "&endDate=28/09/2019";
+              query1 += "&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1";
+              query1 += `&uuid=${flow.read('uuid')}amp;97892170124`;
+              result.push(query1);
+              break;
+
+            case 'nav-params':
+              result = jsonData;
+              break;
+
+            case 'redux1':
+                result = ['userInterface.datesAndGuestsData.roomsData'];
+                break;
+
+            case 'redux-exec-payload':
+              let roomsData = [];
+              roomsData.push({adults: 2, children: [2,3,8]});
+              roomsData.push({adults: 1, children: [0]});
+              roomsData.push({adults: 1, children: [8,17]});
+              result.push({roomsData});
+              break;
+
+            case 'nav-screen':
+              result = 'GuestInfoForm';
+              break;
+            
+            
+            case 'redux2':
+              result = ['userInterface.walletData'];
+              break;
+
+            case 'redux-action-type':
+              result = 'SET_WALLET_DATA';
+              break;
+
+            case 'redux-action-payload':
+              result = {reduxTest: 'hello there I am redux test in a test-flow'};
+              break;
+          }
+
+          return result;
+        }
+
+        lib
+          .setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
+        lib.flows
+          .sampleFlow()
+          .exec();
       } catch (error) {
-        wlog(`[debug-tools::testFlowExec] Couldn't execute flow '${type}'`, {error,lib})
+        wlog('                                                                                                              ');
+        wlog('                                                                                                              ');
+        wlog(`[Error] [debug-tools::testFlowExec] Couldn't execute flow '${type}'`, {error,lib})
+        wlog('                                                                                                              ');
+        wlog('                                                                                                              ');
       }
       break;
   

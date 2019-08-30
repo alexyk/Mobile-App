@@ -424,6 +424,7 @@ class GuestInfoForm extends Component {
         {this.state.guests &&
           this.state.guests.map((item, index) => (
             <GuestFormRow
+              key={`${index}_${item.roomIndex}`}
               guest={item}
               itemIndex={index}
               roomIndex={item.roomIndex}
