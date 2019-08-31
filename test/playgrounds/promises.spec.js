@@ -1,8 +1,14 @@
 import { cloneDeep } from 'lodash'
 
+/**
+ * //TODO:
+ *    1. Remove debugger
+ *
+ */
 
-// mock envirentment - see also functions after tests 
-log = console.log;
+// mock envireontment - see also functions after tests 
+const log = console.log;
+const l = console.log;
 let expected = '';
 let emptyFunc = (name) => () => throw new Error(`[${name}] These functions should be defined by test case`)
 let promise, subPromise, 
@@ -10,6 +16,127 @@ let promise, subPromise,
   onPromiseFail = emptyFunc,
   onSubPromiseSuccess = emptyFunc,
   onSubPromiseFail = emptyFunc;
+
+
+
+
+// -----  TESTS -----
+
+describe.only('chained promises handling experiments', () => {
+  it('rejecting with reject and reject2, with catch at different position', async () => {
+    expect.assertions(1)
+
+    const h1 = (resolve, reject) => {
+      console.log('handle 1');
+      new Promise((resolve2, reject2) => {
+        setTimeout(() => {
+          console.log('handle 2');
+
+          expect (1)                                .toBe(1);
+
+          return reject2('no2');
+        }, 1000)
+      });
+    }
+    const p1 = () => new Promise((resolve, reject) => {
+      return h1(resolve, reject);
+    });
+
+    let caseNo = 4;
+    swtich (caseNo) {
+      case 1:
+        return p1()
+                .then()
+                .catch(error => l(error))
+      case 2:
+        return p1()
+                .then()
+                .catch(error => l(error))
+      case 3:
+        return p1()
+                .then()
+                .then()
+                .catch(error => l(error))
+      case 4:
+        return p1()
+                .then()
+                .catch(error => l(`level 1`, error))
+                .then()
+                .catch(error => l(`level 2`, error))
+      case 5:
+        return p1()
+                .then()
+                .then()
+                .catch(error => l(error))
+      case 6:
+        return p1()
+                .then()
+                .then()
+                .catch(error => l(error))
+    }
+  }
+})
+
+
+
+describe('Try service-layer models', () => {
+  describe('current - August, 2019', () => {
+    const generateModelAug2019 = (caseType) => new Promise((resolve, reject) => {
+      debugger;
+      switch (caseType) {
+        case "resolve1":
+          resolve('resolving in main');
+          break;
+        case "reject1":
+          reject('rejecting in main');
+          break;
+        case "throw1":
+          throw new Error('throwing in main');
+          break;
+      }
+
+
+      // fetch imitation
+      new Promise((resolve2,reject2) => {
+        switch (caseType) {
+          case "resolve2":
+            resolve2('resolving in fetch')
+            break;
+          case "reject2":
+            reject2('rejecting in fetch')
+            break;
+          case "throw2":
+            throw new Error('throwing in fetch')
+            break;
+        }
+      })
+    })
+    const e1 = (caseType) => (result) => {
+      switch (caseType) {
+        case 'resolve1':
+          expect(result)        .toEqual('resolving in main')
+          break;
+      }
+    }
+    const c1 = (caseType) => (result) => {
+      expect(result instanceof Error)     .toBeTruthy();
+      switch (caseType) {
+        case 'resolve1':
+          expect(result)                  .toEqual('resolving in main')
+          break;
+      }
+    }
+
+    debugger
+    expect.assertions(1);
+
+    it('resolve 1', () => {
+      generateModelAug2019('resolve1')
+        .then(e1('resolve1'))
+        .catch(c1('resolve1'))
+    })
+  });
+})
 
 
 describe('Test the outcomes of promises', () => {
@@ -43,7 +170,7 @@ describe('Test the outcomes of promises', () => {
       expect.assertions(2);
       expect(promise)                                               .toBeDefined();
       
-      await promise.catch(error => expect(error.message)             .toEqual('promise error'))
+      await promise.catch(error => expect(error.message)            .toEqual('promise error'))
       // await expect(promise)     .rejects          .toEqual('rejecting');
     })
   });
@@ -87,8 +214,6 @@ describe('Test the outcomes of promises', () => {
     });
   });
 });
-
-
 
 
 // functions

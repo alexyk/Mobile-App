@@ -1,4 +1,4 @@
-import { isObject, isString, getObjectClassName, isSymbol } from '../../../components/screens/utils';
+import { isObject, isString, getObjectClassName, isSymbol, gotoWebviewSimple } from '../../../components/screens/utils';
 import lodash from 'lodash';
 import moment, { isMoment } from 'moment';
 import navigationService from '../../../services/navigationService';
@@ -379,83 +379,88 @@ function testFlowExecSafe(type, extraConfig={}) {
   if (type == null) {
     type = testFlow;
   }
+  let lib, flow;
+
+  lib = require('test-flows').default;
+  lib
+    .setConfig({getObjectClassName, navigationService})
 
   switch (type) {
+
+    case 'recaptchaFlow':
+      flow = require("../test-flows/recaptcha/recaptchaFlow").default;
+      lib
+        .setConfig({getObjectClassName, gotoWebviewSimple, navigationService, ...extraConfig});
+      flow(lib)
+        .exec();
+      break;
+      
+
     case 'current':
-      let lib;
-      try {
-        lib = require("test-flows").default;
-        const jsonData = require('../../debug/test-flows/data/guest-info-3a-4ch.json');
+      const jsonData = require('../../debug/test-flows/data/guest-info-3a-4ch.json');
 
-        const getParams = (flow) => function (name) {
-          let result = [];
+      const getParams = (flow) => function (name) {
+        let result = [];
 
-          switch (name) {
-            case 'hotels-search':
-              let query1 = `?region=1937`;
-              query1 += "&currency=EUR";
-              query1 += "&startDate=27/09/2019";
-              query1 += "&endDate=28/09/2019";
-              query1 += "&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1";
-              query1 += `&uuid=${flow.read('uuid')}amp;97892170124`;
-              result.push(query1);
+        switch (name) {
+          case 'hotels-search':
+            let query1 = `?region=1937`;
+            query1 += "&currency=EUR";
+            query1 += "&startDate=27/09/2019";
+            query1 += "&endDate=28/09/2019";
+            query1 += "&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1";
+            query1 += `&uuid=${flow.read('uuid')}amp;97892170124`;
+            result.push(query1);
+            break;
+
+          case 'nav-params':
+            result = jsonData;
+            break;
+
+          case 'redux1':
+              result = ['userInterface.datesAndGuestsData.roomsData'];
               break;
 
-            case 'nav-params':
-              result = jsonData;
-              break;
+          case 'redux-exec-payload':
+            let roomsData = [];
+            roomsData.push({adults: 2, children: [2,3,8]});
+            roomsData.push({adults: 1, children: [0]});
+            roomsData.push({adults: 1, children: [8,17]});
+            result.push({roomsData});
+            break;
 
-            case 'redux1':
-                result = ['userInterface.datesAndGuestsData.roomsData'];
-                break;
+          case 'nav-screen':
+            result = 'GuestInfoForm';
+            break;
+          
+          
+          case 'redux2':
+            result = ['userInterface.walletData'];
+            break;
 
-            case 'redux-exec-payload':
-              let roomsData = [];
-              roomsData.push({adults: 2, children: [2,3,8]});
-              roomsData.push({adults: 1, children: [0]});
-              roomsData.push({adults: 1, children: [8,17]});
-              result.push({roomsData});
-              break;
+          case 'redux-action-type':
+            result = 'SET_WALLET_DATA';
+            break;
 
-            case 'nav-screen':
-              result = 'GuestInfoForm';
-              break;
-            
-            
-            case 'redux2':
-              result = ['userInterface.walletData'];
-              break;
-
-            case 'redux-action-type':
-              result = 'SET_WALLET_DATA';
-              break;
-
-            case 'redux-action-payload':
-              result = {reduxTest: 'hello there I am redux test in a test-flow'};
-              break;
-          }
-
-          return result;
+          case 'redux-action-payload':
+            result = {reduxTest: 'hello there I am redux test in a test-flow'};
+            break;
         }
 
-        lib
-          .setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
-        lib.flows
-          .sampleFlow()
-          .exec();
-      } catch (error) {
-        wlog('                                                                                                              ');
-        wlog('                                                                                                              ');
-        wlog(`[Error] [debug-tools::testFlowExec] Couldn't execute flow '${type}'`, {error,lib})
-        wlog('                                                                                                              ');
-        wlog('                                                                                                              ');
+        return result;
       }
+
+      lib
+        .setConfig({ serverRequest, requester, reduxStore, getParams });
+      lib.flows
+        .sampleFlow()
+        .exec();
       break;
   
     default:
       // run a test flow - for easy debug/development/testing
-      let flow = require("../../../utils/debug/test-flows").default;
-      flow.setConfig({ getObjectClassName, serverRequest, requester });
+      lib
+        .setConfig({ serverRequest, requester });
       testFlow
         .split(".")
         .forEach(item => (flow = flow[item]));

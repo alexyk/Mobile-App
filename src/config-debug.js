@@ -90,7 +90,7 @@ export const autoHomeSearchPlace                = 'uk1'
 export const autoCalendar                       = false;
   // test flows
 export const testFlowURL                        = "http://beta.locktrip.com/api/mobile/login";
-export const testFlow                           = "";
+export const testFlow                           = "recaptchaFlow";
 // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
