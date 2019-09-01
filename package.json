@@ -42,7 +42,7 @@
     "immutable": "3.8.2",
     "javascript-time-ago": "1.0.30",
     "locktrip-svc-layer": "git+https://github.com/LockTrip/Service-Layer.git#v1.1.2",
-    "lodash": "4.17.10",
+    "lodash": "4.17.13",
     "missing": "0.0.1",
     "moment": "2.22.1",
     "prop-types": "15.6.1",
