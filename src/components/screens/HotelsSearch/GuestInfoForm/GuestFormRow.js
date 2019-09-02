@@ -5,7 +5,8 @@ import RNPickerSelect from "react-native-picker-select";
 import PropTypes from "prop-types";
 import styles from "./styles";
 import { orderbyPickerSelectStyles } from "../HotelFilters/styles";
-import Separator from "../../../atoms/Separator";
+import { commonText } from "../../../../common.styles";
+
 
 export default class GuestFormRow extends Component {
   static propTypes = {
@@ -50,7 +51,7 @@ export default class GuestFormRow extends Component {
 
   _renderGenderOrAge(isAChild, age) {
     if (isAChild) {
-      return null;
+      return <Text style={{...commonText, fontSize:14, color:'grey',marginBottom: 10,fontWeight: "200"}}>aged {age}</Text>;
     } else {
       return (
         <View style={styles.titleContainer}>
@@ -105,9 +106,9 @@ export default class GuestFormRow extends Component {
 
   _renderType(isAChild, age, no, roomIndex) {
     if (isAChild) {
-      return <Text style={styles.labelGuest}>Room {roomIndex + 1}, Child at {age}</Text>
+      return <Text style={styles.labelGuest}>Young Guest {no}</Text>
     } else {
-      return <Text style={styles.labelGuest}>Room {roomIndex + 1}, Guest {no}</Text>
+      return <Text style={styles.labelGuest}>Guest {no}</Text>
     }
   }
 
@@ -120,7 +121,6 @@ export default class GuestFormRow extends Component {
     return (
       <View style={styles.guestInfoWrapper} key={`${itemIndex}`}>
         {this._renderType(isAChild, age, no, roomIndex)}
-        <Separator isHR height={1} />
         <View style={styles.inputFieldsView}>
           {this._renderGenderOrAge(isAChild, age)}
           {this._renderFirstName()}

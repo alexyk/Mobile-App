@@ -13,7 +13,7 @@ import requester from "../../../../initDependencies";
 import { userInstance } from "../../../../utils/userInstance";
 import { imgHost } from "../../../../config";
 import { SC_NAME, DEFAULT_CRYPTO_CURRENCY } from "../../../../config-settings";
-import { processError, rlog, clog } from "../../../../utils/debug/debug-tools";
+import { processError } from "../../../../utils/debug/debug-tools";
 import { gotoWebview } from "../../utils";
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
 import { cloneDeep } from "lodash";
@@ -30,6 +30,7 @@ import TopBar from "../../../molecules/TopBar";
 import { setGuestData } from "../../../../redux/action/hotels";
 import lang from "../../../../language";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
+import RoomTitle from "./RoomTitle";
 
 
 class GuestInfoForm extends Component {
@@ -404,15 +405,32 @@ class GuestInfoForm extends Component {
     );
   }
 
-  _renderGuestsCount(guestsCount) {
+  _renderGuestsCount() {
+    const { guests } = this.state;
+    const { rooms, roomsData } = this.props.datesAndGuestsData;
+
+    if (guests == null) {
+      return null;
+    }
+
     return (
-      <View style={styles.listItem}>
-        <View style={styles.listItemNameWrapper}>
-          <Text style={styles.listItemText}>Guests</Text>
-        </View>
-        <View style={styles.listItemValueWrapper}>
-          <Text style={styles.valueText}>{guestsCount}</Text>
-        </View>
+      <View>
+        { guests.map( (room, roomIndex) => {
+            const guestsCount = room.length;
+            const childrenCount = (roomsData && roomsData[roomIndex] ? roomsData[roomIndex].children.length : 0)
+            const extraString = (
+              childrenCount > 0 
+                ? <Text style={styles.childCount}>{`\nincl. ${childrenCount} ${childrenCount == 1 ? 'child' : 'children'}`}</Text>
+                : ""
+            );
+            return (
+              <View key={`${roomIndex}_${guestsCount}`} style={styles.guestsCount}>
+                  <Text style={styles.listItemText}>{rooms == 1 ? "Guests" : `Room ${roomIndex+1} Guests`}</Text>
+                  <Text style={styles.valueText}>{guestsCount}{extraString}</Text>
+              </View>
+            )
+          })
+        }
       </View>
     );
   }
@@ -420,12 +438,17 @@ class GuestInfoForm extends Component {
   _renderGuests() {
     const _this = this;
     let guestsRendered = [];
+    const { rooms } = this.props.datesAndGuestsData;
 
     if (this.state.guests) {
       this.state.guests.forEach(
-        (room, roomIndex) => (
+        (room, roomIndex) => {
+          // room title
+          if (rooms > 1) {
+            guestsRendered.push(<RoomTitle key={`title_${roomIndex}`} roomIndex={roomIndex} />)
+          }
+          // guests in room
           room.forEach((item, index) => {
-            clog({item,index,roomIndex,room})
             guestsRendered.push(
               <GuestFormRow
                 key={`${index}_${item.roomIndex}`}
@@ -438,13 +461,13 @@ class GuestInfoForm extends Component {
               />
             )
           })
-        )
+        }
       )
     }
 
 
     return (
-      <View style={{ backgroundColor: "#f0f1f3" }}>
+      <View>
         {guestsRendered}
       </View>
     );
@@ -452,11 +475,11 @@ class GuestInfoForm extends Component {
 
   render() {
     const { params } = this.props.navigation.state;
-    const { price, daysDifference, guests: guestsCount } = params;
+    const { price, daysDifference } = params;
     const { buttonLabel, isLoading } = this.state;
 
     return (
-      <View style={styles.container}>
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null} style={styles.container} >
         <Toast
           ref="toast"
           style={{ backgroundColor: "#DA7B61" }}
@@ -478,11 +501,9 @@ class GuestInfoForm extends Component {
           <Separator height={20} />
           {this._renderRoomType()}
           {this._renderDates()}
-          {this._renderGuestsCount(guestsCount)}
+          {this._renderGuestsCount()}
           <Separator height={10} />
-          <KeyboardAvoidingView behavior="position" enabled>
-            {this._renderGuests()}
-          </KeyboardAvoidingView>
+          {this._renderGuests()}
         </ScrollView>
 
         <HotelDetailBottomBar
@@ -492,7 +513,7 @@ class GuestInfoForm extends Component {
           onPress={this.onProceedPress}
           isDisabled={isLoading}
         />
-      </View>
+      </KeyboardAvoidingView>
     );
   }
 }

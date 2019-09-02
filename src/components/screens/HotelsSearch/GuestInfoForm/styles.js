@@ -138,6 +138,17 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingVertical: 5
   },
+  guestsCount: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 5,
+    marginLeft: 0,
+    marginRight: 20,
+    borderBottomColor: "#e3e3e3",
+    borderBottomWidth: 1
+  },
   listItemNameWrapper: {
     width: "35%",
     flexDirection: "column",
@@ -159,7 +170,11 @@ const styles = StyleSheet.create({
   valueText: {
     fontSize: 16,
     fontFamily: "FuturaStd-Light",
-    color: "#d97b61"
+    textAlign: 'right',
+    color: "#d97b61",
+  },
+  childCount: {
+    fontSize: 12,
   }
 });
 
