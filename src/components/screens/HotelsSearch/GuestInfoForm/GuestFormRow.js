@@ -76,7 +76,7 @@ export default class GuestFormRow extends Component {
         <TextInput
           style={[styles.formField]}
           onChangeText={this._onChangeText}
-          placeholder={itemIndex == 0 ? "First Name" : "Optional"}
+          placeholder="First Name"
           underlineColorAndroid="#fff"
           value={firstName}
         />
@@ -96,7 +96,7 @@ export default class GuestFormRow extends Component {
             onLastNameChange(itemIndex, text);
             this.setState({ lastName: text });
           }}
-          placeholder={itemIndex == 0 ? "Last Name" : "Optional"}
+          placeholder="Last Name"
           underlineColorAndroid="#fff"
           value={lastName}
         />

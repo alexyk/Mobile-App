@@ -30,6 +30,11 @@ export const hasLetter = password => {
   return re.test(password);
 };
 
+export const hasTwoLetters = password => {
+  const re = /^(?=.*?[A-Z a-z]{2,})/; // eslint-disable-line
+  return re.test(password);
+};
+
 export const hasSymbol = password => {
   const re = /^(?=.*?[#?!@$%^&*-]).{8,}$/; // eslint-disable-line
   return re.test(password);

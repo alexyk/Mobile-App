@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import moment from "moment";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { hasLetter } from "../../../../utils/validation";
+import { hasLetter, hasTwoLetters } from "../../../../utils/validation";
 import { CurrencyConverter } from "../../../../services/utilities/currencyConverter";
 import { RoomsXMLCurrency } from "../../../../services/utilities/roomsXMLCurrency";
 import { setLocRateFiatAmount } from "../../../../redux/action/exchangeRates";
@@ -46,7 +46,7 @@ class GuestInfoForm extends Component {
       isLoading: true,
       isConfirmed: false,
       scMode: false,
-      buttonLabel: "Loading ...",
+      proceedButtonLabel: "Loading ...",
 
       guests: guestData ? cloneDeep(guestData) : null,
       roomType: this._getRoomType(params.roomDetail),
@@ -75,6 +75,7 @@ class GuestInfoForm extends Component {
     this._onReservationReady = this._onReservationReady.bind(this);
     this._onBackPress = this._onBackPress.bind(this);
     this._onWebviewRightPress = this._onWebviewRightPress.bind(this);
+    this._onProceedPress = this._onProceedPress.bind(this);
   }
 
   componentWillMount() {
@@ -180,7 +181,7 @@ class GuestInfoForm extends Component {
         this.setState({
           scMode: data.value === "true",
           isLoading: false,
-          buttonLabel: "Proceed"
+          proceedButtonLabel: "Proceed"
         });
       },
       errorData => {
@@ -241,7 +242,7 @@ class GuestInfoForm extends Component {
               data,
               isLoading: false,
               isConfirmed: true,
-              buttonLabel: "Proceed"
+              proceedButtonLabel: "Proceed"
             },
             () => {
               const { currencyExchangeRates } = this.props.exchangeRates;
@@ -274,7 +275,7 @@ class GuestInfoForm extends Component {
         }
       ]
     };
-    this.setState({ isLoading: true, buttonLabel: "Processing ..." });
+    this.setState({ isLoading: true, proceedButtonLabel: "Processing ..." });
 
     serverRequest(this, requester.createReservation, [value], this.onReservationSuccess, this.onReservationError);
   }
@@ -331,24 +332,35 @@ class GuestInfoForm extends Component {
     this._updateCache();
   }
 
-  onProceedPress = () => {
+  _onProceedPress() {
     if (this.state.isLoading) {
       return;
     }
     let isValid = true;
     this.setState({ isLoading: true });
 
-    for (let item of this._guestsCollection) {
-      if (!hasLetter(item["firstName"]) || !hasLetter(item["lastName"])) {
-        isValid = false;
+    for (let room of this._guestsCollection) {
+      for (let guest of room) {
+        if (!hasTwoLetters(guest["firstName"]) || !hasTwoLetters(guest["lastName"])) {
+          isValid = false;
+          break;
+        }
+      }
+      if (!isValid) {
         break;
       }
     }
 
+    let message;
     if (this._guestsCollection.length != this.state.guests.length) {
-      this.refs.toast.show("Please enter details for all the guests", 2000);
+      message = "Please enter details for all the guests";
     } else if (!isValid) {
-      this.refs.toast.show("Names should be at least 1 characters long and contain only characters.", 2000);
+      message = "Please enter details for all guests. Each name should contain only letters and be two characters or more long.";
+    }
+
+    if (message != null) {
+      this.refs.toast.show(message, 6000);
+      this.setState({proceedButtonLabel: 'Proceed', isLoading: false})
     } else {
       const { quoteId } = this.props.navigation.state.params.roomDetail;
       const { currency } = this.props;
@@ -476,7 +488,7 @@ class GuestInfoForm extends Component {
   render() {
     const { params } = this.props.navigation.state;
     const { price, daysDifference } = params;
-    const { buttonLabel, isLoading } = this.state;
+    const { proceedButtonLabel, isLoading } = this.state;
 
     return (
       <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null} style={styles.container} >
@@ -509,8 +521,8 @@ class GuestInfoForm extends Component {
         <HotelDetailBottomBar
           price={price}
           daysDifference={daysDifference}
-          titleBtn={buttonLabel}
-          onPress={this.onProceedPress}
+          titleBtn={proceedButtonLabel}
+          onPress={this._onProceedPress}
           isDisabled={isLoading}
         />
       </KeyboardAvoidingView>
