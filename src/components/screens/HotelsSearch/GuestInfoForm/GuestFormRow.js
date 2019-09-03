@@ -100,13 +100,13 @@ export default class GuestFormRow extends Component {
     }
   }
 
-  _renderFirstName(roomIndex, guestIndex) {
+  _renderFirstName(roomIndex, guestIndex, id) {
     const { textRefs, guest } = this.props;
     const { firstName } = guest;
     const { _firstId } = this;
 
     return (
-      <View key={`first_${roomIndex}_${guestIndex}`} style={styles.firstNameFlex}>
+      <View key={`first_${roomIndex}_${guestIndex}_${id}`} style={styles.firstNameFlex}>
         <TextInput
           ref={ref => textRefs[_firstId] = ref}
           onSubmitEditing={event => this._focusNext(event, _firstId, 0)}
@@ -121,13 +121,13 @@ export default class GuestFormRow extends Component {
     );
   }
 
-  _renderLastName(roomIndex, guestIndex) {
+  _renderLastName(roomIndex, guestIndex, id) {
     const { textRefs, guest } = this.props;
     const { lastName } = guest;
     const { _lastId } = this;
 
     return (
-      <View key={`first_${roomIndex}_${guestIndex}`} style={styles.lastNameFlex}>
+      <View key={`last_${roomIndex}_${guestIndex}_${id}`} style={styles.lastNameFlex}>
         <TextInput
           ref={ref => textRefs[_lastId] = ref}
           onSubmitEditing={event => this._focusNext(event, _lastId, 1)}
@@ -166,8 +166,8 @@ export default class GuestFormRow extends Component {
           {this._renderGenderOrAge(isAChild, age, title)}
         </View>
         <View style={styles.inputFieldsView}>
-          {this._renderFirstName(roomIndex, guestIndex)}
-          {this._renderLastName(roomIndex, guestIndex)}
+          {this._renderFirstName(roomIndex, guestIndex, id)}
+          {this._renderLastName(roomIndex, guestIndex, id)}
         </View>
       </View>
     );
