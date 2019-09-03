@@ -421,7 +421,7 @@ class Explore extends Component {
         <ScrollView
           style={{
             position: "absolute",
-            top: getSafeTopOffset() + 45,
+            top: getSafeTopOffset() + 35,
             marginLeft: 15,
             marginRight: 15,
             minHeight: 100,

@@ -268,9 +268,7 @@ class GuestInfoForm extends Component {
   }
 
   serviceCreateReservation(quoteId, currency, guestRecord) {
-    const value = {
-      quoteId,
-      currency,
+    const value = {quoteId, currency,
       rooms: [
         {
           adults: guestRecord,

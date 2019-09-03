@@ -118,8 +118,9 @@ export default class ChildrenView extends Component {
       return (
         <View
           style={{
-            flexDirection: withTitle ? "column" : "row",
-            marginBottom: 30
+            flexDirection: (withTitle ? "column" : "row"),
+            justifyContent: (withTitle ? "center" : "flex-end"),
+            marginBottom: 10
           }}
         >
           {this._childrenRenderedItems}
