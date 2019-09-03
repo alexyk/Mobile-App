@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { commonText } from "../../../../common.styles";
 
 const styles = StyleSheet.create({
   container: {
@@ -75,11 +76,14 @@ const styles = StyleSheet.create({
   labelGuest: {
     fontFamily: "FuturaStd-Light",
     fontSize: 16,
-    fontWeight: "bold"
+    fontWeight: "bold",
+    paddingTop: 8,
+    paddingHorizontal: 8,
+    backgroundColor: '#FFF',
   },
   inputFieldsView: {
     flexDirection: "column",
-    marginTop: 10
+    // marginTop: 10
   },
   firstNameFlex: {
     marginBottom: 5
@@ -119,14 +123,13 @@ const styles = StyleSheet.create({
     marginRight: 10
   },
   guestInfoWrapper: {
-    marginVertical: 15
+    marginVertical: 5,
   },
   titleContainer: {
     width: 80,
-    marginBottom: 5,
     justifyContent: "flex-end",
     alignItems: "center",
-    backgroundColor: "#CCC8"
+    backgroundColor: 'orange'
   },
   listItem: {
     width: "100%",
@@ -175,6 +178,20 @@ const styles = StyleSheet.create({
   },
   childCount: {
     fontSize: 12,
+  },
+  childAgeText: {
+    ...commonText,
+    fontSize:13,
+    fontWeight: "200",
+    width: 80,
+    height: 30,
+    color:'#BBB',
+    alignSelf: 'center',
+    textAlignVertical: 'center',
+    textAlign: 'center',
+    // backgroundColor:'#fafafa',
+    // borderColor: 'grey',
+    // borderWidth: 1
   }
 });
 
@@ -190,10 +207,12 @@ export const titleSelectorStyles = StyleSheet.create({
     alignItems: "flex-start"
   },
   inputAndroid: {
-    height: 50,
-    width: 70,
-    alignSelf: "flex-end",
-    justifyContent: "flex-end",
-    alignItems: "flex-start"
+    fontSize: 12,
+    color:'grey',
+    height: 30,
+    width: 100,
+    alignSelf: 'flex-start',
+    textAlign: "left",
+    backgroundColor: "#eee"
   }
 });

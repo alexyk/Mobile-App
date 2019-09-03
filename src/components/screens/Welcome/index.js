@@ -326,7 +326,7 @@ class Welcome extends Component {
         <VersionText
           color={"white"}
           size={10}
-          style={{ bottom: "11%", position: "absolute" }}
+          style={{ top: "85%", position: "absolute" }}
           textStyle={{ marginHorizontal: 30 }}
         />
 

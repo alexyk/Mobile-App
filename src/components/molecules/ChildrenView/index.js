@@ -1,12 +1,12 @@
 import React, { Component } from "react";
-import { View, Text, Platform } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
+import { View, Text } from "react-native";
 import { wlog } from "../../../config-debug";
 import Separator from "../../atoms/Separator";
-import styles, { orderbyPickerSelectStyles } from "./styles";
-import { INVALID_CHILD_AGE } from "../../screens/Guests/utils";
 import GuestRow from "../GuestRow";
+import styles from "./styles";
+import { INVALID_CHILD_AGE } from "../../screens/Guests/utils";
 import { HOTEL_ROOM_LIMITS } from "../../../config-settings";
+import LTPicker from "../LTPicker";
 
 export default class ChildrenView extends Component {
   constructor(props) {
@@ -25,22 +25,21 @@ export default class ChildrenView extends Component {
   }
 
   _renderChildAgeOptions(index, value, roomIndex) {
-    const { onChildChange } = this.props;
-    let picker = (
-      <RNPickerSelect
-        key={`${index}_${value}`}
-        items={this._ageItems}
-        onValueChange={value => onChildChange(roomIndex, index, value)}
-        value={value}
-        style={orderbyPickerSelectStyles}
-      />
-    );
+    const { onChildeAgeChange } = this.props;
 
-    if (Platform.OS == "android") {
-      return <View style={styles.androidPickerWrap}>{picker}</View>;
-    } else {
-      return picker;
-    }
+    const props = {
+      id: `${index}_${value}`,
+      value,
+      data: this._ageItems, 
+      extraDataOnChange: {roomIndex, childIndex: index},
+      placeholder: { label: "", value: null },
+      onValueChange: onChildeAgeChange,
+      // styles: {container:{height: 40, backgroundColor: 'pink'}, picker: {height: 40, } },
+    };
+
+    return (
+      <LTPicker {...props} />
+    )
   }
 
   _renderTitle(index) {

@@ -4,6 +4,7 @@ import Image from "react-native-remote-svg";
 import { commonText } from "../../../common.styles";
 import { BarIndicator } from "react-native-indicators";
 import PropTypes from "prop-types";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default class LTLoader extends PureComponent {
   static propTypes = {
@@ -11,7 +12,8 @@ export default class LTLoader extends PureComponent {
     isLoading: PropTypes.bool,
     message: PropTypes.string,
     opacity: PropTypes.string,
-    style: PropTypes.object
+    style: PropTypes.object,
+    onPress: PropTypes.func
   };
 
   static defaultProps = {
@@ -49,8 +51,10 @@ export default class LTLoader extends PureComponent {
   }
 
   render() {
-    if (this.props.isLoading) {
-      const opacity = this.props.opacity != null ? this.props.opacity : "F8";
+    let { opacity, style, isLoading, onPress } = this.props;
+
+    if (isLoading) {
+      opacity = (opacity != null ? opacity : "F8");
       const defaultStyle = {
         position: "absolute",
         width: "100%",
@@ -60,24 +64,33 @@ export default class LTLoader extends PureComponent {
         justifyContent: "space-between",
         alignItems: "center",
 
-        display: this.props.isLoading ? "flex" : "none",
+        display: isLoading ? "flex" : "none",
 
         backgroundColor: `#FFFFFF${opacity}`
       };
 
-      const style = this.props.style
+      style = style
         ? {
             ...defaultStyle,
             ...this.props.style
           }
         : defaultStyle;
 
-      return (
+      const result = (
         <View style={style}>
           {this.renderAnimation()}
           {this.renderMessage()}
         </View>
       );
+      if (onPress) {
+        return (
+          <TouchableOpacity onPress={onPress}>
+            { result }
+          </TouchableOpacity>
+        )
+      } else {
+        return result;
+      }
     } else {
       return null;
     }

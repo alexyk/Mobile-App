@@ -9,7 +9,7 @@ import CloseButton from "../../atoms/CloseButton";
 import MonthList from "../../organisms/MonthList";
 import styles from "./styles";
 import { updateMarkedCalendarData, i18n, formatDay } from "./utils";
-import { tslog, telog } from "../../../config-debug";
+import { tslog, telog } from "../../../utils/debug/debug-tools";
 import LTLoader from "../../molecules/LTLoader";
 
 class Calendar extends Component {

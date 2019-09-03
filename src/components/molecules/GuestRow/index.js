@@ -7,9 +7,9 @@ import styles from "./styles";
 
 class GuestRow extends PureComponent {
   static propTypes = {
-    title: PropTypes.string.isRequired,
-    type: PropTypes.string.isRequired,
-    count: PropTypes.number.isRequired,
+    title: PropTypes.string,
+    type: PropTypes.string,
+    count: PropTypes.number,
     isChild: PropTypes.bool,
     childAge: PropTypes.number,
     index: PropTypes.any,
@@ -32,16 +32,7 @@ class GuestRow extends PureComponent {
   }
 
   render() {
-    const {
-      title,
-      subtitle,
-      count,
-      min,
-      max,
-      containerStyle,
-      headerStyle,
-      countStyle
-    } = this.props;
+    const { title, subtitle, count, min, max, containerStyle, headerStyle, countStyle } = this.props;
 
     return (
       <View style={[styles.container, containerStyle]}>

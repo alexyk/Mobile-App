@@ -1,10 +1,7 @@
 import { handleActions } from "redux-actions";
-import {
-  setSearch,
-  setSearchFiltered,
-  setSearchString,
-  setGuestData
-} from "../../action/hotels";
+import { setSearch, setSearchFiltered, setSearchString, setGuestData } from "../../action/hotels";
+import { cloneDeep } from 'lodash';
+
 
 const initialState = {
   searchString: null,

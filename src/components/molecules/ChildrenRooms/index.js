@@ -8,7 +8,7 @@ export default class ChildrenRooms extends Component {
   }
 
   _renderContent() {
-    const { data, cache, onChildChange, onCountChange } = this.props;
+    const { data, cache, onChildeAgeChange, onCountChange } = this.props;
     const { rooms, childrenAgeValues, children } = data;
 
     let items = childrenAgeValues.map((item, index) => {
@@ -17,7 +17,7 @@ export default class ChildrenRooms extends Component {
           key={`${index}_${item.join("_")}`}
           index={index}
           ageValues={item}
-          onChildChange={onChildChange}
+          onChildeAgeChange={onChildeAgeChange}
           onCountChange={onCountChange}
           cache={cache}
         />

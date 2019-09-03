@@ -22,7 +22,8 @@ import { formatDatesData } from "../Calendar/utils";
 import { hotelSearchIsNative } from "../../../config-settings";
 import { setLoginDetails } from "../../../redux/action/userInterface";
 import { getSafeTopOffset } from "../../../utils/designUtils";
-import { serverRequest } from "../../../services/utilities/serverUtils";
+import { serverRequest, SERVER_ERROR } from "../../../services/utilities/serverUtils";
+import { setGuestData } from "../../../redux/action/hotels";
 
 
 const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
@@ -95,8 +96,6 @@ class Explore extends Component {
   }
 
   onServerGetUserInfoError(errorData, errorCode) {
-    // AsyncStorage.removeItem(`${domainPrefix}.auth.locktrip`);
-    // AsyncStorage.removeItem(`${domainPrefix}.auth.username`);
     this.props.navigation.navigate("Welcome");
     alert(`Old login data expired.\nPlease log in again ...`);
   }
@@ -269,6 +268,7 @@ class Explore extends Component {
     };
     this.setState(newState);
     this.props.setDatesAndGuestsData(newState);
+    this.props.setGuestData(null);
   }
 
   gotoGuests() {
@@ -818,7 +818,8 @@ let mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   setCurrency: bindActionCreators(setCurrency, dispatch),
   setLoginDetails: bindActionCreators(setLoginDetails, dispatch),
-  setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch)
+  setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch),
+  setGuestData: bindActionCreators(setGuestData, dispatch)
 });
 
 export default connect(

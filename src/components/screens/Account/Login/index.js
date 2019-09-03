@@ -23,6 +23,7 @@ import requester from "../../../../initDependencies";
 import LoginLocationDialog from "../../../atoms/LoginLocationDialog";
 import LoginEmailVerifyDialog from "../../../atoms/LoginEmailVerifyDialog";
 import { SERVER_ERROR, serverRequest } from "../../../../services/utilities/serverUtils";
+import LTLoader from "../../../molecules/LTLoader";
 
 class Login extends Component {
   static propTypes = {
@@ -144,7 +145,7 @@ class Login extends Component {
   }
 
   render() {
-    const { email, password } = this.state;
+    const { email, password, showProgress } = this.state;
 
     return (
       <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -208,14 +209,7 @@ class Login extends Component {
             />
           </View>
 
-          <ProgressDialog
-            visible={this.state.showProgress}
-            title=""
-            message="Login..."
-            animationType="slide"
-            activityIndicatorSize="large"
-            activityIndicatorColor="black"
-          />
+          <LTLoader isLoading={showProgress} message="Logging in ..." onPress={event => this.setState({showProgress: false})}/>
 
           <LoginLocationDialog
             countries={this.props.countries}

@@ -1,16 +1,15 @@
-import { Text, TextInput, View } from "react-native";
 import React, { Component } from "react";
-import RNPickerSelect from "react-native-picker-select";
+import { Text, TextInput, View } from "react-native";
 
 import PropTypes from "prop-types";
 import styles from "./styles";
-import { orderbyPickerSelectStyles } from "../HotelFilters/styles";
-import { commonText } from "../../../../common.styles";
+import LTPicker from "../../../molecules/LTPicker";
+import { hasTwoLetters } from "../../../../utils/validation";
 
 
 export default class GuestFormRow extends Component {
   static propTypes = {
-    itemIndex: PropTypes.number,
+    guestIndex: PropTypes.number,
     onFirstNameChange: PropTypes.func.isRequired,
     onLastNameChange: PropTypes.func.isRequired,
     onGuestTitleUpdate: PropTypes.func.isRequired
@@ -19,63 +18,101 @@ export default class GuestFormRow extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      title: "Mr",
-      firstName: "",
-      lastName: "",
-      titleSelectItems: [
-        { value: "Mr", label: "Mr" },
-        { value: "Mrs", label: "Mrs" }
-      ]
-    };
+    this._titleSelectItems = [
+      { value: "Mr", label: "Mr" },
+      { value: "Mrs", label: "Mrs" }
+    ]
+    this._ready = false;
+    this._editStatus = {0: false, 1: false};
 
+    this._focusNext = this._focusNext.bind(this);
     this._onGenderChange = this._onGenderChange.bind(this);
     this._onChangeText = this._onChangeText.bind(this);
   }
 
-  componentDidMount() {
-    this.setState({ ...this.props.guest });
+  _onGenderChange(value) {
+    const { roomIndex, guestIndex, onGuestTitleUpdate } = this.props;
+    onGuestTitleUpdate(roomIndex, guestIndex, value);
   }
 
-  _onGenderChange(value, index) {
-    this.setState({ title: value });
+  /**
+   * 
+   * @param {String} text The changed text value
+   * @param {Number} index index=0 -> first name, index=1 -> last name
+   */
+  _onChangeText(text, index) {
+    const { _ready, _editStatus } = this;
+    const { guestIndex } = this.props;
 
-    const { itemIndex, onGuestTitleUpdate } = this.props;
-    onGuestTitleUpdate(itemIndex, value);
-  }
+    if (!_ready) {
+      _editStatus[index] = (hasTwoLetters(text));
+      if (_editStatus[0] && _editStatus[1]) {
+        this._ready = true;
+      }
+    }
 
-  _onChangeText(text) {
-    this.props.onFirstNameChange(this.props.itemIndex, text);
-    this.setState({ firstName: text });
-  }
-
-  _renderGenderOrAge(isAChild, age) {
-    if (isAChild) {
-      return <Text style={{...commonText, fontSize:14, color:'grey',marginBottom: 10,fontWeight: "200"}}>aged {age}</Text>;
-    } else {
-      return (
-        <View style={styles.titleContainer}>
-          <RNPickerSelect
-            placeholder={{ label: "", value: null }}
-            style={orderbyPickerSelectStyles}
-            value={this.state.title}
-            items={this.state.titleSelectItems}
-            onValueChange={this._onGenderChange}
-          />
-        </View>
-      );
+    switch (index) {
+      case 0:
+        this.props.onFirstNameChange(guestIndex, text);
+        break;
+      case 1:
+        this.props.onLastNameChange(guestIndex, text);
+        break;
     }
   }
 
-  _renderFirstName() {
-    const { itemIndex } = this.props;
-    const { firstName } = this.state;
+  _renderGenderOrAge(isAChild, age, title) {
+    if (isAChild) {
+      return (
+        <Text style={styles.childAgeText}>Aged {age}</Text>
+      )
+    } else {
+      const props = {
+        id: `${isAChild}_${age}`,
+        value: title,
+        data: this._titleSelectItems, 
+        extraDataOnChange: {},
+        placeholder: { label: "", value: null },
+        onValueChange: this._onGenderChange,
+        styles: {picker: {width: 80, height:30}}
+      };
+      return <LTPicker {...props} />;
+    }
+  }
+
+  _focusNext(event, id, index) {
+    const { _ready, _editStatus } = this;
+    const { textRefs } = this.props;
+    const { text } = event.nativeEvent
+    const isReady = (
+      (index == 0 && _editStatus[0])
+      || (index == 1 && _ready)
+    );
+
+    if (isReady && hasTwoLetters(text)) {
+      const { [id+1]: txt } = textRefs || {};
+      
+      if (txt) {
+        setTimeout(txt.focus, 80);
+      } else {
+        textRefs[id].blur();
+      }
+    }
+  }
+
+  _renderFirstName(roomIndex, guestIndex) {
+    const { textRefs, guest } = this.props;
+    const { firstName } = guest;
+    const { _firstId } = this;
 
     return (
-      <View style={styles.firstNameFlex}>
+      <View key={`first_${roomIndex}_${guestIndex}`} style={styles.firstNameFlex}>
         <TextInput
-          style={[styles.formField]}
-          onChangeText={this._onChangeText}
+          ref={ref => textRefs[_firstId] = ref}
+          onSubmitEditing={event => this._focusNext(event, _firstId, 0)}
+          blurOnSubmit={false}
+          style={styles.formField}
+          onChangeText={(value) => this._onChangeText(value, 0)}
           placeholder="First Name"
           underlineColorAndroid="#fff"
           value={firstName}
@@ -84,18 +121,19 @@ export default class GuestFormRow extends Component {
     );
   }
 
-  _renderLastName() {
-    const { onLastNameChange, itemIndex } = this.props;
-    const { lastName } = this.state;
+  _renderLastName(roomIndex, guestIndex) {
+    const { textRefs, guest } = this.props;
+    const { lastName } = guest;
+    const { _lastId } = this;
 
     return (
-      <View style={styles.lastNameFlex}>
+      <View key={`first_${roomIndex}_${guestIndex}`} style={styles.lastNameFlex}>
         <TextInput
+          ref={ref => textRefs[_lastId] = ref}
+          onSubmitEditing={event => this._focusNext(event, _lastId, 1)}
+          blurOnSubmit={false}
           style={styles.formField}
-          onChangeText={text => {
-            onLastNameChange(itemIndex, text);
-            this.setState({ lastName: text });
-          }}
+          onChangeText={(value) => this._onChangeText(value, 1)}
           placeholder="Last Name"
           underlineColorAndroid="#fff"
           value={lastName}
@@ -113,18 +151,23 @@ export default class GuestFormRow extends Component {
   }
 
   render() {
-    const { itemIndex, guest } = this.props;
-    const { age, roomIndex } = guest;
-    const no = parseInt(itemIndex) + 1;
+    const { guestIndex, guest, textRefs, id } = this.props;
+    const { age, roomIndex, title } = guest;
+    const no = guestIndex + 1;
     const isAChild = (age != null);
+    this._firstId = id;
+    this._lastId = id+1;
+    textRefs.id += 2;
 
     return (
-      <View style={styles.guestInfoWrapper} key={`${itemIndex}`}>
-        {this._renderType(isAChild, age, no, roomIndex)}
+      <View key={`${roomIndex}_${guestIndex}_${id}`} style={styles.guestInfoWrapper} key={`${guestIndex}`}>
+        <View style={{flexDirection: "row", justifyContent: 'space-between'}}>
+          {this._renderType(isAChild, age, no, roomIndex)}
+          {this._renderGenderOrAge(isAChild, age, title)}
+        </View>
         <View style={styles.inputFieldsView}>
-          {this._renderGenderOrAge(isAChild, age)}
-          {this._renderFirstName()}
-          {this._renderLastName()}
+          {this._renderFirstName(roomIndex, guestIndex)}
+          {this._renderLastName(roomIndex, guestIndex)}
         </View>
       </View>
     );

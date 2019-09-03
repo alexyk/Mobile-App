@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import moment from "moment";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { hasLetter, hasTwoLetters } from "../../../../utils/validation";
+import { hasTwoLetters } from "../../../../utils/validation";
 import { CurrencyConverter } from "../../../../services/utilities/currencyConverter";
 import { RoomsXMLCurrency } from "../../../../services/utilities/roomsXMLCurrency";
 import { setLocRateFiatAmount } from "../../../../redux/action/exchangeRates";
@@ -66,7 +66,9 @@ class GuestInfoForm extends Component {
     this._guestsCollection = [];
     this._editingTimeout;
 
-    this._updateCache = this._updateCache.bind(this);
+    this._textRefs = {id: 0};
+
+    this._updateStateAndCache = this._updateStateAndCache.bind(this);
     this._serviceRequestSCMode = this._serviceRequestSCMode.bind(this);
     this._prepareInitialGuestsData = this._prepareInitialGuestsData.bind(this);
     this._onGuestTitleUpdate = this._onGuestTitleUpdate.bind(this);
@@ -85,6 +87,7 @@ class GuestInfoForm extends Component {
 
   componentDidMount() {
     WebsocketClient.stopGrouping();
+    this.setState({ready: true});
   }
 
   componentWillUnmount() {
@@ -158,18 +161,20 @@ class GuestInfoForm extends Component {
     }
   }
 
-  _updateCache() {
+  _updateStateAndCache() {
     const _this = this;
+
+    this.setState({guests: cloneDeep(this._guestsCollection)});
 
     if (this._editingTimeout != null) {
       clearTimeout(this._editingTimeout);
     }
 
     this._editingTimeout = setTimeout(() => {
-      _this.props.setGuestData(cloneDeep(_this._guestsCollection), 700)
+      _this.props.setGuestData(cloneDeep(_this._guestsCollection));
       clearTimeout(_this._editingTimeout);
       _this._editingTimeout = null;
-    });
+    }, 4000);
   }
   
   _serviceRequestSCMode() {
@@ -193,13 +198,15 @@ class GuestInfoForm extends Component {
   onReservationError(errorData, errorCode) {
     const { errors } = errorData;
 
-    if (errors.hasOwnProperty("RoomsXmlResponse")) {
+    this.setState({proceedButtonLabel: 'Unavailable...'})
+
+    if (errors && errors.hasOwnProperty("RoomsXmlResponse")) {
       if (errors["RoomsXmlResponse"].message.indexOf("QuoteNotAvailable:") !== -1) {
         this.refs.toast.show(data.errors.RoomsXmlResponse.message, 5000, () => {
           this.props.navigation.pop(3);
         });
       }
-    } else {
+    } else if (errors != null) {
       for (let key in errors) {
         if (typeof errors[key] !== "function") {
           this.refs.toast.show(errors[key].message, 5000, () => {
@@ -211,8 +218,6 @@ class GuestInfoForm extends Component {
   }
 
   onReservationSuccess(data) {
-    //rlog('case 2')
-    // console.log("createReservation  ---", data)
     const quoteBookingCandidate = {
       bookingId: data.preparedBookingId
     };
@@ -254,10 +259,8 @@ class GuestInfoForm extends Component {
               this._onReservationReady();
             }
           );
-          //rlog('case 4')
         } else {
           this.props.navigation.navigation.pop(3);
-          //rlog('case 5')
         }
       },
       () => {}
@@ -316,20 +319,22 @@ class GuestInfoForm extends Component {
   }
 
   _onGuestTitleUpdate(roomIndex, index, title) {
-    this._guestsCollection[index].title = title;
-    this.props.setGuestData(cloneDeep(this._guestsCollection));
+    this._guestsCollection[roomIndex][index].title = title;
+    this._updateStateAndCache();
   }
 
   _onFirstNameChange(roomIndex, key, text) {
     let item = this._guestsCollection[roomIndex];
-    item = item[parseInt(key)]
-    item.firstName = text; // (text === "" ? "Optional" : text)
-    this._updateCache();
+    item = item[key]
+    item.firstName = text;
+    this._updateStateAndCache();
   }
   
   _onLastNameChange(roomIndex, key, text) {
-    this._guestsCollection[roomIndex][parseInt(key)].lastName = text; // (text === "" ? "Optional" : text)
-    this._updateCache();
+    let item = this._guestsCollection[roomIndex];
+    item = item[key]
+    item.lastName = text;
+    this._updateStateAndCache();
   }
 
   _onProceedPress() {
@@ -360,7 +365,7 @@ class GuestInfoForm extends Component {
 
     if (message != null) {
       this.refs.toast.show(message, 6000);
-      this.setState({proceedButtonLabel: 'Proceed', isLoading: false})
+      this.setState({proceedButtonLabel: 'Proceed', isLoading: false});
     } else {
       const { quoteId } = this.props.navigation.state.params.roomDetail;
       const { currency } = this.props;
@@ -448,12 +453,16 @@ class GuestInfoForm extends Component {
   }
 
   _renderGuests() {
-    const _this = this;
-    let guestsRendered = [];
     const { rooms } = this.props.datesAndGuestsData;
+    const { guests, ready } = this.state;
 
-    if (this.state.guests) {
-      this.state.guests.forEach(
+    const _this = this;
+    let id = 0;
+
+    let guestsRendered = [];
+
+    if (guests) {
+      guests.forEach(
         (room, roomIndex) => {
           // room title
           if (rooms > 1) {
@@ -461,22 +470,29 @@ class GuestInfoForm extends Component {
           }
           // guests in room
           room.forEach((item, index) => {
+
             guestsRendered.push(
               <GuestFormRow
+                id={id}
                 key={`${index}_${item.roomIndex}`}
+                textRefs={this._textRefs}
+                ready={ready}
                 guest={item}
-                itemIndex={index}
+                guestIndex={index}
                 roomIndex={roomIndex}
                 onGuestTitleUpdate={_this._onGuestTitleUpdate}
                 onFirstNameChange={(index, text) => _this._onFirstNameChange(roomIndex, index, text)}
                 onLastNameChange={(index, text) => _this._onLastNameChange(roomIndex, index, text)}
               />
-            )
+            );
+
+            id += 2;
           })
         }
       )
     }
 
+    this._textRefs.ready = true;
 
     return (
       <View>
@@ -491,7 +507,7 @@ class GuestInfoForm extends Component {
     const { proceedButtonLabel, isLoading } = this.state;
 
     return (
-      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "padding" : null} style={styles.container} >
+      <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "height" : null} style={styles.container} >
         <Toast
           ref="toast"
           style={{ backgroundColor: "#DA7B61" }}

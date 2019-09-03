@@ -18,7 +18,8 @@ const RoomTitle = (props) => {
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    marginTop: 40
+    marginTop: 40,
+    marginBottom: 10
   },
   titleText: {
     ...commonText,

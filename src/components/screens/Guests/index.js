@@ -62,7 +62,7 @@ class Guests extends Component {
     this.onDone = this.onDone.bind(this);
     this.onClear = this.onClear.bind(this);
     this.onCountChange = this.onCountChange.bind(this);
-    this.onChildChange = this.onChildChange.bind(this);
+    this.onChildeAgeChange = this.onChildeAgeChange.bind(this);
     this.onWithChildrenClick = this.onWithChildrenClick.bind(this);
   }
 
@@ -140,7 +140,7 @@ class Guests extends Component {
     });
   }
 
-  onChildChange(roomIndex, childIndex, age) {
+  onChildeAgeChange(age, {roomIndex, childIndex}) {
     const { childrenAgeValues } = this.state;
     const newValues = modifyChildAgeInRoom(
       roomIndex,
@@ -236,13 +236,7 @@ class Guests extends Component {
   }
 
   render() {
-    const {
-      childrenAgeValues,
-      children,
-      adults,
-      rooms,
-      hasChildren
-    } = this.state;
+    const { childrenAgeValues, children, adults, rooms, hasChildren } = this.state;
     const maxRooms = Math.min(HOTEL_ROOM_LIMITS.MAX.ROOMS, adults);
 
     return (
@@ -276,7 +270,7 @@ class Guests extends Component {
             data={{ children, childrenAgeValues, rooms }}
             hasChildren={hasChildren}
             onCountChange={this.onCountChange}
-            onChildChange={this.onChildChange}
+            onChildeAgeChange={this.onChildeAgeChange}
             cache={this._childAgesCached}
           />
         </View>

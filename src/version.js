@@ -10,6 +10,7 @@ const compilationTime = ""; // this line is updated by scripts/select_config.rb 
 const branchName = ""; // this line is updated by scripts/select_config.rb and travis-version.rb
 const travisVersion = ""; // this line is updated by scripts/select_config.rb and travis-version.rb
 const packJsonVersion = require("../package.json").version;
+const svcVersion = require("../node_modules/locktrip-svc-layer/package.json").version;
 const productVersion = `${packJsonVersion}${
   travisVersion.length > 0 ? ` (Build ${travisVersion})` : ""
 }`;
@@ -27,5 +28,6 @@ if (branchName.length > 0) debugVersion += `\nbranch: ${branchName}`;
 debugVersion += `\n[${compilationTime}]`;
 debugVersion += `\nenv: ${LT_CFG.toLowerCase()}`;
 debugVersion += `\nui: ${ui}`;
+debugVersion += `\nsvc: ${svcVersion}`;
 
 export default productVersion;
