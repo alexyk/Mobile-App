@@ -31,6 +31,7 @@ import { setGuestData } from "../../../../redux/action/hotels";
 import lang from "../../../../language";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
 import RoomTitle from "./RoomTitle";
+import { parseGuestInfoToServerFormat } from "../utils";
 
 
 class GuestInfoForm extends Component {
@@ -57,9 +58,9 @@ class GuestInfoForm extends Component {
       creationDate: null,
       cancellationPrice: null,
       bookingId: null,
-      hotelBooking: null,
-      booking: null,
-      data: null
+      reservationRequestData: null,
+      reservationRequestData: null,
+      reservationData: null
     };
 
     this._bookingParams = null;
@@ -202,7 +203,7 @@ class GuestInfoForm extends Component {
 
     if (errors && errors.hasOwnProperty("RoomsXmlResponse")) {
       if (errors["RoomsXmlResponse"].message.indexOf("QuoteNotAvailable:") !== -1) {
-        this.refs.toast.show(data.errors.RoomsXmlResponse.message, 5000, () => {
+        this.refs.toast.show(errors.RoomsXmlResponse.message, 5000, () => {
           this.props.navigation.pop(3);
         });
       }
@@ -218,33 +219,43 @@ class GuestInfoForm extends Component {
   }
 
   onReservationSuccess(data) {
+    const { preparedBookingId, booking, fiatPrice } = data || {};
+
+    if (preparedBookingId == null || booking == null ) {
+      this.refs.toast.show(lang.TEXT.ROOM_NA, 3000);
+      this.setState({proceedButtonLabel: 'Unavailable...'})
+      processError(`[GuestInfoForm] [onReservationSuccess] Booking the selected item did not succeed.`, {data});
+      return;
+    }
+
     const quoteBookingCandidate = {
-      bookingId: data.preparedBookingId
+      bookingId: preparedBookingId
     };
 
-    serverRequest(
-      this,
-      requester.quoteBooking,
-      [quoteBookingCandidate],
+    // prettier-ignore
+    serverRequest(this, requester.quoteBooking, [quoteBookingCandidate],
       success => {
-        if (success.is_successful_quoted) {
-          const bookingId = data.preparedBookingId;
-          const hotelBooking = data.booking.hotelBooking[0];
-          const startDate = moment(data.booking.hotelBooking[0].creationDate, "YYYY-MM-DD");
-          const endDate = moment(data.booking.hotelBooking[0].arrivalDate, "YYYY-MM-DD");
-          const leavingDate = moment(data.booking.hotelBooking[0].arrivalDate, "YYYY-MM-DD").add(data.booking.hotelBooking[0].nights, "days");
-          this.setState(
-            {
-              roomType: data.booking.hotelBooking[0].room.roomType.text,
-              //arrivalDate: endDate.format('DD MMM'),
-              //leavingDate: leavingDate.format('DD MMM'),
+        const currentBooking = booking.hotelBooking[0]
+        const { createdDate } = booking;
+        if (success.is_successful_quoted && (currentBooking != null || createdDate != null)) {
+          let { creationDate, arrivalDate } = currentBooking || {};
+          const bookingId = preparedBookingId;
+          let startDate, endDate;
+          if (creationDate) {
+            endDate = moment(arrivalDate, "YYYY-MM-DD");
+            startDate = moment(creationDate, "YYYY-MM-DD");
+          } else {
+            let { checkInMoment, checkOutMoment } = this.props.datesAndGuestsData;
+            startDate = (createdDate == null ? checkInMoment.clone() : moment(createdDate));
+            endDate = checkOutMoment.clone();
+          }
+
+          this.setState({
+              bookingId, 
               cancelationDate: endDate.format("DD MMM YYYY"),
               creationDate: startDate.format("DD MMM"),
-              cancellationPrice: data.fiatPrice,
-              bookingId: bookingId,
-              hotelBooking: hotelBooking,
-              booking: value,
-              data,
+              cancellationPrice: fiatPrice,
+              reservationData: data,
               isLoading: false,
               isConfirmed: true,
               proceedButtonLabel: "Proceed"
@@ -260,35 +271,29 @@ class GuestInfoForm extends Component {
             }
           );
         } else {
-          this.props.navigation.navigation.pop(3);
+          this.refs.toast.show(lang.TEXT.ROOM_NA, 3000);
         }
-      },
-      () => {}
+      }
     );
   }
 
   serviceCreateReservation(quoteId, currency, guestRecord) {
-    const value = {quoteId, currency,
-      rooms: [
-        {
-          adults: guestRecord,
-          children: []
-        }
-      ]
+    const reservationRequestData = {
+      quoteId, currency,
+      rooms: parseGuestInfoToServerFormat(guestRecord)
     };
-    this.setState({ isLoading: true, proceedButtonLabel: "Processing ..." });
+    this.setState({ isLoading: true, proceedButtonLabel: "Processing ...", reservationRequestData });
 
-    serverRequest(this, requester.createReservation, [value], this.onReservationSuccess, this.onReservationError);
+    serverRequest(this, requester.createReservation, [reservationRequestData], this.onReservationSuccess, this.onReservationError);
   }
 
   gotoWebViewPayment() {
     const { searchString } = this.props.navigation.state.params;
     const { quoteId } = this.props.navigation.state.params.roomDetail;
-    const { quoteId: quoteId2 } = this.props;
-    const { bookingId, booking } = this.state;
+    const { bookingId, reservationRequestData } = this.state;
     const { currency } = this.props;
     const { token, email } = this.props.loginDetails;
-    const rooms = JSON.stringify(booking.rooms);
+    const rooms = JSON.stringify(reservationRequestData.rooms);
     const search = StringUtils.subBeforeIndexOf(searchString, "&rooms=") + `&quoteId=${quoteId}&rooms=${rooms}&authToken=${token}&authEmail=${email}`;
     const state = { currency, token, email };
     const extra = {

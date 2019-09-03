@@ -33,6 +33,7 @@ export default class ChildrenView extends Component {
       data: this._ageItems, 
       extraDataOnChange: {roomIndex, childIndex: index},
       placeholder: { label: "", value: null },
+      containerStyle: {paddingHorizontal: 10},
       onValueChange: onChildeAgeChange,
       // styles: {container:{height: 40, backgroundColor: 'pink'}, picker: {height: 40, } },
     };
@@ -75,7 +76,7 @@ export default class ChildrenView extends Component {
     }
   }
 
-  _renderChildren(ageValues, roomIndex) {
+  _renderChildAgeSelectors(ageValues, roomIndex) {
     const withTitle = false;
     const { cache } = this.props;
 
@@ -100,14 +101,18 @@ export default class ChildrenView extends Component {
                 <Text style={styles.textChildTitle}>
                   Child {`${index + 1}`}
                 </Text>
-                <View style={styles.childOptions}>
+                <View style={styles.childOptionsVertical}>
                   {this._renderChildAgeOptions(index, item, roomIndex)}
                 </View>
               </View>
             </View>
           );
         } else {
-          newItem = this._renderChildAgeOptions(index, item, roomIndex);
+          newItem = (
+            <View style={styles.childOptionsHorizontal}>
+              { this._renderChildAgeOptions(index, item, roomIndex) }
+            </View>
+          )
         }
 
         this._childrenRenderedItems[index] = newItem;
@@ -120,14 +125,16 @@ export default class ChildrenView extends Component {
           style={{
             flexDirection: (withTitle ? "column" : "row"),
             justifyContent: (withTitle ? "center" : "flex-end"),
-            marginBottom: 10
+            marginTop: 5,
+            marginBottom: 15,
+            marginRight: 15,
           }}
         >
           {this._childrenRenderedItems}
         </View>
       );
     } catch (error) {
-      wlog(`[ChildrenView] Error in _renderChildren`, {
+      wlog(`[ChildrenView] Error in _renderChildAgeSelectors`, {
         error,
         ageValues,
         props: this.props
@@ -142,7 +149,7 @@ export default class ChildrenView extends Component {
     const count = ageValues ? ageValues.length : 0;
 
     return (
-      <View style={{ marginHorizontal: 15 }}>
+      <View style={{ marginLeft: 20 }}>
         <View
           style={{
             marginLeft: 10,
@@ -155,7 +162,7 @@ export default class ChildrenView extends Component {
           {this._renderInput(count, index, onCountChange, false)}
         </View>
 
-        {this._renderChildren(ageValues, index)}
+        {this._renderChildAgeSelectors(ageValues, index)}
       </View>
     );
   }

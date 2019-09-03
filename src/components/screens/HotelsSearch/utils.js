@@ -872,3 +872,25 @@ export function calculateCoordinatesGridPosition(
 
   return result;
 }
+
+
+export function parseGuestInfoToServerFormat(data) {
+  let result = [];
+
+  data.forEach(room => {
+    let roomInfo = {adults:[], children: []}
+    room.forEach(guest => {
+      const { age, title, firstName, lastName } = guest;
+      const isAChild = (age != null);
+      if (isAChild) {
+        // roomInfo.children.push({age, firstName, lastName})
+        roomInfo.children.push({age})
+      } else {
+        roomInfo.adults.push({title, firstName, lastName})
+      }
+    })
+    result.push(roomInfo);
+  })
+
+  return result;
+}

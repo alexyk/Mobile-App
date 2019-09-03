@@ -21,6 +21,7 @@ import Separator from "../../atoms/Separator";
 import ChildrenRooms from "../../molecules/ChildrenRooms";
 import { HOTEL_ROOM_LIMITS } from "../../../config-settings";
 import { cloneDeep } from "lodash";
+import { commonText } from "../../../common.styles";
 
 class Guests extends Component {
   static propTypes = {
@@ -202,24 +203,28 @@ class Guests extends Component {
   }
 
   _renderChildren(hasChildren, children) {
+    const count = (hasChildren
+      ? `(${children})` 
+      : ""
+    );
     return (
       <View
         style={{
           flexDirection: "row",
+          alignSelf: 'flex-end',
           alignItems: "center",
           justifyContent: "space-between",
-          marginRight: 60
+          marginRight: 10
         }}
       >
         <CheckBox
-          checkboxStyle={styles.withChildrenCheckbox}
-          label={"With Children"}
           checked={hasChildren}
+          label={`With Children ${count}`}
+          labelStyle={styles.withChildrenCheckboxText}
+          containerStyle={styles.withChildrenCheckboxContainer}
+          checkboxStyle={styles.withChildrenCheckbox}
           onChange={this.onWithChildrenClick}
         />
-        {hasChildren && children > 0 && (
-          <Text style={styles.childrenText}>{children}</Text>
-        )}
       </View>
     );
   }

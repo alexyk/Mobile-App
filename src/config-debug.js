@@ -50,7 +50,7 @@ export const consoleShowTimeInLogs              = true;    // prepend with time
 export const serverLogRequesting                = false;
 export const serverExpandErrors                 = false;
   // other
-export const webviewDebugEnabled                = false;
+export const webviewDebugEnabled                = true;
 export const hotelsSearchMapDebugEnabled        = false;
 export const hotelsSearchSocketDebug            = false;
 export const checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
@@ -81,7 +81,7 @@ export const offlineTimeInSeconds = {
   // automated flows
     // hotels search
 export const autoHotelSearch                    = false;
-export const autoHotelSearchFocus               = false;
+export const autoHotelSearchFocus               = true;
 export const autoHotelSearchPlace               = 'sofia'
     // homes search
 export const autoHomeSearch                     = false;

@@ -3,6 +3,7 @@ import {
   getSafeTopOffset,
   getSafeBottomOffset
 } from "../../../utils/designUtils";
+import { commonText } from "../../../common.styles";
 
 const styles = StyleSheet.create({
   container: {
@@ -52,10 +53,17 @@ const styles = StyleSheet.create({
     height: 70
   },
 
+  withChildrenCheckboxContainer: {
+    marginRight: 10
+  },
+  withChildrenCheckboxText: {
+    ...commonText,
+    fontSize: 15,
+    fontWeight: "100"
+  },
   withChildrenCheckbox: {
-    height: 15,
-    width: 15,
-    marginLeft: 15,
+    height: 17,
+    width: 17,
     marginVertical: 10
   }
 });

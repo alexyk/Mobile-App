@@ -5,17 +5,19 @@ export default StyleSheet.create({
     flexDirection: "column",
     alignSelf: "center",
     justifyContent: "center",
-    alignItems: "stretch",
-    width: "80%"
+    // alignItems: "stretch"
   },
   childOptionsContainer2: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
   },
-  childOptions: {
+  childOptionsHorizontal: {
+    marginRight: 10
+  }, 
+  childOptionsVertical: {
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "flex-start"
   },
   separator: {
     marginVertical: 10,
