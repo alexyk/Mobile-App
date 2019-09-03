@@ -56,7 +56,7 @@ export const hotelsSearchSocketDebug            = false;
 export const checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
   // offline mode
   // Enabled if: (__DEV__ == true) and (isOffline == true)
-                                let isOffline   = true;
+                                let isOffline   = false;
   if (forceOffline) isOffline = forceOffline;
   if (!__DEV__) isOffline = false;
 export const isOnline = (!isOffline);
@@ -90,7 +90,7 @@ export const autoHomeSearchPlace                = 'uk1'
 export const autoCalendar                       = false;
   // test flows
 export const testFlowURL                        = "http://beta.locktrip.com/api/mobile/login";
-export const testFlow                           = "guestInfo";
+export const testFlow                           = "";
 // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
