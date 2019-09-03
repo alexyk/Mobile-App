@@ -6,7 +6,7 @@ import { serverRequest } from '../../../services/utilities/serverUtils';
 import requester from "../../../initDependencies";
 import { __MYDEV__, __TEST__,
   consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs,
-  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls
+  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters
 } from '../../../config-debug';
 import reduxStore from "../../../redux/store";
 
@@ -117,6 +117,36 @@ function configureConsole() {
     tslog = emptyFunc;
     telog = emptyFunc;
     if (__MYDEV__ !== undefined && console.warn != null) console.warn(`[debug-tools] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
+  }
+
+  if (consoleFilters && consoleFilters.length > 0) {
+    const origLog = console.log;
+    const funcLog = (type) => (...args) => {
+      let isFiltered = false;
+      let a = {args, type};
+      
+      for (let filter of consoleFilters) {
+        for (let arg of args) {
+          if (typeof(arg) == 'string') {
+            if (arg.includes(filter)) {
+              isFiltered = true;
+              break;
+            }
+          }
+        }
+
+        if (isFiltered) {
+          break;
+        }
+      }
+      if (isFiltered) {
+        origLog(...args);
+      }
+    }
+    console.log = funcLog('log');
+    console.info = funcLog('info');
+    console.error = funcLog('error');
+    console.warn = funcLog('warn');
   }
 }
 
@@ -379,12 +409,14 @@ function testFlowExecSafe(type, extraConfig={}) {
   if (type == null) {
     type = testFlow;
   }
+  let lib;
+  try {
+    lib = require("test-flows").default;
+  } catch (error) { wlog('[debug] Could not get test-flows lib')}
 
   switch (type) {
     case 'guestInfo':
-      let lib;
       try {
-        lib = require("test-flows").default;
         const jsonData = require('../../debug/test-flows/data/guest-info-3a-4ch.json');
 
         const getParams = (flow) => function (name) {
@@ -451,6 +483,10 @@ function testFlowExecSafe(type, extraConfig={}) {
         wlog('                                                                                                              ');
         wlog('                                                                                                              ');
       }
+      break;
+
+    case 'hotelsSearch':
+      
       break;
   
     default:
