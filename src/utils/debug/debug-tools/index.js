@@ -123,7 +123,6 @@ function configureConsole() {
     const origLog = console.log;
     const funcLog = (type) => (...args) => {
       let isFiltered = false;
-      let a = {args, type};
       
       for (let filter of consoleFilters) {
         for (let arg of args) {
@@ -147,6 +146,9 @@ function configureConsole() {
     console.info = funcLog('info');
     console.error = funcLog('error');
     console.warn = funcLog('warn');
+    ilog = funcLog('ilog');
+    clog = funcLog('clog');
+    wlog = funcLog('wlog');
   }
 }
 
@@ -409,7 +411,8 @@ function testFlowExecSafe(type, extraConfig={}) {
   if (type == null) {
     type = testFlow;
   }
-  let lib;
+  let lib, flow;
+
   try {
     lib = require("test-flows").default;
   } catch (error) { wlog('[debug] Could not get test-flows lib')}
@@ -484,19 +487,18 @@ function testFlowExecSafe(type, extraConfig={}) {
         wlog('                                                                                                              ');
       }
       break;
-
-    case 'hotelsSearch':
-      
-      break;
   
     default:
       // run a test flow - for easy debug/development/testing
-      let flow = require("../../../utils/debug/test-flows").default;
-      flow.setConfig({ getObjectClassName, serverRequest, requester });
+      lib.setConfig({ serverRequest, requester, navigationService });
+      flow = lib.flows;
       testFlow
         .split(".")
         .forEach(item => (flow = flow[item]));
-      setTimeout(flow, 500);
+      if (typeof(flow) == 'function') {
+        flow = flow();
+      }
+      setTimeout(flow.exec, 500);
       break;
   }
 }
