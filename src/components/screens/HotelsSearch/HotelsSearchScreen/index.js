@@ -573,10 +573,8 @@ class HotelsSearchScreen extends Component {
 
     const pricesFromSocketValid = this.validSocketPrices;
     const hotelsToRender = hotelsTemporaryFilterAndSort(this.hotelsAll);
-    let preloaderIsLoading = true;
     if (hotelsToRender.length >= HOTELS_MINIMUM_RESULTS) {
       this.isMinimumResultLoaded = true;
-      preloaderIsLoading = false;
     }
 
     this.listStartFetch(hotelsToRender, this.pageLimit);
@@ -585,7 +583,6 @@ class HotelsSearchScreen extends Component {
     console.timeEnd("*** onSocketUpdateTick");
 
     return {
-      isLoading: preloaderIsLoading,
       hotelsInfoForMap: hotelsToRender,
       pricesFromSocketValid
     };
@@ -890,16 +887,11 @@ class HotelsSearchScreen extends Component {
     const isSkipping = !this || !this.listViewRef || this.isUnmounted;
 
     if (isSkipping) {
-      wlog(
-        `[HotelsSearchScreen::onServerStaticHotels] Is screen unmounted: ${
-          this ? this.isUnmounted : "n/a"
-        }`,
-        {
-          thisNull: this == null,
-          listViewRef: this ? this.listViewRef : "n/a",
-          isUnMounted: this ? this.isUnmounted : "n/a"
-        }
-      );
+      wlog(`[HotelsSearchScreen::onServerStaticHotels] Is screen unmounted: ${this ? this.isUnmounted : "n/a"}`, {
+        thisNull: this == null,
+        listViewRef: this ? this.listViewRef : "n/a",
+        isUnMounted: this ? this.isUnmounted : "n/a"
+      });
       return;
     }
     const _this = this;
@@ -912,7 +904,9 @@ class HotelsSearchScreen extends Component {
     const newState = {
       totalHotels: data.totalElements,
       totalPages: data.totalPages,
-      displayMode: DISPLAY_MODE_RESULTS_AS_LIST
+      displayMode: DISPLAY_MODE_RESULTS_AS_LIST,
+      isLoading: false,
+      hideFooter: false
     };
     if (_this.isSocketDown) {
       _this.startSearch();
@@ -934,14 +928,11 @@ class HotelsSearchScreen extends Component {
     }
 
     let hotels = data.content;
-    processStaticHotels(
-      hotels,
-      _this.hotelsStaticCacheMap,
-      _this.hotelsIndicesByIdMap,
-      _this.hotelsAll,
-      _this.isAllHotelsLoaded
-    );
+    processStaticHotels(hotels, _this.hotelsStaticCacheMap, _this.hotelsIndicesByIdMap, _this.hotelsAll, _this.isAllHotelsLoaded);
     printCheckHotelDataCache();
+
+    // update list
+    _this.listUpdateDataSource(hotels);
 
     _this.pagesCached++;
     _this.isFirstLoad = false;
@@ -976,10 +967,7 @@ class HotelsSearchScreen extends Component {
 
   // onFetch (page = 1, startFetch, abortFetch) {
   onFetchNewListViewData(page = 1, startFetch, abortFetch) {
-    rlog(
-      "list-fetch",
-      `res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`
-    );
+    rlog("list-fetch", `res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`);
     // Save these methods to use later in list....() methods (for example listStartFetch)
     this.listViewHelpers = { startFetch, abortFetch };
   }

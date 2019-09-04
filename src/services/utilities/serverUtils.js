@@ -48,6 +48,7 @@ export function serverRequest(
   const errorFunctionWrapped = function(thisObject, errorData, errorCode, message) {
     let hasError = false;
     try {
+      if (serverLogRequesting) ilog(`[serverUtils] [${callerName}] Response-Error ${requestName}`, {callerName, requestName, callParams, errorData, errorCode, message});
       errorFunction.call(thisObject, errorData, errorCode);
     } 
     catch (error) {
@@ -87,6 +88,7 @@ export function serverRequest(
         res.body
           .then(function(data) {
             try {
+              if (serverLogRequesting) ilog(`[serverUtils] [${callerName}] Response ${requestName}`, {callerName, requestName, callParams, data});
               successFunction.call(thisObject, data);
             } catch (error) {
               errorData = { error };

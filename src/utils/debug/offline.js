@@ -129,7 +129,7 @@ export default function createOfflineRequester() {
   )};
   
   // prettier-ignore
-  const socketDelay = 10; // in milliseconds
+  const { socketDelay, socketDelay2, socketDelay3 } = offlineTimeInSeconds;
 	const offlineRequester = {
     // fake test calls
 		testCall: (caseNo) 				              => new Promise( (resolve, reject) => { 
@@ -193,13 +193,16 @@ export default function createOfflineRequester() {
       try {
         const tmp = offlinePacksHotels[autoHotelSearchPlace].socket;
         if (tmp) arr = tmp;
+        if (arr.hotelsAll) {
+          arr = arr.hotelsAll;
+        }
       } catch (e) {
         processError(`[offline::startSocketConnection] Error in getting offline pack: ${e.message}`, {error:e})
       }
 
 			const delayPerRefresh = socketDelay
-			const delay2 = 500
-			const delay3 = delay2+300
+			const delay2 = socketDelay2
+			const delay3 = delay2+socketDelay3
 			arr.map((item,index) => {
 				const func = () => {
           onData.apply( _this, [ { body: JSON.stringify(item) } ] )
@@ -224,8 +227,8 @@ export default function createOfflineRequester() {
           data =  {ethBalance: 0.00032480};
           callback(data);
           rlog('API-OFFLINE', `getWalletFromEtherJS-2`, {data} )
-        }, 1000*offlineTimeInSeconds['getWalletFromEtherJS2']);
-      }, 1000*offlineTimeInSeconds['getWalletFromEtherJS1'])
+        }, 1000*offlineTimeInSeconds.getWalletFromEtherJS2);
+      }, 1000*offlineTimeInSeconds.getWalletFromEtherJS1)
   }
 
   return offlineRequester;

@@ -30,6 +30,5 @@ export const DEFAULT_HOTEL_PNG = "listings/images/listing_thumbnail_152907786240
 export const DEFAULT_CRYPTO_CURRENCY = "EUR";
 export const showNumberOnHotelItem = __DEV__ && false;
 export const showBothMapAndListHotelSearch = false;
-export const showSimpleFooterHotelSearch = true;
 export const isFontScalingEnabled = false;
 export const autoGetAllStaticPages = false;

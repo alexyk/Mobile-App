@@ -79,7 +79,8 @@ export function createHotelSearchInitialState(params, reduxCache) {
     isSocketTimeout: false,
     isStaticTimeout: false,
 
-    isLoading: true, // progress dialog
+    isLoading: true, // preloader
+    hideFooter: true,
 
     checkInDate,
     checkOutDate,
@@ -472,7 +473,15 @@ export function processStaticHotels(
  */
 
 function parseStaticHotel(hotel, index) {
-  if (hotel.star != null) delete hotel.star;
+  // use only one property for stars
+  if (hotel.star != null) {
+    hotel.stars = hotel.star;
+    delete hotel.star;
+  }
+  if (hotel.lastBestPrice) {
+    hotel.price = hotel.lastBestPrice;
+    delete hotel.lastBestPrice;
+  }
   checkHotelData(hotel, "static-parsed", index);
 }
 
@@ -623,27 +632,17 @@ export function printCheckHotelDataCache() {
               })
               .join("    ");
       if (totalErrors > 0) {
-        console.info(`[checkHotelData] Printing errors cache - ${summary}`, {
+        console.info(`[checkHotelData] Printing cache mismatches - ${summary}`, {
           checkHotelDataCache
         });
-        rlog(
-          "X-cache",
-          `checkHotelData - ${totalErrors} errors found  -  ${summary}`,
-          { checkHotelDataCache },
-          true
-        );
+        rlog("X-cache", `checkHotelData - ${totalErrors} mismatches found  -  ${summary}`, { checkHotelDataCache }, true);
       } else {
-        console.info(`[checkHotelData] Printing errors cache - no errors`);
-        rlog("X-cache", `checkHotelData - no errors`);
+        console.info(`[checkHotelData] Printing mismatches cache - none`);
+        rlog("X-cache", `checkHotelData - no mismatches`);
       }
     } catch (error) {
       processError(`printCheckHotelDataCache - ${error.message}`, { error });
-      rlog(
-        "X-cache-error",
-        `checkHotelData - error printing: ${error.message}`,
-        { error },
-        true
-      );
+      rlog("X-cache-error", `checkHotelData - printing mismatches: ${error.message}`, { error }, true);
     }
   }
 }
@@ -680,7 +679,9 @@ export function checkHotelData(data, type, index) {
         props = newObject(commonData, {
           generalDescription: "string",
           hotelPhoto: { url: "string" },
-          star: "number"
+          star: "number",
+          lastBestPrice: "number",
+          hotelFeatures: "object"
         });
         result = validateObject(data, props);
         break;
@@ -688,7 +689,10 @@ export function checkHotelData(data, type, index) {
       case "static-parsed":
         props = newObject(commonData, {
           generalDescription: "string",
-          hotelPhoto: "object"
+          hotelPhoto: "object",
+          stars: "number",
+          price: "number",
+          hotelFeatures: "object"
         });
         result = validateObject(data, props);
         break;

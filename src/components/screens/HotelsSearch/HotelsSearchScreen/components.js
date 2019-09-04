@@ -10,13 +10,11 @@ import {
 import WebView from "react-native-webview";
 
 import {
-  showBothMapAndListHotelSearch,
-  showSimpleFooterHotelSearch
+  showBothMapAndListHotelSearch
 } from "../../../../config-settings";
 import {
   webviewDebugEnabled,
-  hotelsSearchMapDebugEnabled,
-  processError
+  hotelsSearchMapDebugEnabled
 } from "../../../../config-debug";
 
 import SearchBar from "../../../molecules/SearchBar";
@@ -338,23 +336,11 @@ export function renderMapButton() {
 export function renderFooter() {
   if (this.isWebviewHotelDetail) return null;
 
-  // options to set
-  const isShowAllSockets = false;
-  const isShowAllHotels = false;
-  const isFilterStatusEnabled = true;
-  const isFiltered = this.state.isFilterResult && isFilterStatusEnabled;
-  const isFiltering = this.props.isApplyingFilter;
-  const isSimpleFooter = !__DEV__ || showSimpleFooterHotelSearch;
+  const { isApplyingFilter } = this.props;
+  const { hideFooter } = this.state;
 
-  // format prices information
-  const allSocketPrices = isShowAllSockets
-    ? `${this.state.pricesFromSocketValid}/${this.state.pricesFromSocket}`
-    : this.state.pricesFromSocketValid;
-  const socketPricesCount =
-    this.state.pricesFromSocket > 0
-      ? allSocketPrices
-      : `${this.state.pricesFromSocketValid}`;
-  const isSocketRedColor = this.state.isSocketTimeout && !isFiltered;
+  // options to set
+  const isShowAllHotels = false;
 
   // format hotels count information
   const hotelsLoadedCount = isShowAllHotels
@@ -367,108 +353,37 @@ export function renderFooter() {
 
   // common text
   const fontSize = 13;
-  let rightText, leftText, simpleText;
+  let simpleText;
 
-  if (isSimpleFooter) {
-    //const isRed = (isSocketRedColor || this.state.isStaticTimeout);
-    const textContent = isFiltering
-      ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
+
+  //const isRed = (isSocketRedColor || this.state.isStaticTimeout);
+  const textContent = isApplyingFilter
+    ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
+    : hotelsLoadedCount == 0
+      ? lang.TEXT.SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS
       : this.isAllHotelsLoaded
-      ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", hotelsLoadedCount)
-      : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING.replace("%1", hotelsLoadedCount);
-    simpleText = (
-      <Text
-        style={{
-          ...commonText,
-          fontSize,
-          fontWeight: "normal",
-          textAlign: "center",
-          color: "black", //isSocketRedColor ? "red" : "black",
-          paddingLeft: 5,
-          width: "100%"
-          // backgroundColor: '#0F02'
-        }}
-      >
-        {textContent}
-      </Text>
-    );
-  } else {
-    // other version - left and right text fields
-    const leftWidth = "50%";
-    const rightWidth = "50%";
+        ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", hotelsLoadedCount)
+        : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING.replace("%1", hotelsLoadedCount);
 
-    // create visual text components
-    leftText = (
-      <Text
-        style={{
-          ...commonText,
-          fontSize,
-          fontWeight: "normal",
-          textAlign: isFiltered ? "center" : "left",
-          color: isSocketRedColor ? "red" : "black",
-          paddingLeft: 5,
-          width: isFiltered ? "100%" : leftWidth
-          // backgroundColor: '#0F02'
-        }}
-      >
-        {isFiltered
-          ? this.props.isApplyingFilter
-            ? this.isFirstFilter
-              ? lang.TEXT.SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS
-              : lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
-            : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace(
-                "%1",
-                this.state.totalHotels
-              )
-          : this.state.pricesFromSocketValid > 0
-          ? // show prices loaded
-            lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES.replace(
-              "$$1",
-              socketPricesCount
-            )
-          : // loading or timeout message
-          this.state.isSocketTimeout
-          ? lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES_TIMEOUT
-          : lang.TEXT.SEARCH_HOTEL_RESULTS_PRICES_LOADING}
-      </Text>
-    );
-    rightText = (
-      <Text
-        style={{
-          ...commonText,
-          fontSize,
-          fontWeight: "normal",
-          textAlign: "right",
-          width: isFiltered ? 0 : rightWidth,
-          color: this.state.isStaticTimeout ? "red" : "black",
-          paddingRight: 5,
-          marginTop: 10
-        }}
-      >
-        {isFiltered
-          ? ""
-          : this.state.totalHotels > 0 || this.state.isFilterResult
-          ? // show loaded hotels
-            this.state.isStaticTimeout
-            ? lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT
-            : lang.TEXT.SEARCH_HOTEL_RESULTS_FOUND.replace(
-                "$$1",
-                hotelsLoadedCount
-              )
-          : // loading or timeout message
-          this.state.isStaticTimeout
-          ? lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT
-          : lang.TEXT.SEARCH_HOTEL_RESULTS_HOTELS_LOADING}
-      </Text>
-    );
-  }
+  simpleText = (
+    <Text
+      style={{
+        ...commonText,
+        fontSize,
+        fontWeight: "normal",
+        textAlign: "center",
+        color: "black", //isSocketRedColor ? "red" : "black",
+        paddingLeft: 5,
+        width: "100%"
+        // backgroundColor: '#0F02'
+      }}
+    >
+      {textContent}
+    </Text>
+  );
 
-  if (
-    this.isAllHotelsLoaded ||
-    !showSimpleFooterHotelSearch ||
-    isFiltering ||
-    this.isMinimumResultLoaded
-  ) {
+
+  if (!hideFooter) {
     return (
       <View
         style={{
@@ -485,9 +400,7 @@ export function renderFooter() {
           marginHorizontal: 0
         }}
       >
-        {simpleText ? simpleText : [leftText, rightText]}
-        {/* { !simpleText ? leftText   : null }
-        { !simpleText ? rightText  : null } */}
+        {simpleText}
       </View>
     );
   } else {
@@ -496,12 +409,13 @@ export function renderFooter() {
 }
 
 export function renderPreloader() {
-  const isHotelDetails = this.state.displayMode == DISPLAY_MODE_HOTEL_DETAILS;
-  const isMap = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
-  const isList = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST;
-  const isLoading = this.state.isLoading;
-  const isFiltering = this.props.isApplyingFilter;
-  const isServerFilter = this.state.isFilterResult;
+  const { displayMode, isLoading, isFilterResult } = this.state;
+  const { isApplyingFilter } = this.props;
+  const isHotelDetails = displayMode == DISPLAY_MODE_HOTEL_DETAILS;
+  const isMap = displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
+  const isList = displayMode == DISPLAY_MODE_RESULTS_AS_LIST;
+  const isFiltering = isApplyingFilter;
+  const isServerFilter = isFilterResult;
   const isFilteringFromServer = isFiltering && isServerFilter;
   const isFilteringFromUI = this.isFilterFromUI;
   const isFirstFilter = this.isFirstFilter;

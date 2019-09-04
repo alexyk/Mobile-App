@@ -47,7 +47,7 @@ export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
 export const consoleShowTimeInLogs              = true;    // prepend with time
-export const consoleFilters                     = ["serverUtil"];
+export const consoleFilters                     = [];
 export const serverLogRequesting                = true;
 export const serverExpandErrors                 = false;
   // other
@@ -73,9 +73,12 @@ export const offlineTimeInSeconds = {
   getMyConversations: 0,
   getWalletFromEtherJS1: 0,
   getWalletFromEtherJS2: 0,
-  getStaticHotels: 0,
-  getSearchHotelResults: 0,
-  getMapInfo: 0,
+  getStaticHotels: 1,
+  getSearchHotelResults: 5,
+  socketDelay: 2000, // in milliseconds
+  socketDelay2: 200, // in milliseconds
+  socketDelay3: 300, // in milliseconds
+  getMapInfo: 3,
   getHotelRooms: 0,
   getHotelById: 0,
 }
@@ -83,7 +86,7 @@ export const offlineTimeInSeconds = {
     // hotels search
 export const autoHotelSearch                    = false;
 export const autoHotelSearchFocus               = true;
-export const autoHotelSearchPlace               = 'sofia'
+export const autoHotelSearchPlace               = 'london'
     // homes search
 export const autoHomeSearch                     = false;
 export const autoHomeSearchPlace                = 'uk1'
