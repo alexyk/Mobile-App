@@ -146,29 +146,24 @@ export function renderHotelDetailsAsWebview() {
   return result;
 }
 
+/**
+ * Content is updated on demand by listUpdateDataSource() and listStartFetch() in index.js
+ * TODO: Investigate refactoring, cleaning and perhaps using a normal FlatList. Consider using test-flows and/or redux sagas.
+ */
 export function renderResultsAsList() {
-  // console.log(`### [HotelsSearchScreen] renderResultsAsList len:${this.state.hotelsInfo.length}`)
   const isMap = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
   const isList = this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST;
   const scale = isList ? 1.0 : 0.0;
   const height =
     showBothMapAndListHotelSearch && (isMap || isList) ? "50%" : null;
   const transform = [{ scaleX: scale }, { scaleY: scale }];
-  // console.log(`#@# [HotelsSearchScreen] renderResultsAsList, display: ${this.state.displayMode}, ListScale: ${scale}, data: ${this.state.hotelsInfo}`)
-
-  //const currentListData = (this.listViewRef?this.listViewRef.getRows():[]);
-  //const page = (this.listViewRef?this.listViewRef.getPage():-1);
-  // log('@@render-list',`${currentListData.length} items, page: ${page} - rendering hotels result as list`, {scale,height,transform,isList,isMap,currentListData},true)
 
   return (
     <UltimateListView
       ref={ref => (this.listViewRef = ref)}
       key={"hotelsList"} // this is important to distinguish different FlatList, default is numColumns
       onFetch={this.onFetchNewListViewData}
-      keyExtractor={(item, index) => {
-        // //console.log(`### [HotelsSearchScreen] item:${item}: index:${index}`)
-        return `${index} - ${item}`;
-      }} // this is required when you are using FlatList
+      keyExtractor={(item, index) => `${index} - ${item}`}
       refreshable={false}
       numColumns={1} // to use grid layout, simply set gridColumn > 1
       item={this.renderListItem} // this takes three params (item, index, separator)
@@ -337,15 +332,10 @@ export function renderFooter() {
   if (this.isWebviewHotelDetail) return null;
 
   const { isApplyingFilter } = this.props;
-  const { hideFooter } = this.state;
-
-  // options to set
-  const isShowAllHotels = false;
+  const { hideFooter, error } = this.state;
 
   // format hotels count information
-  const hotelsLoadedCount = isShowAllHotels
-    ? `${this.state.hotelsInfoForMap}/${this.state.totalHotels}`
-    : `${
+  const hotelsLoadedCount = `${
         this.isMinimumResultLoaded && !this.isAllHotelsLoaded
           ? this.state.pricesFromSocketValid
           : this.state.totalHotels
@@ -357,13 +347,15 @@ export function renderFooter() {
 
 
   //const isRed = (isSocketRedColor || this.state.isStaticTimeout);
-  const textContent = isApplyingFilter
-    ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
-    : hotelsLoadedCount == 0
-      ? lang.TEXT.SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS
-      : this.isAllHotelsLoaded
-        ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", hotelsLoadedCount)
-        : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING.replace("%1", hotelsLoadedCount);
+  const textContent = error
+    ? error
+    : isApplyingFilter && !this.isAllHotelsLoaded
+      ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
+      : hotelsLoadedCount == 0
+        ? lang.TEXT.SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS
+        : this.isAllHotelsLoaded
+          ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", hotelsLoadedCount)
+          : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING.replace("%1", hotelsLoadedCount);
 
   simpleText = (
     <Text
@@ -372,10 +364,9 @@ export function renderFooter() {
         fontSize,
         fontWeight: "normal",
         textAlign: "center",
-        color: "black", //isSocketRedColor ? "red" : "black",
+        color: "black",
         paddingLeft: 5,
         width: "100%"
-        // backgroundColor: '#0F02'
       }}
     >
       {textContent}

@@ -105,11 +105,11 @@ export function serverRequest(
         if (res.errors && res.errors instanceof Promise) {
           res.errors
             .then(function(error) {
-              const { responseAsRawText, jsonError } = error;
+              const { dataAsRawText, jsonError } = error;
               errorData = error;
               if (jsonError) {
                 errorCode = SERVER_ERROR.LEVEL_3_HTML_RESULT_FROM_SERVER;
-                gotoWebviewSimple({body: responseAsRawText});
+                gotoWebviewSimple({body: dataAsRawText});
                 errorFunctionWrapped(thisObject, errorData, errorCode, `Error when requesting ${requestName} from server - level 2 - HTML data`);
               } else {      
                 errorCode = SERVER_ERROR.LEVEL_3_FROM_SERVER;

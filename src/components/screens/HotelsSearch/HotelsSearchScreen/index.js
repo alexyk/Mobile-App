@@ -1,6 +1,9 @@
 /**
  * Hotels search results are loaded like this
  * 
+ * TODO: Plan cleaning and refactoring. For example components.js was a temporary solution - needs to be
+ * cleaned and converted to normal (class or function) components
+ * 
  * ==== Variant 2 - quicker search results (when 30 prices loaded) ====
  * ==== (using footer in simple mode - one simple text field) ====
  * 1) onServerStaticHotels
@@ -56,7 +59,7 @@ import {
   generateFilterInitialData,
   generateHotelFilterString,
   applyHotelsSearchFilter,
-  processFilteredHotels,
+  processServerFilteredHotels,
   hotelsTemporaryFilterAndSort,
   mergeAllHotelData,
   parseSocketHotelData,
@@ -777,18 +780,13 @@ class HotelsSearchScreen extends Component {
     this.props.setIsApplyingFilter(false);
     this.setState({ error: lang.TEXT.SEARCH_HOTEL_FILTER_ERROR });
 
-    this.refs.toast.show(
-      `There was an error while applying filters.\nPlease check your connection and try searching again.`,
-      DURATION.FOREVER
-    );
+    // this.refs.toast.show(`There was an error while applying filters.\nPlease check your connection and try searching again.`, DURATION.LONG);
   }
 
   onFilteredData(data) {
     const _this = this;
     if (!this || !(this instanceof HotelsSearchScreen) || this.isUnmounted) {
-      wlog(
-        `[HotelsSearchScreen] Skipping onFilteredData - screen seems unmounted`
-      );
+      wlog(`[HotelsSearchScreen] Skipping onFilteredData - screen seems unmounted`);
       return;
     }
 
@@ -798,22 +796,11 @@ class HotelsSearchScreen extends Component {
     const hotelsAll = data.content;
     checkHotelData(hotelsAll, "filter");
     printCheckHotelDataCache();
-    rlog(
-      "@@filter-on-server",
-      `${count} filtered hotels, before parsing`,
-      { hotelsAll },
-      true
-    );
 
     // parse data
-    mergeAllHotelData(
-      hotelsAll,
-      this.hotelsSocketCacheMap,
-      this.hotelsStaticCacheMap
-    );
+    mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap);
     checkHotelData(hotelsAll, "filter-parsed");
     printCheckHotelDataCache();
-    // log('filtered-hotels',`${count} filtered hotels, after parsing`, {hotelsAll})
 
     const oldHotels = this.hotelsAll;
     if (this.isFirstFilter) {
@@ -826,15 +813,7 @@ class HotelsSearchScreen extends Component {
 
     // pagination of list component (renderResultsAsList)
     this.listSetPageLimit(count, this.PAGE_LIMIT);
-
-    // log('filtered-hotels',`before processing`, {hotelsAll,ids:this.hotelsIndicesByIdMap,min:this.priceMin,max:this.priceMax})
-    const { priceMin, priceMax, newIdsMap } = processFilteredHotels(
-      hotelsAll,
-      oldHotels,
-      this.hotelsIndicesByIdMap,
-      this.priceMin,
-      this.priceMax
-    );
+    const { priceMin, priceMax, newIdsMap } = processServerFilteredHotels(hotelsAll, oldHotels, this.hotelsIndicesByIdMap, this.priceMin, this.priceMax);
     this.priceMin = priceMin;
     this.priceMax = priceMax;
     this.hotelsIndicesByIdMap = newIdsMap;
@@ -984,13 +963,6 @@ class HotelsSearchScreen extends Component {
   gotoFilter = () => {
     console.time("*** HotelsSearchScreen::gotoFilter()");
 
-    // log('HotelsSearchScreen','gotoFilter', {props:this.props, state: this.state})
-    rlog(
-      "HotelsSearchScreen",
-      `gotoFilter  isLoading: ${this.state.isLoading} isFiltering: ${this.props.isApplyingFilter}`,
-      { props: this.props, state: this.state }
-    );
-
     if (this.state.isLoading || this.props.isApplyingFilter) {
       this.refs.toast.show(lang.TEXT.SEARCH_HOTEL_FILTER_NA, 3000);
     } else {
@@ -1074,9 +1046,7 @@ class HotelsSearchScreen extends Component {
       });
 
       this.props.setIsApplyingFilter(false);
-      if (!this.isAllHotelsLoaded) {
-        this.isAllHotelsLoaded = true;
-      }
+      this.isAllHotelsLoaded = true;
     } else {
       this.isFilterFromUI = false;
       // filter on server
@@ -1120,13 +1090,7 @@ class HotelsSearchScreen extends Component {
     //      .then(this.onFilteredData);
 
     // .getLastSearchHotelResultsByFilter(strSearch, strFilters)
-    serverRequest(
-      this,
-      requester.getMapInfo,
-      [strSearch + strFilters],
-      this.onFilteredData,
-      this.onFilteredDataError
-    );
+    serverRequest(this, requester.getMapInfo, [strSearch + strFilters], this.onFilteredData, this.onFilteredDataError);
   };
 
   onWebViewLoadStart() {

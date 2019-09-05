@@ -40,7 +40,6 @@ class HotelFilters extends Component {
 
     this.state = {
       isHotelSelected: true,
-      selectedRating: 4,
       showUnAvailable: false,
       nameFilter: params.nameFilter,
       count: {
@@ -58,11 +57,11 @@ class HotelFilters extends Component {
         },
         {
           label: "Lowest price",
-          value: "priceForSort,asc"
+          value: "price,asc"
         },
         {
           label: "Highest price",
-          value: "priceForSort,desc"
+          value: "price,desc"
         }
       ]
     };
@@ -280,13 +279,7 @@ class HotelFilters extends Component {
   renderFilterOrderBy() {
     return (
       <View style={styles.filterComponentHorizontalContainer}>
-        <View
-          style={
-            this.state.isHotelSelected
-              ? styles.orderByTitle
-              : styles.emptyPricingView
-          }
-        >
+        <View style={this.state.isHotelSelected ? styles.orderByTitle : styles.emptyPricingView}>
           <Text style={styles.pricingText}>Order By</Text>
         </View>
         <View style={styles.orderyByPickerWrap}>

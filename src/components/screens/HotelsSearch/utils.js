@@ -101,7 +101,7 @@ export function createHotelSearchInitialState(params, reduxCache) {
     showUnAvailable: false,
     nameFilter: "",
     selectedRating: [false, false, false, false, false],
-    orderBy: "rank,desc",
+    orderBy: "price,asc",
     priceRange: [1, 5000],
     priceRangeSelected: [1, 5000],
 
@@ -275,62 +275,62 @@ export function hotelsTemporaryFilterAndSort(hotels) {
  * priceMin, priceMax, newIdsMap,
  * minLat, maxLat, minLon, maxLon
  */
-export function processFilteredHotels(
-  filtered,
-  hotelsOld,
-  hotelsOldIdsMap,
-  priceMinOld,
-  priceMaxOld
-) {
+export function processServerFilteredHotels(filtered, hotelsOld, hotelsOldIdsMap, priceMinOld, priceMaxOld) {
   let priceMin = priceMinOld;
   let priceMax = priceMaxOld;
   let newIdsMap = {};
   let minLat, maxLat, minLon, maxLon;
+  let hotels = [];
 
-  // calculate min &max price
-  filtered.map((item, index) => {
+
+  // calculate min &max price and filter out items without price
+  filtered.forEach((item, index) => {
     const { price, latitude, longitude } = item;
 
-    // log('processing',`${index}, id:${item.id}, name:'${item.name}', price:${price}, min:${priceMin} max:${priceMax}`)
-    newIdsMap[item.id] = index;
-
-    if (minLat == -1) {
-      minLat = latitude;
-      maxLat = latitude;
-    } else if (minLon == -1) {
-      minLon = longitude;
-      maxLon = longitude;
-    } else {
-      if (latitude < minLat) {
-        minLat = latitude;
-      }
-      if (latitude > maxLat) {
-        maxLat = latitude;
-      }
-      if (longitude < minLon) {
-        minLon = longitude;
-      }
-      if (longitude > maxLon) {
-        maxLon = longitude;
-      }
-    }
-
-    // process price
+    // filtering out items without price
     if (price != null) {
+      // log('processing',`${index}, id:${item.id}, name:'${item.name}', price:${price}, min:${priceMin} max:${priceMax}`)
+      newIdsMap[item.id] = index;
+
+      if (minLat == -1) {
+        minLat = latitude;
+        maxLat = latitude;
+      } else if (minLon == -1) {
+        minLon = longitude;
+        maxLon = longitude;
+      } else {
+        if (latitude < minLat) {
+          minLat = latitude;
+        }
+        if (latitude > maxLat) {
+          maxLat = latitude;
+        }
+        if (longitude < minLon) {
+          minLon = longitude;
+        }
+        if (longitude > maxLon) {
+          maxLon = longitude;
+        }
+      }
+
+      // process price  
+    
       if (priceMax < price) {
         priceMax = price;
       }
       if (priceMin > price) {
         priceMin = price;
       }
+
+      hotels.push(item);
     }
-    return null;
   });
 
-  // process images
-  // log('processing',`priceMin:${priceMin}, priceMax:${priceMax}`,{priceMin, priceMax, newIdsMap})
+  // sort by lowest price first
+  hotels.sort((a,b) => (a.price < b.price));
 
   return {
+    hotels,
     priceMin,
     priceMax,
     newIdsMap,

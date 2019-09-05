@@ -1,7 +1,8 @@
-import { isMoment } from "moment";
 import { basePath } from "../../config";
 import { StyleSheet } from "react-native";
 import navigationService from "../../services/navigationService";
+import { isArray, isNumber } from "js-tools";
+
 
 export function validateObject(sourceData, props, index = -1, path = "") {
   let result = "";
@@ -249,10 +250,6 @@ export function gotoWebviewSimple(simpleParams) {
   navigationService.navigate("WebviewScreen", { simpleParams });
 }
 
-export function isArray(value) {
-  return value instanceof Array;
-}
-
 export function processGuestsData(adults, rooms, childrenAgeValuesByRoom) {
   let result = [];
   let averageAdults = Math.floor(adults/rooms);
@@ -271,60 +268,6 @@ export function processGuestsData(adults, rooms, childrenAgeValuesByRoom) {
 export function stringifyRoomsData(roomsData) {
   const result = encodeURI(JSON.stringify(roomsData));
 
-  return result;
-}
-
-export function isObject(value, className = null) {
-  let result = typeof value == "object";
-  if (!result) {
-    className = className ? className : getObjectClassName(value);
-    result = ["Symbol", "Object"].includes(className);
-  }
-  return result;
-}
-
-export function isNumber(value) {
-  return typeof value == "number";
-}
-
-export function isString(value) {
-  return typeof value == "string";
-}
-
-export function isSymbol(obj, className = null) {
-  return (className || getObjectClassName(obj)) == "Symbol";
-}
-
-export function getObjectKeysCount(obj) {
-  const result = (obj && Object.keys(obj).length) || -1;
-  return result;
-}
-
-export function getObjectClassName(obj) {
-  let result = null;
-
-  try {
-    if (isMoment(obj)) {
-      result = "moment";
-    }
-    if (obj instanceof Symbol) {
-      result = "Symbol";
-    }
-    if (!result) {
-      result =
-        obj &&
-        obj.constructor &&
-        (obj.constructor.name || obj.constructor.className || null);
-    }
-    if (!result) {
-      result = typeof obj;
-    }
-  } catch (error) {
-    processError(
-      `[screens::utils::getObjectClassName] Error: ${error.message}`,
-      { error, obj }
-    );
-  }
   return result;
 }
 
