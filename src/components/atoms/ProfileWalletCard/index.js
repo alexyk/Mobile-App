@@ -275,7 +275,8 @@ class ProfileWalletCard extends Component {
         style={{
           position: "absolute",
           backgroundColor: "transparent",
-          top: 10
+          top: 25,
+          right: 10,
         }}
         textStyle={{ textAlign: "right" }}
       />
@@ -539,8 +540,6 @@ class ProfileWalletCard extends Component {
     return (
       <View>
         <View style={styles.cardBox}>
-          {this._renderAppVersion()}
-
           {this._renderWalletContent(isReloading, isEmpty, isReady, isLoading)}
 
           {this._renderCreateWalletButton()}
@@ -550,6 +549,7 @@ class ProfileWalletCard extends Component {
           (isReloading || isReady || skipLOCAddressRequest) && !isEmpty
         )}
 
+        {this._renderAppVersion()}
         {this._renderToast()}
       </View>
     );
