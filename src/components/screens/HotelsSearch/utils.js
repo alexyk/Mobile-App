@@ -1,5 +1,6 @@
 import lodash from "lodash";
-import { validateObject, isObject, isNumber, isString, isArray } from "../utils";
+import { validateObject } from "../utils";
+import { isObject, isNumber, isString, isArray } from "js-tools";
 import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config-settings";
 import { checkHotelsDataWithTemplates } from "../../../config-debug";
 import { rlog, processError } from "../../../utils/debug/debug-tools";

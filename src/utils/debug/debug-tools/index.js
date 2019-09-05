@@ -1,4 +1,4 @@
-import { isObject, isString, getObjectClassName, isSymbol } from '../../../components/screens/utils';
+import { isObject, isString, getObjectClassName, isSymbol } from "js-tools";
 import lodash from 'lodash';
 import moment, { isMoment } from 'moment';
 import navigationService from '../../../services/navigationService';
@@ -6,7 +6,7 @@ import { serverRequest } from '../../../services/utilities/serverUtils';
 import requester from "../../../initDependencies";
 import { __MYDEV__, __TEST__,
   consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs,
-  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters
+  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters, testFlowURL
 } from '../../../config-debug';
 import reduxStore from "../../../redux/store";
 
@@ -414,7 +414,8 @@ function testFlowExecSafe(type, extraConfig={}) {
   let lib, flow;
 
   try {
-    lib = require("test-flows").default;
+    lib = require("test-flows");
+    lib = lib.default;
   } catch (error) { wlog('[debug] Could not get test-flows lib')}
 
   switch (type) {
@@ -489,6 +490,13 @@ function testFlowExecSafe(type, extraConfig={}) {
       break;
   
     default:
+      // data
+      const data = {
+        url: testFlowURL,
+        screen: "WebviewScreen"
+      }
+      data.navParams = () => ({simpleParams: {url: testFlowURL}});
+
       // run a test flow - for easy debug/development/testing
       lib.setConfig({ serverRequest, requester, navigationService });
       flow = lib.flows;
@@ -496,8 +504,9 @@ function testFlowExecSafe(type, extraConfig={}) {
         .split(".")
         .forEach(item => (flow = flow[item]));
       if (typeof(flow) == 'function') {
-        flow = flow();
+        flow = flow(data);
       }
+    
       setTimeout(flow.exec, 500);
       break;
   }

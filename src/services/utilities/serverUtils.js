@@ -1,7 +1,7 @@
 import requester from "../../initDependencies";
 import { serverLogRequesting } from "../../config-debug";
 import { processError, ilog } from "../../utils/debug/debug-tools";
-import { getObjectClassName, isString, gotoWebviewSimple } from "../../components/screens/utils";
+import { getObjectClassName, isString, gotoWebviewSimple } from "js-tools";
 
 export const SERVER_ERROR = {
   LEVEL_3_IN_REQUEST:               "LEVEL_3_IN_REQUEST",

@@ -1,4 +1,4 @@
-import { isString, isNumber } from "../components/screens/utils";
+import { isString, isNumber } from "js-tools";
 
 var valid = require("card-validator");
 export const validateName = name => !!name;
