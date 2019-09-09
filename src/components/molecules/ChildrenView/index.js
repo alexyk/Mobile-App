@@ -28,7 +28,7 @@ export default class ChildrenView extends Component {
     const { onChildeAgeChange } = this.props;
 
     const props = {
-      id: `${index}_${value}`,
+      key: `${index}_${value}`,
       value,
       data: this._ageItems, 
       extraDataOnChange: {roomIndex, childIndex: index},
