@@ -442,13 +442,7 @@ export function mergeAllHotelData(filtered, socketMap, staticMap) {
   return result;
 }
 
-export function processStaticHotels(
-  hotels,
-  hotelsStaticCacheMap,
-  hotelsIndicesByIdMap,
-  hotelsAll,
-  isAllHotelsLoaded
-) {
+export function processStaticHotels(hotels, hotelsStaticCacheMap, hotelsIndicesByIdMap, hotelsAll, isAllHotelsLoaded) {
   hotels.forEach((item, index) => {
     hotelsStaticCacheMap[item.id] = item;
     checkHotelData(item, "static", index);

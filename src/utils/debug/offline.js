@@ -1,6 +1,6 @@
 import { autoHotelSearchPlace, autoHomeSearchPlace, validationStateOfflineWallet, offlineTimeInSeconds } from '../../config-debug';
 import { rlog, processError } from '../../utils/debug/debug-tools';
-import { isObject } from '../../components/screens/utils'
+import { isObject } from "js-tools";
 
 
 const offlinePacksHomes = {

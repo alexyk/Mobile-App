@@ -1,7 +1,7 @@
 import { basePath } from "../../config";
 import { StyleSheet } from "react-native";
 import navigationService from "../../services/navigationService";
-import { isArray, isNumber } from "js-tools";
+import { isObject, isArray, isNumber, isString } from "js-tools";
 
 
 export function validateObject(sourceData, props, index = -1, path = "") {
