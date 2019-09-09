@@ -744,10 +744,11 @@ class HotelsSearchScreen extends Component {
   };
 
   gotoHotelDetailsPageNative(item) {
+    const params = this._searchString.substr(1).split("&");
     serverRequest(
       this,
       requester.getHotelById,
-      [item.id, this._searchString.split("&")],
+      [item.id, params],
       data => {
         const hotelPhotos = [];
         for (let i = 0; i < data.hotelPhotos.length; i++) {
