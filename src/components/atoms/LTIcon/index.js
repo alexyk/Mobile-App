@@ -7,7 +7,7 @@ import SimpleIcon from "react-native-vector-icons/SimpleLineIcons";
 import { iconsDebugEnabled } from "../../../config-debug";
 
 export default function LTIcon(props) {
-  let { name, style, size, textStyle, color, iconSet, key, isText } = props;
+  let { name, style, size, textStyle, color, iconSet, isText, id } = props;
   let isAsText = false;
 
   /**
@@ -44,7 +44,7 @@ export default function LTIcon(props) {
 
     renderedResult = (
       // <Text style={[textStyle, {color}]} key={key}>
-      <Text style={textStyle} key={key}>
+      <Text style={textStyle} key={id}>
         <FontAwesome>{Icons[name]}</FontAwesome>
       </Text>
     );

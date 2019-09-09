@@ -381,7 +381,7 @@ function mapStars(stars) {
 
 export function generateHotelFilterString(page, state) {
   const filtersObj = {
-    showUnavailable: state.showUnAvailable,
+    showUnavailable: true,
     name: state.nameFilter,
     minPrice: state.priceRange[0],
     maxPrice: state.priceRange[1],
@@ -390,8 +390,7 @@ export function generateHotelFilterString(page, state) {
 
   // const page = page;//this.listView.getPage();
   const sort = state.orderBy;
-  const pagination =
-    page > -1 ? `&page=${page}&sort=${sort}` : `&page=0&sort=${sort}`;
+  const pagination = (page > -1 ? `&page=${page}&sort=${sort}` : `&page=0&sort=rank,desc`);
 
   const filtersStr = encodeURI(JSON.stringify(filtersObj));
   let filters = `&filters=${filtersStr}${pagination}`; //eslint-disable-line

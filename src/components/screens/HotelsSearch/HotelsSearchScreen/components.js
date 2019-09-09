@@ -9,13 +9,8 @@ import {
 } from "react-native";
 import WebView from "react-native-webview";
 
-import {
-  showBothMapAndListHotelSearch
-} from "../../../../config-settings";
-import {
-  webviewDebugEnabled,
-  hotelsSearchMapDebugEnabled
-} from "../../../../config-debug";
+import { showBothMapAndListHotelSearch } from "../../../../config-settings";
+import { webviewDebugEnabled, hotelsSearchMapDebugEnabled } from "../../../../config-debug";
 
 import SearchBar from "../../../molecules/SearchBar";
 import LTLoader from "../../../molecules/LTLoader";
@@ -35,7 +30,7 @@ import {
 } from "../utils";
 
 import lang from "../../../../language";
-import { commonText, commonComponents } from "../../../../common.styles";
+import { commonText } from "../../../../common.styles";
 import styles from "./styles";
 
 import { hasValidCoordinatesForMap } from "../utils";
@@ -268,11 +263,6 @@ export function renderResultsAsMap() {
     result = (
       <MapModeHotelsSearch
         key={"resultsAsMap"}
-        ref={ref => {
-          if (!!ref) {
-            this.mapView = ref.getWrappedInstance();
-          }
-        }}
         isMap={isMap}
         optimiseMarkers={this.state.optimiseMapMarkers}
         isFilterResult={this.state.isFilterResult}
@@ -332,14 +322,8 @@ export function renderFooter() {
   if (this.isWebviewHotelDetail) return null;
 
   const { isApplyingFilter } = this.props;
-  const { hideFooter, error } = this.state;
+  const { hideFooter, error, pricesFromSocketValid, totalHotels } = this.state;
 
-  // format hotels count information
-  const hotelsLoadedCount = `${
-        this.isMinimumResultLoaded && !this.isAllHotelsLoaded
-          ? this.state.pricesFromSocketValid
-          : this.state.totalHotels
-      }`;
 
   // common text
   const fontSize = 13;
@@ -347,15 +331,16 @@ export function renderFooter() {
 
 
   //const isRed = (isSocketRedColor || this.state.isStaticTimeout);
-  const textContent = error
+  const textContent = (error
     ? error
-    : isApplyingFilter && !this.isAllHotelsLoaded
+    : isApplyingFilter
       ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
-      : hotelsLoadedCount == 0
-        ? lang.TEXT.SEARCH_HOTEL_RESULTS_FIRST_FILTER_IN_PROGRESS
-        : this.isAllHotelsLoaded
-          ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", hotelsLoadedCount)
-          : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING.replace("%1", hotelsLoadedCount);
+      : this.isAllHotelsLoaded
+        ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", totalHotels)
+        : pricesFromSocketValid
+          ? lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING_WITH_MATCHES.replace("%1", pricesFromSocketValid)
+          : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING
+  );
 
   simpleText = (
     <Text

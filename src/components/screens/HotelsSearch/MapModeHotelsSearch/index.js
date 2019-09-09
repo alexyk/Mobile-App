@@ -129,7 +129,7 @@ class MapModeHotelsSearch extends Component {
         result = (
           <Text style={styles.ratingsMap}>
             {arr.map((item, index) => (
-              <LTIcon isText key={`star_${index}_${this.itemId}`} name={"starO"} />
+              <LTIcon isText id={`star_${index}_${this.itemId}`} name={"starO"} />
             ))}
           </Text>
         );

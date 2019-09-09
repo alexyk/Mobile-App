@@ -6,7 +6,7 @@
  * 
  * ==== Variant 2 - quicker search results (when 30 prices loaded) ====
  * ==== (using footer in simple mode - one simple text field) ====
- * 1) onServerStaticHotels
+ * 1) onServerStaticHotelsSuccess
  *    This is the initial load of static hotel data (name,description,image)
  *    5 pages are initially loaded
  
@@ -161,7 +161,7 @@ class HotelsSearchScreen extends Component {
     this.updateCoords = this.updateCoords.bind(this);
     this.onBackButtonPress = this.onBackButtonPress.bind(this);
     this.onServerHotelsFromSocket = this.onServerHotelsFromSocket.bind(this);
-    this.onServerStaticHotels = this.onServerStaticHotels.bind(this);
+    this.onServerStaticHotelsSuccess = this.onServerStaticHotelsSuccess.bind(this);
     this.onFilteredData = this.onFilteredData.bind(this);
     this.onFilteredDataError = this.onFilteredDataError.bind(this);
     this.onFetchNewListViewData = this.onFetchNewListViewData.bind(this);
@@ -284,13 +284,7 @@ class HotelsSearchScreen extends Component {
     this.startStaticDataConnectionTimeOut();
 
     const { regionId } = this.state;
-    serverRequest(
-      this,
-      requester.getStaticHotels,
-      [regionId, page, elementsCount],
-      this.onServerStaticHotels,
-      this.onServerStaticHotelsError
-    );
+    serverRequest(this, requester.getStaticHotels, [regionId, page, elementsCount], this.onServerStaticHotelsSuccess, this.onServerStaticHotelsError);
   }
 
   getStaticHotelsData() {
@@ -453,6 +447,7 @@ class HotelsSearchScreen extends Component {
 
   onServerHotelsFromSocket(data) {
     // clog("socket-data", `onServerHotelsFromSocket`, { data });
+    // rlog("socket-data", `onServerHotelsFromSocket`, { data });
 
     if (!this || !this.listViewRef || this.isUnmounted) {
       wlog(
@@ -594,10 +589,7 @@ class HotelsSearchScreen extends Component {
   onServerStartSearch(data) {
     const { search_started: isSearchStarted } = data;
     if (!isSearchStarted) {
-      processError(
-        "[HotelsSearchScreen::onServerStartSearch] Search seems to have not been started",
-        data
-      );
+      processError("[HotelsSearchScreen::onServerStartSearch] Search seems to have not been started", data);
     }
   }
 
@@ -847,6 +839,7 @@ class HotelsSearchScreen extends Component {
         } else {
           if (_this.isFirstFilter) {
             _this.isFirstFilter = false;
+            _this.isAllHotelsLoaded = true;
           }
         }
       }
@@ -862,11 +855,11 @@ class HotelsSearchScreen extends Component {
     );
   }
 
-  onServerStaticHotels(data) {
+  onServerStaticHotelsSuccess(data) {
     const isSkipping = !this || !this.listViewRef || this.isUnmounted;
 
     if (isSkipping) {
-      wlog(`[HotelsSearchScreen::onServerStaticHotels] Is screen unmounted: ${this ? this.isUnmounted : "n/a"}`, {
+      wlog(`[HotelsSearchScreen::onServerStaticHotelsSuccess] Is screen unmounted: ${this ? this.isUnmounted : "n/a"}`, {
         thisNull: this == null,
         listViewRef: this ? this.listViewRef : "n/a",
         isUnMounted: this ? this.isUnmounted : "n/a"
@@ -1018,12 +1011,7 @@ class HotelsSearchScreen extends Component {
       const count = filtered.length;
       //this.props.setSearchFiltered(filtered)
 
-      rlog(
-        "@@filter-fromUI",
-        `Filtered from UI: ${count} / ${hotelsAll.length}`,
-        { filtered, hotelsAll, filterParams },
-        true
-      );
+      // rlog("@@filter-fromUI", `Filtered from UI: ${count} / ${hotelsAll.length}`, { filtered, hotelsAll, filterParams }, true);
       checkHotelData(filtered, "filter-fromUI");
 
       // add no

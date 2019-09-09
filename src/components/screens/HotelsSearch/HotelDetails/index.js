@@ -28,9 +28,6 @@ class HotelDetails extends Component {
   constructor(props) {
     super(props);
 
-    this.onClose = this.onClose.bind(this);
-    this.onFacilityMore = this.onFacilityMore.bind(this);
-
     const { params } = this.props.navigation.state;
     const { searchString } = props;
     const { guests } = props.datesAndGuestsData;
@@ -56,13 +53,27 @@ class HotelDetails extends Component {
       currentIndex: 0
     };
 
+    this._isMounted = false;
+
+    this.onClose = this.onClose.bind(this);
+    this.onFacilityMore = this.onFacilityMore.bind(this);
     this.onBackButtonPress = this.onBackButtonPress.bind(this);
   }
 
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+  
+
   componentDidMount() {
+    this._isMounted = true;
     // Temporary solution - improve loading time by delaying location
     // TODO: Improve suggestion - provide an image (screenshot of map) rather than a map component
-    setTimeout(() => this.setState({ canLoadLocation: true }), 3000);
+    setTimeout(() => {
+      if (this && !this._isMounted) {
+        this.setState({ canLoadLocation: true })
+      }
+    }, 3000);
   }
 
   onBackButtonPress() {
