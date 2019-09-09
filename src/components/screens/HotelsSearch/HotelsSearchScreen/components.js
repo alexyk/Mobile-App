@@ -385,7 +385,7 @@ export function renderFooter() {
 }
 
 export function renderPreloader() {
-  const { displayMode, isLoading, isFilterResult } = this.state;
+  const { displayMode, isLoading, isFilterResult, search } = this.state;
   const { isApplyingFilter } = this.props;
   const isHotelDetails = displayMode == DISPLAY_MODE_HOTEL_DETAILS;
   const isMap = displayMode == DISPLAY_MODE_RESULTS_AS_MAP;
@@ -399,26 +399,19 @@ export function renderPreloader() {
 
   //log('filterUI',`${isFirstFilter ? 'first+' : 'first-'} ${isFilteringFromUI ? 'ui+' : 'ui-'} ${isFilteringFromServer ? 'srv+' : "srv-"} ${isServerFilter ? 'respSrv+' : 'respSrv-'}`)
 
-  const totalText =
-    ""; /*(
-    this.state.totalHotels > 0
-      ? `of maximum ${this.state.totalHotels}`
-      : ''
-  )*/
-  const propertiesText =
-    /* this.state.pricesFromSocketValid > 0
-      ? `\n\n${this.state.pricesFromSocketValid} found ${totalText}`
-      : */ "";
+  // const totalText =(this.state.totalHotels > 0 ? `of maximum ${this.state.totalHotels}` : '')
+  // const propertiesText = this.state.pricesFromSocketValid > 0 ? `\n\n${this.state.pricesFromSocketValid} found ${totalText}` : "";
+
   const message =
     isList || isMap
       ? isFiltering
         ? isFilteringFromUI && !isFirstFilter
           ? ""
           : lang.TEXT.SEARCH_HOTEL_FILTERED_MSG
-        : `Loading matches for your search ...${propertiesText}`
+        : `Loading matches for your search\n\n${search} ...`
       : isHotelDetails
       ? `Loading hotel details ...`
-      : "";
+      : `Loading matches for your search\n\n${search} ...`;
 
   return (
     <LTLoader

@@ -90,7 +90,7 @@ class HotelItemView extends Component {
     for (let i = 0; i < count; i++) {
       indents.push(
         <LTIcon
-          id={`star - ${i}`}
+          key={`star_${i}_${stars}`}
           textStyle={{ color: "#a3c5c0" }}
           name={"star"}
         />
@@ -99,7 +99,7 @@ class HotelItemView extends Component {
     for (let i = count; i < 5; i++) {
       indents.push(
         <LTIcon
-          id={`star - ${i}`}
+          key={`star_${i}_${stars}`}
           textStyle={{ color: "#dddddd" }}
           name={"star"}
         />

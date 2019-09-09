@@ -48,14 +48,14 @@ class SmallPropertyTile extends Component {
       <LTIcon
         name={"starO"}
         textStyle={{ color: "#acc6c1", fontSize: 7 }}
-        id={key}
+        key={key}
       />
     );
     const emptyStar = key => (
       <LTIcon
         name={"starO"}
         textStyle={{ color: "#d8d8d8", fontSize: 7 }}
-        id={key}
+        key={key}
       />
     );
     for (let i = 0; i < averageRating; i++) stars.push(fullStar(i));

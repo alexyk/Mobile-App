@@ -41,7 +41,7 @@ class HomeItemView extends Component {
     for (let i = 0; i < count; i++) {
       indents.push(
         <LTIcon
-          id={`star - ${i}`}
+          key={`star_${i}_${count}`}
           textStyle={{ color: "#a3c5c0" }}
           name={"star"}
         />
@@ -50,7 +50,7 @@ class HomeItemView extends Component {
     for (let i = count; i < 5; i++) {
       indents.push(
         <LTIcon
-          id={`star - ${i}`}
+          key={`star_${i}_${count}`}
           textStyle={{ color: "#dddddd" }}
           name={"star"}
         />

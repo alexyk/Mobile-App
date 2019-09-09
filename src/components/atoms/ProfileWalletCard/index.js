@@ -19,7 +19,7 @@ import { validateLOCAddress } from "../../../utils/validation";
 import { Wallet } from "../../../services/blockchain/wallet";
 import { CurrencyConverter } from "../../../services/utilities/currencyConverter";
 import requester from "../../../initDependencies";
-import { isNumber } from "../../screens/utils";
+import { isNumber } from "js-tools";
 import { isOnline } from "../../../config-debug";
 
 const DEFAULT_CRYPTO_CURRENCY = "EUR";
