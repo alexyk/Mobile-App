@@ -446,12 +446,11 @@ function testFlowExecSafe(type, extraConfig={}) {
                 break;
 
             case 'redux-exec-payload':
-              /*
               let roomsData = [];
               roomsData.push({adults: 2, children: [2,3,8]});
               roomsData.push({adults: 1, children: [0]});
               roomsData.push({adults: 1, children: [8,17]});
-              result.push({roomsData, rooms: 3});*/
+              result.push({roomsData, rooms: 3});
               break;
 
             case 'nav-screen':

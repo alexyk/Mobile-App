@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import { commonText } from "../../../../common.styles";
 
 const styles = StyleSheet.create({
@@ -185,13 +185,11 @@ const styles = StyleSheet.create({
     fontWeight: "200",
     width: 80,
     height: 30,
-    color:'#BBB',
+    color:'#AAA',
     alignSelf: 'center',
     textAlignVertical: 'center',
     textAlign: 'center',
-    // backgroundColor:'#fafafa',
-    // borderColor: 'grey',
-    // borderWidth: 1
+    paddingTop: (Platform.OS == "ios" ? 5 : 0)
   }
 });
 

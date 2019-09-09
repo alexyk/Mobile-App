@@ -22,12 +22,15 @@ export default class GuestFormRow extends Component {
       { value: "Mr", label: "Mr" },
       { value: "Mrs", label: "Mrs" }
     ]
-    this._ready = false;
-    this._editStatus = {0: false, 1: false};
+    this._isReady = false;
 
     this._focusNext = this._focusNext.bind(this);
     this._onGenderChange = this._onGenderChange.bind(this);
     this._onChangeText = this._onChangeText.bind(this);
+  }
+
+  componentDidMount() {
+    setTimeout( () => this._isReady = true, 500);
   }
 
   _onGenderChange(value) {
@@ -41,15 +44,7 @@ export default class GuestFormRow extends Component {
    * @param {Number} index index=0 -> first name, index=1 -> last name
    */
   _onChangeText(text, index) {
-    const { _ready, _editStatus } = this;
     const { guestIndex } = this.props;
-
-    if (!_ready) {
-      _editStatus[index] = (hasTwoLetters(text));
-      if (_editStatus[0] && _editStatus[1]) {
-        this._ready = true;
-      }
-    }
 
     switch (index) {
       case 0:
@@ -81,15 +76,10 @@ export default class GuestFormRow extends Component {
   }
 
   _focusNext(event, id, index) {
-    const { _ready, _editStatus } = this;
     const { textRefs } = this.props;
     const { text } = event.nativeEvent
-    const isReady = (
-      (index == 0 && _editStatus[0])
-      || (index == 1 && _ready)
-    );
 
-    if (isReady && hasTwoLetters(text)) {
+    if (this._isReady && hasTwoLetters(text)) {
       const { [id+1]: txt } = textRefs || {};
       
       if (txt) {
