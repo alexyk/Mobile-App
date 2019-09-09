@@ -1,4 +1,4 @@
-import { validatePhone, validateLOCAddress } from '../src/utils/validation'
+import { validatePhone, validateLOCAddress, validateName } from '../src/utils/validation'
 
 
 describe('validation functions', () => {
@@ -40,6 +40,20 @@ describe('validation functions', () => {
     expect( validateLOCAddress({}) )                          .toEqual(-1);
     expect( validateLOCAddress(-1) )                          .toEqual(0);
     expect( validateLOCAddress('-1') )                        .toEqual(0);
+  })
+
+  it('validateName', () => {
+    expect( validateName('nm') )                        .toBeTruthy();
+    expect( validateName('Nh') )                        .toBeTruthy();
+    expect( validateName('Name') )                      .toBeTruthy();
+    expect( validateName('NAme') )                      .toBeTruthy();
+    expect( validateName('NAME') )                      .toBeTruthy();
+
+    expect( validateName('N') )                         .toBeFalsy();
+    expect( validateName('t') )                         .toBeFalsy();
+    expect( validateName('t.') )                        .toBeFalsy();
+    expect( validateName('t,') )                        .toBeFalsy();
+    expect( validateName('') )                          .toBeFalsy();
   })
 
 });

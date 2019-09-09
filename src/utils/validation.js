@@ -1,7 +1,6 @@
 import { isString, isNumber } from "js-tools";
 
 var valid = require("card-validator");
-export const validateName = name => !!name;
 
 export const validateEmail = email => {
   const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/; // eslint-disable-line
@@ -30,9 +29,13 @@ export const hasLetter = password => {
   return re.test(password);
 };
 
-export const hasTwoLetters = password => {
-  const re = /^(?=.*?[A-Z a-z]{2,})/; // eslint-disable-line
-  return re.test(password);
+export const validateName = value => {
+  if (!value) {
+    return false;
+  }
+  
+  const re = /^([A-Za-z]{2,})$/; // eslint-disable-line
+  return re.test(value);
 };
 
 export const hasSymbol = password => {
