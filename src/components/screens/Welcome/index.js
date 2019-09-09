@@ -277,11 +277,11 @@ class Welcome extends Component {
           text="Log In"
           wrapStyle={styles.logInButton}
         />
-        <Button
+        {/* <Button
           wrapStyle={styles.facebookButton}
           text="Continue with Facebook"
           onPress={this.gotoFB}
-        />
+        /> */}
         <Button
           wrapStyle={styles.createAccountButton}
           onPress={this.gotoSignup}
