@@ -4,7 +4,7 @@ import { Text, TextInput, View } from "react-native";
 import PropTypes from "prop-types";
 import styles from "./styles";
 import LTPicker from "../../../molecules/LTPicker";
-import { hasTwoLetters } from "../../../../utils/validation";
+import { validateName } from "../../../../utils/validation";
 
 
 export default class GuestFormRow extends Component {
@@ -79,7 +79,7 @@ export default class GuestFormRow extends Component {
     const { textRefs } = this.props;
     const { text } = event.nativeEvent
 
-    if (this._isReady && hasTwoLetters(text)) {
+    if (this._isReady && validateName(text)) {
       const { [id+1]: txt } = textRefs || {};
       
       if (txt) {
@@ -91,9 +91,11 @@ export default class GuestFormRow extends Component {
   }
 
   _renderFirstName(roomIndex, guestIndex, id) {
-    const { textRefs, guest } = this.props;
+    const { textRefs, guest, validationState } = this.props;
     const { firstName } = guest;
     const { _firstId } = this;
+    const isValid = (validationState == null || !validationState.hasOwnProperty('first') )
+    const validStyle = (isValid ? null : {backgroundColor: '#f004'});
 
     return (
       <View key={`first_${roomIndex}_${guestIndex}_${id}`} style={styles.firstNameFlex}>
@@ -101,7 +103,7 @@ export default class GuestFormRow extends Component {
           ref={ref => textRefs[_firstId] = ref}
           onSubmitEditing={event => this._focusNext(event, _firstId, 0)}
           blurOnSubmit={false}
-          style={styles.formField}
+          style={[styles.formField, validStyle]}
           onChangeText={(value) => this._onChangeText(value, 0)}
           placeholder="First Name"
           underlineColorAndroid="#fff"
@@ -112,9 +114,11 @@ export default class GuestFormRow extends Component {
   }
 
   _renderLastName(roomIndex, guestIndex, id) {
-    const { textRefs, guest } = this.props;
+    const { textRefs, guest, validationState } = this.props;
     const { lastName } = guest;
     const { _lastId } = this;
+    const isValid = (validationState == null || !validationState.hasOwnProperty('last') )
+    const validStyle = (isValid ? null : {backgroundColor: '#f004'});
 
     return (
       <View key={`last_${roomIndex}_${guestIndex}_${id}`} style={styles.lastNameFlex}>
@@ -122,7 +126,7 @@ export default class GuestFormRow extends Component {
           ref={ref => textRefs[_lastId] = ref}
           onSubmitEditing={event => this._focusNext(event, _lastId, 1)}
           blurOnSubmit={false}
-          style={styles.formField}
+          style={[styles.formField, validStyle]}
           onChangeText={(value) => this._onChangeText(value, 1)}
           placeholder="Last Name"
           underlineColorAndroid="#fff"

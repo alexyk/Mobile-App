@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import moment from "moment";
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { hasTwoLetters } from "../../../../utils/validation";
+import { validateName } from "../../../../utils/validation";
 import { CurrencyConverter } from "../../../../services/utilities/currencyConverter";
 import { RoomsXMLCurrency } from "../../../../services/utilities/roomsXMLCurrency";
 import { setLocRateFiatAmount } from "../../../../redux/action/exchangeRates";
@@ -32,7 +32,10 @@ import lang from "../../../../language";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
 import RoomTitle from "./RoomTitle";
 import { parseGuestInfoToServerFormat } from "../utils";
+import { commonText } from "../../../../common.styles"
 
+
+const CACHE_REFRESH_TIMEOUT = 0.7; // in seconds
 
 class GuestInfoForm extends Component {
   constructor(props) {
@@ -60,14 +63,15 @@ class GuestInfoForm extends Component {
       bookingId: null,
       reservationRequestData: null,
       reservationRequestData: null,
-      reservationData: null
+      reservationData: null,
+      invalidGuestNames: []
     };
 
     this._bookingParams = null;
     this._guestsCollection = [];
     this._editingTimeout;
 
-    this._textRefs = {id: 0};
+    this._textRefs = {};
 
     this._updateStateAndCache = this._updateStateAndCache.bind(this);
     this._serviceRequestSCMode = this._serviceRequestSCMode.bind(this);
@@ -88,7 +92,6 @@ class GuestInfoForm extends Component {
 
   componentDidMount() {
     WebsocketClient.stopGrouping();
-    this.setState({ready: true});
   }
 
   componentWillUnmount() {
@@ -164,6 +167,7 @@ class GuestInfoForm extends Component {
 
   _updateStateAndCache() {
     const _this = this;
+    const { invalidGuestNames } = this.state;
 
     this.setState({guests: cloneDeep(this._guestsCollection)});
 
@@ -172,10 +176,13 @@ class GuestInfoForm extends Component {
     }
 
     this._editingTimeout = setTimeout(() => {
+      if (invalidGuestNames && invalidGuestNames.length > 0) {
+        _this._validateAllNames(true);
+      }
       _this.props.setGuestData(cloneDeep(_this._guestsCollection));
       clearTimeout(_this._editingTimeout);
       _this._editingTimeout = null;
-    }, 4000);
+    }, CACHE_REFRESH_TIMEOUT*1000);
   }
   
   _serviceRequestSCMode() {
@@ -203,16 +210,12 @@ class GuestInfoForm extends Component {
 
     if (errors && errors.hasOwnProperty("RoomsXmlResponse")) {
       if (errors["RoomsXmlResponse"].message.indexOf("QuoteNotAvailable:") !== -1) {
-        this.refs.toast.show(errors.RoomsXmlResponse.message, 5000, () => {
-          this.props.navigation.pop(3);
-        });
+        this.refs.toast.show(errors.RoomsXmlResponse.message, 5000);
       }
     } else if (errors != null) {
       for (let key in errors) {
         if (typeof errors[key] !== "function") {
-          this.refs.toast.show(errors[key].message, 5000, () => {
-            this.props.navigation.pop(3);
-          });
+          this.refs.toast.show(errors[key].message, 5000);
         }
       }
     }
@@ -306,6 +309,59 @@ class GuestInfoForm extends Component {
     gotoWebview(state, this.props.navigation, extra);
   }
 
+  _focusFirstInvalidField(firstInvalid, validationState, guestIndex) {
+    if (this._needToFocusInvalidAfterProceed && validationState && Object.keys(validationState).length > 0) {
+      firstInvalid = guestIndex;
+      let isFirstName = (validationState.first != null);
+      setTimeout(() => {
+        this._textRefs[isFirstName ? guestIndex*2 : guestIndex*2 + 1].focus()
+      }, 300)
+
+      this._needToFocusInvalidAfterProceed = false;
+    }
+
+    return firstInvalid;
+  }
+
+  _validateAllNames(isAutoCheck=false) {
+    let result = true;
+    const { _textRefs } = this;
+
+    if (_textRefs) {
+      let invalidGuestNames = [];
+
+      for (let prop in _textRefs) {
+        if (_textRefs[prop] == null) {
+          continue;
+        }
+
+        let index = parseInt(prop);
+        const { _lastNativeText: text } = _textRefs[prop];
+        let isFirst = ( (index + 1) % 2 );
+        if (!validateName(text)) {
+          let no = Math.floor( index / 2 );
+          if (invalidGuestNames[no] == null) {
+            invalidGuestNames[no] = {};
+          }
+          if (isFirst) {
+            invalidGuestNames[no].first = text;
+          } else {
+            invalidGuestNames[no].last = text;
+          }
+        }
+      }
+
+      if (!isAutoCheck && invalidGuestNames.length > 0) {
+        result = false;
+        this.refs.toast.show(`Each name should contain only letters and be two characters or more long.`, 5000);
+      }
+
+      this.setState({invalidGuestNames});
+    }
+
+    return result;
+  }
+
   _onReservationReady() {
     const { currency } = this.props;
     const { quoteId } = this.props.navigation.state.params.roomDetail;
@@ -330,50 +386,30 @@ class GuestInfoForm extends Component {
     let item = this._guestsCollection[roomIndex];
     item = item[key]
     item.firstName = text;
-    this._updateStateAndCache();
+    this._updateStateAndCache('first-name-changed', roomIndex, key, text);
   }
   
   _onLastNameChange(roomIndex, key, text) {
     let item = this._guestsCollection[roomIndex];
     item = item[key]
     item.lastName = text;
-    this._updateStateAndCache();
+    this._updateStateAndCache('last-name-changed', roomIndex, key, text);
   }
 
   _onProceedPress() {
     if (this.state.isLoading) {
       return;
     }
-    let isValid = true;
+    if (!this._validateAllNames()) {
+      this._needToFocusInvalidAfterProceed = true;
+      return;
+    }
+
     this.setState({ isLoading: true });
 
-    for (let room of this._guestsCollection) {
-      for (let guest of room) {
-        if (!hasTwoLetters(guest["firstName"]) || !hasTwoLetters(guest["lastName"])) {
-          isValid = false;
-          break;
-        }
-      }
-      if (!isValid) {
-        break;
-      }
-    }
-
-    let message;
-    if (this._guestsCollection.length != this.state.guests.length) {
-      message = "Please enter details for all the guests";
-    } else if (!isValid) {
-      message = "Please enter details for all guests. Each name should contain only letters and be two characters or more long.";
-    }
-
-    if (message != null) {
-      this.refs.toast.show(message, 6000);
-      this.setState({proceedButtonLabel: 'Proceed', isLoading: false});
-    } else {
-      const { quoteId } = this.props.navigation.state.params.roomDetail;
-      const { currency } = this.props;
-      this.serviceCreateReservation(quoteId, currency, cloneDeep(this._guestsCollection));
-    }
+    const { quoteId } = this.props.navigation.state.params.roomDetail;
+    const { currency } = this.props;
+    this.serviceCreateReservation(quoteId, currency, cloneDeep(this._guestsCollection));
   };
 
   _onBackPress() {
@@ -457,12 +493,14 @@ class GuestInfoForm extends Component {
 
   _renderGuests() {
     const { rooms } = this.props.datesAndGuestsData;
-    const { guests, ready } = this.state;
+    const { guests, invalidGuestNames } = this.state;
 
     const _this = this;
     let id = 0;
 
     let guestsRendered = [];
+    let firstInvalid = null;
+    let guestIndex = 0;
 
     if (guests) {
       guests.forEach(
@@ -473,14 +511,18 @@ class GuestInfoForm extends Component {
           }
           // guests in room
           room.forEach((item, index) => {
+            const validationState = invalidGuestNames[guestIndex];
+            if (firstInvalid == null) {
+              firstInvalid = this._focusFirstInvalidField(firstInvalid, validationState, guestIndex);
+            }
 
             guestsRendered.push(
               <GuestFormRow
                 id={id}
                 key={`${index}_${item.roomIndex}`}
                 textRefs={this._textRefs}
-                ready={ready}
                 guest={item}
+                validationState={validationState}
                 guestIndex={index}
                 roomIndex={roomIndex}
                 onGuestTitleUpdate={_this._onGuestTitleUpdate}
@@ -489,13 +531,13 @@ class GuestInfoForm extends Component {
               />
             );
 
+            guestIndex++;
+
             id += 2;
           })
         }
       )
     }
-
-    this._textRefs.ready = true;
 
     return (
       <View>
@@ -514,12 +556,11 @@ class GuestInfoForm extends Component {
         <Toast
           ref="toast"
           style={{ backgroundColor: "#DA7B61" }}
-          position="bottom"
-          positionValue={150}
+          position={'center'}
           fadeInDuration={500}
           fadeOutDuration={500}
           opacity={1.0}
-          textStyle={{ color: "white", fontFamily: "FuturaStd-Light" }}
+          textStyle={{ color: "white", ...commonText }}
         />
         <TopBar onBackPress={this._onBackPress} />
         <Separator height={10} />
