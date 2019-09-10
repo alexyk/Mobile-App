@@ -240,18 +240,14 @@ class GuestInfoForm extends Component {
       success => {
         const currentBooking = booking.hotelBooking[0]
         const { createdDate } = booking;
-        if (success.is_successful_quoted && (currentBooking != null || createdDate != null)) {
-          let { creationDate, arrivalDate } = currentBooking || {};
+        let { arrivalDate } = currentBooking || {};
+
+        if (success.is_successful_quoted && (currentBooking != null || arrivalDate != null)) {
           const bookingId = preparedBookingId;
           let startDate, endDate;
-          if (creationDate) {
-            endDate = moment(arrivalDate, "YYYY-MM-DD");
-            startDate = moment(creationDate, "YYYY-MM-DD");
-          } else {
-            let { checkInMoment, checkOutMoment } = this.props.datesAndGuestsData;
-            startDate = (createdDate == null ? checkInMoment.clone() : moment(createdDate));
-            endDate = checkOutMoment.clone();
-          }
+          let { checkInMoment, checkOutMoment } = this.props.datesAndGuestsData;
+          startDate = (createdDate == null ? checkInMoment.clone() : moment(createdDate));
+          endDate = checkOutMoment.clone();
 
           this.setState({
               bookingId, 
