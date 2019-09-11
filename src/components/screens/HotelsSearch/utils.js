@@ -47,16 +47,7 @@ export function generateListItemKey(prop, prefix = "", doReset = false) {
 }
 
 export function createHotelSearchInitialState(params, reduxCache) {
-  const {
-    roomsDummyData,
-    guests,
-    adults,
-    children,
-    checkInDate,
-    checkOutDate,
-    checkInDateFormated,
-    checkOutDateFormated
-  } = reduxCache;
+  const { roomsDummyData, guests, adults, children, checkInDate, checkOutDate, checkInDateFormated, checkOutDateFormated } = reduxCache;
 
   let initialState = {
     isHotel: true,
@@ -127,6 +118,8 @@ export function createHotelSearchInitialState(params, reduxCache) {
 
     initialState.roomsDummyData = params.roomsDummyData;
     initialState.daysDifference = params.daysDifference;
+
+    initialState.oneHotelId = params.oneHotelId;
   }
 
   return initialState;
@@ -165,14 +158,20 @@ export function hasValidCoordinatesForMap(data, isInitial = false) {
   return result;
 }
 
-export function applyHotelsSearchFilter(data, filter) {
+/**
+ * 
+ * @param {Array} data Hotels array
+ * @param {Object} filter An object with filters collection
+ * @param {Number} oneHotelId If not null - the search is for a specific hotel with this id
+ */
+export function applyHotelsSearchFilter(data, filter, oneHotelId) {
   console.time("*** utils::applyHotelsSearchFilter()");
 
-  const doFilter = function(data, type, value, showUnAvailable) {
+  const doFilter = function(hotels, type, value, showUnAvailable) {
     const tmp = isString(value) ? value.split(",") : [value];
     const value1 = tmp[0];
     const value2 = tmp.length == 2 ? tmp[1] : null;
-    let result = data;
+    let result = hotels;
 
     switch (type) {
       case "orderBy":
@@ -191,7 +190,7 @@ export function applyHotelsSearchFilter(data, filter) {
         const nameFilter = value1.toLowerCase();
         if (nameFilter) {
           //log('doFilter-name',`items: ${data?data.length:'n/a'}`,{data})
-          result = data.filter(item => {
+          result = hotels.filter(item => {
             if (item && item.name && item) {
               result = item.name.toLowerCase().indexOf(nameFilter) > -1;
             } else {
@@ -205,7 +204,7 @@ export function applyHotelsSearchFilter(data, filter) {
       case "priceRange":
         const v1 = parseFloat(value[0]);
         const v2 = parseFloat(value[1]);
-        result = data.filter(
+        result = hotels.filter(
           item =>
             (v1 <= item.price && item.price <= v2) ||
             (item.price == null && showUnAvailable)
@@ -219,7 +218,7 @@ export function applyHotelsSearchFilter(data, filter) {
           (item, index) => (hasStarToFilter = item ? true : hasStarToFilter)
         );
         if (hasStarToFilter) {
-          result = data.filter(item => value[item.stars - 1]);
+          result = hotels.filter(item => value[item.stars - 1]);
         }
         break;
 
@@ -234,6 +233,24 @@ export function applyHotelsSearchFilter(data, filter) {
   };
 
   let filtered = data.concat(); // make a shallow copy
+
+  // buffer selected hotel - if present
+  let selectedHotel;
+  if (oneHotelId != null) {
+    for (let i=0; i<filtered.length; i++) {
+      let item = filtered[i];
+      const { id } = item;
+      if (id == oneHotelId) {
+        // move the hotel to first position
+        filtered.splice(i, 1);
+        item.isSelected = true;
+        selectedHotel = item;
+        break;
+      }
+    }
+  }
+
+
   for (let prop in filter) {
     if (prop == "showUnAvailable") {
       // priceRange used for this one
@@ -243,7 +260,12 @@ export function applyHotelsSearchFilter(data, filter) {
     filtered = doFilter(filtered, prop, value, filter.showUnAvailable);
   }
 
-  //log('utils',`applyHotelsSearchFilter(): ${filtered.length} / ${data.length}`, {filter,data,result:filtered},true)
+  // use selected hotel buffer - if present
+  if (oneHotelId != null) {
+    if (selectedHotel) {
+      filtered.unshift(selectedHotel);
+    }
+  }
 
   console.timeEnd("*** utils::applyHotelsSearchFilter()");
   return filtered;

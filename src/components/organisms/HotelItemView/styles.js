@@ -1,9 +1,9 @@
-import { StyleSheet, Dimensions, Platform } from "react-native";
+import { StyleSheet, Platform } from "react-native";
 import { commonText } from "../../../common.styles";
+import { SCREEN_SIZE } from "../../../utils/designUtils";
 
-const dimensions = Dimensions.get("window");
-const imageHeight = Math.round(dimensions.width * 0.25);
-const imageWidth = Math.round(dimensions.width * 0.32);
+const imageWidth = Math.round(SCREEN_SIZE.W * 0.32);
+export const imageHeight = Math.round(SCREEN_SIZE.W * 0.25);
 
 const styles = StyleSheet.create({
   card: {

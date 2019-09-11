@@ -16,9 +16,10 @@ import { RoomsXMLCurrency } from "../../../services/utilities/roomsXMLCurrency";
 import { CurrencyConverter } from "../../../services/utilities/currencyConverter";
 import LocPrice from "../../atoms/LocPrice";
 
-import styles from "./styles";
+import styles, { imageHeight } from "./styles";
 import lang from "../../../language";
 import LTIcon from "../../atoms/LTIcon";
+import { SCREEN_SIZE } from "../../../utils/designUtils";
 
 class HotelItemView extends Component {
   static propTypes = {
@@ -225,6 +226,22 @@ class HotelItemView extends Component {
     }
   }
 
+  renderSelectionStyling(selectedStyle) {
+    const mainStyle = {
+      position: "absolute",
+      borderRadius: 5,
+      height: imageHeight,
+      width: SCREEN_SIZE.W - 30,
+      marginTop: 7.5,
+      marginLeft: 15,
+      marginBottom: 7.5,
+      paddingRight: 10
+    }
+    return (
+      <View style={[mainStyle, selectedStyle]} />
+    )
+  }
+
   render() {
     const item = this.props.item;
 
@@ -252,10 +269,11 @@ class HotelItemView extends Component {
     }
     urlThumbnail = imgHost + urlThumbnail;
 
-    let { name, stars } = item;
+    const { name, stars, isSelected } = item;
+    const selectedStyle = (isSelected ? {borderColor: "#D87A61AA", borderWidth: 3} : null);
 
     return (
-      <TouchableOpacity onPress={this.onPress}>
+      <TouchableOpacity onPress={this.onPress} >
         <CardView
           style={styles.card}
           cardElevation={0.5}
@@ -286,7 +304,9 @@ class HotelItemView extends Component {
             {this.renderPrice()}
             {this.renderIndex(showNumberOnHotelItem)}
           </View>
+
         </CardView>
+        {this.renderSelectionStyling(selectedStyle)}
       </TouchableOpacity>
     );
   }

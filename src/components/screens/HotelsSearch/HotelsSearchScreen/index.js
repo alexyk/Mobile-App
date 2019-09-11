@@ -113,10 +113,7 @@ class HotelsSearchScreen extends Component {
     console.disableYellowBox = true;
 
     const { params } = this.props.navigation.state; //eslint-disable-line
-    this.state = createHotelSearchInitialState(
-      params,
-      props.datesAndGuestsData
-    );
+    this.state = createHotelSearchInitialState(params, props.datesAndGuestsData);
 
     this.pageLimit = this.PAGE_LIMIT;
     this.pagesLoaded = 0;
@@ -1008,14 +1005,14 @@ class HotelsSearchScreen extends Component {
       filterParams.priceRange = data.priceRange;
 
       const hotelsAll = this.hotelsAll;
-      const filtered = applyHotelsSearchFilter(hotelsAll, filterParams);
+      const filtered = applyHotelsSearchFilter(hotelsAll, filterParams, this.state.oneHotelId);
       const count = filtered.length;
       //this.props.setSearchFiltered(filtered)
 
       // rlog("@@filter-fromUI", `Filtered from UI: ${count} / ${hotelsAll.length}`, { filtered, hotelsAll, filterParams }, true);
       checkHotelData(filtered, "filter-fromUI");
 
-      // add no
+      // add number if option is on
       this.hotelsIndicesByIdMap = {};
       if (showNumberOnHotelItem) {
         filtered.forEach((item, index) => {

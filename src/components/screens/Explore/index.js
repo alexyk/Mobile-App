@@ -22,8 +22,9 @@ import { formatDatesData } from "../Calendar/utils";
 import { hotelSearchIsNative } from "../../../config-settings";
 import { setLoginDetails } from "../../../redux/action/userInterface";
 import { getSafeTopOffset } from "../../../utils/designUtils";
-import { serverRequest, SERVER_ERROR } from "../../../services/utilities/serverUtils";
+import { serverRequest } from "../../../services/utilities/serverUtils";
 import { setGuestData } from "../../../redux/action/hotels";
+import { isString } from "js-tools";
 
 
 const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
@@ -317,6 +318,7 @@ class Explore extends Component {
           isHotel,
           search,
           regionId,
+          oneHotelId,
           roomsDummyData,
           daysDifference,
           adults,
@@ -339,7 +341,7 @@ class Explore extends Component {
           this.props.navigation.navigate("HotelsSearchScreen", {
             isHotel: isHotel,
             searchedCity: search,
-            regionId: regionId,
+            regionId, oneHotelId,
             checkInDate: checkInDate,
             checkOutDate: checkOutDate,
             guests: guests,
@@ -391,9 +393,21 @@ class Explore extends Component {
     setTimeout(delayedFunction, 100);
   }
 
+  /**
+   * @param {String|Number} id Region id
+   * @param {String} name Search name - for example "London, United Kingdom"
+   * @param {Function} callback If set - the callback executes after setting the state with parameter values
+   */
   handleAutocompleteSelect(id, name, callback = null) {
+    let oneHotelId = null;
+    if (isString(id) && id.includes('_')) {
+      let asArray = id.split('_');
+      id = parseInt(asArray[0]);
+      oneHotelId = parseInt(asArray[1]);
+    }
     this.setState(
       {
+        oneHotelId,
         cities: [],
         search: name,
         regionId: id
