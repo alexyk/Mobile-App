@@ -158,7 +158,11 @@ export function renderResultsAsList() {
       ref={ref => (this.listViewRef = ref)}
       key={"hotelsList"} // this is important to distinguish different FlatList, default is numColumns
       onFetch={this.onFetchNewListViewData}
-      keyExtractor={(item, index) => `${index} - ${item}`}
+      keyExtractor={(item, index) => {
+        const { name, price ,id } = item;
+        let res = `${index}_${id}_${name}_${price}`;
+        return res;
+      }}
       refreshable={false}
       numColumns={1} // to use grid layout, simply set gridColumn > 1
       item={this.renderListItem} // this takes three params (item, index, separator)
@@ -336,7 +340,7 @@ export function renderFooter() {
     : isApplyingFilter
       ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
       : this.isAllHotelsLoaded
-        ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", totalHotels)
+        ? (totalHotels == 1 ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED_ONE : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", totalHotels))
         : pricesFromSocketValid
           ? lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING_WITH_MATCHES.replace("%1", pricesFromSocketValid)
           : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING

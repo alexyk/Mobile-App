@@ -624,10 +624,7 @@ class HotelsSearchScreen extends Component {
         // then with UI filtering remove unavailable
         this.filtersCallback = () => {
           if (this && this.listViewRef) {
-            this.updateFilter(
-              generateFilterInitialData(false, this.state),
-              true
-            );
+            this.updateFilter(generateFilterInitialData(false, this.state), true);
             const priceRange = [this.priceMin, this.priceMax];
             this.setState({ priceRange, priceRangeSelected: priceRange });
           } else {
@@ -1022,13 +1019,14 @@ class HotelsSearchScreen extends Component {
         });
       }
 
-      this.listSetPageLimit(this.state.totalHotels, this.PAGE_LIMIT);
-      this.listUpdateDataSource(filtered);
+      this.listSetPageLimit(count, this.PAGE_LIMIT);
       this.setState({
         hotelsInfo: filtered,
         hotelsInfoForMap: filtered,
         priceRangeSelected: data.priceRange,
         totalHotels: count
+      }, () => {
+        this.listUpdateDataSource(filtered)
       });
 
       this.props.setIsApplyingFilter(false);
