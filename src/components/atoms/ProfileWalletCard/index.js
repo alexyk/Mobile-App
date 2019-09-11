@@ -528,10 +528,12 @@ class ProfileWalletCard extends Component {
       skipLOCAddressRequest,
       walletState
     } = this.props.walletData;
+    const { locAddress } = this.props.loginDetails
 
     const isReady = walletState == WALLET_STATE.READY;
     const isLoading = walletState == WALLET_STATE.LOADING;
     const isEmpty =
+      (walletState == WALLET_STATE.CHECKING && locAddress == null) ||
       walletState == WALLET_STATE.NONE ||
       walletState == WALLET_STATE.CONNECTION_ERROR ||
       walletState == WALLET_STATE.INVALID;
