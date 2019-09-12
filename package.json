@@ -31,10 +31,6 @@
     "lint": "./node_modules/.bin/eslint .",
     "test-debug": "node --inspect node_modules/.bin/jest --watch --runInBand"
   },
-  "jest": {
-    "preset": "react-native",
-    "testEnvironment": "node"
-  },
   "dependencies": {
     "@ptomasroos/react-native-multi-slider": "1.0.0",
     "apisauce": "1.0.3",

@@ -44,7 +44,11 @@ const TEXT = {
   SEARCH_HOTEL_ITEM_PRICE_LOADING: "",
   BOOKING_STEPS: ["Guest Info", "Confirm and Pay"],
   NO_ROOMS: "No rooms available. Please try a different search.",
-  ROOM_NA: "The room was not available for booking. Please try again later or select another room."
+  ROOM_NA: "The room was not available for booking. Please try again later or select another room.",
+  VERIFICATION_EMAIL_MESSAGE: "It seems that your email has not yet been verified. You need to verify your email before you can proceed with your booking.",
+  NETWORK_ERROR: "There was an error while connecting to the server. Please check your Internet connection and try again later.",
+  "VERIFICATION_EMAIL_SUCCESS": 'Verification e-mail sent successfully',
+  "VERIFICATION_EMAIL_ERROR": 'There was an error when sending verification e-mail'
 };
 
 export default {

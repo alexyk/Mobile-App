@@ -12,7 +12,7 @@ import {
 } from "react-navigation-redux-helpers";
 import { BackHandler, View } from "react-native";
 
-import ExitConfirmDialog from "../components/molecules/ExitConfirmDialog";
+import MessageDialog from "../components/molecules/MessageDialog";
 
 import AppLoading from "../components/app/AppLoading";
 
@@ -180,7 +180,7 @@ class ReduxNavigation extends PureComponent {
     return true;
   };
 
-  onConfirmOk = () => {
+  onOk = () => {
     //console.log("onConfirmOk ---");
     this.setState({ visibleConfirmDialog: false }, () => {
       //console.log("onConfirmOk ---123123123");
@@ -190,7 +190,7 @@ class ReduxNavigation extends PureComponent {
     });
   };
 
-  onConfirmCancel = () => {
+  onCancel = () => {
     this.setState({ visibleConfirmDialog: false });
   };
 
@@ -206,11 +206,15 @@ class ReduxNavigation extends PureComponent {
           dispatch={dispatch}
           state={state}
         />
-        <ExitConfirmDialog
+        <MessageDialog
           title={"Confirm"}
-          visible={visibleConfirmDialog}
-          onCancel={this.onConfirmCancel}
-          onOk={this.onConfirmOk}
+          message="Are you sure you want to exit?"
+          isVisible={visibleConfirmDialog}
+          commonButtonContainerStyle={{}}
+          commonButtonStyle={{color: "black", fontSize: 17}}
+          buttonsContainerStyle={{}}
+          onOk={this.onOk}
+          onCancel={this.onCancel}
         />
       </View>
     );

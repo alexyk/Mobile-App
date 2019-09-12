@@ -4,8 +4,6 @@ import { clog } from "../../../utils/debug/debug-tools";
 export const walletBoxHeight = 190;
 export const loaderPreloaderBottom = "20%";
 
-clog(`$$$ [preloader] loaderPreloaderBottom = ${loaderPreloaderBottom}`);
-
 const styles = StyleSheet.create({
   cardBox: {
     backgroundColor: "#da7b60",

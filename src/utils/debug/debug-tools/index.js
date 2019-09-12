@@ -1,14 +1,10 @@
 import { isObject, isString, getObjectClassName, isSymbol } from "js-tools";
 import lodash from 'lodash';
 import moment, { isMoment } from 'moment';
-import navigationService from '../../../services/navigationService';
-import { serverRequest } from '../../../services/utilities/serverUtils';
-import requester from "../../../initDependencies";
 import { __MYDEV__, __TEST__,
   consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs,
-  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters, testFlowURL
+  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters, testFlowURL, consoleClearAtStart, filtersConfig
 } from '../../../config-debug';
-import reduxStore from "../../../redux/store";
 
 
 // ---------------  function definitions  -----------------
@@ -22,19 +18,6 @@ function addTime(all) {
     all.unshift(timeStr);
   }
 }
-export var dlog = dlogFunc;
-export function clog(...all) {addTime(all); console.log(...all)};
-export function ilog(...all) {addTime(all); console.info(...all)}
-export function wlog(...all) {addTime(all); console.warn(...all)}
-export function elog(...all) {addTime(all); console.error(...all)}
-export var tslog = (consoleTimeCalculations ? console.time : emptyFunc);
-export var telog = (consoleTimeCalculations ? console.timeEnd : emptyFunc);
-
-
-/**
- * Print moment object in a formated way
- */
-export var mlog = mlogFunc; // moment logging
 
 function configureConsole() {
   // if testing with jest - return
@@ -43,6 +26,10 @@ function configureConsole() {
   }
 
 
+  if (__DEV__ && consoleClearAtStart) {
+    console.clear();
+    console.log(' ------  Clearing at start -----   (consoleClearAtStart)');
+  }
 
   if (!__DEV__ && !__MYDEV__) {
     clog = emptyFunc;
@@ -58,6 +45,39 @@ function configureConsole() {
     wlog = emptyFuncWithDescr("wlog");
     elog = emptyFuncWithDescr("elog");
     mlog = emptyFuncWithDescr("mlog");
+  } else if (__DEV__ && consoleFilters && consoleFilters.length > 0) {
+    const origLog = console.log;
+    const origWarn = console.warn;
+    const origInfo = console.info;
+
+    const funcLog = (type) => (...args) => {
+      let isFiltered = applyConsoleFilters(args, consoleFilters);
+
+      if (isFiltered) {
+        switch (type) {
+          case 'warn':
+          case 'wlog':
+            origWarn(...args);
+            break;
+
+          case 'info':
+          case 'wlog':
+            origInfo(...args);
+            break;
+        
+          default:
+            origLog(...args);
+            break;
+        }
+      }
+    }
+    console.log = funcLog('log');
+    console.info = funcLog('info');
+    console.error = funcLog('error');
+    console.warn = funcLog('warn');
+    ilog = funcLog('ilog');
+    clog = funcLog('clog');
+    wlog = funcLog('wlog');
   }
 
   // in both release & debug/dev
@@ -110,48 +130,106 @@ function configureConsole() {
     console.group = (console.log ? console.log : emptyFunc);
     console.groupEnd = (console.log ? console.log : emptyFunc);
     console.groupCollapsed = (console.log ? console.log : emptyFunc);
-    if (console.warn) console.warn('[debug-tools] console.time is not available - disabling console.time(End) and console.group(End|Collapsed) families of calls');
+    wlog('[debug-tools] console.time is not available - disabling console.time(End) and console.group(End|Collapsed) families of calls');
   } else if (!consoleTimeCalculations || !__MYDEV__) {
     console.time = emptyFunc;
     console.timeEnd = emptyFunc;
     tslog = emptyFunc;
     telog = emptyFunc;
-    if (__MYDEV__ !== undefined && console.warn != null) console.warn(`[debug-tools] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
+    if (__MYDEV__ !== undefined && console.warn != null) {
+      console.warn(`[debug-tools] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
+    }
   }
+}
 
-  if (consoleFilters && consoleFilters.length > 0) {
-    const origLog = console.log;
-    const funcLog = (type) => (...args) => {
-      let isFiltered = false;
-      
-      for (let filter of consoleFilters) {
-        for (let arg of args) {
-          if (typeof(arg) == 'string') {
-            if (arg.includes(filter)) {
-              isFiltered = true;
+
+function applyConsoleFiltersFunc(consoleArgs, filtersOrig) {
+  let result = true;
+  let filters = filtersOrig.concat(); // work with a copy
+
+  let isMatching = false;
+  let { includeNonMatching } = filtersConfig;
+  
+  let filter;
+  for (filter of filters) {
+    let isRegEx = (filter instanceof RegExp);
+    let isType = false;
+    let isExclusive = false;
+    let includeInLog = false;
+
+    if (!isRegEx) {
+      // overriding "includeNonMatching"
+      if (filter.includes('includeNonMatching')) {
+        // prettier-ignore
+        includeNonMatching = eval(  filter.split(/[:=]/)[1]  );
+        continue;
+      }
+
+      // exclusive filter
+      if (filter.charAt(0) == '!') {
+        isExclusive = true;
+        includeInLog = true;
+        filter = filter.substr(1);
+      }
+
+      isType = (filter.charAt(0) == '<');
+    }
+
+    let argIndex = 0;
+    for (let arg of consoleArgs) {
+      if (isType) {
+        filter = filter.replace(/[<>]/g,"");
+        isMatching = (typeof(arg) == filter);
+        if (isMatching) {
+          if (isExclusive) {
+            if (consoleArgs.length > 1) {
+              consoleArgs.splice(argIndex, 1)
+              isMatching = false;
+            } else {
+              includeInLog = false;
+              break;
+            }
+          } else {
+            includeInLog = true;
+            break;
+          }
+        }
+      } else if (isString(arg)) {
+        if (isRegEx) {
+          isMatching = filter.test(arg);
+          if (isMatching) {
+            includeInLog = true;
+            break;
+          }
+        } else {
+          if (isExclusive) {
+            isMatching = arg.includes(filter);
+            if (isMatching) {
+              includeInLog = false;
+              break;
+            }
+          } else {
+            isMatching = arg.includes(filter);
+            if (isMatching) {
+              includeInLog = true;
               break;
             }
           }
         }
-
-        if (isFiltered) {
-          break;
-        }
       }
-      if (isFiltered) {
-        origLog(...args);
-      }
+      argIndex++;
     }
-    console.log = funcLog('log');
-    console.info = funcLog('info');
-    console.error = funcLog('error');
-    console.warn = funcLog('warn');
-    ilog = funcLog('ilog');
-    clog = funcLog('clog');
-    wlog = funcLog('wlog');
-  }
-}
 
+    if (isMatching) {
+      result = includeInLog;
+      break;
+    }
+  }
+
+  result = (isMatching ? result : includeNonMatching);
+
+  return result;
+}
 
 function configureReactotron() {
   // if testing with jest - return
@@ -184,14 +262,7 @@ function configureReactotron() {
 }
 
 
-// ---------------     exports     -----------------
-
-/**
- * Logs or throws a captured error
- * @param {String} description Information about the error
- * @param {Object} data Not shown in release
- */
-export function processError(description, data, errorCode = null) {
+function processErrorFunc(description, errorData, errorCode = null) {
   if (!__DEV__) {
 
     console.warn(description);
@@ -201,28 +272,28 @@ export function processError(description, data, errorCode = null) {
     switch (errorLevel) {
       case 0:
         if (serverExpandErrors) {
-          console.warn.apply(null, [description, ...Object.values(data), `, code ${errorCode}`]);
+          console.warn.apply(null, [description, ...Object.values(errorData), `, code ${errorCode}`]);
         } else {
-          console.warn(`${description}, error code ${errorCode}`, data);
+          console.warn(`${description}, error code ${errorCode}`, errorData);
         }
         break;
 
       case 1:
-        console.error(description, data, errorCode);
+        console.error(description, errorData, errorCode);
         break;
 
       case 2:
         if (console.tron && console.tron.error) {
           //TODO: Try this - not tested!!!
-          console.tron.error(description, data);
+          console.tron.error(description, errorData);
         }
         break;
 
       default:      
-        console.error(description, data, errorCode);
+        console.error(description, errorData, errorCode);
 
-        if (data.error) {
-          throw data.error;
+        if (errorData.error) {
+          throw errorData.error;
         } else {
         throw new Error(description);
     }
@@ -233,25 +304,24 @@ export function processError(description, data, errorCode = null) {
 
 /**
  * Print object in console log having in mind moment
- * @param {Object} obj
  */
 function mlogFunc(momentObj, title=`Moment is`, format=`YYYY-MM-DD HH:mm:ss.SSS [GMT]ZZ [T] ddd,MMM`) {
   if (momentObj == null) momentObj = {format:()=>'moment is null'};
   console.log(`[mlog] ${title} ${momentObj.format(format)}`)
 }
-function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
+function dlogFunc(objOrTitle, titleOrObject=null, isInternal=false, indent=' ') {
   // reverse params if needed
-  if (isObject(title) && isString(obj)) {
-    let tmp = title;
-    title = obj;
-    obj = tmp;
+  if (isObject(titleOrObject) && isString(objOrTitle)) {
+    let tmp = titleOrObject;
+    titleOrObject = objOrTitle;
+    objOrTitle = tmp;
   }
 
   let result = "";
   let isFirst = true;
 
-  for (let i in obj) {
-    let item = obj[i];
+  for (let i in objOrTitle) {
+    let item = objOrTitle[i];
 
     if (isMoment(item)) {
       result += indent + `${i}: ${item.format('YYYY-MM-DD HH:mm:ss.SSS GMTZ, ddd, MMM')} (moment)\n`;
@@ -266,10 +336,10 @@ function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
     }
   }
 
-  if (!isObject(obj)) result = `${obj}`;
+  if (!isObject(objOrTitle)) result = `${objOrTitle}`;
 
   if (!isInternal) {
-    result = `[dlog]${title ? " " + title : ""}:\n${result}`;
+    result = `[dlog]${titleOrObject ? " " + titleOrObject : ""}:\n${result}`;
   }
   if (!isInternal) {
     console.log(result);
@@ -278,14 +348,7 @@ function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
   }
 }
 
-/**
- * Reactotron logging - for temporary debug
- * @param {String} tag 
- * @param {String} description 
- * @param {any} data 
- * @param {Boolean} isImportant 
- */
-export function rlogd(tag, description, data, isImportant = false) {
+function rlogdFunc(tag, description, data, isImportant = false) {
   // if testing in jest etc.
   if (__MYDEV__ == undefined || __TEST__) {
     console.log("[rlog]", tag, description, data);
@@ -298,14 +361,7 @@ export function rlogd(tag, description, data, isImportant = false) {
 }
 
 
-/**
- * Reactotron custom logging using Reactotron.display
- * @param {String/Object} tag Tag as in ERROR, API, DEBUG etc. / Can be just an object to trace
- * @param {String/Object} description A short description or preview of data / Or just data to trace
- * @param {any} data Any object data that need to be visible
- * @param {Boolean} isImportant A highlight of tag (as in ERROR)
- */
-export function rlog(tag, description, data, isImportant = false) {
+function rlogFunc(tag, description, data, isImportant = false) {
   // if testing in jest etc.
   if (__MYDEV__ == undefined || __TEST__) {
     return;
@@ -389,16 +445,14 @@ export function rlog(tag, description, data, isImportant = false) {
 }
 
 
-export function configureDebug() {
+function configureDebug() {
   configureReactotron();
   configureConsole();
   
   // axios debug
+  // const requester = require("../../../initDependencies");
   //try { require('locktrip-svc-layer').setServiceDebug(false); } catch (error) {console.error('Error while setting debug to axios-requester',{error})}
 }
-
-// debug settings
-configureDebug();
 
 export function testFlowExec(type, extraConfig={}) {
   try {
@@ -407,10 +461,15 @@ export function testFlowExec(type, extraConfig={}) {
     wlog(`[Error] Could not execute test-flow ${type} - ${error.message}`)
   }
 }
-function testFlowExecSafe(type, extraConfig={}) {
+function testFlowExecSasfe(type, extraConfig={}) {
   if (type == null) {
     type = testFlow;
   }
+  const requester = require("../../../initDependencies");
+  const reduxStore = require("../../../redux/store");
+  const navigationService = require('../../../services/navigationService');
+  const serverRequest = require('../../../services/utilities/serverUtils').serverRequest;
+
   let lib, flow;
 
   try {
@@ -510,3 +569,69 @@ function testFlowExecSafe(type, extraConfig={}) {
       break;
   }
 }
+
+
+
+//      -----------------                                  ----------------------
+//      -----------------              Exports             ----------------------
+//      -----------------                                  ----------------------
+
+
+
+/**
+ * Print moment object in a formated way
+ */
+export function mlog(...args) { mlogFunc(...args) }
+/**
+ * Log an object when debugging
+ * @param {Object|String} objOrTitle String or Object
+ * @param {String|Object} titleOrObject Default is null
+ * @param {Boolean} isInternal Default is false
+ * @param {String} indent Default is double space ("  ")
+ */
+export function dlog(...args) { dlogFunc(...args) }
+/**
+ * console function wrappers
+ */
+export function clog(...all) {addTime(all); console.log(...all)};
+export function ilog(...all) {addTime(all); console.info(...all)}
+export function wlog(...all) {addTime(all); console.warn(...all)}
+export function elog(...all) {addTime(all); console.error(...all)}
+/**
+ * console.time and console.timeEnd functions
+ */
+export function tslog(...args) { consoleTimeCalculations ? console.time(...args) : emptyFunc(...args) }
+export function telog(...args) { consoleTimeCalculations ? console.timeEnd(...args) : emptyFunc(...args) }
+/**
+ * Reactotron logging - for temporary debug
+ * @param {String} tag 
+ * @param {String} description 
+ * @param {any} data 
+ * @param {Boolean} isImportant 
+ */
+export function rlogd(...args) { rlogdFunc(...args) }
+/**
+ * Reactotron custom logging using Reactotron.display
+ * @param {String/Object} tag Tag as in ERROR, API, DEBUG etc. / Can be just an object to trace
+ * @param {String/Object} description A short description or preview of data / Or just data to trace
+ * @param {any} data Any object data that need to be visible
+ * @param {Boolean} isImportant A highlight of tag (as in ERROR)
+ */
+export function rlog(tag, description, data, isImportant = false) { rlogFunc(tag, description, data, isImportant) }
+
+/**
+ * Exported only for testing
+ * @param {Array} consoleArgs List of console arguments (as in console.log(...args))
+ * @param {Array} filters Filters to apply
+ */
+export function applyConsoleFilters(...args) { return applyConsoleFiltersFunc(...args); }
+/**
+ * Logs or throws a captured error
+ * @param {String} description Information about the error
+ * @param {Object} errorData Not shown in release
+ * @param {Number} errorCode Default is null (usually passed from serverUtils only)
+ */
+export function processError(...args) { processErrorFunc(...args) }
+
+// apply settings
+configureDebug();

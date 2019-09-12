@@ -1,4 +1,6 @@
 module.exports = {
+  preset: "react-native",
+  testEnvironment: "node",
   moduleFileExtensions: ['js', 'jsx', 'json', 'vue'],
   transform: {
     '^.+\\.(js|jsx)?$': 'babel-jest'

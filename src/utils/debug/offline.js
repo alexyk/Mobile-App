@@ -1,4 +1,4 @@
-import { autoHotelSearchPlace, autoHomeSearchPlace, validationStateOfflineWallet, offlineTimeInSeconds } from '../../config-debug';
+import { autoHotelSearchPlace, autoHomeSearchPlace, validationStateOfflineWallet, offlineTimeInSeconds, offlineEmailVerificationValue } from '../../config-debug';
 import { rlog, processError } from '../../utils/debug/debug-tools';
 import { isObject } from "js-tools";
 
@@ -96,7 +96,7 @@ export default function createOfflineRequester() {
       case 'getCurrencyRates':              return require('./offline-responses/rates.json')
       case 'getLocRateByCurrency':          return require('./offline-responses/convert.json')
       case 'getRegionsBySearchParameter':   return jsonRegions
-      case 'getStaticHotels':               return offlinePacksHotels[autoHotelSearchPlace].first
+      case 'getStaticHotels':               return autoHotelSearchPlace != "" ? offlinePacksHotels[autoHotelSearchPlace].first : offlinePacksHotels['london'].first
       case 'getSearchHotelResults':         return {search_started: true}
       case 'getMapInfo':                    return offlinePacksHotels[autoHotelSearchPlace].all
       case 'getHotelById':                  return require('./offline-responses/hotel1.json')
@@ -107,7 +107,8 @@ export default function createOfflineRequester() {
       case 'getListingsByFilter':           return offlinePacksHomes[autoHomeSearchPlace]
       case 'getMyHotelBookings':            return require('./offline-responses/my-trips-all.json')
       case 'getMyConversations':            return {content: []};
-      default: {}
+      case 'sendVerificationEmail':         return {isVerificationEmailSent: offlineEmailVerificationValue};
+      default: {};
     }
   }
     
@@ -178,6 +179,7 @@ export default function createOfflineRequester() {
 		getHotelById: (...args) 					      => genPromise(args,'getHotelById', 0.5),
 		getHotelRooms: (...args) 					      => genPromise(args,'getHotelRooms', 0.5),
 		getConfigVarByName: (...args) 					=> genPromise(args,'getConfigVarByName'),
+		sendVerificationEmail: (...args) 			  => genPromise(args,'sendVerificationEmail'),
 		createReservation: (...args) 					  => genPromise(args,'createReservation'),
 		getUserHasPendingBooking: (...args) 	  => genPromise(args,'getUserHasPendingBooking'),
     markQuoteIdAsMarked: (...args) 	        => genPromise(args,'getUserHasPendingBooking'),
@@ -186,7 +188,7 @@ export default function createOfflineRequester() {
       // my trips aka bookings
     getMyHotelBookings: (...args)           => genPromise(args,'getMyHotelBookings'),
       // Messages / Inbox
-      getMyConversations: (...args)         => genPromise(args,'getMyConversations'),
+    getMyConversations: (...args)         => genPromise(args,'getMyConversations'),
 		// socket
 		startSocketConnection: (onData,_this) => {
       let arr = require('./offline-responses/fromSocket.json');

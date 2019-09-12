@@ -13,6 +13,9 @@ import {
 } from "react-native";
 import colors from "./colors";
 import { material } from "react-native-typography";
+import Separator from "../Separator";
+import { styleFromArrayToObject } from "../../../utils/designUtils";
+
 
 const { height, width } = Dimensions.get("window");
 
@@ -20,27 +23,33 @@ const { height, width } = Dimensions.get("window");
 // TODO: Support custom actions
 // TODO: Stacked full-width buttons
 
-const ActionButton = ({ testID, onPress, colorAccent, style, label }) => (
-  <TouchableHighlight
-    testID={testID}
-    style={styles.actionContainer}
-    underlayColor={colors.androidPressedUnderlay}
-    onPress={onPress}
-  >
-    <Text style={[material.button, { color: colorAccent }, style]}>
-      {label}
-    </Text>
-  </TouchableHighlight>
-);
+const ActionButton = ({ testID, onPress, colorAccent, style, containerStyle, label }) => {
+  return (
+    <TouchableHighlight
+      testID={testID}
+      style={[styles.actionContainer, containerStyle]}
+      underlayColor={colors.androidPressedUnderlay}
+      onPress={onPress}
+    >
+      <Text style={[material.button, { color: colorAccent }, style]}>
+        {label}
+      </Text>
+    </TouchableHighlight>
+  )
+};
 
 const MaterialDialog = ({
   visible,
   scrolled,
   title,
   titleColor,
+  titleStyle,
   colorAccent,
   cancelStyle,
+  cancelContainerStyle,
   okStyle,
+  okContainerStyle,
+  buttonsContainerStyle,
   backgroundColor,
   addPadding,
   isVisibleBottomBar,
@@ -48,8 +57,16 @@ const MaterialDialog = ({
   onCancel,
   okLabel,
   cancelLabel,
-  children
+  children,
+  modalProps,
+  bottomSpace,
+  modalContainerStyle
 }) => {
+  cancelStyle = styleFromArrayToObject(cancelStyle);
+  okStyle = styleFromArrayToObject(okStyle);
+  okContainerStyle = styleFromArrayToObject(okContainerStyle);
+  cancelContainerStyle = styleFromArrayToObject(cancelContainerStyle);
+
   return (
     <Modal
       animationType={"fade"}
@@ -58,6 +75,7 @@ const MaterialDialog = ({
       visible={visible}
       onRequestClose={onCancel != undefined ? onCancel : () => {}}
       supportedOrientations={["portrait", "landscape"]}
+      {...modalProps}
     >
       <TouchableWithoutFeedback
         onPress={onCancel != undefined ? onCancel : () => {}}
@@ -71,7 +89,8 @@ const MaterialDialog = ({
                 styles.modalContainer,
                 (title != null || (addPadding && title == null)) &&
                   styles.modalContainerPadding,
-                { backgroundColor }
+                { backgroundColor },
+                modalContainerStyle
               ]}
             >
               <TouchableWithoutFeedback>
@@ -87,7 +106,8 @@ const MaterialDialog = ({
                       <Text
                         style={[
                           material.title,
-                          { color: titleColor, fontSize: 20 }
+                          { color: titleColor, fontSize: 20 },
+                          titleStyle
                         ]}
                       >
                         {title}
@@ -113,15 +133,16 @@ const MaterialDialog = ({
                     <View
                       style={
                         scrolled
-                          ? styles.actionsContainerScrolled
-                          : styles.actionsContainer
+                          ? [styles.actionsContainerScrolled, buttonsContainerStyle]
+                          : [styles.actionsContainer, buttonsContainerStyle]
                       }
                     >
-                      {onCancel != undefined && onCancel != null ? (
+                      {onCancel != undefined && onCancel != null && cancelLabel ? (
                         <ActionButton
                           testID="dialog-cancel-button"
                           colorAccent={colorAccent}
                           style={cancelStyle}
+                          containerStyle={cancelContainerStyle}
                           onPress={onCancel}
                           label={cancelLabel}
                         />
@@ -131,6 +152,7 @@ const MaterialDialog = ({
                           testID="dialog-ok-button"
                           colorAccent={colorAccent}
                           style={okStyle}
+                          containerStyle={okContainerStyle}
                           onPress={onOk}
                           label={okLabel}
                         />
@@ -139,10 +161,13 @@ const MaterialDialog = ({
                   ) : null}
                 </View>
               </TouchableWithoutFeedback>
+
+              <Separator height={bottomSpace ? bottomSpace : 0} isHR extraStyle={{backgroundColor:'white'}} />
             </View>
           </KeyboardAvoidingView>
         </View>
       </TouchableWithoutFeedback>
+
     </Modal>
   );
 };
@@ -153,15 +178,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors.backgroundOverlay
+    backgroundColor: colors.backgroundOverlay,
   },
   modalContainer: {
     marginHorizontal: 16,
     marginVertical: 106,
-    // minWidth: width * 0.8,
     width: width * 0.8,
-    // minWidth: 300,
-    borderRadius: 2,
     elevation: 24,
     overflow: "hidden"
   },
@@ -200,6 +222,7 @@ const styles = StyleSheet.create({
   },
   actionsContainer: {
     height: 52,
+    marginRight: 8,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
@@ -207,6 +230,7 @@ const styles = StyleSheet.create({
   },
   actionsContainerScrolled: {
     height: 52,
+    marginRight: 8,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
@@ -215,13 +239,13 @@ const styles = StyleSheet.create({
     borderColor: colors.androidBorderColor
   },
   actionContainer: {
-    marginRight: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
+    paddingHorizontal: 5,
+    paddingVertical: 5,
     minWidth: 64,
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    borderRadius: 5
   }
 });
 
@@ -234,10 +258,13 @@ MaterialDialog.propTypes = {
   okLabel: PropTypes.string,
   title: PropTypes.string,
   titleColor: PropTypes.string,
+  titleStyle: PropTypes.string,
   backgroundColor: PropTypes.string,
   colorAccent: PropTypes.string,
-  cancelStyle: PropTypes.object,
-  okStyle: PropTypes.object,
+  cancelStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  okStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  cancelContainerStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+  okContainerStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   scrolled: PropTypes.bool,
   addPadding: PropTypes.bool
 };
@@ -251,6 +278,8 @@ MaterialDialog.defaultProps = {
   colorAccent: colors.androidColorAccent,
   cancelStyle: {},
   okStyle: {},
+  cancelContainerStyle: {},
+  okContainerStyle: {},
   scrolled: false,
   addPadding: true,
   onOk: undefined,
@@ -262,6 +291,7 @@ ActionButton.propTypes = {
   colorAccent: PropTypes.string.isRequired,
   cancelStyle: PropTypes.object,
   okStyle: PropTypes.object,
+  containerStyle: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   label: PropTypes.string.isRequired,
   onPress: PropTypes.func.isRequired
 };

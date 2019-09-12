@@ -98,3 +98,14 @@ export function logDebugInformation() {
 export function createStyleFromObject(obj) {
   return StyleSheet.create(obj);
 }
+
+export function styleFromArrayToObject(value) {
+  let result = value;
+
+  if (value instanceof Array) {
+    result = {};
+    value.forEach(item => Object.assign(result, item || {}));
+  }
+
+  return result;
+}

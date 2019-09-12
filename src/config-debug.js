@@ -47,7 +47,25 @@ export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
 export const consoleShowTimeInLogs              = true;    // prepend with time
-export const consoleFilters                     = [];
+/**
+ * consoleFilters
+ * Two types of filtering - inclusive and exclusive depending on whether first char is exclamation mark (!)
+ * Two types of filter data - String or RegEx
+ * If the string starts with an ! - exclude it from log
+ * If not starting with ! - continue logging it
+ * Notes:
+ *  - lower index in the array - means a higher priority as a filter meaning if it matches next filters are ignored
+ *  - only inclusive regex is supported so far
+ */
+export const filtersConfig = {
+  includeNonMatching: true,
+  empty: [],
+  0: [],
+  1: ['!Require cycle', '!Disabling console.time', '!<object>', "!WARNING", "!deprecated", "!Running appl", "!RCTSplashScreen", "all-other"],
+  2: ['includeNonMatching:false','!Require cycle', '!Disabling console.time', '!<object>', "!WARNING", "!deprecated", "!Running appl", "!RCTSplashScreen", "all-other"],
+}
+export const consoleFilters                     = filtersConfig['2'];
+export const consoleClearAtStart                = true;
 export const serverLogRequesting                = true;
 export const serverExpandErrors                 = false;
   // other
@@ -63,6 +81,7 @@ export const checkHotelsDataWithTemplates       = 'static,static-patched,static-
 export const isOnline = (!isOffline);
 export const autoLoginInOfflineMode             = true;
 export var validationStateOfflineWallet         = -1;  // -1: none, 0: invalid, 1: valid
+export const offlineEmailVerificationValue      = true;
 export const offlineTimeInSeconds = {
   getCountries: 0,
   getCurrencyRates: 0,
@@ -74,13 +93,14 @@ export const offlineTimeInSeconds = {
   getWalletFromEtherJS1: 0,
   getWalletFromEtherJS2: 0,
   getStaticHotels: 1,
-  getSearchHotelResults: 5,
-  socketDelay: 2000, // in milliseconds
-  socketDelay2: 200, // in milliseconds
-  socketDelay3: 300, // in milliseconds
+  getSearchHotelResults: 1,
+  socketDelay: 20, // in milliseconds
+  socketDelay2: 1, // in milliseconds
+  socketDelay3: 3, // in milliseconds
   getMapInfo: 3,
   getHotelRooms: 0,
   getHotelById: 0,
+  sendVerificationEmail: 0.5
 }
   // automated flows
     // hotels search

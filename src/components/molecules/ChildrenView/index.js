@@ -81,12 +81,12 @@ export default class ChildrenView extends Component {
     const { cache } = this.props;
 
     try {
-      ageValues.map((item, index) => {
+      ageValues.map((childAge, index) => {
         if (
           this._childrenRenderedItems[index] &&
           cache[roomIndex] &&
           cache[roomIndex][index] != null &&
-          cache[roomIndex][index] == item
+          cache[roomIndex][index] == childAge
         ) {
           return this._childrenRenderedItems[index];
         }
@@ -95,14 +95,14 @@ export default class ChildrenView extends Component {
 
         if (withTitle) {
           newItem = (
-            <View key={`${index}_${item}`} style={styles.childOptionsContainer}>
+            <View key={`${index}_${childAge}`} style={styles.childOptionsContainer}>
               <Separator isHR height={2} extraStyle={styles.separator} />
               <View style={styles.childOptionsContainer2}>
                 <Text style={styles.textChildTitle}>
                   Child {`${index + 1}`}
                 </Text>
                 <View style={styles.childOptionsVertical}>
-                  {this._renderChildAgeOptions(index, item, roomIndex)}
+                  {this._renderChildAgeOptions(index, childAge, roomIndex)}
                 </View>
               </View>
             </View>
@@ -110,7 +110,7 @@ export default class ChildrenView extends Component {
         } else {
           newItem = (
             <View style={styles.childOptionsHorizontal}>
-              { this._renderChildAgeOptions(index, item, roomIndex) }
+              { this._renderChildAgeOptions(index, childAge, roomIndex) }
             </View>
           )
         }
