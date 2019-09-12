@@ -1,14 +1,10 @@
 import { isObject, isString, getObjectClassName, isSymbol } from "js-tools";
 import lodash from 'lodash';
 import moment, { isMoment } from 'moment';
-import navigationService from '../../../services/navigationService';
-import { serverRequest } from '../../../services/utilities/serverUtils';
-import requester from "../../../initDependencies";
 import { __MYDEV__, __TEST__,
   consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs,
   errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters, testFlowURL
 } from '../../../config-debug';
-import reduxStore from "../../../redux/store";
 
 
 // ---------------  function definitions  -----------------
@@ -119,8 +115,11 @@ function configureConsole() {
     if (__MYDEV__ !== undefined && console.warn != null) console.warn(`[debug-tools] Disabling console.time(End) calls - see values of 'consoleTimeCalculations' or '__MYDEV__'`);
   }
 
-  if (consoleFilters && consoleFilters.length > 0) {
+  if (__DEV__ && consoleFilters && consoleFilters.length > 0) {
     const origLog = console.log;
+    const origWarn = console.warn;
+    const origInfo = console.info;
+
     const funcLog = (type) => (...args) => {
       let isFiltered = false;
       
@@ -138,8 +137,23 @@ function configureConsole() {
           break;
         }
       }
+
       if (isFiltered) {
-        origLog(...args);
+        switch (type) {
+          case 'warn':
+          case 'wlog':
+            origWarn(...args);
+            break;
+
+          case 'info':
+          case 'wlog':
+            origInfo(...args);
+            break;
+        
+          default:
+            origLog(...args);
+            break;
+        }
       }
     }
     console.log = funcLog('log');
@@ -164,7 +178,7 @@ function configureReactotron() {
   if ((__DEV__ && reactotronLoggingEnabled) || reactotronLoggingInReleaseForceEnabled) {
     // Reactotron config
     try {
-      require('../../reactotronLogging')
+      //require('../../reactotronLogging')
       const r = require('reactotron-react-native')
       const Reactotron = r.default;
       console.tron = Reactotron;
@@ -390,10 +404,11 @@ export function rlog(tag, description, data, isImportant = false) {
 
 
 export function configureDebug() {
-  configureReactotron();
   configureConsole();
+  configureReactotron();
   
   // axios debug
+  // const requester = require("../../../initDependencies");
   //try { require('locktrip-svc-layer').setServiceDebug(false); } catch (error) {console.error('Error while setting debug to axios-requester',{error})}
 }
 
@@ -407,10 +422,17 @@ export function testFlowExec(type, extraConfig={}) {
     wlog(`[Error] Could not execute test-flow ${type} - ${error.message}`)
   }
 }
-function testFlowExecSafe(type, extraConfig={}) {
+function testFlowExecSasfe(type, extraConfig={}) {
   if (type == null) {
     type = testFlow;
   }
+
+  let requester, reduxStore, navigationService, serverRequest;
+  // const requester = require("../../../initDependencies");
+  // const reduxStore = require("../../../redux/store");
+  // const navigationService = require('../../../services/navigationService');
+  // const serverRequest = require('../../../services/utilities/serverUtils').serverRequest;
+
   let lib, flow;
 
   try {
@@ -421,7 +443,8 @@ function testFlowExecSafe(type, extraConfig={}) {
   switch (type) {
     case 'guestInfo':
       try {
-        const jsonData = require('../../debug/test-flows/data/guest-info-3a-4ch.json');
+        // const jsonData = require('../../debug/test-flows/data/guest-info-3a-4ch.json');
+        let jsonData = {};
 
         const getParams = (flow) => function (name) {
           let result = [];
