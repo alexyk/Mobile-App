@@ -333,17 +333,26 @@ export function renderFooter() {
   const fontSize = 13;
   let simpleText;
 
-
+  /**
+   * 3 phases:
+   *    (1) static hotels
+   *    (2) socket hotels
+   *    (3) filtered hotels === all done
+   */
   //const isRed = (isSocketRedColor || this.state.isStaticTimeout);
+  // prettier-ignore
   const textContent = (error
     ? error
     : isApplyingFilter
       ? lang.TEXT.SEARCH_HOTEL_RESULTS_APPLYING_FILTER
       : this.isAllHotelsLoaded
-        ? (totalHotels == 1 ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED_ONE : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", totalHotels))
+        ? (totalHotels == 1
+            ? lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED_ONE
+            : lang.TEXT.SEARCH_HOTEL_RESULTS_FILTERED.replace("%1", totalHotels)
+          )
         : pricesFromSocketValid
-          ? lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING_WITH_MATCHES.replace("%1", pricesFromSocketValid)
-          : lang.TEXT.SEARCH_HOTEL_RESULTS_LOADING
+          ? lang.TEXT.SEARCH_HOTEL_SOCKET_RESULTS_LOADING.replace("%1", pricesFromSocketValid)
+          : lang.TEXT.SEARCH_HOTEL_STATIC_RESULTS_LOADED
   );
 
   simpleText = (

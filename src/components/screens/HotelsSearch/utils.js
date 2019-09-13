@@ -494,6 +494,8 @@ function parseStaticHotel(hotel, index) {
     hotel.stars = hotel.star;
     delete hotel.star;
   }
+
+  // use lastBestPrice instead of price for static hotels data
   if (hotel.lastBestPrice) {
     hotel.price = hotel.lastBestPrice;
     delete hotel.lastBestPrice;
