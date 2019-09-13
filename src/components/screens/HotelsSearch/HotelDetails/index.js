@@ -1,6 +1,5 @@
-import { ScrollView, View, TouchableOpacity } from "react-native";
+import { StatusBar, ScrollView, View, TouchableOpacity } from "react-native";
 import React, { Component } from "react";
-import { Text } from "react-native";
 import PropTypes from "prop-types";
 import AvailableRoomsView from "../../../molecules/AvailableRoomsView";
 import FacilitiesView from "../../../molecules/FacilitiesView";
@@ -128,7 +127,7 @@ class HotelDetails extends Component {
   onUserInfoSuccessAndBook(data, roomDetail) {
     const { isEmailVerified } = data;
     if (!isEmailVerified) {
-      this.setState({emailVerificationVisible: true});
+      MessageDialog.showMessage("Email Verification", lang.TEXT.VERIFICATION_EMAIL_MESSAGE, 'email-verification');
       return
     }
 
@@ -175,11 +174,11 @@ class HotelDetails extends Component {
   };
 
   onSendVerificationEmail() {
-    this.setState({emailVerificationVisible: false});
-
     const { onVerificationEmailSuccess, onVerificationEmailError } = this;
     const { searchString, hotel } = this.state;
     const emailVerificationRedirectURL = `/hotels/listings/${hotel.id}${searchString}`;
+
+    MessageDialog.hide('email-verification');
 
     serverRequest(this, requester.sendVerificationEmail,[{emailVerificationRedirectURL}], onVerificationEmailSuccess, onVerificationEmailError);
   }
@@ -310,13 +309,15 @@ class HotelDetails extends Component {
     );
   }
 
-  _renderEmailVerificationDialog() {
-    const { emailVerificationVisible } = this.state;
+  _renderMessage() {
+    const { messageTitle, dialogMessage, messageVisible } = this.state;
+
     return (
       <MessageDialog
-        title={"Email Verification"}
-        message={lang.TEXT.VERIFICATION_EMAIL_MESSAGE}
-        isVisible={emailVerificationVisible}
+        parent={this}
+        title={messageTitle}
+        message={dialogMessage}
+        isVisible={messageVisible}
         okLabel="Send Email"
         okStyle={{width: "80%", textAlign: 'center'}}
         okContainerStyle={{}}
@@ -324,7 +325,6 @@ class HotelDetails extends Component {
         extraProps={{}}
         modalProps={{}}
         onOk={this.onSendVerificationEmail}
-        onCancel={() => this.setState({emailVerificationVisible: false})}
       />
     )
   }
@@ -332,6 +332,7 @@ class HotelDetails extends Component {
   render() {
     return (
       <View style={styles.container}>
+        <StatusBar barStyle="dark-content" backgroundColor="#f0f1f3" />
         <ScrollView style={styles.scrollView}>
           <View style={styles.body}>
             <ImageSlides data={this.state.dataSourcePreview} height={SCREEN_SIZE.H / 3} />
@@ -347,7 +348,7 @@ class HotelDetails extends Component {
         </ScrollView>
         {this._renderBackButton()}
         {this._renderToast()}
-        {this._renderEmailVerificationDialog()}
+        {this._renderMessage()}
       </View>
     );
   }

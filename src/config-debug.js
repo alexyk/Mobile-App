@@ -57,14 +57,20 @@ export const consoleShowTimeInLogs              = true;    // prepend with time
  *  - lower index in the array - means a higher priority as a filter meaning if it matches next filters are ignored
  *  - only inclusive regex is supported so far
  */
-export const filtersConfig = {
+export var filtersConfig = {
   includeNonMatching: true,
   empty: [],
+  safari: ['!\`scale', '!Require cycle', "!Async Storage ", "!SocketRocket"],
   0: [],
-  1: ['!Require cycle', '!Disabling console.time', '!<object>', "!WARNING", "!deprecated", "!Running appl", "!RCTSplashScreen", "all-other"],
-  2: ['includeNonMatching:false','!Require cycle', '!Disabling console.time', '!<object>', "!WARNING", "!deprecated", "!Running appl", "!RCTSplashScreen", "all-other"],
+  1: ['!Require cycle', '!Disabling console.time', '!<object>', "!WARNING", "!deprecated", "!Running appl", "!RCTSplashScreen", "!Async Storage "],
+  2: ['!Require cycle', '!Disabling console.time', "!WARNING", "!deprecated", "!Running appl", "!RCTSplashScreen", "!Async Storage "]
 }
-export const consoleFilters                     = filtersConfig['2'];
+filtersConfig = { ...filtersConfig,
+  fav1: ['includeNonMatching: true', ...filtersConfig["1"], ],
+  fav2: ['MessageDialog', 'includeNonMatching: false'],
+  debug: ['includeNonMatching: false', 'MessageDialog', 'serverUtil', "!<object>"],
+}
+export const consoleFilters                     = filtersConfig['safari'];
 export const consoleClearAtStart                = true;
 export const serverLogRequesting                = true;
 export const serverExpandErrors                 = false;

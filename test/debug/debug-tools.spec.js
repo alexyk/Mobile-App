@@ -76,4 +76,21 @@ describe('consoleFilters', () => {
       })
     })
   })
+
+  describe('custom cases', () => {
+    let filters, args;
+
+    it('fav2', () => {
+      filters = ['MessageDialog', 'includeNonMatching: false'];
+
+      args = ['[serverUtils] [Action getCountries] Requesting getCountries'];
+      expect(applyConsoleFilters(args, filters))                  .toBeFalsy();
+
+      args = ['Offline mode (see utils/debug/offline.js)'];
+      expect(applyConsoleFilters(args, filters))                  .toBeFalsy();
+
+      args = ['[MessageDialog] current: vMT next: vMT'];
+      expect(applyConsoleFilters(args, filters))                  .toBeTruthy();
+    })
+  })
 })

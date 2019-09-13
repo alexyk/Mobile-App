@@ -25,6 +25,7 @@ import { getSafeTopOffset } from "../../../utils/designUtils";
 import { serverRequest } from "../../../services/utilities/serverUtils";
 import { setGuestData } from "../../../redux/action/hotels";
 import { isString } from "js-tools";
+import MessageDialog from "../../molecules/MessageDialog";
 
 
 const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
@@ -98,7 +99,7 @@ class Explore extends Component {
 
   onServerGetUserInfoError(errorData, errorCode) {
     this.props.navigation.navigate("Welcome");
-    alert(`Old login data expired.\nPlease log in again ...`);
+    MessageDialog.showMessage(`Old login data expired.\nPlease log in again ...`, 0);
   }
 
   async componentWillMount() {
@@ -618,6 +619,8 @@ class Explore extends Component {
   }
 
   render() {
+    const { message, messageVisible } = this.state;
+
     // prettier-ignore
     return (
       <View style={styles.container}>
@@ -803,6 +806,7 @@ class Explore extends Component {
             // this.setState({ singlePickerSelectedItem: result.selectedItem });
           }}
         />
+        <MessageDialog parent={this} isVisible={messageVisible} message={message} />
       </View>
     );
   }

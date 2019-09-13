@@ -53,6 +53,12 @@ function configureConsole() {
     const funcLog = (type) => (...args) => {
       let isFiltered = applyConsoleFilters(args, consoleFilters);
 
+      if (consoleShowTimeInLogs) {
+        const timeStr = `[${moment().format("HH:mm:ss.SSS")}]`;
+        args.unshift(timeStr);
+      }
+    
+
       if (isFiltered) {
         switch (type) {
           case 'warn':
