@@ -34,7 +34,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     marginLeft: 15
   },
-  doneButtonView: {
+  doneButtonTouchable: {
     flex: 1,
     flexDirection: "column",
     width: "100%",
@@ -44,13 +44,13 @@ const styles = StyleSheet.create({
     height: 50
   },
 
-  bottomView: {
+  doneButtonContainer: {
     width: "100%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: "#FFF0",
     justifyContent: "center",
     alignItems: "center",
-    padding: 10,
-    height: 70
+    padding: 7,
+    height: 65
   },
 
   withChildrenCheckboxContainer: {

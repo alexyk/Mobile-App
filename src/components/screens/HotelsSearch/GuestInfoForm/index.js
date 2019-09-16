@@ -13,7 +13,7 @@ import requester from "../../../../initDependencies";
 import { userInstance } from "../../../../utils/userInstance";
 import { imgHost } from "../../../../config";
 import { SC_NAME, DEFAULT_CRYPTO_CURRENCY } from "../../../../config-settings";
-import { processError } from "../../../../utils/debug/debug-tools";
+import { processError, clog } from "../../../../utils/debug/debug-tools";
 import { gotoWebview } from "../../utils";
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
 import { cloneDeep } from "lodash";
@@ -229,6 +229,8 @@ class GuestInfoForm extends Component {
   onReservationSuccess(data) {
     const { preparedBookingId, booking, fiatPrice } = data || {};
 
+    let retries = 0;
+
     if (preparedBookingId == null || booking == null ) {
       this._showRoomNAMessage();
       processError(`[GuestInfoForm] [onReservationSuccess] Booking the selected item did not succeed.`, {data});
@@ -274,7 +276,13 @@ class GuestInfoForm extends Component {
             }
           );
         } else {
-          this._showRoomNAMessage();
+          if (retries <= BOOKING_RETRIES) {
+            retries++;
+            clog(`Retrying booking #${retries}`, success)
+            this.onReservationSuccess(data);
+          } else {
+            this._showRoomNAMessage();
+          }
         }
       }
     );

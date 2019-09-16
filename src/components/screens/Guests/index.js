@@ -229,6 +229,17 @@ class Guests extends Component {
     );
   }
 
+  _renderDoneButton() {
+    return (
+      <View style={styles.doneButtonContainer}>
+        <TouchableOpacity style={styles.doneButtonTouchable} onPress={this.onDone}>
+          <Text style={styles.doneButtonText}>Done</Text>
+        </TouchableOpacity>
+      </View>
+
+    )
+  }
+
   _renderClearButton() {
     return (
       <TouchableOpacity
@@ -269,6 +280,7 @@ class Guests extends Component {
             type={"rooms"}
             onChanged={this.onCountChange}
           />
+          { this._renderDoneButton() }
           <Separator isHR height={1} margin={5} />
           {this._renderChildren(hasChildren, children)}
           <ChildrenRooms
@@ -278,11 +290,6 @@ class Guests extends Component {
             onChildeAgeChange={this.onChildeAgeChange}
             cache={this._childAgesCached}
           />
-        </View>
-        <View style={styles.bottomView}>
-          <TouchableOpacity style={styles.doneButtonView} onPress={this.onDone}>
-            <Text style={styles.doneButtonText}>Done</Text>
-          </TouchableOpacity>
         </View>
 
         <Toast

@@ -35,3 +35,8 @@ export const autoGetAllStaticPages = false;
 export const hotelSearchResults = {
   lastBestPriceTitle: false,
 }
+export const Options = {
+  hotelReservation: {
+    BOOKING_RETRIES: 1
+  }
+}

@@ -6,7 +6,7 @@ const {
   step3BookingDetails
 } = hotelSearchIsNative;
 
-const compilationTime = '2019-09-03 16:16:42 EEST';
+const compilationTime = '2019-09-16 15:25:25 EEST';
 const branchName = ""; // this line is updated by scripts/select_config.rb and travis-version.rb
 const travisVersion = ""; // this line is updated by scripts/select_config.rb and travis-version.rb
 const packJsonVersion = require("../package.json").version;
