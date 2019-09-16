@@ -204,7 +204,7 @@ class GuestInfoForm extends Component {
   }
 
   _showRoomNAMessage() {
-    this.refs.toast.show(lang.TEXT.ROOM_NA, 3000);
+    // this.refs.toast.show(lang.TEXT.ROOM_NA, 3000);
     this.setState({proceedButtonLabel: 'Unavailable...'})
   }
 
@@ -215,12 +215,12 @@ class GuestInfoForm extends Component {
 
     if (errors && errors.hasOwnProperty("RoomsXmlResponse")) {
       if (errors["RoomsXmlResponse"].message.indexOf("QuoteNotAvailable:") !== -1) {
-        this.refs.toast.show(errors.RoomsXmlResponse.message, 5000);
+        // this.refs.toast.show(errors.RoomsXmlResponse.message, 5000);
       }
     } else if (errors != null) {
       for (let key in errors) {
         if (typeof errors[key] !== "function") {
-          this.refs.toast.show(errors[key].message, 5000);
+          // this.refs.toast.show(errors[key].message, 5000);
         }
       }
     }
