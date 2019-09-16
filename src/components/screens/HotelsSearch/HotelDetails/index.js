@@ -18,7 +18,6 @@ import { commonText } from "../../../../common.styles";
 import lang from "../../../../language";
 import MessageDialog from "../../../molecules/MessageDialog";
 import { skipEmailVerification } from "../../../../config-debug";
-import { clog } from "../../../../utils/debug/debug-tools";
 
 
 class HotelDetails extends Component {

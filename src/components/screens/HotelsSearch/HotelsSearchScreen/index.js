@@ -41,7 +41,8 @@ import {
   HOTELS_MINIMUM_RESULTS,
   autoGetAllStaticPages,
   hotelSearchIsNative,
-  HOTELS_INITIAL_ITEMS_TO_LOAD
+  HOTELS_INITIAL_ITEMS_TO_LOAD,
+  hotelSearchResults
 } from "../../../../config-settings";
 import { rlog, processError, clog, elog, wlog } from "../../../../utils/debug/debug-tools";
 import { isOnline, hotelsSearchSocketDebug } from "../../../../config-debug";
@@ -97,7 +98,7 @@ import {
 
 import stomp from "stomp-websocket-js";
 import { setIsApplyingFilter } from "../../../../redux/action/userInterface";
-import { setSearch, setSearchString } from "../../../../redux/action/hotels";
+import { setSearch, setSearchString, setSearchState } from "../../../../redux/action/hotels";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
 import { DURATION } from "react-native-easy-toast";
 
@@ -155,7 +156,6 @@ class HotelsSearchScreen extends Component {
     );
     this.getNextStaticPage = this.getNextStaticPage.bind(this);
     this.unsubscribe = this.stopSocketConnection.bind(this);
-    this.updateCoords = this.updateCoords.bind(this);
     this.onBackButtonPress = this.onBackButtonPress.bind(this);
     this.onServerHotelsFromSocket = this.onServerHotelsFromSocket.bind(this);
     this.onServerStaticHotelsSuccess = this.onServerStaticHotelsSuccess.bind(this);
@@ -323,6 +323,8 @@ class HotelsSearchScreen extends Component {
   }
 
   startSearch() {
+    this.props.setSearchState(false);
+
     UUIDGenerator.getRandomUUID().then(value => {
       this._uuid = value;
       const query = `${this._searchString}&uuid=${value}`;
@@ -595,9 +597,7 @@ class HotelsSearchScreen extends Component {
   }
 
   onDoneSocket = data => {
-    console.log(
-      `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`
-    );
+    console.log(`#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
     rlog("on-done-socket", `elements: ${data.totalElements}`, {
       data,
       hotelsAll: this.hotelsAll,
@@ -611,7 +611,7 @@ class HotelsSearchScreen extends Component {
 
     this.setState(
       prevState => ({
-        pricesFromSocket: data.totalElements
+        pricesFromSocket: data.totalElements,
       }),
       () => {
         this.isAllHotelsLoaded = false;
@@ -766,8 +766,7 @@ class HotelsSearchScreen extends Component {
   onFilteredDataError(errorData) {
     this.props.setIsApplyingFilter(false);
     this.setState({ error: lang.TEXT.SEARCH_HOTEL_FILTER_ERROR });
-
-    // this.refs.toast.show(`There was an error while applying filters.\nPlease check your connection and try searching again.`, DURATION.LONG);
+    this.props.setSearchState(true);
   }
 
   onFilteredData(data) {
@@ -839,6 +838,8 @@ class HotelsSearchScreen extends Component {
         }
       }
     );
+
+    this.props.setSearchState(true);
   }
 
   onServerStaticHotelsError(errorData, errorCode) {
@@ -898,6 +899,11 @@ class HotelsSearchScreen extends Component {
     processStaticHotels(hotels, _this.hotelsStaticCacheMap, _this.hotelsIndicesByIdMap, _this.hotelsAll, _this.isAllHotelsLoaded);
     printCheckHotelDataCache();
 
+
+    // add title for last best price list
+    if (hotelSearchResults.lastBestPriceTitle) {
+      hotels.unshift(`List of ${hotels.length} Last Best Price Hotels:`)
+    }
     // update list
     _this.listUpdateDataSource(hotels);
 
@@ -971,13 +977,6 @@ class HotelsSearchScreen extends Component {
     }
     console.timeEnd("*** HotelsSearchScreen::gotoFilter()");
   };
-
-  updateCoords(coords) {
-    this.setState({
-      initialLat: coords.initialLat,
-      initialLon: coords.initialLon
-    });
-  }
 
   updateFilter = (data, fromUI = false) => {
     console.time("*** HotelsSearchScreen::updateFilter()");
@@ -1148,7 +1147,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => ({
   setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
   setSearch: bindActionCreators(setSearch, dispatch),
-  setSearchString: bindActionCreators(setSearchString, dispatch)
+  setSearchString: bindActionCreators(setSearchString, dispatch),
+  setSearchState: bindActionCreators(setSearchState, dispatch)
   //setSearchFiltered: bindActionCreators(setSearchFiltered, dispatch),
 });
 

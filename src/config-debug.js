@@ -48,7 +48,7 @@ export const logConverterError                  = false;
 export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
 export const consoleShowTimeInLogs              = true;    // prepend with time
 export const consoleClearAtStart                = true;
-export const consoleFilter                      = 'redux';
+export const consoleFilter                      = 'debug1';
 export const serverLogRequesting                = true;
 export const serverExpandErrors                 = false;
   // other
@@ -69,7 +69,7 @@ export const offlineEmailVerificationValue      = true;
     // hotels search
 export const autoHotelSearch                    = false;
 export const autoHotelSearchFocus               = false;
-export const autoHotelSearchPlace               = 'araraquara'
+export const autoHotelSearchPlace               = 'london';
 export const skipEmailVerification              = false;
     // homes search
 export const autoHomeSearch                     = false;
@@ -79,8 +79,8 @@ export const autoCalendar                       = false;
   // message dialog
 export const messageDialogDebug                 = false;
   // test flows
-export const testFlowURL                        = "http://beta.locktrip.com/api/mobile/login";
-export const testFlow                           = "hotelDetails";
+export const testFlowURL                        = "http://beta.locktrip.com/api/hotels/searh?query=london";
+export const testFlow                           = "";
 
 
 // ------------ data definitions ----------------
@@ -96,9 +96,9 @@ export const offlineTimeInSeconds = {
   getWalletFromEtherJS2: 0,
   getStaticHotels: 1,
   getSearchHotelResults: 1,
-  socketDelay: 20, // in milliseconds
-  socketDelay2: 1, // in milliseconds
-  socketDelay3: 3, // in milliseconds
+  initialSocketDelay: 1500, // in milliseconds
+  socketDelay: 0, // in milliseconds
+  socketOnDoneDelay: 500, // in milliseconds
   getMapInfo: 3,
   getHotelRooms: 0,
   getHotelById: 0,
@@ -154,8 +154,8 @@ filtersConfig.vscode2  = [].concat(filtersConfig.vscode, ['action'])
 filtersConfig.testFlow = [].concat(filtersConfig.default, ['includeNonMatching: true'])
 filtersConfig.simple = [].concat(filtersConfig.default4, ['includeNonMatching: false', 'serverUtil'])
 filtersConfig.server = ['includeNonMatching: false', 'serverUtil', ]
-filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, [
-  'serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
+filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
+filtersConfig.debug1  = ["mode: LiM", "renderMapButton"]
 
 export const consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
 

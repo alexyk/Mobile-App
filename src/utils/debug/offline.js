@@ -130,7 +130,7 @@ export default function createOfflineRequester() {
   )};
   
   // prettier-ignore
-  const { socketDelay, socketDelay2, socketDelay3 } = offlineTimeInSeconds;
+  const { initialSocketDelay, socketDelay, socketOnDoneDelay } = offlineTimeInSeconds;
 	const offlineRequester = {
     // fake test calls
 		testCall: (caseNo) 				              => new Promise( (resolve, reject) => { 
@@ -203,19 +203,18 @@ export default function createOfflineRequester() {
       }
 
 			const delayPerRefresh = socketDelay
-			const delay2 = socketDelay2
-			const delay3 = delay2+socketDelay3
+			const delayOnDone = initialSocketDelay+socketOnDoneDelay
 			arr.map((item,index) => {
 				const func = () => {
           onData.apply( _this, [ { body: JSON.stringify(item) } ] )
           rlog('SOCKET-OFFLINE',`onData ${index}`,{item,index})
         }
-				setTimeout(func, index*delayPerRefresh + delay2);
+				setTimeout(func, index*delayPerRefresh + initialSocketDelay);
 
 				if (index+1 == arr.length) {
 					onDoneSocket.totalElements = arr.length;
 					const func2 = () => onData.apply( _this, [ { body: JSON.stringify(onDoneSocket) } ] )
-					setTimeout(func2, index*delayPerRefresh+delay3)
+					setTimeout(func2, index*delayPerRefresh+delayOnDone)
 				}
       })
     },

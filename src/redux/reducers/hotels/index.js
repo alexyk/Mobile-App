@@ -1,13 +1,14 @@
 import { handleActions } from "redux-actions";
-import { setSearch, setSearchFiltered, setSearchString, setGuestData } from "../../action/hotels";
-import { cloneDeep } from 'lodash';
+import { setSearch, setSearchFiltered, setSearchString, setGuestData, setSearchState } from "../../action/hotels";
+
 
 
 const initialState = {
   searchString: null,
   searchResults: [],
   searchResultsFiltered: [],
-  guestData: null
+  guestData: null,
+  isSearchDone: false
 };
 
 export default handleActions(
@@ -34,6 +35,12 @@ export default handleActions(
       return {
         ...state,
         guestData: payload
+      };
+    },
+    [setSearchState]: (state, { payload }) => {
+      return {
+        ...state,
+        isSearchDone: payload
       };
     }
   },

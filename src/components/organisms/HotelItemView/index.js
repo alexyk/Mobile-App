@@ -20,6 +20,8 @@ import styles, { imageHeight } from "./styles";
 import lang from "../../../language";
 import LTIcon from "../../atoms/LTIcon";
 import { SCREEN_SIZE } from "../../../utils/designUtils";
+import { isString } from "js-tools";
+import { commonText } from "../../../common.styles";
 
 class HotelItemView extends Component {
   static propTypes = {
@@ -242,8 +244,20 @@ class HotelItemView extends Component {
     )
   }
 
+  renderSpecialItem(item) {
+    return (
+      <View style={{width: "100%", padding: 10}}>
+        <Text style={{...commonText, fontSize: 17, textAlign: 'center'}}>{item}</Text>
+      </View>
+    )
+  }
+
   render() {
     const item = this.props.item;
+
+    if (isString(item)) {
+      return this.renderSpecialItem(item);
+    }
 
     //TODO: @@debug remove
     // console.log(`[HotelItemView] hotel item ${item.id}`, item, this.props)

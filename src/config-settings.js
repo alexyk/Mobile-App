@@ -32,3 +32,6 @@ export const showNumberOnHotelItem = __DEV__ && false;
 export const showBothMapAndListHotelSearch = false;
 export const isFontScalingEnabled = false;
 export const autoGetAllStaticPages = false;
+export const hotelSearchResults = {
+  lastBestPriceTitle: false,
+}
