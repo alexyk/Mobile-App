@@ -35,11 +35,11 @@ export const errorLevel = 0;
 
   // reactotron
 export const reactotronLoggingEnabled           = true;
-export const logConverterErrorToReactrotron     = false;
-export const showTypesInReactotronLog           = true;
+export const logConverterErrorToReactotron      = false;
+export const showTypesInReactotronLog           = false;
 export const warnOnReactotronDisabledCalls      = false;
   // redux
-export const reduxConsoleLoggingEnabled         = false;
+export const reduxConsoleLoggingEnabled         = true;
 export const reduxConsoleCollapsedLogging       = true;
 export const reduxReactotronLoggingEnabled      = false;
   // console
@@ -47,31 +47,8 @@ export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
 export const consoleShowTimeInLogs              = true;    // prepend with time
-/**
- * consoleFilters
- * Two types of filtering - inclusive and exclusive depending on whether first char is exclamation mark (!)
- * Two types of filter data - String or RegEx
- * If the string starts with an ! - exclude it from log
- * If not starting with ! - continue logging it
- * Notes:
- *  - lower index in the array - means a higher priority as a filter meaning if it matches next filters are ignored
- *  - only inclusive regex is supported so far
- */
-export var filtersConfig = {
-  includeNonMatching: true,
-  empty: [],
-  safari: ['!\`scale', '!Require cycle', "!Async Storage ", "!SocketRocket"],
-  0: [],
-  1: ['!Require cycle', '!Disabling console.time', '!<object>', "!WARNING", "!deprecated", "!Running appl", "!RCTSplashScreen", "!Async Storage "],
-  2: ['!Require cycle', '!Disabling console.time', "!WARNING", "!deprecated", "!Running appl", "!RCTSplashScreen", "!Async Storage "]
-}
-filtersConfig = { ...filtersConfig,
-  fav1: ['includeNonMatching: true', ...filtersConfig["1"], ],
-  fav2: ['MessageDialog', 'includeNonMatching: false'],
-  debug: ['includeNonMatching: false', 'MessageDialog', 'serverUtil', "!<object>"],
-}
-export const consoleFilters                     = filtersConfig['safari'];
 export const consoleClearAtStart                = true;
+export const consoleFilter                      = 'redux';
 export const serverLogRequesting                = true;
 export const serverExpandErrors                 = false;
   // other
@@ -88,6 +65,25 @@ export const isOnline = (!isOffline);
 export const autoLoginInOfflineMode             = true;
 export var validationStateOfflineWallet         = -1;  // -1: none, 0: invalid, 1: valid
 export const offlineEmailVerificationValue      = true;
+  // automated flows
+    // hotels search
+export const autoHotelSearch                    = false;
+export const autoHotelSearchFocus               = false;
+export const autoHotelSearchPlace               = 'araraquara'
+export const skipEmailVerification              = false;
+    // homes search
+export const autoHomeSearch                     = false;
+export const autoHomeSearchPlace                = 'uk1'
+  // calendar
+export const autoCalendar                       = false;
+  // message dialog
+export const messageDialogDebug                 = false;
+  // test flows
+export const testFlowURL                        = "http://beta.locktrip.com/api/mobile/login";
+export const testFlow                           = "hotelDetails";
+
+
+// ------------ data definitions ----------------
 export const offlineTimeInSeconds = {
   getCountries: 0,
   getCurrencyRates: 0,
@@ -108,19 +104,7 @@ export const offlineTimeInSeconds = {
   getHotelById: 0,
   sendVerificationEmail: 0.5
 }
-  // automated flows
-    // hotels search
-export const autoHotelSearch                    = false;
-export const autoHotelSearchFocus               = true;
-export const autoHotelSearchPlace               = 'london'
-    // homes search
-export const autoHomeSearch                     = false;
-export const autoHomeSearchPlace                = 'uk1'
-  // calendar
-export const autoCalendar                       = false;
-  // test flows
-export const testFlowURL                        = "http://beta.locktrip.com/api/mobile/login";
-export const testFlow                           = "";
+
 // TODO: Add the following options
 /*
     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
@@ -137,5 +121,41 @@ export const testFlow                           = "";
 */
 
   // ui
-export const iconsDebugEnabled                  = false;    
+export const iconsDebugEnabled                  = false;
+
+
+// prettier-ignore
+/**
+ * consoleFilters
+ * Two types of filtering - inclusive and exclusive depending on whether first char is exclamation mark (!)
+ * Two types of filter data - String or RegEx
+ * If the string starts with an ! - exclude it from log
+ * If not starting with ! - continue logging it
+ * Notes:
+ *  - lower index in the array - means a higher priority as a filter meaning if it matches next filters are ignored
+ *  - only inclusive regex is supported so far
+ */
+export var filtersConfig = {
+  includeNonMatching: true,
+  leaveOnFirstMatch: true,
+  mode: 'and',
+  empty: [],
+  0: [],
+  default: ['!\`scale', '!Require cycle', "!Async Storage ", "!SocketRocket", '!Disabling console.time', '!deprecated', "!RCTSplashScreen"],
+}
+filtersConfig.default2 = [].concat(filtersConfig.default, ['!<object>'])
+filtersConfig.default3 = ['mode:liM'].concat(filtersConfig.default2, [])
+filtersConfig.default4 = [`mode:liM`].concat(filtersConfig.default2, [])
+filtersConfig.fav1   = ['serverUtil'].concat(filtersConfig.default4, [])
+filtersConfig.fav2   = ['MessageDialog', 'includeNonMatching: false']
+filtersConfig.safari = [].concat(filtersConfig.default2)
+filtersConfig.vscode = [].concat(filtersConfig.default4, ['MessageDialog', 'serverUtil'])
+filtersConfig.vscode2  = [].concat(filtersConfig.vscode, ['action'])
+filtersConfig.testFlow = [].concat(filtersConfig.default, ['includeNonMatching: true'])
+filtersConfig.simple = [].concat(filtersConfig.default4, ['includeNonMatching: false', 'serverUtil'])
+filtersConfig.server = ['includeNonMatching: false', 'serverUtil', ]
+filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, [
+  'serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
+
+export const consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
 

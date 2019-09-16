@@ -1,4 +1,4 @@
-import { isObject, isString, getObjectClassName, isSymbol } from "js-tools";
+import { isObject, isString, getObjectClassName, isSymbol, logError } from "js-tools";
 import lodash from 'lodash';
 import moment, { isMoment } from 'moment';
 import { __MYDEV__, __TEST__,
@@ -10,7 +10,9 @@ import { __MYDEV__, __TEST__,
 // ---------------  function definitions  -----------------
 
 const emptyFunc = function() {};
-function emptyFuncWithDescr(descr) { if (__MYDEV__ !== undefined && console.warn != null) console.warn(` Call of '${descr}' is disabled - see '__MYDEV__'`) };
+function emptyFuncWithDescr(descr) {
+  return () => { if (__MYDEV__ !== undefined && console.warn != null) console.warn(` Call of '${descr}' is disabled - see '__MYDEV__'`) };
+}
 
 function addTime(all) {
   if (consoleShowTimeInLogs) {
@@ -49,13 +51,24 @@ function configureConsole() {
     const origLog = console.log;
     const origWarn = console.warn;
     const origInfo = console.info;
+    const origGroup = console.group;
+    const origGroupCollapsed = console.groupCollapsed;
+    
 
     const funcLog = (type) => (...args) => {
       let isFiltered = applyConsoleFilters(args, consoleFilters);
 
-      if (consoleShowTimeInLogs) {
+      const hasTime = /\d{2}:\d{2}:\d{2}/.test(args[0]);
+      const hasColor = (/%c/.test(args[0]));
+      const isReduxAction = (/%c action/.test(args[0]));
+      if (consoleShowTimeInLogs && !hasTime && !hasColor) {
         const timeStr = `[${moment().format("HH:mm:ss.SSS")}]`;
         args.unshift(timeStr);
+      }
+      if (isReduxAction) {
+        args.splice(1,10);
+        args[0].replace('%c', '');
+        return;
       }
     
 
@@ -81,6 +94,9 @@ function configureConsole() {
     console.info = funcLog('info');
     console.error = funcLog('error');
     console.warn = funcLog('warn');
+    console.group = funcLog('group')
+    console.groupCollapsed = funcLog('groupCollapsed')
+    console.groupEnd = (emptyFunc);
     ilog = funcLog('ilog');
     clog = funcLog('clog');
     wlog = funcLog('wlog');
@@ -148,26 +164,71 @@ function configureConsole() {
   }
 }
 
+export function evalFilterConfig(filter) {
+  // prettier-ignore
+  const asArr = filter.split(/[:=]/);
+  const isMode = (asArr[0].trim() == 'mode');
+  const value = asArr[1].trim();
+
+  if (isMode) {
+    switch (value) {
+      case 'or':    
+      case 'and':
+        return value;
+    
+      default:
+        if (value.toLowerCase() != 'lim') {
+          throw new Error(`[debug-tools] evalFilterConfig() - unexpected mode value - "${value}"`);
+        }
+        return {
+          lOFM: value[0] == 'L',
+          iNM: value[1] == 'I',
+          m: value[2] == 'm' ? 'or' : 'and'
+        }
+    }
+  }
+  
+  return eval(value);
+}
 
 function applyConsoleFiltersFunc(consoleArgs, filtersOrig) {
   let result = true;
   let filters = filtersOrig.concat(); // work with a copy
 
   let isMatching = false;
-  let { includeNonMatching } = filtersConfig;
+  let { includeNonMatching, leaveOnFirstMatch, mode } = filtersConfig;
+  let results = [];
   
   let filter;
   for (filter of filters) {
+    if (!filter) { // happens if forgotten a comma at the end or empty string etc.
+      continue;
+    }
     let isRegEx = (filter instanceof RegExp);
     let isType = false;
     let isExclusive = false;
     let includeInLog = false;
 
     if (!isRegEx) {
-      // overriding "includeNonMatching"
+      // overriding config
       if (filter.includes('includeNonMatching')) {
-        // prettier-ignore
-        includeNonMatching = eval(  filter.split(/[:=]/)[1]  );
+        includeNonMatching = evalFilterConfig(filter);
+        continue;
+      }
+      if (filter.includes('leaveOnFirstMatch')) {
+        leaveOnFirstMatch = evalFilterConfig(filter);
+        continue;
+      }
+      if (filter.includes('mode')) {
+        const res = evalFilterConfig(filter);
+        if (isObject(res)) {
+          const { m, lOFM, iNM } = res;
+          leaveOnFirstMatch = lOFM;
+          includeNonMatching = iNM;
+          mode = m;
+        } else {
+          mode = res;
+        }
         continue;
       }
 
@@ -178,13 +239,13 @@ function applyConsoleFiltersFunc(consoleArgs, filtersOrig) {
         filter = filter.substr(1);
       }
 
-      isType = (filter.charAt(0) == '<');
+      isType = (filter.charAt(0) == '(');
     }
 
     let argIndex = 0;
     for (let arg of consoleArgs) {
       if (isType) {
-        filter = filter.replace(/[<>]/g,"");
+        filter = filter.replace(/[\(\)]/g,"");
         isMatching = (typeof(arg) == filter);
         if (isMatching) {
           if (isExclusive) {
@@ -226,13 +287,21 @@ function applyConsoleFiltersFunc(consoleArgs, filtersOrig) {
       argIndex++;
     }
 
-    if (isMatching) {
+    if (isMatching) results.push(includeInLog);
+
+    if (isMatching && leaveOnFirstMatch) {
       result = includeInLog;
       break;
     }
   }
 
-  result = (isMatching ? result : includeNonMatching);
+  if (leaveOnFirstMatch) {
+    result = (isMatching ? result : includeNonMatching);
+  } else if (mode == 'and') {
+    results.forEach(item => result = result && item);
+  } else {
+    results.forEach(item => result = result || item);
+  }
 
   return result;
 }
@@ -464,79 +533,66 @@ export function testFlowExec(type, extraConfig={}) {
   try {
     testFlowExecSafe(type, extraConfig);
   } catch (error) {
-    wlog(`[Error] Could not execute test-flow ${type} - ${error.message}`)
+    logError(`${type}] [testFlowExec()`, null, error, `- could not execute test-flow`);
   }
 }
-function testFlowExecSasfe(type, extraConfig={}) {
+function testFlowExecSafe(type, extraConfig={}) {
   if (type == null) {
     type = testFlow;
   }
-  const requester = require("../../../initDependencies");
-  const reduxStore = require("../../../redux/store");
-  const navigationService = require('../../../services/navigationService');
+  const requester = require("../../../initDependencies").default;
+  const reduxStore = require("../../../redux/store").default;
+  const navigationService = require('../../../services/navigationService').default;
   const serverRequest = require('../../../services/utilities/serverUtils').serverRequest;
 
-  let lib, flow;
+  let lib, flow, jsonData;
 
   try {
     lib = require("test-flows");
     lib = lib.default;
   } catch (error) { wlog('[debug] Could not get test-flows lib')}
 
+  // prettier-ignore
   switch (type) {
+
+    case 'hotelDetails':
+      const getParams = (flow) => function (name) {
+        switch (name) {
+          case 'redux-action-type':     return "SET_SEARCH_STRING";
+          case 'redux-action-payload':  return "?region=1937&currency=EUR&startDate=27/09/2019&endDate=28/09/2019&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1";
+          case 'redux1':                return "hotels.searchString";
+          case 'nav-params':            return require('../../debug/test-flows/data/hotelDetails.json');
+          case 'nav-screen':            return 'HotelDetails';
+          default:                      return ["none"];
+        }
+      }
+
+      lib.setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
+      lib.flows
+        .sampleFlow([6,9,11,12])
+        .exec()
+      break;
+
     case 'guestInfo':
       try {
-        const jsonData = require('../../debug/test-flows/data/guest-info-3a-4ch.json');
-
         const getParams = (flow) => function (name) {
-          let result = [];
-
           switch (name) {
-            case 'hotels-search':
-              let query1 = `?region=1937`;
-              query1 += "&currency=EUR";
-              query1 += "&startDate=27/09/2019";
-              query1 += "&endDate=28/09/2019";
-              query1 += "&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1";
-              query1 += `&uuid=${flow.read('uuid')}amp;97892170124`;
-              result.push(query1);
-              break;
-
-            case 'nav-params':
-              result = jsonData;
-              break;
-
-            case 'redux1':
-                result = ['userInterface.datesAndGuestsData.roomsData'];
-                break;
-
+            case 'hotels-search':       return ["?region=1937&currency=EUR&startDate=27/09/2019&endDate=28/09/2019&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1" +
+                                                `&uuid=${flow.read('uuid')}amp;97892170124`];
+            case 'nav-params':          return require('../../debug/test-flows/data/guest-info-3a-4ch.json');
+            case 'redux1':              return ['userInterface.datesAndGuestsData.roomsData'];
             case 'redux-exec-payload':
-              let roomsData = [];
-              roomsData.push({adults: 2, children: [2,3,8]});
-              roomsData.push({adults: 1, children: [0]});
-              roomsData.push({adults: 1, children: [8,17]});
-              result.push({roomsData, rooms: 3});
-              break;
-
-            case 'nav-screen':
-              result = 'GuestInfoForm';
-              break;
-            
-            
-            case 'redux2':
-              result = ['userInterface.walletData'];
-              break;
-
-            case 'redux-action-type':
-              result = 'SET_WALLET_DATA';
-              break;
-
-            case 'redux-action-payload':
-              result = {reduxTest: 'hello there I am redux test in a test-flow'};
-              break;
+              let roomsData = [
+                {adults: 2, children: [2,3,8]},
+                {adults: 1, children: [0]},
+                {adults: 1, children: [8,17]}
+              ];
+              return [{roomsData, rooms: 3}];
+            case 'nav-screen':            return 'GuestInfoForm';
+            case 'redux2':                return ['userInterface.walletData'];
+            case 'redux-action-type':     return 'SET_WALLET_DATA';
+            case 'redux-action-payload':  return {reduxTest: 'hello there I am redux test in a test-flow'};
           }
-
-          return result;
         }
 
         lib
@@ -544,6 +600,7 @@ function testFlowExecSasfe(type, extraConfig={}) {
         lib.flows
           .sampleFlow()
           .exec();
+
       } catch (error) {
         wlog('                                                                                                              ');
         wlog('                                                                                                              ');

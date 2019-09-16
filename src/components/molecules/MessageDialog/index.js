@@ -5,6 +5,7 @@ import PropTypes from 'prop-types'
 import MaterialDialog from "../../atoms/MaterialDialog/MaterialDialog";
 import { clog, wlog } from "../../../utils/debug/debug-tools";
 import { getObjectClassName } from "js-tools";
+import { messageDialogDebug } from "../../../config-debug";
 
 
 class MessageDialog extends Component {
@@ -60,7 +61,7 @@ class MessageDialog extends Component {
     const { message: nextMessage, isVisible: nextIsVisible } = nextProps;
     const { message, isVisible, parent } = this.props;
 
-    if (__DEV__) {
+    if (__DEV__ && messageDialogDebug) {
       const printD = this.propsToDebug.bind(this);
       const parentName = getObjectClassName(parent);
       clog(`[MessageDialog][${parentName}] current: ${printD(this.props)} next: ${printD(nextProps)}`);

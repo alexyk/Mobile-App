@@ -1,7 +1,7 @@
 import {
   raiseConverterExceptions,
   logConverterError,
-  logConverterErrorToReactrotron
+  logConverterErrorToReactotron
 } from "../../config-debug";
 
 class CurrencyConverter {
@@ -41,7 +41,7 @@ class CurrencyConverter {
       if (logConverterError) {
         console.error(`[currencyConverter] Error`, error);
       }
-      if (logConverterErrorToReactrotron) {
+      if (logConverterErrorToReactotron) {
         console.tron.error(
           `[currencyConverter] Error: "${error.message}"`,
           error

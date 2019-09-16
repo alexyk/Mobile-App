@@ -60,7 +60,6 @@ class HotelDetails extends Component {
       guests,
       searchString,
       currentIndex: 0,
-      emailVerificationVisible: false
     };
 
     this._isMounted = false;
@@ -177,8 +176,6 @@ class HotelDetails extends Component {
     const { onVerificationEmailSuccess, onVerificationEmailError } = this;
     const { searchString, hotel } = this.state;
     const emailVerificationRedirectURL = `/hotels/listings/${hotel.id}${searchString}`;
-
-    MessageDialog.hide('email-verification');
 
     serverRequest(this, requester.sendVerificationEmail,[{emailVerificationRedirectURL}], onVerificationEmailSuccess, onVerificationEmailError);
   }
