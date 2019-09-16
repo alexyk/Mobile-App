@@ -423,14 +423,15 @@ export function generateHotelFilterString(page, state) {
 /**
  * Merging all data from getting static hotels (getStaticHotels), through socket messages
  * and finally - filtered (getMapInfo)
+ * Skip priceless ones
  * @param {Array} filtered
  * @param {Object} socketMap A map {id: hotelData, ...}
  * @param {Object} staticMap A map {id: hotelData, ...}
  */
 export function mergeAllHotelData(filtered, socketMap, staticMap) {
-  let result = filtered;
+  let result = [];
   try {
-    result.forEach((item, index) => {
+    filtered.forEach((item, index) => {
       const socketData = socketMap ? socketMap[item.id] : null;
       const staticData = staticMap ? staticMap[item.id] : null;
 
@@ -452,7 +453,9 @@ export function mergeAllHotelData(filtered, socketMap, staticMap) {
         mergedData = item;
       }
 
-      return mergedData;
+      if (mergedData.price != null) {
+        result.push(mergedData);
+      }
     });
   } catch (e) {
     processError(
@@ -896,13 +899,17 @@ export function calculateCoordinatesGridPosition(
 }
 
 
-export function parseGuestInfoToServerFormat(data) {
+export function parseGuestInfoToServerFormat(data, isInitial=false) {
   let result = [];
 
   data.forEach(room => {
     let roomInfo = {adults:[], children: []}
     room.forEach(guest => {
-      const { age, title, firstName, lastName } = guest;
+      let { age, title, firstName, lastName } = guest;
+      if (isInitial) {
+        firstName = null;
+        lastName = null;
+      }
       const isAChild = (age != null);
       if (isAChild) {
         // roomInfo.children.push({age, firstName, lastName})

@@ -39,7 +39,7 @@ export const logConverterErrorToReactotron      = false;
 export const showTypesInReactotronLog           = false;
 export const warnOnReactotronDisabledCalls      = false;
   // redux
-export const reduxConsoleLoggingEnabled         = true;
+export const reduxConsoleLoggingEnabled         = false;
 export const reduxConsoleCollapsedLogging       = true;
 export const reduxReactotronLoggingEnabled      = false;
   // console
@@ -48,7 +48,7 @@ export const logConverterError                  = false;
 export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
 export const consoleShowTimeInLogs              = true;    // prepend with time
 export const consoleClearAtStart                = true;
-export const consoleFilter                      = 'debug1';
+export const consoleFilter                      = '';
 export const serverLogRequesting                = true;
 export const serverExpandErrors                 = false;
   // other
@@ -155,7 +155,7 @@ filtersConfig.testFlow = [].concat(filtersConfig.default, ['includeNonMatching: 
 filtersConfig.simple = [].concat(filtersConfig.default4, ['includeNonMatching: false', 'serverUtil'])
 filtersConfig.server = ['includeNonMatching: false', 'serverUtil', ]
 filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
-filtersConfig.debug1  = ["mode: LiM", "renderMapButton"]
+filtersConfig.debug1  = ["mode: LiM", ].concat(filtersConfig.default2)
 
 export const consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
 

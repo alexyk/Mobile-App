@@ -42,7 +42,7 @@ import {
   autoGetAllStaticPages,
   hotelSearchIsNative,
   HOTELS_INITIAL_ITEMS_TO_LOAD,
-  hotelSearchResults
+  OPTIONS
 } from "../../../../config-settings";
 import { rlog, processError, clog, elog, wlog } from "../../../../utils/debug/debug-tools";
 import { isOnline, hotelsSearchSocketDebug } from "../../../../config-debug";
@@ -901,7 +901,7 @@ class HotelsSearchScreen extends Component {
 
 
     // add title for last best price list
-    if (hotelSearchResults.lastBestPriceTitle) {
+    if (OPTIONS.hotelSearchResults.LAST_BEST_PRICE_TITLE) {
       hotels.unshift(`List of ${hotels.length} Last Best Price Hotels:`)
     }
     // update list

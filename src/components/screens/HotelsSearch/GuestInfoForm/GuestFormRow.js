@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import styles from "./styles";
 import LTPicker from "../../../molecules/LTPicker";
 import { validateName } from "../../../../utils/validation";
+import { OPTIONS } from "../../../../config-settings";
 
 
 export default class GuestFormRow extends Component {
@@ -152,6 +153,10 @@ export default class GuestFormRow extends Component {
     this._firstId = id;
     this._lastId = id+1;
     textRefs.id += 2;
+
+    if (isAChild && OPTIONS.guests.SKIP_CHILDREN_NAMES) {
+      return null;
+    }
 
     return (
       <View key={`${roomIndex}_${guestIndex}_${id}`} style={styles.guestInfoWrapper} key={`${guestIndex}`}>

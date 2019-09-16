@@ -12,7 +12,7 @@ import { setLocRateFiatAmount } from "../../../../redux/action/exchangeRates";
 import requester from "../../../../initDependencies";
 import { userInstance } from "../../../../utils/userInstance";
 import { imgHost } from "../../../../config";
-import { SC_NAME, DEFAULT_CRYPTO_CURRENCY } from "../../../../config-settings";
+import { SC_NAME, DEFAULT_CRYPTO_CURRENCY, OPTIONS } from "../../../../config-settings";
 import { processError, clog } from "../../../../utils/debug/debug-tools";
 import { gotoWebview } from "../../utils";
 import { WebsocketClient } from "../../../../utils/exchangerWebsocket";
@@ -72,6 +72,7 @@ class GuestInfoForm extends Component {
     this._editingTimeout;
 
     this._textRefs = {};
+    this._retries = 0;
 
     this._updateStateAndCache = this._updateStateAndCache.bind(this);
     this._serviceRequestSCMode = this._serviceRequestSCMode.bind(this);
@@ -162,6 +163,12 @@ class GuestInfoForm extends Component {
       });
 
       _this.setState({ guests: cloneDeep(preparedGuests), isLoading: false });
+
+      if (OPTIONS.hotelReservation.USE_INITIAL_BOOKING) {
+        const { quoteId } = _this.props.navigation.state.params.roomDetail;
+        const { currency } = _this.props;
+        _this.serviceCreateReservation(quoteId, currency, preparedGuests, true);
+      }
     }
   }
 
@@ -229,13 +236,30 @@ class GuestInfoForm extends Component {
   onReservationSuccess(data) {
     const { preparedBookingId, booking, fiatPrice } = data || {};
 
-    let retries = 0;
-
     if (preparedBookingId == null || booking == null ) {
       this._showRoomNAMessage();
       processError(`[GuestInfoForm] [onReservationSuccess] Booking the selected item did not succeed.`, {data});
       return;
     }
+
+    const currentBooking = booking.hotelBooking[0]
+    const { createdDate } = booking;
+    let { arrivalDate } = currentBooking || {};
+
+    if (arrivalDate == null || currentBooking == null) {
+      let max = OPTIONS.hotelReservation.BOOKING_RETRIES;
+      if (this._retries <= max) {
+        this._retries++;
+        clog(`Retrying booking #${this._retries}`, data)
+        const { quoteId } = this.props.navigation.state.params.roomDetail;
+        const { currency } = this.props;
+        this.serviceCreateReservation(quoteId, currency, cloneDeep(this._guestsCollection));
+      } else {
+        this._showRoomNAMessage();
+      }
+      return;
+    }
+
 
     const quoteBookingCandidate = {
       bookingId: preparedBookingId
@@ -244,10 +268,6 @@ class GuestInfoForm extends Component {
     // prettier-ignore
     serverRequest(this, requester.quoteBooking, [quoteBookingCandidate],
       success => {
-        const currentBooking = booking.hotelBooking[0]
-        const { createdDate } = booking;
-        let { arrivalDate } = currentBooking || {};
-
         if (success.is_successful_quoted && (currentBooking != null || arrivalDate != null)) {
           const bookingId = preparedBookingId;
           let startDate, endDate;
@@ -275,27 +295,24 @@ class GuestInfoForm extends Component {
               this._onReservationReady();
             }
           );
-        } else {
-          if (retries <= BOOKING_RETRIES) {
-            retries++;
-            clog(`Retrying booking #${retries}`, success)
-            this.onReservationSuccess(data);
-          } else {
-            this._showRoomNAMessage();
-          }
         }
       }
     );
   }
 
-  serviceCreateReservation(quoteId, currency, guestRecord) {
+  serviceCreateReservation(quoteId, currency, guestRecord, isInitial=false) {
     const reservationRequestData = {
       quoteId, currency,
-      rooms: parseGuestInfoToServerFormat(guestRecord)
+      rooms: parseGuestInfoToServerFormat(guestRecord, isInitial)
     };
     this.setState({ isLoading: true, proceedButtonLabel: "Processing ...", reservationRequestData });
 
-    serverRequest(this, requester.createReservation, [reservationRequestData], this.onReservationSuccess, this.onReservationError);
+    let { onReservationSuccess, onReservationError } = this;
+    if (isInitial) {
+      onReservationSuccess = () => {};
+      onReservationError = () => {};
+    }
+    serverRequest(this, requester.createReservation, [reservationRequestData], onReservationSuccess, onReservationError);
   }
 
   gotoWebViewPayment() {
@@ -480,11 +497,13 @@ class GuestInfoForm extends Component {
     return (
       <View>
         { guests.map( (room, roomIndex) => {
-            const guestsCount = room.length;
             const childrenCount = (roomsData && roomsData[roomIndex] ? roomsData[roomIndex].children.length : 0)
+            const guestsCount = room.length - (OPTIONS.guests.SKIP_CHILDREN_NAMES ? childrenCount : 0);
             const extraString = (
               childrenCount > 0 
-                ? <Text style={styles.childCount}>{`\nincl. ${childrenCount} ${childrenCount == 1 ? 'child' : 'children'}`}</Text>
+                ? OPTIONS.guests.SKIP_CHILDREN_NAMES
+                  ? <Text style={styles.childCount}>{`\nand ${childrenCount} ${childrenCount == 1 ? 'child' : 'children'}`}</Text>
+                  : <Text style={styles.childCount}>{`\nincl. ${childrenCount} ${childrenCount == 1 ? 'child' : 'children'}`}</Text>
                 : ""
             );
             return (

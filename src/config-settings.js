@@ -32,11 +32,16 @@ export const showNumberOnHotelItem = __DEV__ && false;
 export const showBothMapAndListHotelSearch = false;
 export const isFontScalingEnabled = false;
 export const autoGetAllStaticPages = false;
-export const hotelSearchResults = {
-  lastBestPriceTitle: false,
-}
-export const Options = {
+
+export const OPTIONS = {
+  guests: {
+    SKIP_CHILDREN_NAMES: true
+  },
   hotelReservation: {
+    USE_INITIAL_BOOKING: false,
     BOOKING_RETRIES: 1
+  },
+  hotelSearchResults: {
+    LAST_BEST_PRICE_TITLE: false,
   }
 }
