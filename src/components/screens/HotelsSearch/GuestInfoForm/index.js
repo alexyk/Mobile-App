@@ -203,6 +203,11 @@ class GuestInfoForm extends Component {
     );
   }
 
+  _showRoomNAMessage() {
+    this.refs.toast.show(lang.TEXT.ROOM_NA, 3000);
+    this.setState({proceedButtonLabel: 'Unavailable...'})
+  }
+
   onReservationError(errorData, errorCode) {
     const { errors } = errorData;
 
@@ -225,8 +230,7 @@ class GuestInfoForm extends Component {
     const { preparedBookingId, booking, fiatPrice } = data || {};
 
     if (preparedBookingId == null || booking == null ) {
-      this.refs.toast.show(lang.TEXT.ROOM_NA, 3000);
-      this.setState({proceedButtonLabel: 'Unavailable...'})
+      this._showRoomNAMessage();
       processError(`[GuestInfoForm] [onReservationSuccess] Booking the selected item did not succeed.`, {data});
       return;
     }
@@ -270,7 +274,7 @@ class GuestInfoForm extends Component {
             }
           );
         } else {
-          this.refs.toast.show(lang.TEXT.ROOM_NA, 3000);
+          this._showRoomNAMessage();
         }
       }
     );

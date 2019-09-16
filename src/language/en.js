@@ -43,7 +43,7 @@ const TEXT = {
   SEARCH_HOTEL_ITEM_PRICE_NA: "Price unavailable",
   SEARCH_HOTEL_ITEM_PRICE_LOADING: "",
   BOOKING_STEPS: ["Guest Info", "Confirm and Pay"],
-  NO_ROOMS: "No rooms available.\nPlease try a different search.",
+  NO_ROOMS: "No rooms available.\nPlease try a different hotel or search.",
   NO_ROOMS_SEARCH_IN_PROGRESS: "Rooms will be available when search is complete. Please check rooms again when search is done.",
   ROOM_NA: "The room was not available for booking. Please try again later or select another room.",
   VERIFICATION_EMAIL_MESSAGE: "It seems that your email has not yet been verified. You need to verify your email before you can proceed with your booking.",
