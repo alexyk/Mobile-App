@@ -607,7 +607,7 @@ class GuestInfoForm extends Component {
   render() {
     const { params } = this.props.navigation.state;
     const { price, daysDifference } = params;
-    const { proceedButtonLabel, isLoading } = this.state;
+    const { proceedButtonLabel, isLoading, isDone, isValid } = this.state;
 
     return (
       <KeyboardAvoidingView behavior={Platform.OS == "ios" ? "height" : null} style={styles.container} >
@@ -641,7 +641,7 @@ class GuestInfoForm extends Component {
           daysDifference={daysDifference}
           titleBtn={proceedButtonLabel}
           onPress={this._onProceedPress}
-          isDisabled={isLoading}
+          isDisabled={isLoading || isDone || !isValid}
         />
       </KeyboardAvoidingView>
     );
