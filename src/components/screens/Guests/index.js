@@ -21,7 +21,7 @@ import Separator from "../../atoms/Separator";
 import ChildrenRooms from "../../molecules/ChildrenRooms";
 import { HOTEL_ROOM_LIMITS } from "../../../config-settings";
 import { cloneDeep } from "lodash";
-import { commonText } from "../../../common.styles";
+
 
 class Guests extends Component {
   static propTypes = {
@@ -39,12 +39,7 @@ class Guests extends Component {
   constructor(props) {
     super(props);
 
-    const {
-      adults,
-      children,
-      childrenAgeValues,
-      rooms
-    } = this.props.datesAndGuestsData;
+    const { adults, children, childrenAgeValues, rooms } = this.props.datesAndGuestsData;
 
     this.state = {
       adults,

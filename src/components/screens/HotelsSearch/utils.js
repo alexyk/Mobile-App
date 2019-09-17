@@ -1,7 +1,7 @@
 import lodash from "lodash";
 import { validateObject } from "../utils";
 import { isObject, isNumber, isString, isArray } from "js-tools";
-import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG } from "../../../config-settings";
+import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG, OPTIONS } from "../../../config-settings";
 import { checkHotelsDataWithTemplates } from "../../../config-debug";
 import { rlog, processError } from "../../../utils/debug/debug-tools";
 
@@ -912,8 +912,11 @@ export function parseGuestInfoToServerFormat(data, isInitial=false) {
       }
       const isAChild = (age != null);
       if (isAChild) {
-        // roomInfo.children.push({age, firstName, lastName})
-        roomInfo.children.push({age})
+        const childData = (OPTIONS.guests.SKIP_CHILDREN_NAMES
+          ? {age}
+          : {age, firstName, lastName}
+        )
+        roomInfo.children.push(childData);
       } else {
         roomInfo.adults.push({title, firstName, lastName})
       }

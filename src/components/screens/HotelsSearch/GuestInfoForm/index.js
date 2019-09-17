@@ -49,6 +49,8 @@ class GuestInfoForm extends Component {
     this.state = {
       isLoading: true,
       isConfirmed: false,
+      isValid: true,
+      isDone: false,
       scMode: false,
       proceedButtonLabel: "Loading ...",
 
@@ -73,6 +75,7 @@ class GuestInfoForm extends Component {
 
     this._textRefs = {};
     this._retries = 0;
+    this._unMounted = true;
 
     this._updateStateAndCache = this._updateStateAndCache.bind(this);
     this._serviceRequestSCMode = this._serviceRequestSCMode.bind(this);
@@ -90,13 +93,16 @@ class GuestInfoForm extends Component {
     this._prepareInitialGuestsData();
     this._serviceRequestSCMode();
   }
-
+  
   componentDidMount() {
+    this._unMounted = false;
     WebsocketClient.stopGrouping();
+    this._serviceValidBookingCheck();
   }
 
   componentWillUnmount() {
     WebsocketClient.startGrouping();
+    this._unMounted = true;
   }
 
   _getRoomType(roomDetail) {
@@ -210,15 +216,38 @@ class GuestInfoForm extends Component {
     );
   }
 
+  _serviceValidBookingCheck() {
+    if (!this || this._unMounted) {
+      return;
+    }
+
+    const { isValid, isDone } = this.state;
+    const { quoteId } = this.props.navigation.state.params.roomDetail;
+
+    serverRequest(this, requester.getQuoteIdExpirationFlag,[quoteId],
+      data => {
+        const { is_quote_valid} = data;
+        if (!is_quote_valid) {
+          this.setState({isValid: false, proceedButtonLabel: 'Unavailable...'});
+        } else if (isValid && !isDone) {
+          setTimeout(() => this._serviceValidBookingCheck(), OPTIONS.hotelReservation.VALID_CHECK_INTERVAL);
+        }
+      },
+      (errorData, errorCode) => {
+        this.setState({isValid: false, proceedButtonLabel: 'Network Error'});
+      }
+    );
+  }
+
   _showRoomNAMessage() {
     // this.refs.toast.show(lang.TEXT.ROOM_NA, 3000);
-    this.setState({proceedButtonLabel: 'Unavailable...'})
+    this.setState({proceedButtonLabel: 'Unavailable...', isValid: false})
   }
 
   onReservationError(errorData, errorCode) {
     const { errors } = errorData;
 
-    this.setState({proceedButtonLabel: 'Unavailable...'})
+    this.setState({proceedButtonLabel: 'Unavailable...', isValid: false})
 
     if (errors && errors.hasOwnProperty("RoomsXmlResponse")) {
       if (errors["RoomsXmlResponse"].message.indexOf("QuoteNotAvailable:") !== -1) {
@@ -395,6 +424,7 @@ class GuestInfoForm extends Component {
       currency,
       guestRecord: cloneDeep(this._guestsCollection)
     };
+    this.setState({isDone: true});
     this.gotoWebViewPayment(resParams);
   }
 
@@ -422,7 +452,8 @@ class GuestInfoForm extends Component {
   }
 
   _onProceedPress() {
-    if (this.state.isLoading) {
+    const { isLoading, isValid } = this.state;
+    if (isLoading || !isValid) {
       return;
     }
     if (!this._validateAllNames()) {

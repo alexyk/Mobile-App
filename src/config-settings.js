@@ -35,11 +35,12 @@ export const autoGetAllStaticPages = false;
 
 export const OPTIONS = {
   guests: {
-    SKIP_CHILDREN_NAMES: true
+    SKIP_CHILDREN_NAMES: false
   },
   hotelReservation: {
     USE_INITIAL_BOOKING: false,
-    BOOKING_RETRIES: 1
+    BOOKING_RETRIES: 1,
+    VALID_CHECK_INTERVAL: 10*1000 // in milliseconds
   },
   hotelSearchResults: {
     LAST_BEST_PRICE_TITLE: false,
