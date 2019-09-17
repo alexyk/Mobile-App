@@ -175,7 +175,7 @@ export function applyHotelsSearchFilter(data, filter, oneHotelId) {
 
     switch (type) {
       case "orderBy":
-        if (value1 == "priceForSort") {
+        if (value1 == "priceForSort" || value1 == "price") {
           if (value2 == "asc") {
             result.sort((a, b) => a.price > b.price);
           } else {

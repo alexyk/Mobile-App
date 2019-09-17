@@ -780,6 +780,9 @@ class HotelsSearchScreen extends Component {
     // const isCacheExpired = data.isCacheExpired;
     const count = data.content.length;
     const hotelsAll = data.content;
+
+    clog(`#hotel-search# [HotelsSearchScreen] Data filtered - ${count} items`);
+
     checkHotelData(hotelsAll, "filter");
     printCheckHotelDataCache();
 
