@@ -177,9 +177,9 @@ export function applyHotelsSearchFilter(data, filter, oneHotelId) {
       case "orderBy":
         if (value1 == "priceForSort" || value1 == "price") {
           if (value2 == "asc") {
-            result.sort((a, b) => a.price > b.price);
+            result.sort((a, b) => a.price - b.price);
           } else {
-            result.sort((a, b) => a.price < b.price);
+            result.sort((a, b) => b.price - a.price);
           }
         } else {
           //log('TODO',`Not implemented filter: '${value1}':'${value2}'   //   TYPE: '${type}'`,null,true)
@@ -347,9 +347,6 @@ export function processServerFilteredHotels(filtered, hotelsOld, hotelsOldIdsMap
       hotels.push(item);
     }
   });
-
-  // sort by lowest price first
-  hotels.sort((a,b) => (a.price < b.price));
 
   return {
     hotels,

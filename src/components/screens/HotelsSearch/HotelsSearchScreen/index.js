@@ -787,7 +787,7 @@ class HotelsSearchScreen extends Component {
     printCheckHotelDataCache();
 
     // parse data
-    mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap);
+    const filtered = mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap);
     checkHotelData(hotelsAll, "filter-parsed");
     printCheckHotelDataCache();
 
@@ -812,10 +812,10 @@ class HotelsSearchScreen extends Component {
     this.setState(
       // state update
       prevState => {
-        this.listUpdateDataSource(hotelsAll);
+        this.listUpdateDataSource(filtered);
         const newState = {
           hotelsInfo: hotelsAll,
-          hotelsInfoForMap: hotelsAll,
+          hotelsInfoForMap: filtered,
           totalHotels: count,
           isLoading: false
         };
@@ -925,11 +925,7 @@ class HotelsSearchScreen extends Component {
   }
 
   listUpdateDataSource(data) {
-    //log('list-updateData',`listUpdateDataSource, items: ${data ? data.length : 'n/a'}`, {hotels: this.state.hotelsInfo,hotelsForMap: this.state.hotelsInfoForMap,props:this.props,data});
-
-    console.time("*** HotelsSearchScreen::listUpdateDataSource()");
     this.listViewRef.updateDataSource(data);
-    console.timeEnd("*** HotelsSearchScreen::listUpdateDataSource()");
   }
 
   listSetPageLimit(value, fallbackValue = this.PAGE_LIMIT) {

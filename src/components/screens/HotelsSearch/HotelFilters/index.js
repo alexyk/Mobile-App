@@ -52,16 +52,16 @@ class HotelFilters extends Component {
       selectedRating: [false, false, false, false, false],
       priceItems: [
         {
-          label: "Rank",
-          value: "rank,desc"
-        },
-        {
           label: "Lowest price",
           value: "price,asc"
         },
         {
           label: "Highest price",
           value: "price,desc"
+        },
+        {
+          label: "Rank",
+          value: "rank,desc"
         }
       ]
     };
