@@ -85,6 +85,8 @@ class HomesSearchScreen extends Component {
     }
 
     this.saveState();
+
+    this.gotoHomeDetailPage = this.gotoHomeDetailPage.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -386,7 +388,7 @@ class HomesSearchScreen extends Component {
     return checks;
   }
 
-  gotoHomeDetailPage = async home => {
+  async gotoHomeDetailPage(home) {
     //console.log (" home ---", home);
     this.setState({ isLoadingDetails: true });
     try {
@@ -438,16 +440,16 @@ class HomesSearchScreen extends Component {
 
       this.setState({ isLoadingDetails: false });
 
+      const { checkInDateFormated, checkOutDateFormated } = this.props.datesAndGuestsData;
+
       this.props.navigation.navigate("HomeDetailsScreen", {
         homeData: data,
         homePhotos: homePhotos,
         checks: checks,
         calendar: calendar,
         roomDetails: roomDetails,
-        startDate: this.state.checkInDateFormated,
-        endDate: this.state.checkOutDateFormated,
-        checkInDate: this.state.checkInDate,
-        checkOutDate: this.state.checkOutDate,
+        startDate: checkInDateFormated,
+        endDate: checkOutDateFormated,
         nights: nights,
         guests: this.state.guests,
         // rateExchange: rateExchange,

@@ -133,7 +133,7 @@ class HomeReview extends Component {
 
         <ReviewListItem
           textFirst="Dates"
-          textLast={params.checkInDate + " - " + params.checkOutDate}
+          textLast={params.startDate + " - " + params.endDate}
         />
 
         <View
