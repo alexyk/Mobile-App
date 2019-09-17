@@ -69,7 +69,7 @@ export const offlineEmailVerificationValue      = true;
     // hotels search
 export const autoHotelSearch                    = false;
 export const autoHotelSearchFocus               = false;
-export const autoHotelSearchPlace               = 'london';
+export const autoHotelSearchPlace               = 'araraquara';
 export const skipEmailVerification              = false;
     // homes search
 export const autoHomeSearch                     = false;
@@ -155,7 +155,7 @@ filtersConfig.testFlow = [].concat(filtersConfig.default, ['includeNonMatching: 
 filtersConfig.simple = [].concat(filtersConfig.default4, ['includeNonMatching: false', 'serverUtil'])
 filtersConfig.server = ['includeNonMatching: false', 'serverUtil', ]
 filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
-filtersConfig.debug1  = ["mode: LiM", ].concat(filtersConfig.default2)
+filtersConfig.debug1  = ["mode: LiM", "error"].concat(filtersConfig.default2)
 
 export const consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
 
