@@ -26,7 +26,6 @@ const TEXT = {
   SEARCH_HOTEL_DETAILS_TILE: "Hotel Details & Booking",
   SEARCH_HOTEL_RESULTS_FOUND: "$$1 hotels",
   SEARCH_HOTEL_RESULTS_PRICES: "$$1 available",
-  SEARCH_HOTEL_RESULTS_PRICES_LOADING: "Searching for matches ...",
   SEARCH_HOTEL_RESULTS_HOTELS_LOADING: "Loading hotels ...",
   SEARCH_HOTEL_RESULTS_PRICES_TIMEOUT: "Price service is slow",
   SEARCH_HOTEL_RESULTS_HOTELS_TIMEOUT: "Hotels service is slow",
