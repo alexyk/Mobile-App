@@ -38,7 +38,7 @@ export const OPTIONS = {
     SKIP_CHILDREN_NAMES: false
   },
   hotelReservation: {
-    USE_INITIAL_BOOKING: false,
+    USE_INITIAL_BOOKING: true,
     BOOKING_RETRIES: 1,
     VALID_CHECK_INTERVAL: 10*1000 // in milliseconds
   },
