@@ -19,7 +19,7 @@ import DateAndGuestPicker from "../../organisms/DateAndGuestPicker";
 import { gotoWebview, stringifyRoomsData, processGuestsData } from "../utils";
 import styles from "./styles";
 import { formatDatesData } from "../Calendar/utils";
-import { hotelSearchIsNative } from "../../../config-settings";
+import { hotelSearchIsNative, BASIC_CURRENCY_LIST } from "../../../config-settings";
 import { setLoginDetails } from "../../../redux/action/userInterface";
 import { getSafeTopOffset } from "../../../utils/designUtils";
 import { serverRequest } from "../../../services/utilities/serverUtils";
@@ -27,8 +27,6 @@ import { setGuestData } from "../../../redux/action/hotels";
 import { isString } from "js-tools";
 import MessageDialog from "../../molecules/MessageDialog";
 
-
-const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
 
 class Explore extends Component {
   static self;

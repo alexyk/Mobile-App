@@ -18,10 +18,6 @@ export default class SingleSelectMaterialDialog extends Component {
   constructor(props) {
     super(props);
 
-    let { items, selected } = props;
-    let selectedIndex = items.findIndex(item => item.label === selected);
-    this.state = { selectedIndex };
-
     this.renderItem = this.renderItem.bind(this);
   }
 
@@ -33,7 +29,9 @@ export default class SingleSelectMaterialDialog extends Component {
   }
 
   renderItem({ item, index }) {
-    const isSelected = index == this.state.selectedIndex;
+    const { selected } = this.props;
+    const { label } = item;
+    const isSelected = (label == selected);
 
     return (
       <TouchableOpacity key={item.value} onPress={() => this.onRowPress(index)}>
@@ -65,7 +63,6 @@ export default class SingleSelectMaterialDialog extends Component {
       onCancel,
       items
     } = this.props;
-    const { selectedIndex } = this.state;
 
     return (
       <MaterialDialog

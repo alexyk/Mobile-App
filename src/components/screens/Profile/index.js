@@ -17,8 +17,9 @@ import ProfileWalletCard from "../../atoms/ProfileWalletCard";
 import { setCurrency } from "../../../redux/action/Currency";
 import styles from "./styles";
 import { WALLET_STATE } from "../../../redux/enum";
+import { BASIC_CURRENCY_LIST } from "../../../config-settings";
 
-const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"];
+
 class Profile extends Component {
   constructor(props) {
     super(props);
@@ -214,6 +215,7 @@ class Profile extends Component {
             value: index,
             label: row
           }))}
+          selected={this.props.currency}
           visible={this.state.currencySelectionVisible}
           onCancel={() => this.setState({ currencySelectionVisible: false })}
           onOk={result => {
