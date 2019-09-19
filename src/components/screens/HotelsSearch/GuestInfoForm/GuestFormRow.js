@@ -139,7 +139,7 @@ export default class GuestFormRow extends Component {
 
   _renderType(isAChild, age, no, roomIndex) {
     if (isAChild) {
-      return <Text style={styles.labelGuest}>Young Guest {no}</Text>
+      return <Text style={styles.labelGuest}>Guest {no} (child)</Text>
     } else {
       return <Text style={styles.labelGuest}>Guest {no}</Text>
     }
