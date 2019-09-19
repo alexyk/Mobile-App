@@ -10,7 +10,21 @@ export const getCountries = () => {
   return dispatch => {
     // prettier-ignore
     serverRequest('Action getCountries', requester.getCountries, [true],
-      data => dispatch(setCountries({ countries: data }))
+      data => {
+        data.sort((a,b) => {
+          const result = (
+            a && b && a.name && b.name
+              ? (a.name < b.name
+                  ? -1
+                  : 1
+              )
+              : 0
+            )
+
+          return result;
+        });
+        dispatch(setCountries({ countries: data }))
+      }
     );
   };
 };
