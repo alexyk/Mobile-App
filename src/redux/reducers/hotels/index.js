@@ -1,5 +1,5 @@
 import { handleActions } from "redux-actions";
-import { setSearch, setSearchFiltered, setSearchString, setGuestData, setSearchState } from "../../action/hotels";
+import { setSearch, setSearchFiltered, setSearchString, setGuestData, setSearchState, setPriceVisible } from "../../action/hotels";
 
 
 
@@ -8,7 +8,8 @@ const initialState = {
   searchResults: [],
   searchResultsFiltered: [],
   guestData: null,
-  isSearchDone: false
+  isSearchDone: false,
+  isPriceVisible: false
 };
 
 export default handleActions(
@@ -41,6 +42,12 @@ export default handleActions(
       return {
         ...state,
         isSearchDone: payload
+      };
+    },
+    [setPriceVisible]: (state, { payload }) => {
+      return {
+        ...state,
+        isPriceVisible: payload
       };
     }
   },

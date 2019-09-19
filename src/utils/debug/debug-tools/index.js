@@ -53,6 +53,8 @@ function configureConsole() {
     const origInfo = console.info;
     const origGroup = console.group;
     const origGroupCollapsed = console.groupCollapsed;
+    const origTime = console.time;
+    const origTimeEnd = console.timeEnd;
     
 
     const funcLog = (type) => (...args) => {
@@ -61,7 +63,8 @@ function configureConsole() {
       const hasTime = /\d{2}:\d{2}:\d{2}/.test(args[0]);
       const hasColor = (/%c/.test(args[0]));
       const isReduxAction = (/%c action/.test(args[0]));
-      if (consoleShowTimeInLogs && !hasTime && !hasColor) {
+      const isTimeCalc = type.includes('time');
+      if (consoleShowTimeInLogs && !hasTime && !hasColor && !isTimeCalc) {
         const timeStr = `[${moment().format("HH:mm:ss.SSS")}]`;
         args.unshift(timeStr);
       }
@@ -83,6 +86,14 @@ function configureConsole() {
           case 'wlog':
             origInfo(...args);
             break;
+
+          case 'time':
+            origTime(...args);
+            break;
+
+          case 'timeEnd':
+            origTimeEnd(...args);
+            break;
         
           default:
             origLog(...args);
@@ -97,6 +108,10 @@ function configureConsole() {
     console.group = funcLog('group')
     console.groupCollapsed = funcLog('groupCollapsed')
     console.groupEnd = (emptyFunc);
+    console.time = funcLog('time');
+    console.timeEnd = funcLog('timeEnd');
+    tslog = funcLog('time');
+    telog = funcLog('timeEnd');
     ilog = funcLog('ilog');
     clog = funcLog('clog');
     wlog = funcLog('wlog');

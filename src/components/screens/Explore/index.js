@@ -6,7 +6,7 @@ import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { domainPrefix } from "../../../config";
 import { autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace, isOnline, testFlow } from "../../../config-debug";
-import { testFlowExec, processError, ilog } from "../../../utils/debug/debug-tools";
+import { testFlowExec, processError, ilog, tslog } from "../../../utils/debug/debug-tools";
 import requester from "../../../initDependencies";
 import lang from "../../../language";
 import { setCurrency } from "../../../redux/action/Currency";
@@ -301,6 +301,7 @@ class Explore extends Component {
   }
 
   gotoSearch() {
+    tslog('search flow step 1 - from search touch/click to static data');
     if (__DEV__ && testFlow) {
       testFlowExec(testFlow, {reduxAction: this.props.setDatesAndGuestsData});
       return;

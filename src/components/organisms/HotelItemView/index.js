@@ -51,12 +51,14 @@ class HotelItemView extends Component {
   }
 
   shouldComponentUpdate(newProps, newState, newContext) {
-    const { item } = newProps;
+    const { item, isPriceVisible } = newProps;
     const oldItem = this.props.item;
     const oldIsDoneSocket = this.props.isDoneSocket;
+    const oldIsPriceVisible = this.props.isPriceVisible;
 
     return (
       oldItem.price != item.price || oldIsDoneSocket != newProps.isDoneSocket
+      || oldIsPriceVisible != isPriceVisible
     );
   }
 
@@ -112,7 +114,11 @@ class HotelItemView extends Component {
   };
 
   renderPrice() {
-    const { exchangeRates, currency, item, currencySign } = this.props;
+    const { exchangeRates, currency, item, currencySign, isPriceVisible } = this.props;
+
+    if (!isPriceVisible) {
+      return null;
+    }
 
     let price = item.price;
     let isPriceReady = price != null;
@@ -328,6 +334,7 @@ class HotelItemView extends Component {
 
 let mapStateToProps = state => {
   return {
+    isPriceVisible: state.hotels.isPriceVisible,
     currency: state.currency.currency,
     currencySign: state.currency.currencySign,
     // locAmounts: state.locAmounts,

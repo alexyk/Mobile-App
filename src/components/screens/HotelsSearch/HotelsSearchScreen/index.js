@@ -44,7 +44,7 @@ import {
   HOTELS_INITIAL_ITEMS_TO_LOAD,
   OPTIONS
 } from "../../../../config-settings";
-import { rlog, processError, clog, elog, wlog } from "../../../../utils/debug/debug-tools";
+import { rlog, processError, clog, elog, wlog, telog, tslog } from "../../../../utils/debug/debug-tools";
 import { isOnline, hotelsSearchSocketDebug } from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
@@ -98,7 +98,7 @@ import {
 
 import stomp from "stomp-websocket-js";
 import { setIsApplyingFilter } from "../../../../redux/action/userInterface";
-import { setSearch, setSearchString, setSearchState } from "../../../../redux/action/hotels";
+import { setSearch, setSearchString, setSearchState, setPriceVisible } from "../../../../redux/action/hotels";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
 import { DURATION } from "react-native-easy-toast";
 
@@ -147,6 +147,8 @@ class HotelsSearchScreen extends Component {
 
     this.filtersCallback = null;
     this.isWebviewHotelDetail = false;
+    this._isMounted = false;
+    this._priceTimeout;
 
     // Bind functions to this,
     // thus optimizing performance - by using bind(this) instead of "=> function".
@@ -202,6 +204,8 @@ class HotelsSearchScreen extends Component {
   }
 
   componentDidMount() {
+    this._isMounted = true;
+
     console.log("#hotel-search# 3/6 HotelSearchScreen componentDidMount START");
     checkHotelDataPrepare();
 
@@ -223,6 +227,7 @@ class HotelsSearchScreen extends Component {
     clearTimeout(this.staticTimeoutId);
 
     this.stopSocketConnection();
+    this._isMounted = false;
   }
 
   startSocketDataConnectionTimeOut() {
@@ -323,6 +328,7 @@ class HotelsSearchScreen extends Component {
   }
 
   startSearch() {
+    this.props.setPriceVisible(OPTIONS.hotelSearchResults.LAST_BEST_PRICE_DELAY > 0 ? false : true);
     this.props.setSearchState(false);
 
     UUIDGenerator.getRandomUUID().then(value => {
@@ -608,6 +614,7 @@ class HotelsSearchScreen extends Component {
     printCheckHotelDataCache();
 
     this.stopSocketConnection(false);
+    this.showPrice();
 
     this.setState(
       prevState => ({
@@ -638,6 +645,9 @@ class HotelsSearchScreen extends Component {
             );
           }
         };
+        clog('#hotel-search# [HotelsSearch] onDoneSocket')
+        telog('search flow step 2 - from static data to socket done');
+        tslog('search flow step 3 - from socket done to filters done');
       }
     );
   };
@@ -839,6 +849,9 @@ class HotelsSearchScreen extends Component {
             _this.isAllHotelsLoaded = true;
           }
         }
+        clog('#hotel-search# [HotelsSearch] onFilteredData');
+        telog('search flow step 3 - from socket done to filters done');
+        tslog('search flow step 4 - from server filters to UI filters (search flow ends)');
       }
     );
 
@@ -912,6 +925,23 @@ class HotelsSearchScreen extends Component {
 
     _this.pagesCached++;
     _this.isFirstLoad = false;
+
+    clog(`search flow steps start - #hotel-search# [HotelsSearch] onStaticData: ${hotels.length}`)
+    telog('search flow step 1 - from search touch/click to static data');
+    tslog('search flow step 2 - from static data to socket done');
+
+    const delay = OPTIONS.hotelSearchResults.LAST_BEST_PRICE_DELAY;
+    if (delay > 0) {
+      this._priceTimeout = setTimeout(() => this.showPrice(), OPTIONS.hotelSearchResults.LAST_BEST_PRICE_DELAY);
+    }
+  }
+
+  showPrice() {
+    if (this && this._isMounted && this._priceTimeout != null) {
+      clearTimeout(this._priceTimeout);
+      this._priceTimeout = null;
+      this.props.setPriceVisible(true);
+    }
   }
 
   listAbortFetch() {
@@ -1029,6 +1059,8 @@ class HotelsSearchScreen extends Component {
 
       this.props.setIsApplyingFilter(false);
       this.isAllHotelsLoaded = true;
+
+      telog('search flow step 4 - from server filters to UI filters (search flow ends)');
     } else {
       this.isFilterFromUI = false;
       // filter on server
@@ -1147,7 +1179,8 @@ const mapDispatchToProps = dispatch => ({
   setIsApplyingFilter: bindActionCreators(setIsApplyingFilter, dispatch),
   setSearch: bindActionCreators(setSearch, dispatch),
   setSearchString: bindActionCreators(setSearchString, dispatch),
-  setSearchState: bindActionCreators(setSearchState, dispatch)
+  setSearchState: bindActionCreators(setSearchState, dispatch),
+  setPriceVisible: bindActionCreators(setPriceVisible, dispatch)
   //setSearchFiltered: bindActionCreators(setSearchFiltered, dispatch),
 });
 
