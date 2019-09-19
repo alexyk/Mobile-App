@@ -46,3 +46,4 @@ export const OPTIONS = {
     LAST_BEST_PRICE_TITLE: false,
   }
 }
+export const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
