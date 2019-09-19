@@ -22,6 +22,7 @@ import SmartInput from "../../../atoms/SmartInput";
 import WhiteBackButton from "../../../atoms/WhiteBackButton";
 import requester from "../../../../initDependencies";
 import LTIcon from "../../../atoms/LTIcon";
+import { serverRequest } from "../../../../services/utilities/serverUtils";
 
 class CreateAccount extends Component {
   constructor(props) {
@@ -120,12 +121,11 @@ class CreateAccount extends Component {
     });
 
     if (hasCountryState) {
-      requester.getStates(value.id).then(res => {
-        res.body.then(data => {
-          //console.log("countryStates", data);
-          this.setCountryStates(data);
-        });
-      });
+      serverRequest(this, requester.getStates, [value.id], 
+        data => {
+          this.setCountryStates(data)
+        }
+      );
     }
   };
 
@@ -182,13 +182,13 @@ class CreateAccount extends Component {
       } = this.state;
 
       if (country === undefined || country === null) {
-        Toast.showWithGravity("Select Country.", Toast.SHORT, Toast.BOTTOM);
+        Toast.showWithGravity("Please choose your country of residence", Toast.SHORT, Toast.BOTTOM);
       } else {
-        requester.getEmailFreeResponse(email).then(res => {
-          res.body.then(data => {
+        serverRequest(this, requester.getEmailFreeResponse, [email],
+          data => {
             if (data.exist) {
               Toast.showWithGravity(
-                "This e-mail is taken, please try with another.",
+                "This e-mail is taken, please use another one.",
                 Toast.SHORT,
                 Toast.BOTTOM
               );
@@ -204,7 +204,6 @@ class CreateAccount extends Component {
               });
             }
           });
-        });
       }
     }
   }
