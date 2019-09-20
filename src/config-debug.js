@@ -155,7 +155,8 @@ filtersConfig.testFlow = [].concat(filtersConfig.default, ['includeNonMatching: 
 filtersConfig.simple = [].concat(filtersConfig.default4, ['includeNonMatching: false', 'serverUtil'])
 filtersConfig.server = ['includeNonMatching: false', 'serverUtil', ]
 filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
-filtersConfig.debug1  = ["mode: LiM", "error"].concat(filtersConfig.default2)
+filtersConfig.debug1  = ["mode: LiM", "error", 'serverUtils'].concat(filtersConfig.default2)
+filtersConfig.flows  = ["mode: Lim", /^search flow step/]
 
 export const consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
 
