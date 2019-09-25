@@ -319,7 +319,7 @@ class CreateAccount extends Component {
                   ref="phone"
                   editable={isEditableEmail}
                   selectTextOnFocus={isEditableEmail}
-                  keyboardType="phone-pad"
+                  keyboardType="numeric"
                   autoCorrect={false}
                   autoCapitalize="none"
                   value={phoneNumber}
