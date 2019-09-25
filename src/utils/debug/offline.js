@@ -130,7 +130,7 @@ export default function createOfflineRequester() {
   )};
   
   // prettier-ignore
-  const { initialSocketDelay, socketDelay, socketOnDoneDelay } = offlineTimeInSeconds;
+  const { initialSocketDelay, socketDelay, socketOnDoneDelay } = offlineTimeInSeconds || {};
 	const offlineRequester = {
     // fake test calls
 		testCall: (caseNo) 				              => new Promise( (resolve, reject) => { 

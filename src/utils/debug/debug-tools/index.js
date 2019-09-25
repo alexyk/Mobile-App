@@ -635,15 +635,22 @@ function testFlowExecSafe(type, extraConfig={}) {
 
       // run a test flow - for easy debug/development/testing
       lib.setConfig({ serverRequest, requester, navigationService });
-      flow = lib.flows;
-      testFlow
-        .split(".")
-        .forEach(item => (flow = flow[item]));
-      if (typeof(flow) == 'function') {
-        flow = flow(data);
+
+      if (isString(testFlow)) {
+        flow = lib.flows;
+        testFlow
+          .split(".")
+          .forEach(item => (flow = flow[item]));
+        if (typeof(flow) == 'function') {
+          flow = flow(data);
+        }        
+      } else {
+        flow = testFlow(data);
       }
-    
-      setTimeout(flow.exec, 500);
+      
+      if (flow != null && flow.exec != null) {
+        setTimeout(flow.exec, 500);
+      }
       break;
   }
 }
