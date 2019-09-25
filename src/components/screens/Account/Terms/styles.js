@@ -3,11 +3,14 @@ import { StyleSheet } from "react-native";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "space-evenly",
     backgroundColor: "#f0f1f3",
-    padding: 15
+  },
+  textContainer: {
+    flex: 1,
+    flexDirection: "column",
+    display: "flex",
+    padding: 15,
+    justifyContent: "space-evenly",
   },
   title: {
     color: "#000",

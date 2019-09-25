@@ -58,7 +58,7 @@ export const hotelsSearchSocketDebug            = false;
 export const checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
   // offline mode
   // Enabled if: (__DEV__ == true) and (isOffline == true)
-                                let isOffline   = false;
+                                let isOffline   = false || !!testFlow;
   if (forceOffline) isOffline = forceOffline;
   if (!__DEV__) isOffline = false;
 export const isOnline = (!isOffline);

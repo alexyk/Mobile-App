@@ -1,4 +1,4 @@
-import { validatePhone, validateLOCAddress, validateName } from '../src/utils/validation'
+import { validatePhone, validateLOCAddress, validateName, validatePassword, validateEmail} from '../src/utils/validation'
 
 
 describe('validation functions', () => {
@@ -54,6 +54,36 @@ describe('validation functions', () => {
     expect( validateName('t.') )                        .toBeFalsy();
     expect( validateName('t,') )                        .toBeFalsy();
     expect( validateName('') )                          .toBeFalsy();
+  })
+
+  it('validatePassword', () => {
+    expect(validatePassword('atgia41702'))               .toBeTruthy();
+    expect(validatePassword('manz&290'))                 .toBeTruthy();
+    expect(validatePassword('aArta&1X^'))                .toBeTruthy();
+
+    expect(validatePassword('aArtb&X'))                  .toBeFalsy();
+    expect(validatePassword('aArtb&XL'))                 .toBeFalsy();
+    expect(validatePassword('thoeurle'))                 .toBeFalsy();
+    expect(validatePassword('982374934'))                .toBeFalsy();
+  })
+
+  it('validateEmail', () => {
+    expect(validateEmail('ne@mn.tb'))                    .toBeTruthy();
+    expect(validateEmail('n@mn.tb'))                     .toBeTruthy();
+    expect(validateEmail('n&@mn.tb'))                    .toBeTruthy();
+    expect(validateEmail('n_&@mn.tb'))                   .toBeTruthy();
+    expect(validateEmail('nc.&@mn.tb'))                  .toBeTruthy();
+    expect(validateEmail('ne@m.tn'))                     .toBeTruthy();
+    expect(validateEmail('ns^@mn.tn'))                   .toBeTruthy();
+    expect(validateEmail('ns&@mn.tn'))                   .toBeTruthy();
+
+    expect(validateEmail('ns@mn.t'))                     .toBeFalsy();
+    expect(validateEmail('ns<@mn.tn'))                   .toBeFalsy();
+    expect(validateEmail('ns>@mn.tn'))                   .toBeFalsy();
+    expect(validateEmail('ns*@mn.tn'))                   .toBeFalsy();
+    expect(validateEmail('ns.t*n@mn.tn'))                .toBeFalsy();
+    expect(validateEmail(`ns&@mn.tn\"`))                 .toBeFalsy();
+    expect(validateEmail(`\"ns\"@mn.tn`))                .toBeFalsy();
   })
 
 });

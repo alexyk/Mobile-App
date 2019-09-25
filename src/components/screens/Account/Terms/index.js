@@ -8,14 +8,13 @@ import Toast from "react-native-simple-toast";
 import Hyperlink from "react-native-hyperlink";
 
 import styles from "./styles";
+import LTLoader from "../../../molecules/LTLoader";
 
 class Terms extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      showProgress: false
-    };
+    this.state = { showProgress: false };
   }
 
   onDecline = () => {
@@ -34,6 +33,7 @@ class Terms extends Component {
     user["image"] = PUBLIC_URL + "images/default.png";
 
     this.setState({ showProgress: true });
+
     requester
       .register(user, null)
       .then(res => {
@@ -73,57 +73,44 @@ class Terms extends Component {
     //console.log("Terms params", params);
     return (
       <View style={styles.container}>
-        <StatusBar
-          backgroundColor="rgba(0,0,0,0)"
-          translucent
-          barStyle="dark-content"
-        />
+        <StatusBar backgroundColor="rgba(0,0,0,0)" translucent barStyle="dark-content" />
 
-        <Text style={styles.title}>Before continuing</Text>
-        <Hyperlink
-          linkDefault={true}
-          linkStyle={{
-            color: "#00f",
-            fontSize: 17,
-            textDecorationLine: "underline"
-          }}
-        >
+        <View style={styles.textContainer}>
+
+          <Text style={styles.title}>Before continuing</Text>
+          <Hyperlink
+            linkDefault={true}
+            linkStyle={{
+              color: "#00f",
+              fontSize: 17,
+              textDecorationLine: "underline"
+            }}
+          >
+            <Text style={styles.paragraph}>I accept the terms and conditions found on https://locktrip.com/terms.html</Text>
+          </Hyperlink>
           <Text style={styles.paragraph}>
-            I accept the terms and conditions found on
-            https://locktrip.com/terms.html
+            I understand that if I forget my wallet password, the only way to recover it would be through the mnemonic keywords provided during the
+            wallet creation. It is my sole responsibility to write them and store them in a safe place. I also understand the dangers associated with
+            Blockchain based assets and under no circumstances will I hold LockTrip responsible for any loss that could arise due to any type of
+            security breach and/or forgotten wallet password or mnemonic keywords.
           </Text>
-        </Hyperlink>
-        <Text style={styles.paragraph}>
-          I understand that if I forget my wallet password, the only way to
-          recover it would be through the mnemonic keywords provided during the
-          wallet creation. It is my sole responsibility to write them and store
-          them in a safe place. I also understand the dangers associated with
-          Blockchain based assets and under no circumstances will I hold
-          LockTrip responsible for any loss that could arise due to any type of
-          security breach and/or forgotten wallet password or mnemonic keywords.
-        </Text>
 
-        <View style={styles.buttonsView}>
-          <TouchableOpacity onPress={this.onNext}>
-            <View style={styles.acceptButtonView}>
-              <Text style={styles.acceptButtonText}>Accept</Text>
-            </View>
-          </TouchableOpacity>
+          <View style={styles.buttonsView}>
+            <TouchableOpacity onPress={this.onNext}>
+              <View style={styles.acceptButtonView}>
+                <Text style={styles.acceptButtonText}>Accept</Text>
+              </View>
+            </TouchableOpacity>
 
-          <TouchableOpacity onPress={this.onDecline}>
-            <View style={styles.declineButtonView}>
-              <Text style={styles.declineButtonText}>Decline</Text>
-            </View>
-          </TouchableOpacity>
+            <TouchableOpacity onPress={this.onDecline}>
+              <View style={styles.declineButtonView}>
+                <Text style={styles.declineButtonText}>Decline</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
-        <ProgressDialog
-          visible={this.state.showProgress}
-          title=""
-          message="Registering..."
-          animationType="slide"
-          activityIndicatorSize="large"
-          activityIndicatorColor="black"
-        />
+
+        <LTLoader isLoading={this.state.showProgress} message="Registering..."/>
       </View>
     );
   }

@@ -560,37 +560,37 @@ function testFlowExecSafe(type, extraConfig={}) {
   const navigationService = require('../../../services/navigationService').default;
   const serverRequest = require('../../../services/utilities/serverUtils').serverRequest;
 
-  let lib, flow, jsonData;
+  let lib, flow, jsonData, getParams;
 
   try {
     lib = require("test-flows");
     lib = lib.default;
   } catch (error) { wlog('[debug] Could not get test-flows lib')}
 
-  // prettier-ignore
-  switch (type) {
+  try {
+      // prettier-ignore
+    switch (type) {
 
-    case 'hotelDetails':
-      const getParams = (flow) => function (name) {
-        switch (name) {
-          case 'redux-action-type':     return "SET_SEARCH_STRING";
-          case 'redux-action-payload':  return "?region=1937&currency=EUR&startDate=27/09/2019&endDate=28/09/2019&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1";
-          case 'redux1':                return "hotels.searchString";
-          case 'nav-params':            return require('../../debug/test-flows/data/hotelDetails.json');
-          case 'nav-screen':            return 'HotelDetails';
-          default:                      return ["none"];
+      case 'hotelDetails':
+        getParams = (flow) => function (name) {
+          switch (name) {
+            case 'redux-action-type':     return "SET_SEARCH_STRING";
+            case 'redux-action-payload':  return "?region=1937&currency=EUR&startDate=27/09/2019&endDate=28/09/2019&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1";
+            case 'redux1':                return "hotels.searchString";
+            case 'nav-params':            return require('../../debug/test-flows/data/hotelDetails.json');
+            case 'nav-screen':            return 'HotelDetails';
+            default:                      return ["none"];
+          }
         }
-      }
 
-      lib.setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
-      lib.flows
-        .sampleFlow([6,9,11,12])
-        .exec()
-      break;
+        lib.setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
+        lib.flows
+          .sampleFlow([6,9,11,12])
+          .exec()
+        break;
 
-    case 'guestInfo':
-      try {
-        const getParams = (flow) => function (name) {
+      case 'guestInfo':
+        getParams = (flow) => function (name) {
           switch (name) {
             case 'hotels-search':       return ["?region=1937&currency=EUR&startDate=27/09/2019&endDate=28/09/2019&rooms=%5B%7B%22adults%22:1,%22children%22:%5B%5D%7D%5D&nat=-1" +
                                                 `&uuid=${flow.read('uuid')}amp;97892170124`];
@@ -615,43 +615,60 @@ function testFlowExecSafe(type, extraConfig={}) {
         lib.flows
           .sampleFlow()
           .exec();
+        break;
 
-      } catch (error) {
-        wlog('                                                                                                              ');
-        wlog('                                                                                                              ');
-        wlog(`[Error] [debug-tools::testFlowExec] Couldn't execute flow '${type}'`, {error,lib})
-        wlog('                                                                                                              ');
-        wlog('                                                                                                              ');
-      }
-      break;
-  
-    default:
-      // data
-      const data = {
-        url: testFlowURL,
-        screen: "WebviewScreen"
-      }
-      data.navParams = () => ({simpleParams: {url: testFlowURL}});
+      case 'terms':
+        getParams = (flow) => function (name) {
+          switch (name) {
+            case 'nav-params':   return require('../../debug/test-flows/data/terms.json');
+            case 'nav-screen':   return 'Terms';
+          }
+        }
 
-      // run a test flow - for easy debug/development/testing
-      lib.setConfig({ serverRequest, requester, navigationService });
+        lib
+          .setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
+        setTimeout(() =>
+          lib.flows
+            .sampleFlow([11,12])
+            .exec(),
+            500
+        );
+        break;
+    
+      default:
+        // data
+        const data = {
+          url: testFlowURL,
+          screen: "WebviewScreen"
+        }
+        data.navParams = () => ({simpleParams: {url: testFlowURL}});
 
-      if (isString(testFlow)) {
-        flow = lib.flows;
-        testFlow
-          .split(".")
-          .forEach(item => (flow = flow[item]));
-        if (typeof(flow) == 'function') {
-          flow = flow(data);
-        }        
-      } else {
-        flow = testFlow(data);
-      }
-      
-      if (flow != null && flow.exec != null) {
-        setTimeout(flow.exec, 500);
-      }
-      break;
+        // run a test flow - for easy debug/development/testing
+        lib.setConfig({ serverRequest, requester, navigationService });
+
+        if (isString(testFlow)) {
+          flow = lib.flows;
+          testFlow
+            .split(".")
+            .forEach(item => (flow = flow[item]));
+          if (typeof(flow) == 'function') {
+            flow = flow(data);
+          }        
+        } else {
+          flow = testFlow(data);
+        }
+        
+        if (flow != null && flow.exec != null) {
+          setTimeout(flow.exec, 500);
+        }
+        break;
+    }
+  } catch (error) {
+    wlog('                                                                                                              ');
+    wlog('                                                                                                              ');
+    wlog(`[Error] [debug-tools::testFlowExec] Couldn't execute flow '${type}'`, {error,lib})
+    wlog('                                                                                                              ');
+    wlog('                                                                                                              ');
   }
 }
 

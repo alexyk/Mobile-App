@@ -7,7 +7,7 @@ export const SC_NAME = "SCPaymentModeOn";
 
 // hotels search settings
 export const hotelSearchIsNative = {
-  step1Results: true,
+  step1Results: false,
   step2HotelDetails: true,
   step3BookingDetails: true,
   step4Payment: false

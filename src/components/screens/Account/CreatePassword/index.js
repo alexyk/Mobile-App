@@ -5,12 +5,7 @@ import Image from "react-native-remote-svg";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Toast from "react-native-simple-toast";
 import styles from "./styles";
-import {
-  hasLetterAndNumber,
-  hasSymbol,
-  validateConfirmPassword,
-  validatePassword
-} from "../../../../utils/validation";
+import { hasLetterAndNumber, validateConfirmPassword, validatePassword } from "../../../../utils/validation";
 import SmartInput from "../../../atoms/SmartInput";
 import WhiteBackButton from "../../../atoms/WhiteBackButton";
 import LTIcon from "../../../atoms/LTIcon";
@@ -26,6 +21,10 @@ class CreatePassword extends Component {
     };
   }
 
+  showMessage(message) {
+    Toast.showWithGravity(message, Toast.SHORT, Toast.CENTER);
+  }
+
   onChangeHandler(property) {
     return value => {
       this.setState({ [property]: value });
@@ -34,38 +33,20 @@ class CreatePassword extends Component {
 
   onCreatePassword() {
     if (this.state.password.length < 8) {
-      Toast.showWithGravity(
-        "Password should be at least 8 characters.",
-        Toast.SHORT,
-        Toast.BOTTOM
-      );
+      this.showMessage("Password should be at least 8 characters.");
       return;
     }
     if (!hasLetterAndNumber(this.state.password)) {
-      Toast.showWithGravity(
-        "Password must contain both latin letters and digits.",
-        Toast.SHORT,
-        Toast.BOTTOM
-      );
+      this.showMessage("Password must contain both latin letters and digits.");
       return;
     }
-    if (!hasSymbol(this.state.password)) {
-      Toast.showWithGravity(
-        "Password must contain symbols, like !, # or %..",
-        Toast.SHORT,
-        Toast.BOTTOM
-      );
+    /* if (!hasSymbol(this.state.password)) {
+      this.showMessage("Password must contain symbols, like !, # or %..");
       return;
-    }
+    } */
 
-    if (
-      !validateConfirmPassword(this.state.password, this.state.confirmPassword)
-    ) {
-      Toast.showWithGravity(
-        "Passwords do not match. Please try again.",
-        Toast.SHORT,
-        Toast.BOTTOM
-      );
+    if (!validateConfirmPassword(this.state.password, this.state.confirmPassword)) {
+      this.showMessage("Passwords do not match. Please try again.");
       return;
     }
     const { params } = this.props.navigation.state;
@@ -103,7 +84,7 @@ class CreatePassword extends Component {
 
             <Text style={styles.finePrintText}>
               Your password must be at least 8 characters long and should
-              contain at least 1 digit and 1 symbol.
+              contain at least 1 digit and 1 letter.
             </Text>
 
             <View style={styles.inputView}>

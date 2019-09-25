@@ -70,6 +70,10 @@ class CreateAccount extends Component {
     }
   }
 
+  showMessage(message) {
+    Toast.showWithGravity(message, Toast.SHORT, Toast.CENTER);
+  }
+
   setCountriesInfo() {
     countryArr = [];
     this.props.countries.map((item, i) => {
@@ -130,16 +134,36 @@ class CreateAccount extends Component {
   };
 
   goToNextScreen() {
-    //console.log("state", this.state);
-    if (
-      this.state.hasCountryState &&
-      (this.state.countryState == undefined || this.state.countryState == "")
-    ) {
-      Toast.showWithGravity(
-        "Please Select State of Country.",
-        Toast.SHORT,
-        Toast.BOTTOM
-      );
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      countryState,
+      hasCountryState
+    } = this.state;
+
+    if (!validateName(firstName)) {
+      this.showMessage("First name should contain at least 2 latin letters.");
+      this.refs.firstName.focus();
+      return;
+    }
+    if (!validateName(lastName)) {
+      this.showMessage("Last name should contain at least 2 latin letters.");
+      this.refs.lastName.focus();
+      return;
+    }
+    if (!validateEmail(email)) {
+      this.showMessage("Please enter a valid email.");
+      this.refs.email.focus();
+      return;
+    }
+    if (!validatePhone(phoneNumber)) {
+      this.showMessage("Phone number should contain 5 or more digits.");
+      return;
+    }
+    if (hasCountryState && !countryState) {
+      this.showMessage("Please Select State of Country.");
       return;
     }
     const { params } = this.props.navigation.state;
@@ -152,11 +176,10 @@ class CreateAccount extends Component {
         phoneNumber,
         country,
         userWantsPromo,
-        checkZIndex,
         countryState
       } = this.state;
       if (country === undefined || country === null) {
-        Toast.showWithGravity("Select Country.", Toast.SHORT, Toast.BOTTOM);
+        this.showMessage("Select Country.");
       } else {
         this.props.navigation.navigate("Terms", {
           ...params,
@@ -182,16 +205,13 @@ class CreateAccount extends Component {
       } = this.state;
 
       if (country === undefined || country === null) {
-        Toast.showWithGravity("Please choose your country of residence", Toast.SHORT, Toast.BOTTOM);
+        this.showMessage("Please choose your country of residence");
       } else {
         serverRequest(this, requester.getEmailFreeResponse, [email],
           data => {
             if (data.exist) {
-              Toast.showWithGravity(
-                "This e-mail is taken, please use another one.",
-                Toast.SHORT,
-                Toast.BOTTOM
-              );
+              this.showMessage("This e-mail is taken, please use another one.");
+              this.refs.email.focus();
             } else {
               this.props.navigation.navigate("CreatePassword", {
                 firstName,
@@ -256,6 +276,7 @@ class CreateAccount extends Component {
 
               <View style={styles.inputView}>
                 <SmartInput
+                  ref="firstName"
                   autoCorrect={false}
                   value={firstName}
                   onChangeText={this.onChangeHandler("firstName")}
@@ -267,6 +288,7 @@ class CreateAccount extends Component {
 
               <View style={styles.inputView}>
                 <SmartInput
+                  ref="lastName"
                   autoCorrect={false}
                   value={lastName}
                   onChangeText={this.onChangeHandler("lastName")}
@@ -278,6 +300,7 @@ class CreateAccount extends Component {
 
               <View style={styles.inputView}>
                 <SmartInput
+                  ref="email"
                   editable={isEditableEmail}
                   selectTextOnFocus={isEditableEmail}
                   keyboardType="email-address"
@@ -293,6 +316,7 @@ class CreateAccount extends Component {
 
               <View style={styles.inputView}>
                 <SmartInput
+                  ref="phone"
                   editable={isEditableEmail}
                   selectTextOnFocus={isEditableEmail}
                   keyboardType="phone-pad"
@@ -379,11 +403,7 @@ class CreateAccount extends Component {
 
               <View style={styles.nextButtonView}>
                 <TouchableOpacity
-                  disabled={
-                    !validateName(firstName) ||
-                    !validateName(lastName) ||
-                    !validateEmail(email)
-                  }
+                  disabled={false}
                   onPress={() => this.goToNextScreen()}
                 >
                   <View style={styles.nextButton}>
