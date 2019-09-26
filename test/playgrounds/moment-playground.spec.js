@@ -1,7 +1,7 @@
 import moment from 'moment'
 
 import {log} from "../common-test-utils"
-
+let l=console.log
 
 logd1 = (obj) => {
   let res = {}
@@ -16,7 +16,7 @@ logd1 = (obj) => {
   log(res)
 }
 
-describe.skip('moment experiments', () => {
+describe('moment experiments', () => {
 
   it('moment-playground', () => {
     const varLocal = moment()
@@ -59,4 +59,16 @@ describe.skip('moment experiments', () => {
     // Conclusion - at least 1ms is needed to make the difference
     // So it is not inBetweenOrEqual - it is inBetweenButNotEqual
   });
+
+  it.only('moment unix', () => {
+    const date1 = '25/10/1990';
+    const format = 'DD/MM/YYYY';
+    let m1 = moment(date1,format);
+    l(date1, 'format:', m1.format('DD/MM/YYYY'))
+    l(date1, 'unix:', m1.unix())
+    l(date1, 'fromNow:', m1.fromNow())
+
+    const date2 = '10/10/1960';
+    l(date2, 'unix:', moment(date2, format).unix());
+  })
 });

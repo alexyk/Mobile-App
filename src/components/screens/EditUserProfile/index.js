@@ -33,6 +33,7 @@ import requester from "../../../initDependencies";
 import _ from "lodash";
 import styles from "./styles";
 import { apiHost, domainPrefix, imgHost, PUBLIC_URL } from "../../../config";
+import LTLoader from "../../molecules/LTLoader";
 
 class EditUserProfile extends Component {
   static propTypes = {
@@ -530,14 +531,10 @@ class EditUserProfile extends Component {
   }
 
   updateProfile() {
-    this.setState({
-      showProgress: true
-    });
+    this.setState({showProgress: true});
 
     userInstance.setAbout(this.state.about == null ? "" : this.state.about);
-    userInstance.setGovernmentId(
-      this.state.governmentId == null ? "" : this.state.governmentId
-    );
+    userInstance.setGovernmentId(this.state.governmentId == null ? "" : this.state.governmentId);
     userInstance.setSchool(this.state.school == null ? "" : this.state.school);
     userInstance.setWork(this.state.work == null ? "" : this.state.work);
 
@@ -584,14 +581,8 @@ class EditUserProfile extends Component {
             `${this.state.year}/${this.state.month}/${this.state.day} 00:00:00`
           ).getTime()
         );
-        this.setState({
-          showProgress: false
-        });
-      } else {
-        this.setState({
-          showProgress: false
-        });
       }
+      this.setState({showProgress: false});
     });
   }
 
@@ -629,33 +620,18 @@ class EditUserProfile extends Component {
       <View style={styles.container}>
         <View style={styles.topContainer}>
           <View style={styles.titleConatiner}>
-            <BackButton
-              style={styles.closeButton}
-              onPress={() => this.onBackPress()}
-            />
+            <BackButton style={styles.closeButton} onPress={() => this.onBackPress()} />
             <Text style={styles.title}>Edit Profile</Text>
           </View>
-          <TouchableOpacity
-            style={styles.cameraContainer}
-            onPress={this.onPhoto}
-          >
-            <Image
-              style={styles.cameraButton}
-              source={require("../../../assets/png/camera.png")}
-            />
+          <TouchableOpacity style={styles.cameraContainer} onPress={this.onPhoto}>
+            <Image style={styles.cameraButton} source={require("../../../assets/png/camera.png")} />
           </TouchableOpacity>
         </View>
-        <ScrollView
-          showsHorizontalScrollIndicator={false}
-          style={{ width: "100%" }}
-        >
+        <ScrollView showsHorizontalScrollIndicator={false} style={{ width: "100%" }}>
           <View style={styles.body}>
             <View style={styles.avatarWrapper}>
               {imageAvatar == "" ? (
-                <Image
-                  style={styles.avatar}
-                  source={require("../../../assets/temple/user_profile_avatar.png")}
-                />
+                <Image style={styles.avatar} source={require("../../../assets/temple/user_profile_avatar.png")} />
               ) : (
                 <Image style={styles.avatar} source={imageAvatar} />
               )}
@@ -695,9 +671,7 @@ class EditUserProfile extends Component {
               <Text style={styles.aboutText}>About me</Text>
               <Text style={styles.aboutText}>{this.state.about}</Text>
               <TouchableOpacity onPress={this.onAbout}>
-                <Text style={[styles.editButton, { marginTop: 20 }]}>
-                  Edit about me
-                </Text>
+                <Text style={[styles.editButton, { marginTop: 20 }]}>Edit about me</Text>
               </TouchableOpacity>
             </View>
             <View
@@ -715,36 +689,20 @@ class EditUserProfile extends Component {
               <Text style={styles.subtitleText}>Private Details</Text>
             </View>
 
-            <UserPropertyItemTypeInfo
-              title="Gender"
-              info={this.upperFirst(
-                this.state.gender == "men" ? "Male" : "Female"
-              )}
-              onPress={this.onGender}
-            />
+            <UserPropertyItemTypeInfo title="Gender" info={this.upperFirst(this.state.gender == "men" ? "Male" : "Female")} onPress={this.onGender} />
             <View style={styles.lineStyle} />
 
             <UserPropertyItemTypeInfo
               title="Birth date"
-              info={
-                this.state.month + "/" + this.state.day + "/" + this.state.year
-              }
+              info={this.state.month + "/" + this.state.day + "/" + this.state.year}
               onPress={this.onBirthDate}
             />
             <View style={styles.lineStyle} />
 
-            <UserPropertyItemTypeInfo
-              title="Email Address"
-              info={this.state.email}
-              onPress={this.onEmail}
-            />
+            <UserPropertyItemTypeInfo title="Email Address" info={this.state.email} onPress={this.onEmail} />
             <View style={styles.lineStyle} />
 
-            <UserPropertyItemTypeInfo
-              title="Phone"
-              info={this.state.phoneNumber}
-              onPress={this.onPhone}
-            />
+            <UserPropertyItemTypeInfo title="Phone" info={this.state.phoneNumber} onPress={this.onPhone} />
 
             {/* <View style={styles.lineStyle} />
 
@@ -760,41 +718,19 @@ class EditUserProfile extends Component {
               <Text style={styles.subtitleText}>Optional Details</Text>
             </View>
 
-            <UserPropertyItemTypeInfo
-              title="Location"
-              info={location}
-              onPress={this.onLocation}
-            />
+            <UserPropertyItemTypeInfo title="Location" info={location} onPress={this.onLocation} />
             <View style={styles.lineStyle} />
 
-            <UserPropertyItemTypeInfo
-              title="School"
-              info={this.state.school}
-              onPress={this.onSchool}
-            />
+            <UserPropertyItemTypeInfo title="School" info={this.state.school} onPress={this.onSchool} />
             <View style={styles.lineStyle} />
 
-            <UserPropertyItemTypeInfo
-              title="Work"
-              info={this.state.work}
-              onPress={this.onWork}
-            />
+            <UserPropertyItemTypeInfo title="Work" info={this.state.work} onPress={this.onWork} />
             <View style={styles.lineStyle} />
 
-            <UserPropertyItemTypeInfo
-              style={{ marginBottom: 15 }}
-              info={this.state.preferredLanguage}
-              title="Languages"
-              onPress={this.onLanguage}
-            />
+            <UserPropertyItemTypeInfo style={{ marginBottom: 15 }} info={this.state.preferredLanguage} title="Languages" onPress={this.onLanguage} />
           </View>
         </ScrollView>
-        <Footer
-          style={styles.footer}
-          button={"Save"}
-          fullButton={true}
-          onClick={this.updateProfile}
-        />
+        <Footer style={styles.footer} button={"Save"} fullButton={true} onClick={this.updateProfile} />
         <Modal
           animationType="fade"
           transparent={true}
@@ -809,29 +745,16 @@ class EditUserProfile extends Component {
         <DateTimePicker
           datePickerModeAndroid={"default"}
           date={
-            this.state.year == "0000"
-              ? new Date()
-              : moment(
-                  this.state.month +
-                    "/" +
-                    this.state.day +
-                    "/" +
-                    this.state.year,
-                  "MM/DD/YYYY"
-                ).toDate()
+            this.state.year == "0000" ? new Date() : moment(this.state.month + "/" + this.state.day + "/" + this.state.year, "MM/DD/YYYY").toDate()
           }
           isVisible={this.state.isDateTimePickerVisible}
           onConfirm={this.handleDatePicked}
           onCancel={this.hideDateTimePicker}
         />
 
-        <ProgressDialog
-          visible={this.state.showProgress}
-          title=""
+        <LTLoader
+          isLoading={this.state.showProgress}
           message="Saving Profile info..."
-          animationType="fade"
-          activityIndicatorSize="large"
-          activityIndicatorColor="black"
         />
       </View>
     );
