@@ -48,3 +48,12 @@ export const OPTIONS = {
   }
 }
 export const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
+
+/**
+ * Example usage:
+ *    moment.utc("19/07/2003", TIME_FORMATS.SERVER_BIRTHDAY_UTC)
+ */
+export const TIME_FORMATS = {
+  SERVER_BIRTHDAY_UTC: 'DD/MM/YYYY',
+  UTC_ZONE: 'ZZ',
+}

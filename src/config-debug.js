@@ -46,9 +46,9 @@ export const reduxReactotronLoggingEnabled      = false;
 export const raiseConverterExceptions           = false;
 export const logConverterError                  = false;
 export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
-export const consoleShowTimeInLogs              = true;    // prepend with time
+export const consoleShowTimeInLogs              = true;     // prepend with time
 export const consoleClearAtStart                = true;
-export const consoleFilter                      = 'debug1';
+export const consoleFilter                      = '' || (testFlow ? 'testFlow' : '');
 export const serverLogRequesting                = true;
 export const serverExpandErrors                 = false;
   // other

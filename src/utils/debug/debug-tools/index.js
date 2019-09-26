@@ -565,6 +565,7 @@ function testFlowExecSafe(type, extraConfig={}) {
   try {
     lib = require("test-flows");
     lib = lib.default;
+    setImmediate(() => lib.setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig }));
   } catch (error) { wlog('[debug] Could not get test-flows lib')}
 
   try {
@@ -583,7 +584,6 @@ function testFlowExecSafe(type, extraConfig={}) {
           }
         }
 
-        lib.setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
         lib.flows
           .sampleFlow([6,9,11,12])
           .exec()
@@ -610,8 +610,6 @@ function testFlowExecSafe(type, extraConfig={}) {
           }
         }
 
-        lib
-          .setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
         lib.flows
           .sampleFlow()
           .exec();
@@ -625,11 +623,30 @@ function testFlowExecSafe(type, extraConfig={}) {
           }
         }
 
-        lib
-          .setConfig({ getObjectClassName, serverRequest, requester, navigationService, reduxStore, getParams, ...extraConfig });
         setTimeout(() =>
           lib.flows
             .sampleFlow([11,12])
+            .exec(),
+            500
+        );
+        break;
+
+      case 'editProfile':
+        let screens = ['EditUserProfile']
+        getParams = (flow) => function (name) {
+          switch (name) {
+            case 'nav-params':   return {};
+            case 'nav-screen':   return screens.shift();
+          }
+        }
+
+        const nav = [11,12];
+        const delays = [9,10,9,10,9,10];
+        // const items = nav.concat(delays, nav);
+        const items = nav;
+        setTimeout(() =>
+          lib.flows
+            .sampleFlow(items)
             .exec(),
             500
         );
@@ -642,9 +659,6 @@ function testFlowExecSafe(type, extraConfig={}) {
           screen: "WebviewScreen"
         }
         data.navParams = () => ({simpleParams: {url: testFlowURL}});
-
-        // run a test flow - for easy debug/development/testing
-        lib.setConfig({ serverRequest, requester, navigationService });
 
         if (isString(testFlow)) {
           flow = lib.flows;

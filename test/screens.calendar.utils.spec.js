@@ -7,7 +7,7 @@ import { internalFormat } from '../src/redux/reducers/userInterface'
 
 
 describe('calendar data functions', () => {
-  const today = moment('2019-01-10', internalFormat).startOf('day');
+  let today = moment.utc('2019-01-10', internalFormat);
   const month = today.clone();
   const checkin = today.clone().add(1,'day');
   const checkout = today.clone().add(2,'day').add(113,'millisecond');

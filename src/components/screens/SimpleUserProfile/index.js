@@ -9,7 +9,6 @@ import ProgressDialog from "../../atoms/SimpleDialogs/ProgressDialog";
 import PropTypes from "prop-types";
 import { imgHost, PUBLIC_URL } from "../../../config.js";
 import moment from "moment";
-import { userInstance } from "../../../utils/userInstance";
 import styles from "./styles";
 
 class SimpleUserProfile extends Component {
@@ -28,87 +27,49 @@ class SimpleUserProfile extends Component {
   constructor(props) {
     super(props);
 
-    // TODO: Remove redundant usage of state
-    // Use redux cache (instead of props / navigation params)
+    const { loginDetails } = props;
+    const { birthday, profileImage } = loginDetails;
+
+    let day = "00";
+    let month = "00";
+    let year = "0000";
+    if (birthday !== null) {
+      let asMoment = moment.utc(parseInt(birthday));
+      day = asMoment.format("DD");
+      month = asMoment.format("MM");
+      year = asMoment.format("YYYY");
+    }
+
     this.state = {
-      birthdayDisplay: "",
-      city: {},
-      country: {},
-      email: "",
-      firstName: "",
-      lastName: "",
-      gender: "",
-      image: "",
-      phoneNumber: "",
-      preferredCurrency: {},
-      preferredLanguage: "",
-      day: "",
-      month: "",
-      year: "",
+      birthdayDisplay: day + "/" + month + "/" + year,
       showProgress: false,
-      loadMessage: "loading..."
+      loadMessage: "loading...",
+      image: profileImage == null ? "" : profileImage,
+      ...loginDetails
     };
   }
 
-  async componentDidMount() {
-    // TODO: Use redux cache instead - remove async storage usage
-    let email = await userInstance.getEmail();
-    let firstName = await userInstance.getFirstName();
-    let lastName = await userInstance.getLastName();
-    let phoneNumber = await userInstance.getPhoneNumber();
-    let preferredLanguage = await userInstance.getLanguage();
-    let preferredCurrency = await userInstance.getCurrency();
-    let gender = await userInstance.getGender();
-    let country = await userInstance.getCountry();
-    let city = await userInstance.getCity();
-    let profileImage = await userInstance.getProfileImage();
-    let day = "01";
-    let month = "01";
-    let year = "1970";
-    let birth = await userInstance.getBirthday();
-    if (birth !== null) {
-      let birthday = moment.utc(parseInt(birth, 10));
-      day = birthday.format("DD");
-      month = birthday.format("MM");
-      year = birthday.format("YYYY");
-    }
-    this.setState({
-      birthdayDisplay: month + "/" + day + "/" + year,
-      city: city,
-      country: country,
-      email: email,
-      firstName: firstName,
-      lastName: lastName,
-      gender: gender,
-      image: profileImage == null ? "" : profileImage,
-      phoneNumber: phoneNumber,
-      preferredCurrency: preferredCurrency,
-      preferredLanguage: preferredLanguage
-    });
-  }
 
   render() {
     const { goBack } = this.props.navigation;
     const { locAddress } = this.props.loginDetails;
+    let { gender, image } = this.state;
 
-    let gender = "";
-    if (this.state.gender === "men") {
+    if (gender === "men") {
       gender = "M";
-    } else if (this.state.gender === "women") {
+    } else if (gender === "women") {
       gender = "F";
     } else {
       gender = "?";
     }
 
-    let image = "";
-    if (this.state.image != "") {
-      if (this.state.image.indexOf("images/default.png".toLowerCase()) != -1) {
+    if (image != "") {
+      if (image.indexOf("images/default.png".toLowerCase()) != -1) {
         image = { uri: PUBLIC_URL + "images/default.png" };
       } else {
-        image = { uri: imgHost + this.state.image };
+        image = { uri: imgHost + image };
       }
     }
-    //console.log("simple profile image", image);
 
     return (
       <View style={styles.container}>
@@ -182,19 +143,19 @@ class SimpleUserProfile extends Component {
               detail={locAddress}
             />
 
-            <View style={styles.lineStyle} />
-            <ProfileHistoryItem
+            {/* <View style={styles.lineStyle} /> */}
+            {/* <ProfileHistoryItem
               style={styles.historyStyle}
               title={"Preferred language"}
               detail={this.state.preferredLanguage}
-            />
+            /> */}
 
-            <View style={styles.lineStyle} />
+            {/* <View style={styles.lineStyle} />
             <ProfileHistoryItem
               style={styles.historyStyle}
               title={"Preferred currency"}
-              detail={this.state.preferredCurrency.code}
-            />
+              detail={this.state.currency}
+            /> */}
           </View>
         </ScrollView>
         <ProgressDialog

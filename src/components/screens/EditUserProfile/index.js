@@ -25,15 +25,17 @@ import Footer from "../../atoms/Footer";
 import Image from "react-native-remote-svg";
 import ImagePicker from "react-native-image-picker";
 import ImageResizer from "react-native-image-resizer";
-import ProgressDialog from "../../atoms/SimpleDialogs/ProgressDialog";
 import PropTypes from "prop-types";
 import UserPropertyItemTypeInfo from "../../atoms/UserPropertyItemTypeInfo";
-import { userInstance } from "../../../utils/userInstance";
 import requester from "../../../initDependencies";
 import _ from "lodash";
 import styles from "./styles";
 import { apiHost, domainPrefix, imgHost, PUBLIC_URL } from "../../../config";
 import LTLoader from "../../molecules/LTLoader";
+import { serverRequest } from "../../../services/utilities/serverUtils";
+import { TIME_FORMATS } from "../../../config-settings";
+import { bindActionCreators } from "redux";
+import { setLoginDetails } from "../../../redux/action/userInterface";
 
 class EditUserProfile extends Component {
   static propTypes = {
@@ -50,35 +52,35 @@ class EditUserProfile extends Component {
 
   constructor(props) {
     super(props);
+
+
+    const { loginDetails } = props;
+    const { birthday, profileImage, preferredCurrency, preferredLanguage } = loginDetails;
+
+    let day = "00";
+    let month = "00";
+    let year = "0000";
+    if (birthday !== null) {
+      let asMoment = moment.utc(parseInt(birthday));
+      day = asMoment.format("DD");
+      month = asMoment.format("MM");
+      year = asMoment.format("YYYY");
+    }
+
     this.state = {
       avatarSource: null,
-      birthday: "",
-      month: "",
-      day: "",
-      year: "",
-      city: {},
-      country: {},
-      email: "",
-      firstName: "",
-      lastName: "",
-      about: "",
-      gender: "",
-      governmentId: "",
       countryId: 1,
-      stateId: "",
-      school: "",
-      work: "",
-      image: "",
-      locAddress: "",
-      phoneNumber: "",
-      preferredCurrency: "",
-      preferredLanguage: "",
       modalVisible: false,
       isDateTimePickerVisible: false,
-      jsonFile: "",
       showProgress: false,
-      countries: this.props.countries
+      image: profileImage,
+      preferredCurrency: preferredCurrency == null ? 0 : preferredCurrency.id,
+      preferredLanguage: preferredLanguage == null ? "English" : preferredLanguage,
+      day, month, year,
+      ...loginDetails
     };
+
+
     this.onPhoto = this.onPhoto.bind(this);
     this.onEditName = this.onEditName.bind(this);
     this.onAbout = this.onAbout.bind(this);
@@ -109,70 +111,6 @@ class EditUserProfile extends Component {
     this.onBackPress = this.onBackPress.bind(this);
   }
 
-  async componentDidMount() {
-    const { locAddress } = this.props.loginDetails;
-
-    let firstName = await userInstance.getFirstName();
-    let lastName = await userInstance.getLastName();
-    let email = await userInstance.getEmail();
-    let phoneNumber = await userInstance.getPhoneNumber();
-    let preferredLanguage = await userInstance.getLanguage();
-    let preferredCurrency = await userInstance.getCurrency();
-    let gender = await userInstance.getGender();
-    let country = await userInstance.getCountry();
-    let countryState = await userInstance.getCountryState();
-    let city = await userInstance.getCity();
-    let jsonFile = await userInstance.getJsonFile();
-    let profileImage = await userInstance.getProfileImage();
-    let about = await userInstance.getAbout();
-    let governmentId = await userInstance.getGovernmentId();
-    let school = await userInstance.getSchool();
-    let work = await userInstance.getWork();
-    let day = "00";
-    let month = "00";
-    let year = "0000";
-    let birth = await userInstance.getBirthday();
-    if (birth !== null) {
-      let birthday = moment.utc(parseInt(birth, 10));
-      day = birthday.format("DD");
-      month = birthday.format("MM");
-      year = birthday.format("YYYY");
-    }
-
-    this.setState({
-      about,
-      governmentId,
-      school,
-      work,
-      city,
-      country,
-      countryState,
-      email,
-      firstName,
-      lastName,
-      gender,
-      image: profileImage,
-      phoneNumber,
-      locAddress,
-      jsonFile,
-      day,
-      month,
-      year,
-      preferredCurrency: preferredCurrency == null ? 0 : preferredCurrency.id,
-      preferredLanguage:
-        preferredLanguage == null ? "English" : preferredLanguage
-    });
-    // requester.getCountries().then(res => {
-    //     res.body.then(data => {
-    //         this.setState({
-    //             countries: data,
-    //         })
-    //     })
-    // }).catch(err => {
-    //     //console.log('countries--error--', err);
-    // });
-  }
-
   componentDidUpdate(prevProps) {
     if (this.props.countries != prevProps.countries) {
       this.setState({
@@ -197,9 +135,7 @@ class EditUserProfile extends Component {
         path: "/"
       }
     };
-    const token_value = await AsyncStorage.getItem(
-      `${domainPrefix}.auth.locktrip`
-    );
+    const token_value = await AsyncStorage.getItem(`${domainPrefix}.auth.locktrip`);
     ImagePicker.showImagePicker(options, response => {
       if (response.didCancel) {
         //console.log('User cancelled image picker');
@@ -245,7 +181,7 @@ class EditUserProfile extends Component {
                       showProgress: false,
                       image: data.thumbnail
                     });
-                    userInstance.setProfileImage(data.thumbnail);
+                    this.props.setLoginDetails({profileImage:data.thumbnail});
                   })
                   .catch(err => {
                     //console.log('upload error', err);
@@ -369,7 +305,7 @@ class EditUserProfile extends Component {
             this.onSaveLocation(country, countryState)
           }
           onCancel={() => this.onCancel()}
-          countries={this.state.countries}
+          countries={this.props.countries}
           country={this.state.country}
           countryState={this.state.countryState}
           city={this.state.city}
@@ -459,9 +395,7 @@ class EditUserProfile extends Component {
 
   onSavePhone(phone) {
     this.setState({
-      modalVisible: false
-    });
-    this.setState({
+      modalVisible: false,
       phoneNumber: phone
     });
   }
@@ -474,14 +408,13 @@ class EditUserProfile extends Component {
   }
 
   onSaveLocation(country, countryState) {
-    // index = _.findIndex(this.state.countries, function (o) {
+    // index = _.findIndex(this.props.countries, function (o) {
     //     return o.id == country.id;
     // })
-    // country.name = this.state.countries[index].name
+    // country.name = this.props.countries[index].name
     this.setState({
       modalVisible: false,
-      country: country,
-      countryState: countryState
+      country, countryState
     });
   }
 
@@ -521,40 +454,27 @@ class EditUserProfile extends Component {
   }
 
   handleDatePicked(date) {
-    date = moment(date);
-    this.setState({
-      month: date.format("MM"),
-      day: date.format("DD"),
-      year: date.format("YYYY")
-    });
+    // here date is selected by the picker in local TZ
+    const dateObject = {
+      day: date.getDate().toString(),
+      month: (date.getMonth()+1).toString(),
+      year: date.getFullYear().toString()
+    };
+    this.setState(dateObject);
     this.hideDateTimePicker();
   }
 
   updateProfile() {
     this.setState({showProgress: true});
 
-    userInstance.setAbout(this.state.about == null ? "" : this.state.about);
-    userInstance.setGovernmentId(this.state.governmentId == null ? "" : this.state.governmentId);
-    userInstance.setSchool(this.state.school == null ? "" : this.state.school);
-    userInstance.setWork(this.state.work == null ? "" : this.state.work);
+    const { firstName, lastName, phoneNumber, preferredLanguage, gender, locAddress, jsonFile, countryState, day, month, year } = this.state;
 
     let userInfo = {
-      firstName: this.state.firstName,
-      lastName: this.state.lastName,
-      phoneNumber: this.state.phoneNumber,
-      preferredLanguage: this.state.preferredLanguage,
+      firstName, lastName, phoneNumber, preferredLanguage, gender, locAddress, jsonFile,
       preferredCurrency: parseInt(this.state.preferredCurrency, 10),
-      gender: this.state.gender,
       country: parseInt(this.state.country.id, 10),
-      countryState:
-        this.state.countryState !== undefined &&
-        this.state.countryState !== null
-          ? parseInt(this.state.countryState.id, 10)
-          : "",
-      // city: parseInt(this.state.city.id, 10),
-      birthday: `${this.state.day}/${this.state.month}/${this.state.year}`,
-      locAddress: this.state.locAddress,
-      jsonFile: this.state.jsonFile
+      countryState: countryState ? parseInt(countryState.id, 10) : "",
+      birthday: `${day}/${month}/${year}`
     };
 
     //console.log("user info", userInfo);
@@ -564,26 +484,30 @@ class EditUserProfile extends Component {
         (userInfo[key] === null || userInfo[key] === "") && delete userInfo[key]
     );
 
-    requester.updateUserInfo(userInfo, null).then(res => {
-      //console.log("------", res)
-      if (res.success) {
-        userInstance.setFirstName(userInfo.firstName);
-        userInstance.setLastName(userInfo.lastName);
-        userInstance.setPhoneNumber(userInfo.phoneNumber);
-        userInstance.setLanguage(userInfo.preferredLanguage);
-        userInstance.setGender(userInfo.gender);
-        userInstance.setCountry(this.state.country);
-        // userInstance.setCountry(this.state.countryState);
-        // userInstance.setCity(this.state.city);
-        userInstance.setCountryState(this.state.countryState);
-        userInstance.setBirthday(
-          new Date(
-            `${this.state.year}/${this.state.month}/${this.state.day} 00:00:00`
-          ).getTime()
-        );
+    serverRequest(this, requester.updateUserInfo, [userInfo],
+      data => {
+        const {
+          firstName,
+          lastName,
+          phoneNumber,
+          preferredLanguage,
+          gender,
+          country,
+          city,
+          countryState,
+          day,
+          month,
+          year
+        } = this.state;
+
+        // TODO: Move this to redux cache
+        this.props.setLoginDetails(data);
+        this.setState({showProgress: false});
+      },
+      (errorData, errorCode) => {
+        this.setState({showProgress: false});
       }
-      this.setState({showProgress: false});
-    });
+    );
   }
 
   onBackPress = () => {
@@ -591,7 +515,38 @@ class EditUserProfile extends Component {
     this.props.navigation.state.params.updateGender(this.state.gender);
   };
 
+  _renderDateTimePicker(day, month, year, isDateTimePickerVisible) {
+    const asMoment = (year && moment.utc(`${day}/${month}/${year}`, TIME_FORMATS.SERVER_BIRTHDAY_UTC));
+    let date = (year == "0000" || !year ? new Date() : asMoment.toDate());
+
+    return (
+      <DateTimePicker
+        datePickerModeAndroid={"default"}
+        date={date}
+        isVisible={isDateTimePickerVisible}
+        onConfirm={this.handleDatePicked}
+        onCancel={this.hideDateTimePicker}
+      />
+    );
+  }
+
+  _renderBirthDate() {
+    const { day, month, year } = this.state;
+
+    return (
+      <UserPropertyItemTypeInfo
+        title="Birth date"
+        info={`${day}/${month}/${year}`}
+        onPress={this.onBirthDate}
+      />
+
+    )
+  }
+
+
   render() {
+    const { day, month, year, isDateTimePickerVisible } = this.state;
+
     let imageAvatar = "";
     if (this.state.image != "") {
       if (this.state.image.indexOf("images/default.png".toLowerCase()) != -1) {
@@ -667,13 +622,13 @@ class EditUserProfile extends Component {
                 }
               ]}
             />
-            <View style={styles.aboutContainer}>
+            {/* <View style={styles.aboutContainer}>
               <Text style={styles.aboutText}>About me</Text>
               <Text style={styles.aboutText}>{this.state.about}</Text>
               <TouchableOpacity onPress={this.onAbout}>
                 <Text style={[styles.editButton, { marginTop: 20 }]}>Edit about me</Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
             <View
               style={[
                 styles.lineStyle,
@@ -692,11 +647,7 @@ class EditUserProfile extends Component {
             <UserPropertyItemTypeInfo title="Gender" info={this.upperFirst(this.state.gender == "men" ? "Male" : "Female")} onPress={this.onGender} />
             <View style={styles.lineStyle} />
 
-            <UserPropertyItemTypeInfo
-              title="Birth date"
-              info={this.state.month + "/" + this.state.day + "/" + this.state.year}
-              onPress={this.onBirthDate}
-            />
+            { this._renderBirthDate(day, month, year) }
             <View style={styles.lineStyle} />
 
             <UserPropertyItemTypeInfo title="Email Address" info={this.state.email} onPress={this.onEmail} />
@@ -714,20 +665,20 @@ class EditUserProfile extends Component {
 
             <View style={{ marginTop: 15 }} />
 
-            <View style={styles.subtitleContainer}>
+            {/* <View style={styles.subtitleContainer}>
               <Text style={styles.subtitleText}>Optional Details</Text>
-            </View>
+            </View> */}
 
-            <UserPropertyItemTypeInfo title="Location" info={location} onPress={this.onLocation} />
-            <View style={styles.lineStyle} />
+            {/* <UserPropertyItemTypeInfo title="Location" info={location} onPress={this.onLocation} />
+            <View style={styles.lineStyle} /> */}
 
-            <UserPropertyItemTypeInfo title="School" info={this.state.school} onPress={this.onSchool} />
-            <View style={styles.lineStyle} />
+            {/* <UserPropertyItemTypeInfo title="School" info={this.state.school} onPress={this.onSchool} /> */}
+            {/* <View style={styles.lineStyle} /> */}
 
-            <UserPropertyItemTypeInfo title="Work" info={this.state.work} onPress={this.onWork} />
-            <View style={styles.lineStyle} />
+            {/* <UserPropertyItemTypeInfo title="Work" info={this.state.work} onPress={this.onWork} /> */}
+            {/* <View style={styles.lineStyle} /> */}
 
-            <UserPropertyItemTypeInfo style={{ marginBottom: 15 }} info={this.state.preferredLanguage} title="Languages" onPress={this.onLanguage} />
+            {/* <UserPropertyItemTypeInfo style={{ marginBottom: 15 }} info={this.state.preferredLanguage} title="Languages" onPress={this.onLanguage} /> */}
           </View>
         </ScrollView>
         <Footer style={styles.footer} button={"Save"} fullButton={true} onClick={this.updateProfile} />
@@ -742,15 +693,8 @@ class EditUserProfile extends Component {
         >
           {this.showModal()}
         </Modal>
-        <DateTimePicker
-          datePickerModeAndroid={"default"}
-          date={
-            this.state.year == "0000" ? new Date() : moment(this.state.month + "/" + this.state.day + "/" + this.state.year, "MM/DD/YYYY").toDate()
-          }
-          isVisible={this.state.isDateTimePickerVisible}
-          onConfirm={this.handleDatePicked}
-          onCancel={this.hideDateTimePicker}
-        />
+        
+        { this._renderDateTimePicker(day, month, year, isDateTimePickerVisible) }
 
         <LTLoader
           isLoading={this.state.showProgress}
@@ -767,8 +711,8 @@ const mapStateToProps = state => {
     countries: state.country.countries
   };
 };
+const mapDispatchToProps = dispatch => ({
+  setLoginDetails: bindActionCreators(setLoginDetails, dispatch),
+});
 
-export default connect(
-  mapStateToProps,
-  null
-)(EditUserProfile);
+export default connect(mapStateToProps, mapDispatchToProps)(EditUserProfile);
