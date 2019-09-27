@@ -4,6 +4,7 @@ import Toast from "react-native-easy-toast"; //eslint-disable-line
 import RNPickerSelect from "react-native-picker-select"; //eslint-disable-line
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
+import { NavigationActions, StackActions } from "react-navigation";
 import { domainPrefix } from "../../../config";
 import { autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace, isOnline, testFlow } from "../../../config-debug";
 import { testFlowExec, processError, ilog, tslog } from "../../../utils/debug/debug-tools";
@@ -96,8 +97,12 @@ class Explore extends Component {
   }
 
   onServerGetUserInfoError(errorData, errorCode) {
-    this.props.navigation.navigate("Welcome");
-    MessageDialog.showMessage(`Old login data expired.\nPlease log in again ...`, 0);
+    const resetAction = StackActions.reset({
+      index: 0,
+      actions: [NavigationActions.navigate({ routeName: 'Welcome' })],
+    });
+    this.props.navigation.dispatch(resetAction);
+    MessageDialog.showMessage("Login Expired",`Last login is not valid any more.\nPlease log in again.`, 0, 'login-expired');
   }
 
   async componentWillMount() {
@@ -618,7 +623,7 @@ class Explore extends Component {
   }
 
   render() {
-    const { message, messageVisible } = this.state;
+    const { dialogMessage, messageVisible } = this.state;
 
     // prettier-ignore
     return (
@@ -805,7 +810,10 @@ class Explore extends Component {
             // this.setState({ singlePickerSelectedItem: result.selectedItem });
           }}
         />
-        <MessageDialog parent={this} isVisible={messageVisible} message={message} />
+        <MessageDialog
+          parent={this}
+          isVisible={messageVisible} 
+          message={dialogMessage} />
       </View>
     );
   }

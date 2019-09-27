@@ -9,6 +9,7 @@ import {
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { NavigationActions, StackActions } from "react-navigation";
+import Toast from "react-native-simple-toast";
 
 import Image from "react-native-remote-svg";
 import PropTypes from "prop-types";
@@ -17,7 +18,6 @@ import { autobind } from "core-decorators";
 import styles from "./styles";
 import { validateEmail, validatePassword1 } from "../../../../utils/validation";
 import SmartInput from "../../../atoms/SmartInput";
-import ProgressDialog from "../../../atoms/SimpleDialogs/ProgressDialog";
 import { domainPrefix } from "../../../../config";
 import requester from "../../../../initDependencies";
 import LoginLocationDialog from "../../../atoms/LoginLocationDialog";
@@ -57,9 +57,7 @@ class Login extends Component {
 
     // auto focus if email set
     if (this.state.email != "" && this.passTextRef) {
-      alert(
-        "Log in with Facebook was not possible. Please enter your password manually."
-      );
+      alert("Log in with Facebook was not possible. Please enter your password manually.");
       setTimeout(() => this.passTextRef.input.focus(), 50);
     }
   }
@@ -67,9 +65,17 @@ class Login extends Component {
   // TODO: Need a way to generate a Google ReCAPTCHA token // old comment by abhi, e5e0b8fa2...
 
   onClickLogIn() {
-    // Toast.showWithGravity('Cannot login, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-    // this.setState({ locationDialogVisible: true });
-    // return;
+    const { email, password } = this.state;
+
+    if (!validateEmail(email)) {
+      Toast.showWithGravity('Please enter a valid email.', Toast.SHORT, Toast.CENTER);
+      return;
+    }
+    if (!validatePassword1(password)) {
+      Toast.showWithGravity('Please enter a valid password - at least 8 characters long and containing at least on letter an one digit.', Toast.LONG, Toast.CENTER);
+      return;
+    }
+
     this.handleLogin();
   }
 
@@ -193,7 +199,7 @@ class Login extends Component {
 
             <TouchableOpacity
               style={styles.buttonWrapper}
-              disabled={!validateEmail(email) || !validatePassword1(password)}
+              disabled={false}
               onPress={() => this.onClickLogIn()}
             >
               <View style={styles.LogInButton}>

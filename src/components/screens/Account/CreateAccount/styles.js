@@ -12,7 +12,7 @@ const styles = StyleSheet.create({
   main_container: {
     flex: 1,
     flexDirection: "column",
-    height: height
+    // height: height
   },
   main: {
     flex: 1,
@@ -92,11 +92,7 @@ const styles = StyleSheet.create({
   lowOpacity: {
     opacity: 0.3,
     position: "absolute",
-    left: 0,
-    right: 0,
     bottom: 0,
-    display: "flex",
-    alignItems: "center"
   },
   getStartedImage: {
     width: 400,

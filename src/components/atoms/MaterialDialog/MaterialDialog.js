@@ -53,6 +53,8 @@ const MaterialDialog = ({
   backgroundColor,
   addPadding,
   isVisibleBottomBar,
+  hasSeparator,
+  hasBottomSpace,
   onOk,
   onCancel,
   okLabel,
@@ -129,6 +131,9 @@ const MaterialDialog = ({
                   >
                     {children}
                   </View>
+
+                  { hasSeparator && <Separator isHR width={"80%"} /> }
+
                   {isVisibleBottomBar ? ( //onOk != null && onCancel != null
                     <View
                       style={
@@ -162,7 +167,7 @@ const MaterialDialog = ({
                 </View>
               </TouchableWithoutFeedback>
 
-              <Separator height={bottomSpace ? bottomSpace : 0} isHR extraStyle={{backgroundColor:'white'}} />
+              { hasBottomSpace && <Separator height={bottomSpace ? bottomSpace : 0} isHR extraStyle={{backgroundColor:'white'}} /> }
             </View>
           </KeyboardAvoidingView>
         </View>

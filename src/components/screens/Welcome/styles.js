@@ -27,17 +27,26 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     marginHorizontal: 48
   },
-  logInButton: {
+  blackButton: {
+    marginBottom: 20,
+    backgroundColor: "#223843"
+  },
+  whiteButton: {
     marginBottom: 20,
     borderColor: "white",
     borderWidth: 1.5
   },
+  blackBorderButton: {
+    marginBottom: 20,
+    borderColor: "#333",
+    borderWidth: 1.5
+  },
+  textButton: {
+    margin: 5
+  },
   facebookButton: {
     backgroundColor: "#223843"
     // elevation: 3
-  },
-  createAccountButton: {
-    marginTop: 20
   },
   recoverButton: {
     marginTop: -20

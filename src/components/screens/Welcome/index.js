@@ -21,6 +21,8 @@ import {
 } from "react-native-fbsdk";
 import LTLoader from "../../molecules/LTLoader";
 import { serverRequest, SERVER_ERROR } from "../../../services/utilities/serverUtils";
+import Separator from "../../atoms/Separator";
+import MessageDialog from "../../molecules/MessageDialog";
 
 class Welcome extends Component {
   constructor(props) {
@@ -29,7 +31,8 @@ class Welcome extends Component {
     this.state = {
       showProgress: false,
       locationDialogVisible: false,
-      message: ""
+      preloaderMessage: "",
+      messageVisible: false
     };
 
     this.doLoginViaFb = this.doLoginViaFb.bind(this);
@@ -68,13 +71,7 @@ class Welcome extends Component {
         user.country = countryID;
       }
 
-      serverRequest(
-        this,
-        requester.login,
-        [user],
-        this.onFBLoginSuccess,
-        this.onFBLoginError
-      );
+      serverRequest(this, requester.login, [user], this.onFBLoginSuccess, this.onFBLoginError);
     } else {
       const user = {
         authId: "fid" + this.fbInfo.id,
@@ -85,13 +82,7 @@ class Welcome extends Component {
         user.country = countryID;
       }
 
-      serverRequest(
-        this,
-        requester.login,
-        [[user, null]],
-        this.onLoginSuccess,
-        this.onLoginError
-      );
+      serverRequest(this, requester.login, [[user, null]], this.onLoginSuccess, this.onLoginError);
     }
   }
 
@@ -133,9 +124,9 @@ class Welcome extends Component {
     const _this = this;
     const responseInfoCallback = function(error, result) {
       if (error) {
-        this.setState({ message: "" });
+        this.setState({ preloaderMessage: "" });
         alert("Error while trying to connect with Facebook account");
-        console.warn(`[Welcome] ` + error.message, error);
+        console.warn(`[Welcome] ` + error.preloaderMessage, error);
       } else {
         _this.fbInfo = {
           ...result,
@@ -164,31 +155,31 @@ class Welcome extends Component {
   gotoFB() {
     const _this = this;
 
-    this.setState({ message: "Attempting log in with Facebook" });
+    this.setState({ preloaderMessage: "Attempting log in with Facebook" });
 
     LoginManager.logInWithPermissions(["public_profile", "email"])
       .then(
         result => {
           if (result.isCancelled) {
-            this.setState({ message: "" });
+            this.setState({ preloaderMessage: "" });
           } else {
             AccessToken.getCurrentAccessToken()
               .then(data => {
                 _this.doLoginViaFb(data);
               })
               .catch(function(error) {
-                this.setState({ message: "" });
+                this.setState({ preloaderMessage: "" });
                 console.warn(`error while getting access token`, error);
               });
           }
         },
         error => {
-          this.setState({ message: "" });
+          this.setState({ preloaderMessage: "" });
           alert("Login fail with error: " + error);
         }
       )
       .catch(function(error) {
-        this.setState({ message: "" });
+        this.setState({ preloaderMessage: "" });
         console.log("error with facebook login", error);
       });
   }
@@ -207,7 +198,7 @@ class Welcome extends Component {
   }
 
   onFBLoginSuccess() {
-    this.setState({ message: "" });
+    this.setState({ preloaderMessage: "" });
 
     res.body.then(data => {
       AsyncStorage.setItem(`${domainPrefix}.auth.locktrip`, data.Authorization);
@@ -218,7 +209,7 @@ class Welcome extends Component {
   }
 
   onFBLoginError(data, errorCode) {
-    this.setState({ message: "", showProgress: false });
+    this.setState({ preloaderMessage: "", showProgress: false });
 
     switch (errorCode) {
 
@@ -262,7 +253,8 @@ class Welcome extends Component {
 
       if (keysNoF.includes("IncorrectPassword")) {
         // prettier-ignore
-        alert("You already registered using email, so please try to login using email.");
+        // suggested message if this case is going to be covered after facebook token implementation
+        // MessageDialog.showMessage("Email Registered",`Your e-mail ${this.fbInfo.email} is already registered. Please try to login with this email.`);
       } else {
         this.tryRegister();
       }
@@ -275,22 +267,23 @@ class Welcome extends Component {
         <Button
           onPress={this.gotoLogin}
           text="Log In"
-          wrapStyle={styles.logInButton}
+          wrapStyle={styles.whiteButton}
         />
         {/* <Button
           wrapStyle={styles.facebookButton}
           text="Continue with Facebook"
           onPress={this.gotoFB}
         /> */}
+        <Separator height={20} />
         <Button
-          wrapStyle={styles.createAccountButton}
+          wrapStyle={styles.textButton}
           onPress={this.gotoSignup}
           text="Create an Account"
         />
         <Button
-          wrapStyle={styles.recoverButton}
+          wrapStyle={styles.textButton}
           onPress={this.gotoRecover}
-          text="Recover"
+          text="Recover your account"
         />
       </View>
     );
@@ -298,7 +291,7 @@ class Welcome extends Component {
 
   render() {
     const { countries } = this.props;
-    const { showProgress, locationDialogVisible, message } = this.state;
+    const { showProgress, locationDialogVisible, preloaderMessage } = this.state;
 
     return (
       <View style={styles.container}>
@@ -317,7 +310,7 @@ class Welcome extends Component {
         {this._renderButtons()}
 
         <Text style={styles.finePrintText}>
-          By tapping Log In, Continue or Create Account, I agree to LockChain's
+          By tapping 'Log In', 'Create Account' or 'Recover your account', I agree to LockChain's
           Terms of Service, Payments Terms of Service and Privacy Policy.
         </Text>
 
@@ -342,7 +335,14 @@ class Welcome extends Component {
           }}
         />
 
-        <LTLoader isLoading={showProgress} message={message} />
+        <LTLoader isLoading={showProgress} preloaderMessage={preloaderMessage} />
+
+        <MessageDialog
+          parent={this}
+          title={this.state.messageTitle}
+          message={this.state.dialogMessage}
+          isVisible={this.state.messageVisible}
+        />
       </View>
     );
   }

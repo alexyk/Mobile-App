@@ -157,10 +157,6 @@ const AppWithNavigationState = createReduxContainer(RootNavigator);
 
 // create nav component
 class ReduxNavigation extends PureComponent {
-  state = {
-    visibleConfirmDialog: false
-  };
-
   componentDidMount() {
     BackHandler.addEventListener("hardwareBackPress", this.onBackPress);
   }
@@ -172,7 +168,7 @@ class ReduxNavigation extends PureComponent {
   onBackPress = () => {
     const { dispatch, state } = this.props;
     if (state.index === 0) {
-      this.setState({ visibleConfirmDialog: true });
+      MessageDialog.showMessage("Confirm Exit", "Are you sure you want to exit the app?", null, 'exit');
       return true;
     }
 
@@ -180,23 +176,8 @@ class ReduxNavigation extends PureComponent {
     return true;
   };
 
-  onOk = () => {
-    //console.log("onConfirmOk ---");
-    this.setState({ visibleConfirmDialog: false }, () => {
-      //console.log("onConfirmOk ---123123123");
-      BackHandler.exitApp();
-      // const { dispatch } = this.props;
-      // dispatch(NavigationActions.back());
-    });
-  };
-
-  onCancel = () => {
-    this.setState({ visibleConfirmDialog: false });
-  };
-
   render() {
     const { dispatch, state } = this.props;
-    const { visibleConfirmDialog } = this.state;
     return (
       <View style={{ flex: 1 }}>
         <AppWithNavigationState
@@ -205,16 +186,6 @@ class ReduxNavigation extends PureComponent {
           }}
           dispatch={dispatch}
           state={state}
-        />
-        <MessageDialog
-          title={"Confirm"}
-          message="Are you sure you want to exit?"
-          isVisible={visibleConfirmDialog}
-          commonButtonContainerStyle={{}}
-          commonButtonStyle={{color: "black", fontSize: 17}}
-          buttonsContainerStyle={{}}
-          onOk={this.onOk}
-          onCancel={this.onCancel}
         />
       </View>
     );

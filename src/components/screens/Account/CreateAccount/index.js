@@ -1,17 +1,12 @@
-import {
-  Platform,
-  Text,
-  TouchableOpacity,
-  View,
-  ScrollView
-} from "react-native";
 import React, { Component } from "react";
+import { Platform, Text, TextInput, TouchableOpacity, View, ScrollView } from "react-native";
 import { connect } from "react-redux";
 import Image from "react-native-remote-svg";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import RNPickerSelect from "react-native-picker-select";
 import Switch from "react-native-customisable-switch";
 import Toast from "react-native-simple-toast";
+import PhoneInput from "react-native-phone-input";
 import styles from "./styles";
 import {
   validateEmail,
@@ -23,15 +18,23 @@ import WhiteBackButton from "../../../atoms/WhiteBackButton";
 import requester from "../../../../initDependencies";
 import LTIcon from "../../../atoms/LTIcon";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
+import { commonText } from "../../../../common.styles";
+import InvisibleComponentFactory from "../../../atoms/InvisibleComponentFactory";
 
 class CreateAccount extends Component {
   constructor(props) {
     super(props);
+
     this.onChangeHandler = this.onChangeHandler.bind(this);
+    this.onPhoneCountryChanged = this.onPhoneCountryChanged.bind(this);
+    this.onPhonePressConfirm = this.onPhonePressConfirm.bind(this);
+
     this.state = {
       countries: [],
       countryStates: [],
       hasCountryState: false,
+      initialCountryForPhone: null,
+      countryCodeForPhone: null,
       firstName: "",
       lastName: "",
       email: "",
@@ -56,6 +59,11 @@ class CreateAccount extends Component {
   componentWillMount() {
     this.setCountriesInfo();
   }
+
+  componentDidMount() {
+    this._phoneCountries = this.refs.phone.getAllCountries();
+  }
+  
 
   onChangeHandler(property) {
     return value => {
@@ -100,7 +108,7 @@ class CreateAccount extends Component {
   };
 
   setCountryStates = states => {
-    countryStates = [];
+    let countryStates = [];
     states.map((item, i) => {
       countryStates.push({
         label: item.name,
@@ -112,17 +120,42 @@ class CreateAccount extends Component {
     });
   };
 
+  onPhonePressConfirm() {
+    const _this = this;
+    setImmediate(() => _this.refs.phone.focus());
+  }
+
+  onPhoneCountryChanged(countryId) {
+    let { phoneNumber } = this.state;
+    let countryCodeForPhone = countryId;
+    if (!phoneNumber || (phoneNumber && phoneNumber.length <= 5)) {
+      phoneNumber = this.refs.phone.getDialCode();
+      this.setState({phoneNumber, countryCodeForPhone});
+    } else {
+      this.setState({countryCodeForPhone});
+    }
+  }
+
   onCountrySelected = value => {
-    //console.log("onCountrySelected", value);
     const hasCountryState = this.hasCountryState(value);
+    const initialCountryForPhone = (value ? value.code.toLowerCase() : '');
+
     this.setState({
-      // countryId: value.id,
-      // countryName: value.name,
       country: value != 0 ? value : undefined,
       countryStates: [],
       hasCountryState: hasCountryState,
-      countryState: ""
+      countryState: "",
+      countryCodeForPhone: initialCountryForPhone,
+      initialCountryForPhone
     });
+    this.refs.phone.selectCountry(initialCountryForPhone);
+
+    // // delayed update to show phone code
+    // const _this = this;
+    // setImmediate(() => {
+    //   if (_this.refs.phone) {
+    //   }
+    // });
 
     if (hasCountryState) {
       serverRequest(this, requester.getStates, [value.id], 
@@ -133,15 +166,21 @@ class CreateAccount extends Component {
     }
   };
 
+  getPhoneCountry(code) {
+    let phoneCountry = ` with code ${code.toUpperCase()}`;
+
+    try {
+      let matches = this._phoneCountries.filter(item => item.iso2 == countryCodeForPhone);
+      if (matches.length == 0) {
+        phoneCountry = ' ' + matches[0].name;
+      }
+    } catch (error) {}
+
+    return phoneCountry;
+  }
+
   goToNextScreen() {
-    const {
-      firstName,
-      lastName,
-      email,
-      phoneNumber,
-      countryState,
-      hasCountryState
-    } = this.state;
+    const { firstName, lastName, email, phoneNumber, country, countryState, hasCountryState, userWantsPromo, countryCodeForPhone } = this.state;
 
     if (!validateName(firstName)) {
       this.showMessage("First name should contain at least 2 latin letters.");
@@ -158,74 +197,96 @@ class CreateAccount extends Component {
       this.refs.email.focus();
       return;
     }
-    if (!validatePhone(phoneNumber)) {
-      this.showMessage("Phone number should contain 5 or more digits.");
+
+    if (country === undefined || country === null) {
+      this.showMessage("Please choose your country of residence.");
       return;
     }
+
     if (hasCountryState && !countryState) {
       this.showMessage("Please Select State of Country.");
       return;
     }
-    const { params } = this.props.navigation.state;
-
-    if (params != undefined && params != null) {
-      const {
-        firstName,
-        lastName,
-        email,
-        phoneNumber,
-        country,
-        userWantsPromo,
-        countryState
-      } = this.state;
-      if (country === undefined || country === null) {
-        this.showMessage("Select Country.");
+    const isPhoneValid = this.refs.phone.isValidNumber()
+    if (!isPhoneValid || !validatePhone(phoneNumber)) {
+      // this.showMessage("Phone number should contain 5 or more digits.");
+      if (countryCodeForPhone != country.code.toLowerCase()) {
+        this.showMessage(`'${phoneNumber}' is not a valid phone number for the selected country${this.getPhoneCountry(countryCodeForPhone)}.`);
       } else {
-        this.props.navigation.navigate("Terms", {
-          ...params,
-          firstName,
-          lastName,
-          email,
-          phoneNumber,
-          country: country.id,
-          countryState: countryState.id,
-          userWantsPromo
-        });
+        this.showMessage(`'${phoneNumber}' is not a valid phone number for the selected country of residence ${country.name}.`);
       }
-    } else {
-      const {
-        firstName,
-        lastName,
-        email,
-        country,
-        userWantsPromo,
-        checkZIndex,
-        countryState,
-        phoneNumber
-      } = this.state;
-
-      if (country === undefined || country === null) {
-        this.showMessage("Please choose your country of residence");
-      } else {
-        serverRequest(this, requester.getEmailFreeResponse, [email],
-          data => {
-            if (data.exist) {
-              this.showMessage("This e-mail is taken, please use another one.");
-              this.refs.email.focus();
-            } else {
-              this.props.navigation.navigate("CreatePassword", {
-                firstName,
-                lastName,
-                email,
-                phoneNumber,
-                country: country.id,
-                countryState: countryState.id,
-                userWantsPromo
-              });
-            }
-          });
-      }
+      this.refs.phone.focus();
+      return;
     }
+
+    // proceed if e-mail is not taken
+    serverRequest(this, requester.getEmailFreeResponse, [email],
+      data => {
+        if (data.exist) {
+          this.showMessage("This e-mail is taken, please use another one.");
+          this.refs.email.focus();
+        } else {
+          this.props.navigation.navigate("CreatePassword", {
+            firstName,
+            lastName,
+            email,
+            phoneNumber,
+            country: country.id,
+            countryState: countryState.id,
+            userWantsPromo
+          });
+        }
+      });
+
+  }
+
+  /**
+   * hide component but still render it (it has ref set)
+   */
+  _renderPhoneInput() {
+    const { phoneNumber, initialCountryForPhone } = this.state;    
+    const isVisible = (!!initialCountryForPhone);
+
+    const visibleStyle = {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      borderRadius: 25,
+      borderColor: "#e4a193",
+      borderWidth: 1,
+      paddingLeft: 10,
+      height: 50
+    }
+    const visibleFlagStyle = {backgroundColor: 'transparent', borderColor: 'transparent'};
+
+    const visibleProps = {
+      ref: 'phone',
+      autoFormat: true, 
+      value: phoneNumber,
+      initialCountry: initialCountryForPhone,
+      textProps: {
+        placeholder: 'Phone Number',
+        keyboardType: 'phone-pad',
+        textContentType: 'telephoneNumber',
+      },
+      flagStyle: visibleFlagStyle,
+      style: visibleStyle,
+      textStyle: {...commonText, color: 'white'},
+      onSelectCountry: this.onPhoneCountryChanged,
+      onPressConfirm: this.onPhonePressConfirm,
+      onChangePhoneNumber: this.onChangeHandler("phoneNumber"),
+    }
+
+    // prettier-ignore
+    return (
+      isVisible
+        ? <PhoneInput {...visibleProps} />
+        : <PhoneInput
+            {...visibleProps}
+            textComponent={InvisibleComponentFactory({style:{height:50, margin: 5}})}
+            flagStyle={{ ...visibleFlagStyle, height: 0, width: 0 }}
+            style={{ ...visibleStyle, borderWidth: 0, height: 0 }}
+          />
+    )
   }
 
   render() {
@@ -233,12 +294,11 @@ class CreateAccount extends Component {
       firstName,
       lastName,
       email,
-      phoneNumber,
       userWantsPromo,
       checkZIndex
     } = this.state;
     const { params } = this.props.navigation.state;
-    const { navigate, goBack } = this.props.navigation;
+    const { goBack } = this.props.navigation;
 
     let isEditableEmail = true;
     if (params != undefined && params != null) {
@@ -315,22 +375,6 @@ class CreateAccount extends Component {
               </View>
 
               <View style={styles.inputView}>
-                <SmartInput
-                  ref="phone"
-                  editable={isEditableEmail}
-                  selectTextOnFocus={isEditableEmail}
-                  keyboardType="numeric"
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  value={phoneNumber}
-                  onChangeText={this.onChangeHandler("phoneNumber")}
-                  placeholder="Phone"
-                  placeholderTextColor="#fff"
-                  rightIcon={validatePhone(phoneNumber) ? null : "close"}
-                />
-              </View>
-
-              <View style={styles.inputView}>
                 <RNPickerSelect
                   items={this.state.countries}
                   placeholder={{
@@ -356,8 +400,13 @@ class CreateAccount extends Component {
                     }}
                     style={{ ...pickerSelectStyles }}
                   ></RNPickerSelect>
-                </View>
+                </View>                
               )}
+
+              <View style={styles.inputView}>
+                { this._renderPhoneInput() }
+              </View>
+
               <View style={styles.finePrintView}>
                 <Text style={styles.finePrintText}>
                   I'd like to receive promotional communications, including
