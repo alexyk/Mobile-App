@@ -36,6 +36,7 @@ import { serverRequest } from "../../../services/utilities/serverUtils";
 import { TIME_FORMATS } from "../../../config-settings";
 import { bindActionCreators } from "redux";
 import { setLoginDetails } from "../../../redux/action/userInterface";
+import MessageDialog from "../../molecules/MessageDialog";
 
 class EditUserProfile extends Component {
   static propTypes = {
@@ -80,7 +81,10 @@ class EditUserProfile extends Component {
       ...loginDetails
     };
 
+    this._modalVisibleBeforeMessage = null;
 
+    this.showMessage = this.showMessage.bind(this);
+    this.onHideMessage = this.onHideMessage.bind(this);
     this.onPhoto = this.onPhoto.bind(this);
     this.onEditName = this.onEditName.bind(this);
     this.onAbout = this.onAbout.bind(this);
@@ -121,6 +125,24 @@ class EditUserProfile extends Component {
 
   upperFirst(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  showMessage(title, text, code="message", stylePreset=null) {
+    let { modalView, modalVisible } = this.state;
+
+    if (modalView && modalVisible) {
+      this._modalVisibleBeforeMessage = true;
+      this.setState({modalVisible: false});
+    }
+
+    MessageDialog.showMessage(title, text, code, stylePreset);
+  }
+
+  onHideMessage() {
+    if (this._modalVisibleBeforeMessage) {
+      this._modalVisibleBeforeMessage = false;
+      this.setState({modalVisible: true});
+    }
   }
 
   showModal() {
@@ -204,6 +226,8 @@ class EditUserProfile extends Component {
     });
   }
 
+  
+
   onEditName() {
     this.setState({
       modalVisible: true,
@@ -213,9 +237,7 @@ class EditUserProfile extends Component {
           onCancel={() => this.onCancel()}
           firstName={this.state.firstName}
           lastName={this.state.lastName}
-          onRequestClose={() => {
-            this.onCancel();
-          }}
+          onRequestClose={() => this.onCancel() }
         />
       )
     });
@@ -262,17 +284,18 @@ class EditUserProfile extends Component {
 
   onEmail() {}
 
+
   onPhone() {
     this.setState({
       modalVisible: true,
       modalView: (
         <EditPhoneModal
+          parent={this}
+          showMessage={this.showMessage}
           onSave={pickerData => this.onSavePhone(pickerData)}
           onCancel={() => this.onCancel()}
           phone={this.state.phoneNumber}
-          onRequestClose={() => {
-            this.onCancel();
-          }}
+          onRequestClose={() => this.onCancel()}
         />
       )
     });
@@ -485,22 +508,7 @@ class EditUserProfile extends Component {
     );
 
     serverRequest(this, requester.updateUserInfo, [userInfo],
-      data => {
-        const {
-          firstName,
-          lastName,
-          phoneNumber,
-          preferredLanguage,
-          gender,
-          country,
-          city,
-          countryState,
-          day,
-          month,
-          year
-        } = this.state;
-
-        // TODO: Move this to redux cache
+      (data) => {
         this.props.setLoginDetails(data);
         this.setState({showProgress: false});
       },
@@ -669,8 +677,8 @@ class EditUserProfile extends Component {
               <Text style={styles.subtitleText}>Optional Details</Text>
             </View> */}
 
-            {/* <UserPropertyItemTypeInfo title="Location" info={location} onPress={this.onLocation} />
-            <View style={styles.lineStyle} /> */}
+            <UserPropertyItemTypeInfo title="Location" info={location} onPress={this.onLocation} />
+            <View style={styles.lineStyle} />
 
             {/* <UserPropertyItemTypeInfo title="School" info={this.state.school} onPress={this.onSchool} /> */}
             {/* <View style={styles.lineStyle} /> */}
@@ -699,6 +707,16 @@ class EditUserProfile extends Component {
         <LTLoader
           isLoading={this.state.showProgress}
           message="Saving Profile info..."
+        />
+
+
+        <MessageDialog
+          parent={this}
+          title={this.state.messageTitle}
+          message={this.state.dialogMessage}
+          isVisible={this.state.messageVisible}
+          onHide={this.onHideMessage}
+          onCancel={this.onHideMessage}
         />
       </View>
     );

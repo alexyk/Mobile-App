@@ -48,7 +48,9 @@ const TEXT = {
   VERIFICATION_EMAIL_MESSAGE: "It seems that your email has not yet been verified. You need to verify your email before you can proceed with your booking.",
   NETWORK_ERROR: "There was an error while connecting to the server. Please check your Internet connection and try again later.",
   "VERIFICATION_EMAIL_SUCCESS": 'Verification e-mail sent successfully',
-  "VERIFICATION_EMAIL_ERROR": 'There was an error when sending verification e-mail'
+  "VERIFICATION_EMAIL_ERROR": 'There was an error when sending verification e-mail',
+  "PHONE_NUMBER_INVALID": `%1 is not a valid phone number for the selected country%2.`,
+  "PHONE_NUMBER_INVALID_RESIDENCE": `% is not a valid phone number for the selected country of residence%2.` 
 };
 
 export default {

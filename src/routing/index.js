@@ -168,7 +168,7 @@ class ReduxNavigation extends PureComponent {
   onBackPress = () => {
     const { dispatch, state } = this.props;
     if (state.index === 0) {
-      MessageDialog.showMessage("Confirm Exit", "Are you sure you want to exit the app?", null, 'exit');
+      MessageDialog.showMessage("Confirm Exit", "Are you sure you want to exit the app?", 'exit');
       return true;
     }
 

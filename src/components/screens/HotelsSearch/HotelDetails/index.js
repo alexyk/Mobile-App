@@ -125,8 +125,7 @@ class HotelDetails extends Component {
   onUserInfoSuccessAndBook(data, roomDetail) {
     const { isEmailVerified } = data;
     if (!isEmailVerified) {
-      const codeAndPreset = "email-verification";
-      MessageDialog.showMessage("Email Verification", lang.TEXT.VERIFICATION_EMAIL_MESSAGE, codeAndPreset, codeAndPreset);
+      MessageDialog.showMessage("Email Verification", lang.TEXT.VERIFICATION_EMAIL_MESSAGE, "email-verification");
       return
     }
 

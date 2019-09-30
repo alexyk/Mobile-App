@@ -72,7 +72,7 @@ class Login extends Component {
       return;
     }
     if (!validatePassword1(password)) {
-      Toast.showWithGravity('Please enter a valid password - at least 8 characters long and containing at least on letter an one digit.', Toast.LONG, Toast.CENTER);
+      Toast.showWithGravity('Please enter a valid password - at least 8 characters long and containing at least one letter an one digit.', Toast.LONG, Toast.CENTER);
       return;
     }
 

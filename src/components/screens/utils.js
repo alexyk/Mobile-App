@@ -2,6 +2,7 @@ import { basePath } from "../../config";
 import { StyleSheet } from "react-native";
 import navigationService from "../../services/navigationService";
 import { isObject, isArray, isNumber, isString } from "js-tools";
+import { validatePhone } from "../../utils/validation";
 
 
 export function validateObject(sourceData, props, index = -1, path = "") {
@@ -281,4 +282,31 @@ export function styleToNumber(style) {
   } else {
     return StyleSheet.create({ style }).style;
   }
+}
+
+/**
+ * Intended to be the only place for processing phone input
+ * @param {PhoneInput} phoneInputInstance An instance of react-native-phone-input
+ * @param {String} value The phone value as string
+ * @param {String} origValue Optional - not currently tested
+ */
+export function processPhoneInput(phoneInputInstance, value, origValue='') {
+  let isValid = validatePhone(value);
+  let formattedValue, dialCode;
+  
+  if (phoneInputInstance) {
+    formattedValue = phoneInputInstance.getValue();
+    dialCode = phoneInputInstance.getDialCode();
+  }
+
+  if (value.charAt(0) == '0') {
+    value = (dialCode || "") + value.slice(1);
+  } else {
+    if (!value || !validatePhone(value) || value.charAt(0) == '+') {
+      value = formattedValue || dialCode || origValue;
+      // (origValue) && (origValue.charAt(0) != "+") && (value += origValue);
+    }  
+  }
+
+  return { isValid, value };
 }

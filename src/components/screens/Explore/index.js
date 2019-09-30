@@ -88,6 +88,7 @@ class Explore extends Component {
     const { email } = data;
 
     if (email) {
+      // TODO: Remove all AsyncStorage calls
       AsyncStorage.setItem(`${domainPrefix}.auth.username`, email);
       this.setState({ email });
     }
@@ -102,7 +103,7 @@ class Explore extends Component {
       actions: [NavigationActions.navigate({ routeName: 'Welcome' })],
     });
     this.props.navigation.dispatch(resetAction);
-    MessageDialog.showMessage("Login Expired",`Last login is not valid any more.\nPlease log in again.`, 0, 'login-expired');
+    MessageDialog.showMessage("Login Expired",`Last login is not valid any more.\nPlease log in again.`, 'login-expired');
   }
 
   async componentWillMount() {

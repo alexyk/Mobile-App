@@ -8,11 +8,7 @@ import Switch from "react-native-customisable-switch";
 import Toast from "react-native-simple-toast";
 import PhoneInput from "react-native-phone-input";
 import styles from "./styles";
-import {
-  validateEmail,
-  validateName,
-  validatePhone
-} from "../../../../utils/validation";
+import { validateEmail, validateName, validatePhone } from "../../../../utils/validation";
 import SmartInput from "../../../atoms/SmartInput";
 import WhiteBackButton from "../../../atoms/WhiteBackButton";
 import requester from "../../../../initDependencies";
@@ -20,6 +16,9 @@ import LTIcon from "../../../atoms/LTIcon";
 import { serverRequest } from "../../../../services/utilities/serverUtils";
 import { commonText } from "../../../../common.styles";
 import InvisibleComponentFactory from "../../../atoms/InvisibleComponentFactory";
+import lang from "../../../../language";
+import { processPhoneInput } from "../../utils";
+
 
 class CreateAccount extends Component {
   constructor(props) {
@@ -62,13 +61,6 @@ class CreateAccount extends Component {
 
   componentDidMount() {
     this._phoneCountries = this.refs.phone.getAllCountries();
-  }
-  
-
-  onChangeHandler(property) {
-    return value => {
-      this.setState({ [property]: value });
-    };
   }
 
   componentDidUpdate(prevProps) {
@@ -120,6 +112,17 @@ class CreateAccount extends Component {
     });
   };
 
+
+  onChangeHandler(property) {
+    return value => {
+      if (property == "phone") {
+        const {value: processedValue } = processPhoneInput(this.phone, value);
+        value = processedValue;
+      }      
+      this.setState({ [property]: value });
+    };
+  }
+
   onPhonePressConfirm() {
     const _this = this;
     setImmediate(() => _this.refs.phone.focus());
@@ -128,9 +131,10 @@ class CreateAccount extends Component {
   onPhoneCountryChanged(countryId) {
     let { phoneNumber } = this.state;
     let countryCodeForPhone = countryId;
-    if (!phoneNumber || (phoneNumber && phoneNumber.length <= 5)) {
-      phoneNumber = this.refs.phone.getDialCode();
-      this.setState({phoneNumber, countryCodeForPhone});
+    const { isValid, value } = processPhoneInput(this.refs.phone, phoneNumber);
+
+    if (!isValid) {
+      this.setState({phoneNumber: value, countryCodeForPhone});
     } else {
       this.setState({countryCodeForPhone});
     }
@@ -150,13 +154,6 @@ class CreateAccount extends Component {
     });
     this.refs.phone.selectCountry(initialCountryForPhone);
 
-    // // delayed update to show phone code
-    // const _this = this;
-    // setImmediate(() => {
-    //   if (_this.refs.phone) {
-    //   }
-    // });
-
     if (hasCountryState) {
       serverRequest(this, requester.getStates, [value.id], 
         data => {
@@ -166,13 +163,14 @@ class CreateAccount extends Component {
     }
   };
 
+  // TODO: Instead of this method - consider extending PhoneNumber form 'react-native-phone-input' to have getCountryName() or similar method
   getPhoneCountry(code) {
     let phoneCountry = ` with code ${code.toUpperCase()}`;
 
     try {
       let matches = this._phoneCountries.filter(item => item.iso2 == countryCodeForPhone);
       if (matches.length == 0) {
-        phoneCountry = ' ' + matches[0].name;
+        phoneCountry = matches[0].name;
       }
     } catch (error) {}
 
@@ -207,15 +205,21 @@ class CreateAccount extends Component {
       this.showMessage("Please Select State of Country.");
       return;
     }
-    const isPhoneValid = this.refs.phone.isValidNumber()
-    if (!isPhoneValid || !validatePhone(phoneNumber)) {
-      // this.showMessage("Phone number should contain 5 or more digits.");
+
+    if (!validatePhone(phoneNumber)) {
+      let message;
+
       if (countryCodeForPhone != country.code.toLowerCase()) {
-        this.showMessage(`'${phoneNumber}' is not a valid phone number for the selected country${this.getPhoneCountry(countryCodeForPhone)}.`);
+        message = lang.TEXT.PHONE_NUMBER_INVALID;
+        message = message.replace('%1', phoneNumber).replace('%2', this.getPhoneCountry(countryCodeForPhone));
       } else {
-        this.showMessage(`'${phoneNumber}' is not a valid phone number for the selected country of residence ${country.name}.`);
+        message = lang.TEXT.PHONE_NUMBER_INVALID_RESIDENCE;
+        message = message.replace('%1', phoneNumber).replace('%2', " " + country.name);
       }
+
+      this.showMessage(message);
       this.refs.phone.focus();
+
       return;
     }
 

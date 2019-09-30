@@ -8,6 +8,10 @@ export const validateEmail = email => {
 };
 
 export const validatePhone = phone => {
+  // TODO: May consider using google library directly if it covers project needs better
+  // Continuing with current simple validation seems to me (Alex K) also a good idea (in terms of maintenance and following project needs)
+  // Google library demo:  https://github.com/google/libphonenumber/blob/master/javascript/i18n/phonenumbers/demo.js
+  // Previous partially applied solution was: 'react-native-phone-input'.phoneNumber.isValidNumber()
   const re = /^([+]{0,1})([\d]{5,})$/; // eslint-disable-line
   return re.test(phone);
 };

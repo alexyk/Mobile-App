@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import { Text } from "react-native";
-import PropTypes from 'prop-types'
 import { BackHandler } from "react-native";
 import lodash, { cloneDeep } from 'lodash'
 
@@ -23,12 +22,15 @@ class MessageDialog extends Component {
    *          message={this.state.dialogMessage}
    *          isVisible={this.state.messageVisible}
    *         />
+   * Optional often used props:
+   *  onHide - handler that triggers (if set) on both onOk and onCancel
+   * 
    * State is taken care of by using parent.setState(...)
    * @param {String} text The message text
-   * @param {Number|String} code A code associated with this message and used to decide what to do in onOk or onCancel handlers
+   * @param {Number|String} code A code or/and style-preset, associated with this message and used to decide what to do in onOk or onCancel handlers
    * @param {Object|String} extraProps If in need to hide a button or set styling etc. If string - used as a name of preset, if object - presetName is name of preset if set, otherwise object props are added as custom props to MessageDialog
    */
-  static showMessage(title, text, code, extraProps = null) {
+  static showMessage(title, text, code='message', extraProps = null) {
     let presetName, customProps;
 
     // prepare extra styling
@@ -39,6 +41,8 @@ class MessageDialog extends Component {
       // combine a predefined style preset (extraProps.presetName) with custom styling (extraProps)
       (presetName = extraProps.presetName) && (delete extraProps.presetName); // experimenting with syntax
       customProps = extraProps;
+    } else if (isString(code)) {
+      presetName = code;
     } else {
       MessageDialog.extraProps = {};
     }
@@ -120,7 +124,7 @@ class MessageDialog extends Component {
   }
 
   onOkInternal() {
-    const { parent, onOk } = this.props;
+    const { parent, onOk, onHide } = this.props;
     let messageCode;
 
     if (parent != null) {
@@ -131,10 +135,13 @@ class MessageDialog extends Component {
     if (onOk) {
       onOk(messageCode);
     }
+    if (onHide) {
+      onHide(messageCode);
+    }
   }
 
   onCancelInternal() {
-    const { parent, onCancel } = this.props;
+    const { parent, onCancel, onHide } = this.props;
     let messageCode;
 
     if (parent != null) {
@@ -144,6 +151,9 @@ class MessageDialog extends Component {
 
     if (onCancel) {
       onCancel(messageCode);
+    }
+    if (onHide) {
+      onHide(messageCode);
     }
   }
 
@@ -244,6 +254,7 @@ class MessageDialog extends Component {
     },
     message: {
       ...MessageDialog.orangeDesign,
+      okLabel: "OK",
       cancelLabel: ""
     },
     "login-expired": {
