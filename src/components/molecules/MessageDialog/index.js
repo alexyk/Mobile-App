@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Text } from "react-native";
 import PropTypes from 'prop-types'
 import { BackHandler } from "react-native";
+import lodash, { cloneDeep } from 'lodash'
 
 import MaterialDialog from "../../atoms/MaterialDialog/MaterialDialog";
 import { clog, wlog } from "../../../utils/debug/debug-tools";
@@ -25,19 +26,31 @@ class MessageDialog extends Component {
    * State is taken care of by using parent.setState(...)
    * @param {String} text The message text
    * @param {Number|String} code A code associated with this message and used to decide what to do in onOk or onCancel handlers
-   * @param {Object|String} extraProps If in need to hide a button or set styling etc. If string - used as a name of preset, if object - dialogPreset is name of preset if set, otherwise object props are added as custom props to MessageDialog
+   * @param {Object|String} extraProps If in need to hide a button or set styling etc. If string - used as a name of preset, if object - presetName is name of preset if set, otherwise object props are added as custom props to MessageDialog
    */
   static showMessage(title, text, code, extraProps = null) {
-    let preset = (isString(extraProps) && extraProps) || extraProps.dialogPreset || null;
-    if (preset != null) {
-      MessageDialog.extraProps = MessageDialog.extraPropsPresets[preset];
-      if (extraProps.dialogPreset) {
-        delete extraProps.dialogPreset;
-      }
+    let presetName, customProps;
+
+    // prepare extra styling
+    if (isString(extraProps)) {
+      // use a predefined style preset
+      presetName = extraProps;
     } else if (extraProps) {
-      MessageDialog.extraProps = extraProps;
+      // combine a predefined style preset (extraProps.presetName) with custom styling (extraProps)
+      (presetName = extraProps.presetName) && (delete extraProps.presetName); // experimenting with syntax
+      customProps = extraProps;
     } else {
       MessageDialog.extraProps = {};
+    }
+
+    // apply extra styling
+    if (presetName && customProps) {
+      MessageDialog.extraProps = {
+        ...MessageDialog.extraPropsPresets[presetName],
+        ...extraProps
+      };
+    } else {
+      MessageDialog.extraProps = MessageDialog.extraPropsPresets[presetName];
     }
 
     const { parent } = MessageDialog;
@@ -55,8 +68,6 @@ class MessageDialog extends Component {
   }
 
   static hide(code) {
-    MessageDialog.extraProps = {};
-
     const { parent } = MessageDialog;
     const { messageVisible, dialogMessage, messageCode } = parent.state;
 
@@ -137,6 +148,10 @@ class MessageDialog extends Component {
   }
 
   render() {
+    // merge props
+    let mergedProps = cloneDeep(this.props);
+    lodash.merge(mergedProps, MessageDialog.extraProps || {});
+
     let {
       buttonsContainerStyle,
       commonButtonContainerStyle,
@@ -151,10 +166,11 @@ class MessageDialog extends Component {
       cancelLabel,
       cancelStyle,
       cancelContainerStyle,
-      extraProps,
       modalProps,
-      modalContainerStyle
-    } = this.props;
+      modalContainerStyle,
+      extraDialogProps
+    } = mergedProps;
+
 
     if (!isVisible) {
       return null;
@@ -178,9 +194,9 @@ class MessageDialog extends Component {
         modalProps={modalProps}
         bottomSpace={10}
         modalContainerStyle={modalContainerStyle}
-        {...MessageDialog.extraProps}
+        {...extraDialogProps}
       >
-        <Text style={[{ fontSize: 17 }, messageStyle]}>{message}</Text>
+        <Text style={[{ fontSize: 15 }, messageStyle]}>{message}</Text>
       </MaterialDialog>
     );
   }
@@ -188,17 +204,22 @@ class MessageDialog extends Component {
   static materialDesign = {
     commonButtonContainerStyle: {},
     commonButtonStyle: { fontSize: 17 },
+    modalContainerStyle: { borderRadius: 15 },
     buttonsContainerStyle: {},
-    colorAccent: 'black',
+    colorAccent: "black",
     hasBottomSpace: false,
     hasSeparator: true
-  }
+  };
+  static materialDesignNonOval = {
+    ...MessageDialog.materialDesign,
+    borderRadius: 0
+  };
   static orangeDesign = {
     modalContainerStyle: {
-      borderRadius: 7,
+      borderRadius: 7
     },
     buttonsContainerStyle: {
-      justifyContent: 'space-around'
+      justifyContent: "space-around"
     },
     commonButtonStyle: {
       borderRadius: 3,
@@ -211,29 +232,30 @@ class MessageDialog extends Component {
       backgroundColor: "#C47B62",
       borderRadius: 5,
       padding: 5
+    },
+    extraDialogProps: {
+      hasBottomSpace: true
     }
-  }
+  };
   static extraPropsPresets = {
     exit: {
       ...MessageDialog.materialDesign,
       onOk: () => BackHandler.exitApp()
     },
     message: {
-      ...MessageDialog.orangeDesign, 
+      ...MessageDialog.orangeDesign,
       cancelLabel: ""
     },
     "login-expired": {
       ...MessageDialog.materialDesign,
       okLabel: "OK",
-      cancelLabel: "",
+      cancelLabel: ""
     },
     "email-verification": {
+      ...MessageDialog.orangeDesign,
       okLabel: "Send Email",
       okStyle: { width: "80%", textAlign: "center" },
-      okContainerStyle: {},
       cancelLabel: "",
-      extraProps: {},
-      modalProps: {}
     }
   };
 }
