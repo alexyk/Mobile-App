@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 import navigationService from "../../services/navigationService";
 import { isObject, isArray, isNumber, isString } from "js-tools";
 import { validatePhone } from "../../utils/validation";
+import { wlog } from "../../utils/debug/debug-tools";
 
 
 export function validateObject(sourceData, props, index = -1, path = "") {
@@ -297,16 +298,14 @@ export function processPhoneInput(phoneInputInstance, value, origValue='') {
   if (phoneInputInstance) {
     formattedValue = phoneInputInstance.getValue();
     dialCode = phoneInputInstance.getDialCode();
+  } else {
+    wlog("[screens::utils] Warning: couldn't get phoneInputInstance in processPhoneInput()")
   }
 
-  if (value.charAt(0) == '0') {
-    value = (dialCode || "") + value.slice(1);
-  } else {
-    if (!value || !validatePhone(value) || value.charAt(0) == '+') {
-      value = formattedValue || dialCode || origValue;
-      // (origValue) && (origValue.charAt(0) != "+") && (value += origValue);
-    }  
-  }
+  if (!value || !validatePhone(value) || value.charAt(0) != '+') {
+    value = formattedValue || dialCode || origValue;
+    // (origValue) && (origValue.charAt(0) != "+") && (value += origValue);
+  }  
 
   return { isValid, value };
 }

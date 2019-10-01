@@ -41,7 +41,7 @@ class SimpleUserProfile extends Component {
     }
 
     this.state = {
-      birthdayDisplay: day + "/" + month + "/" + year,
+      birthdayDisplay: year == "0000" ? 'DD/MM/YYYY' : `${day}/${month}/${year}`,
       showProgress: false,
       loadMessage: "loading...",
       image: profileImage == null ? "" : profileImage,
@@ -53,7 +53,7 @@ class SimpleUserProfile extends Component {
   render() {
     const { goBack } = this.props.navigation;
     const { locAddress } = this.props.loginDetails;
-    let { gender, image } = this.state;
+    let { gender, image, country, countryState } = this.state;
 
     if (gender === "men") {
       gender = "M";
@@ -69,6 +69,11 @@ class SimpleUserProfile extends Component {
       } else {
         image = { uri: imgHost + image };
       }
+    }
+    
+    let location = (country == null ? "" : country.name);
+    if (location && countryState != null && countryState.name) {
+      location = `${countryState.name}, ${location}`;
     }
 
     return (
@@ -103,12 +108,12 @@ class SimpleUserProfile extends Component {
               </Text>
               {this.state.city == "" ? (
                 <Text style={styles.location}>
-                  {this.state.country == null ? "" : this.state.country.name}
+                  {location}
                 </Text>
               ) : (
                 <Text style={styles.location}>
                   {this.state.city == null ? "" : this.state.city.name}{" "}
-                  {this.state.country == null ? "" : this.state.country.name}
+                  {location}
                 </Text>
               )}
             </View>

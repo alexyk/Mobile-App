@@ -88,14 +88,15 @@ class EditLocationModal extends Component {
     this.setState({countryStates, ...extraData});    
   }
 
-  setCountryStates() {
-    let { countryState, countryStates, country, lastCountry, hasCountryState: hasCountryStateFromState } = this.state;
+  setCountryStates(newCountry = null) {
+    let { countryState, countryStates, country, lastCountry } = this.state;
+    const statesNeedUpdate = (!!newCountry || !lastCountry || !countryStates || countryStates.length == 0);
 
-    const hasStates = (hasCountryStateFromState || hasCountryState);
-    const statesNeedUpdate = (!lastCountry || !countryStates || countryStates.length == 0);
+    const currentCountry = (newCountry || country);
+    const hasCountryState = this.hasCountryState(currentCountry);
 
-    if (hasStates && statesNeedUpdate) {
-      serverRequest(this, requester.getStates, [country.id],
+    if (hasCountryState && statesNeedUpdate) {
+      serverRequest(this, requester.getStates, [currentCountry.id],
         (data) => {
           if (isNumber(getObjectFromPath(countryState, "id"))) {
             const selected = data.filter(item => item.id == countryState.id);
@@ -104,9 +105,11 @@ class EditLocationModal extends Component {
             }
           }
           
-          this.processStates(data, {countryState, lastCountry: country});
+          this.processStates(data, {countryState, lastCountry: currentCountry});
         }
       );
+    } else if (!lastCountry) {
+      this.setState({lastCountry: currentCountry});
     }
 
   };
@@ -118,6 +121,9 @@ class EditLocationModal extends Component {
     // });
     // this.getCities(value);
     const hasCountryState = this.hasCountryState(value);
+    if (hasCountryState) {
+      this.setCountryStates(value);
+    }
     
     this.setState({
       // countryId: value.id,
@@ -127,10 +133,6 @@ class EditLocationModal extends Component {
       hasCountryState: hasCountryState,
       countryState: null
     });
-
-    if (hasCountryState) {
-      this.setCountryStates();
-    }
   };
 
   // onCountrySelected = (value) => {

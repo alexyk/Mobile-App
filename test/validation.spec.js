@@ -1,4 +1,4 @@
-import { validatePhone, validateLOCAddress, validateName, validatePassword, validateEmail} from '../src/utils/validation'
+import { validatePhone, validatePhoneIssues, PHONE_VALIDATION_ISSUES, validateLOCAddress, validateName, validatePassword, validateEmail} from '../src/utils/validation'
 
 
 describe('validation functions', () => {
@@ -29,6 +29,34 @@ describe('validation functions', () => {
     expect(validatePhone(p9))     .toBeFalsy();
     expect(validatePhone(p10))    .toBeFalsy();
     expect(validatePhone(p11))    .toBeFalsy();
+  });
+  it('validatePhone - phone validation issues list', () => {
+    let p1 = '+87989'
+        p2 = '09890'
+        p3 = '+389723497234'
+        p4 = '389723497234';
+        
+    let p5 = 'fg09890'
+        p6 = '+3897234 97 234'
+        p7 = '+3897234-97-234'
+        p8 = '389 7234 97 234'
+        p9 = '389k7234 97 234'
+        p10 = -1;
+        p11 = '-1';
+    
+    expect(validatePhoneIssues(p1))     .toEqual(null);
+    expect(validatePhoneIssues(p2))     .toEqual(null);
+    expect(validatePhoneIssues(p3))     .toEqual(null);
+    expect(validatePhoneIssues(p4))     .toEqual(null);
+
+    debugger;
+    expect(validatePhoneIssues(p5))     .toEqual(PHONE_VALIDATION_ISSUES.DIGITS_ONLY);
+    expect(validatePhoneIssues(p6))     .toEqual(PHONE_VALIDATION_ISSUES.DIGITS_ONLY);
+    expect(validatePhoneIssues(p7))     .toEqual(PHONE_VALIDATION_ISSUES.DIGITS_ONLY);
+    expect(validatePhoneIssues(p8))     .toEqual(PHONE_VALIDATION_ISSUES.DIGITS_ONLY);
+    expect(validatePhoneIssues(p9))     .toEqual(PHONE_VALIDATION_ISSUES.DIGITS_ONLY);
+    expect(validatePhoneIssues(p10))    .toEqual(PHONE_VALIDATION_ISSUES.INTERNAL);
+    expect(validatePhoneIssues(p11))    .toEqual(PHONE_VALIDATION_ISSUES.LENGTH);
   });
 
   it('validateLOCAddress - should validate blockchain address', () => {

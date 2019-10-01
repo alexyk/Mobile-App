@@ -5,6 +5,7 @@ import RNPickerSelect from "react-native-picker-select"; //eslint-disable-line
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
 import { NavigationActions, StackActions } from "react-navigation";
+import { cloneDeep } from 'lodash';
 import { domainPrefix } from "../../../config";
 import { autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace, isOnline, testFlow } from "../../../config-debug";
 import { testFlowExec, processError, ilog, tslog } from "../../../utils/debug/debug-tools";
@@ -25,8 +26,9 @@ import { setLoginDetails } from "../../../redux/action/userInterface";
 import { getSafeTopOffset } from "../../../utils/designUtils";
 import { serverRequest } from "../../../services/utilities/serverUtils";
 import { setGuestData } from "../../../redux/action/hotels";
-import { isString } from "js-tools";
+import { isString, isNumber, getObjectFromPath, isArray } from "js-tools";
 import MessageDialog from "../../molecules/MessageDialog";
+
 
 
 class Explore extends Component {
@@ -84,6 +86,24 @@ class Explore extends Component {
   onServerGetUserInfo(data) {
     //  with redux cache, for example:
     this.props.setLoginDetails(data);
+
+    const { countryState, country } = data;
+    
+    if (countryState) {
+      serverRequest(this, requester.getStates, [country.id],
+        (data) => {
+          if (isNumber(getObjectFromPath(countryState, "id"))) {
+            const selected = data.filter(item => item.id == countryState.id);
+            
+            if (isArray(selected) && selected.length == 1) {
+              this.props.setLoginDetails({countryState: cloneDeep(selected[0])});
+            }
+          }
+          
+          this.processStates(data, {countryState, lastCountry: country});
+        }
+      );
+    }
 
     const { email } = data;
 

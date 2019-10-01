@@ -16,6 +16,38 @@ export const validatePhone = phone => {
   return re.test(phone);
 };
 
+export const PHONE_VALIDATION_ISSUES = {
+  LENGTH: "Phone number should be at least 5 digits",
+  DIGITS_ONLY: "Phone number should contain only digits",
+  INTERNAL: "Phone number - internal error",
+  NA: "Phone number - unknown error",
+}
+export function validatePhoneIssues(phone) {
+  let result = null;
+
+  if (validatePhone(phone)) {
+    return result;
+  }
+
+  if (!isString(phone)) {
+    result = PHONE_VALIDATION_ISSUES.INTERNAL;
+  } else {
+    if (phone && phone.charAt(0) == "+") {
+      phone = phone.slice(1);
+    }
+    if (!phone || phone.length < 5) {
+      result = PHONE_VALIDATION_ISSUES.LENGTH;
+    } else if (!/^[\d]{5,}$/.test(phone)) {
+      result = PHONE_VALIDATION_ISSUES.DIGITS_ONLY;
+    } else {
+      result = PHONE_VALIDATION_ISSUES.NA;
+    }
+
+  }
+
+  return result;
+}
+
 export const validatePassword = password => {
   // const re = /^(?=.*?[A-Za-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-])(.{8,})$/; // eslint-disable-line
   const re = /^(?=.*?[A-Za-z])(?=.*?[0-9])(.{8,})$/; // eslint-disable-line

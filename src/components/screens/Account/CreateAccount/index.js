@@ -8,7 +8,7 @@ import Switch from "react-native-customisable-switch";
 import Toast from "react-native-simple-toast";
 import PhoneInput from "react-native-phone-input";
 import styles from "./styles";
-import { validateEmail, validateName, validatePhone } from "../../../../utils/validation";
+import { validateEmail, validateName, validatePhone, validatePhoneIssues, PHONE_VALIDATION_ISSUES } from "../../../../utils/validation";
 import SmartInput from "../../../atoms/SmartInput";
 import WhiteBackButton from "../../../atoms/WhiteBackButton";
 import requester from "../../../../initDependencies";
@@ -115,8 +115,8 @@ class CreateAccount extends Component {
 
   onChangeHandler(property) {
     return value => {
-      if (property == "phone") {
-        const {value: processedValue } = processPhoneInput(this.phone, value);
+      if (property == "phoneNumber") {
+        const {value: processedValue } = processPhoneInput(this.refs.phone, value);
         value = processedValue;
       }      
       this.setState({ [property]: value });
@@ -168,9 +168,9 @@ class CreateAccount extends Component {
     let phoneCountry = ` with code ${code.toUpperCase()}`;
 
     try {
-      let matches = this._phoneCountries.filter(item => item.iso2 == countryCodeForPhone);
-      if (matches.length == 0) {
-        phoneCountry = matches[0].name;
+      let match = this.refs.phone.getCountryData(this.state.countryCodeForPhone);
+      if (match && match.name) {
+        phoneCountry = match.name;
       }
     } catch (error) {}
 
@@ -209,14 +209,22 @@ class CreateAccount extends Component {
     if (!validatePhone(phoneNumber)) {
       let message;
 
-      if (countryCodeForPhone != country.code.toLowerCase()) {
+      const firstIssue = validatePhoneIssues(phoneNumber);
+
+      if (firstIssue && firstIssue != PHONE_VALIDATION_ISSUES.NA) {
+        message = firstIssue;
+      } else if (countryCodeForPhone != country.code.toLowerCase()) {
+        // TODO: Implement this case
+        // This case is currently not happening - it is prepared for more detailed verification with google validation
         message = lang.TEXT.PHONE_NUMBER_INVALID;
         message = message.replace('%1', phoneNumber).replace('%2', this.getPhoneCountry(countryCodeForPhone));
       } else {
+        // TODO: Implement this case
+        // This case is currently not happening - it is prepared for more detailed verification with google validation
         message = lang.TEXT.PHONE_NUMBER_INVALID_RESIDENCE;
         message = message.replace('%1', phoneNumber).replace('%2', " " + country.name);
       }
-
+      
       this.showMessage(message);
       this.refs.phone.focus();
 
@@ -264,7 +272,8 @@ class CreateAccount extends Component {
 
     const visibleProps = {
       ref: 'phone',
-      autoFormat: true, 
+      autoFormat: true,
+      allowZeroAfterCountryCode: false,
       value: phoneNumber,
       initialCountry: initialCountryForPhone,
       textProps: {

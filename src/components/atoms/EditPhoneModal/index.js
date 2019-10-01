@@ -3,7 +3,8 @@ import { Text, TouchableOpacity, View } from "react-native";
 import PhoneInput from "react-native-phone-input";
 import PropTypes from "prop-types";
 import styles from "./styles";
-import { validatePhone } from "../../../utils/validation";
+import Toast from 'react-native-simple-toast';
+import { validatePhoneIssues, PHONE_VALIDATION_ISSUES } from "../../../utils/validation";
 import lang from "../../../language";
 import { processPhoneInput } from "../../screens/utils";
 import { getObjectFromPath } from "js-tools";
@@ -42,24 +43,34 @@ class EditPhoneModal extends Component {
   }
 
   componentDidMount() {
-    this.phone.selectCountry(this.state.initialCountryForPhone);
+    this.refs.phone.selectCountry(this.state.initialCountryForPhone);
     this.setState({value: this.props.phone});
-    setImmediate(() => this.phone.focus());
+    setImmediate(() => this.refs.phone.focus());
   }
 
   updateInfo() {
     const { value } = this.state;
-    const isValid = processPhoneInput(this.phone, value)
+    const { isValid } = processPhoneInput(this.refs.phone, value)
 
     if (isValid) {
-      this.props.onSave(this.phone.getValue());
-    } else {
-      let message = lang.TEXT.PHONE_NUMBER_INVALID
-                      .replace('%1', value)
-                      .replace('%2','');
-      
+      this.props.onSave(this.refs.phone.getValue());
+    } else {      
       if (this.props.showMessage) {
-        this.props.showMessage('Phone Invalid', message, 'invalid-phone', 'message');
+        let message;
+        const firstIssue = validatePhoneIssues(value);
+
+        if (firstIssue && firstIssue != PHONE_VALIDATION_ISSUES.NA) {
+          message = firstIssue;
+        } else {
+          // TODO: Implement this case
+          // This case is currently not happening - it is prepared for more detailed verification with google validation
+          message = lang.TEXT.PHONE_NUMBER_INVALID
+                          .replace('%1', value)
+                          .replace('%2','');
+        }
+
+        // this.props.showMessage('Phone Invalid', message, 'invalid-phone', 'message');
+        Toast.showWithGravity(message, Toast.SHORT, Toast.CENTER);
       } else {
         throw new Error('[EditPhoneModal] "showMessage" need to be passed as a prop, for example: <EditPhoneModal showMessage={this.showMessage}  ... />');
       }
@@ -77,14 +88,14 @@ class EditPhoneModal extends Component {
   }
 
   onPhoneChanged(value) {
-    const {value: processedValue } = processPhoneInput(this.phone, value);
+    const {value: processedValue } = processPhoneInput(this.refs.phone, value);
     this.setState({value:processedValue});
   }
 
   onPhoneCountryChanged(countryId) {
     // const { phoneNumber: lastValue } = this.props.parent.state;
     const { value } = this.state;    
-    const { isValid, value: valueProcessed } = processPhoneInput(this.phone, value);
+    const { isValid, value: valueProcessed } = processPhoneInput(this.refs.phone, value);
 
     this.setState({value: valueProcessed});
   }
@@ -100,8 +111,8 @@ class EditPhoneModal extends Component {
           {/* {!isValid && this.renderInfo()} */}
 
           <View style={styles.editContent}>
-            <PhoneInput ref={ref => (this.phone = ref)}
-              initialCountryForPhone={initialCountryForPhone}
+            <PhoneInput ref={'phone'}
+              initialCountry={initialCountryForPhone}
               flagStyle={{backgroundColor: 'transparent', borderColor: 'transparent'}}
               value={this.state.value}
               onChangePhoneNumber={this.onPhoneChanged}

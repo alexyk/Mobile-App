@@ -50,7 +50,7 @@ const TEXT = {
   "VERIFICATION_EMAIL_SUCCESS": 'Verification e-mail sent successfully',
   "VERIFICATION_EMAIL_ERROR": 'There was an error when sending verification e-mail',
   "PHONE_NUMBER_INVALID": `%1 is not a valid phone number for the selected country%2.`,
-  "PHONE_NUMBER_INVALID_RESIDENCE": `% is not a valid phone number for the selected country of residence%2.` 
+  "PHONE_NUMBER_INVALID_RESIDENCE": `%1 is not a valid phone number for the selected country of residence%2.` 
 };
 
 export default {

@@ -17,9 +17,7 @@ class EditGenderModal extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      isFemale: true
-    };
+    this.state = { isFemale: null };
   }
 
   componentWillMount() {
@@ -39,10 +37,10 @@ class EditGenderModal extends Component {
                 onPress={() => this.setState({ isFemale: false })}
                 style={[
                   styles.gender,
-                  !this.state.isFemale ? styles.selected : ""
+                  this.state.isFemale === false ? styles.selected : ""
                 ]}
               >
-                {!this.state.isFemale && (
+                {this.state.isFemale === false && (
                   <Image
                     source={require("../../../assets/png/Filters/check.png")}
                     style={styles.tick}
@@ -60,10 +58,10 @@ class EditGenderModal extends Component {
                 onPress={() => this.setState({ isFemale: true })}
                 style={[
                   styles.gender,
-                  this.state.isFemale ? styles.selected : ""
+                  this.state.isFemale === true ? styles.selected : ""
                 ]}
               >
-                {this.state.isFemale && (
+                {this.state.isFemale === true && (
                   <Image
                     source={require("../../../assets/png/Filters/check.png")}
                     style={styles.tick}

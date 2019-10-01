@@ -14,7 +14,6 @@ import BackButton from "../../atoms/BackButton";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import EditAboutModal from "../../atoms/EditAboutModal";
 import EditGenderModal from "../../atoms/EditGenderModal";
-import EditGovernmentModal from "../../atoms/EditGovenmentModal";
 import EditLanguageModal from "../../atoms/EditLanguageModal";
 import EditLocationModal from "../../atoms/EditLocationModal";
 import EditNameModal from "../../atoms/EditNameModal";
@@ -70,7 +69,6 @@ class EditUserProfile extends Component {
 
     this.state = {
       avatarSource: null,
-      countryId: 1,
       modalVisible: false,
       isDateTimePickerVisible: false,
       showProgress: false,
@@ -78,7 +76,8 @@ class EditUserProfile extends Component {
       preferredCurrency: preferredCurrency == null ? 0 : preferredCurrency.id,
       preferredLanguage: preferredLanguage == null ? "English" : preferredLanguage,
       day, month, year,
-      ...loginDetails
+      ...loginDetails,
+      hasChanged: false
     };
 
     this._modalVisibleBeforeMessage = null;
@@ -92,7 +91,6 @@ class EditUserProfile extends Component {
     this.onBirthDate = this.onBirthDate.bind(this);
     this.onEmail = this.onEmail.bind(this);
     this.onPhone = this.onPhone.bind(this);
-    this.onGovernmentID = this.onGovernmentID.bind(this);
     this.onLocation = this.onLocation.bind(this);
     this.onSchool = this.onSchool.bind(this);
     this.onWork = this.onWork.bind(this);
@@ -101,7 +99,6 @@ class EditUserProfile extends Component {
     this.onSaveAbout = this.onSaveAbout.bind(this);
     this.onSaveGender = this.onSaveGender.bind(this);
     this.onSavePhone = this.onSavePhone.bind(this);
-    this.onSaveGovernmentId = this.onSaveGovernmentId.bind(this);
     this.onSaveLocation = this.onSaveLocation.bind(this);
     this.onSaveSchool = this.onSaveSchool.bind(this);
     this.onSaveWork = this.onSaveWork.bind(this);
@@ -200,6 +197,7 @@ class EditUserProfile extends Component {
                   .json()
                   .then(data => {
                     this.setState({
+                      hasChanged: true,
                       showProgress: false,
                       image: data.thumbnail
                     });
@@ -262,13 +260,15 @@ class EditUserProfile extends Component {
   }
 
   onGender() {
+    const { gender } = this.state;
+
     this.setState({
       modalVisible: true,
       modalView: (
         <EditGenderModal
           onSave={isFemale => this.onSaveGender(isFemale)}
           onCancel={() => this.onCancel()}
-          isFemale={this.state.gender == "women" ? true : false}
+          isFemale={gender == "women" ? true : gender == 'men' ? false : null}
           onRequestClose={() => {
             this.onCancel();
           }}
@@ -302,39 +302,24 @@ class EditUserProfile extends Component {
     this.showModal();
   }
 
-  onGovernmentID() {
-    this.setState({
-      modalVisible: true,
-      modalView: (
-        <EditGovernmentModal
-          onSave={governmentId => this.onSaveGovernmentId(governmentId)}
-          onCancel={() => this.onCancel()}
-          governmentId={this.state.governmentId}
-          onRequestClose={() => {
-            this.onCancel();
-          }}
-        />
-      )
-    });
-    this.showModal();
-  }
-
   onLocation() {
+    const { countries } = this.props;
+    const { country, countryState } = this.state;
+
     this.setState({
       modalVisible: true,
       modalView: (
         <EditLocationModal
-          onSave={(country, countryState) =>
-            this.onSaveLocation(country, countryState)
-          }
+          onSave={(country, countryState) => this.onSaveLocation(country, countryState)}
           onCancel={() => this.onCancel()}
-          countries={this.props.countries}
-          country={this.state.country}
-          countryState={this.state.countryState}
+          countries={countries}
+          country={country}
+          countryState={countryState}
           city={this.state.city}
         />
       )
     });
+
     this.showModal();
   }
 
@@ -391,9 +376,8 @@ class EditUserProfile extends Component {
 
   onSaveName(firstName, lastName) {
     this.setState({
-      modalVisible: false
-    });
-    this.setState({
+      hasChanged: true,
+      modalVisible: false,
       firstName: firstName,
       lastName: lastName
     });
@@ -401,32 +385,26 @@ class EditUserProfile extends Component {
 
   onSaveAbout(about) {
     this.setState({
+      hasChanged: true,
       modalVisible: false,
-      about: about
+      about
     });
   }
 
   onSaveGender(isFemale) {
+    let gender = isFemale ? "women" : "men";
     this.setState({
-      modalVisible: false
-    });
-    gender = isFemale ? "women" : "men";
-    this.setState({
-      gender: gender
+      hasChanged: true,
+      modalVisible: false,
+      gender
     });
   }
 
   onSavePhone(phone) {
     this.setState({
+      hasChanged: true,
       modalVisible: false,
       phoneNumber: phone
-    });
-  }
-
-  onSaveGovernmentId(governmentId) {
-    this.setState({
-      modalVisible: false,
-      governmentId: governmentId
     });
   }
 
@@ -436,6 +414,7 @@ class EditUserProfile extends Component {
     // })
     // country.name = this.props.countries[index].name
     this.setState({
+      hasChanged: true,
       modalVisible: false,
       country, countryState
     });
@@ -443,6 +422,7 @@ class EditUserProfile extends Component {
 
   onSaveSchool(school) {
     this.setState({
+      hasChanged: true,
       modalVisible: false,
       school: school
     });
@@ -450,6 +430,7 @@ class EditUserProfile extends Component {
 
   onSaveWork(work) {
     this.setState({
+      hasChanged: true,
       modalVisible: false,
       work: work
     });
@@ -457,6 +438,7 @@ class EditUserProfile extends Component {
 
   onSaveLanguage(language) {
     this.setState({
+      hasChanged: true,
       modalVisible: false,
       preferredLanguage: language
     });
@@ -544,7 +526,7 @@ class EditUserProfile extends Component {
     return (
       <UserPropertyItemTypeInfo
         title="Birth date"
-        info={`${day}/${month}/${year}`}
+        info={year == "0000" ? 'DD/MM/YYYY' : `${day}/${month}/${year}`}
         onPress={this.onBirthDate}
       />
 
@@ -553,7 +535,7 @@ class EditUserProfile extends Component {
 
 
   render() {
-    const { day, month, year, isDateTimePickerVisible } = this.state;
+    const { day, month, year, isDateTimePickerVisible, gender, country, countryState } = this.state;
 
     let imageAvatar = "";
     if (this.state.image != "") {
@@ -564,20 +546,13 @@ class EditUserProfile extends Component {
       }
     }
 
-    let location = "";
-    //console.log("location city", this.state.city, imageAvatar);
-    if (
-      this.state.city == undefined ||
-      this.state.city == null ||
-      this.state.city == ""
-    ) {
-      location = this.state.country == null ? "" : this.state.country.name;
-    } else {
-      let city_name = this.state.city == null ? "" : this.state.city.name;
-      let country_name =
-        this.state.country == null ? "" : this.state.country.name;
-      location = city_name + " " + country_name;
+    let location = (country == null ? "" : country.name);
+    if (location && countryState != null && countryState.name) {
+      location = `${countryState.name}, ${location}`;
     }
+
+
+    let genderAsString = (gender == "men" ? "Male" : (this.state.gender == 'women' ? "Female" : '( none selected )'));
 
     return (
       <View style={styles.container}>
@@ -652,7 +627,7 @@ class EditUserProfile extends Component {
               <Text style={styles.subtitleText}>Private Details</Text>
             </View>
 
-            <UserPropertyItemTypeInfo title="Gender" info={this.upperFirst(this.state.gender == "men" ? "Male" : "Female")} onPress={this.onGender} />
+            <UserPropertyItemTypeInfo title="Gender" info={this.upperFirst(genderAsString)} onPress={this.onGender} />
             <View style={styles.lineStyle} />
 
             { this._renderBirthDate(day, month, year) }
@@ -663,21 +638,13 @@ class EditUserProfile extends Component {
 
             <UserPropertyItemTypeInfo title="Phone" info={this.state.phoneNumber} onPress={this.onPhone} />
 
-            {/* <View style={styles.lineStyle} />
-
-                        <UserPropertyItemTypeInfo
-                            title="Government ID"
-                            info={this.state.governmentId}
-                            onPress={this.onGovernmentID} />
-                        <View style={[styles.lineStyle, { marginLeft: 0, marginRight: 0, marginTop: 0, marginBottom: 15 }]} /> */}
-
             <View style={{ marginTop: 15 }} />
 
             {/* <View style={styles.subtitleContainer}>
               <Text style={styles.subtitleText}>Optional Details</Text>
             </View> */}
 
-            <UserPropertyItemTypeInfo title="Location" info={location} onPress={this.onLocation} />
+            <UserPropertyItemTypeInfo title="Country" info={location} onPress={this.onLocation} />
             <View style={styles.lineStyle} />
 
             {/* <UserPropertyItemTypeInfo title="School" info={this.state.school} onPress={this.onSchool} /> */}
@@ -689,7 +656,9 @@ class EditUserProfile extends Component {
             {/* <UserPropertyItemTypeInfo style={{ marginBottom: 15 }} info={this.state.preferredLanguage} title="Languages" onPress={this.onLanguage} /> */}
           </View>
         </ScrollView>
-        <Footer style={styles.footer} button={"Save"} fullButton={true} onClick={this.updateProfile} />
+        { this.state.hasChanged &&
+            <Footer style={styles.footer} button={"Save"} fullButton={true} onClick={this.updateProfile} />
+        }
         <Modal
           animationType="fade"
           transparent={true}
