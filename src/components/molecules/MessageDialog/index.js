@@ -213,10 +213,9 @@ class MessageDialog extends Component {
 
   static materialDesign = {
     commonButtonContainerStyle: {},
-    commonButtonStyle: { fontSize: 17 },
+    commonButtonStyle: { fontSize: 17, color: "black" },
     modalContainerStyle: { borderRadius: 15 },
     buttonsContainerStyle: {},
-    colorAccent: "black",
     hasBottomSpace: false,
     hasSeparator: true
   };
