@@ -5,8 +5,19 @@ export const HOTELS_SOCKET_CONNECTION_TIMEOUT = 15;
 export const HOTELS_SOCKET_CONNECTION_UPDATE_TICK = 1;
 export const SC_NAME = "SCPaymentModeOn";
 
+export function setOption(name, value) {
+  switch (name) {
+    case 'experimental-search':
+      hotelSearchIsNative.step1Results = value;
+      break;
+  
+    default:
+      break;
+  }
+}
+
 // hotels search settings
-export const hotelSearchIsNative = {
+export var hotelSearchIsNative = {
   step1Results: false,
   step2HotelDetails: true,
   step3BookingDetails: true,

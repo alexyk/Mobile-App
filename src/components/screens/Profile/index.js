@@ -146,12 +146,12 @@ class Profile extends Component {
           {this._renderWallet(walletState)}
 
           <View>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => navigate("SimpleUserProfile")}
               style={styles.navItem}
             >
               <Text style={styles.navItemText}>View Profile</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity
               onPress={() =>
                 navigate("EditUserProfile", { updateGender: this.updateGender })
@@ -203,6 +203,13 @@ class Profile extends Component {
                 style={styles.navIcon}
               />
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigate("Settings")}
+              style={styles.navItem}
+            >
+              <Text style={styles.navItemText}>Settings</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={this.logout} style={styles.navItem}>
               <Text style={styles.navItemText}>Log Out</Text>
             </TouchableOpacity>
