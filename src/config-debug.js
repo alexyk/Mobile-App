@@ -141,7 +141,7 @@ export var filtersConfig = {
   mode: 'and',
   empty: [],
   0: [],
-  default: ['!\`scale', '!Require cycle', "!Async Storage ", "!SocketRocket", '!Disabling console.time', '!deprecated', "!RCTSplashScreen"],
+  default: ['!\`scale', '!Require cycle', "!Async Storage ", "!SocketRocket", '!Disabling console.time', '!deprecated', "!RCTSplashScreen", "!using weak randomBytes", "!Running application", "!serverUtils"],
 }
 filtersConfig.default2 = [].concat(filtersConfig.default, ['!<object>'])
 filtersConfig.default3 = ['mode:liM'].concat(filtersConfig.default2, [])
@@ -157,6 +157,8 @@ filtersConfig.server = ['includeNonMatching: false', 'serverUtil', ]
 filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
 filtersConfig.debug1  = ["mode: LiM", "error", 'serverUtils'].concat(filtersConfig.default2)
 filtersConfig.flows  = ["mode: Lim", /^search flow step/]
+
+filtersConfig.custom  = ['!Rejection'].concat(filtersConfig.default)
 
 export const consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
 
