@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View, Platform } from "react-native";
 import CustomSwitch from "react-native-customisable-switch";
 import { commonText } from "../../../common.styles";
 import { setOption, hotelSearchIsNative } from '../../../config-settings'
@@ -9,7 +9,9 @@ const OptionSwitch = (props) => {
   let { label, labelOn, labelOff, description, value, onChange } = props;
 
   (!label) && (label = (labelOn && labelOff) ? (value ? labelOn : labelOff) : "");
-  (!description) && (description='')
+  (!description) && (description='');
+  const borderWidth = (Platform.OS == 'android' ? 1 : 0);
+
 
   return (
     <View style={{width: "100%", paddingVertical: 10, flexDirection: 'column', marginVertical: 10}}>
@@ -22,18 +24,18 @@ const OptionSwitch = (props) => {
             activeBackgroundColor="#DA7B61"
             inactiveBackgroundColor="#4445"
             switchWidth={62}
-            switchBorderWidth={value ? 1 : 0}
+            switchBorderWidth={borderWidth}
             switchBorderColor="#e4a193"
             buttonWidth={30}
             buttonHeight={30}
             buttonBorderRadius={15}
-            buttonBorderColor="#fff"
-            buttonBorderWidth={0}
+            buttonBorderColor="#555"
+            buttonBorderWidth={borderWidth}
             padding={false}
             containerStyle={{marginBottom: 5}}
           />
       </View>
-      <Text style={{...commonText, marginTop: 5, fontSize: 12, marginRight: 55}}>{description}</Text>
+      <Text style={{...commonText, marginTop: 5, fontSize: 12, marginRight: 0, textAlign: "justify"}}>{description}</Text>
     </View>
   )
 }
