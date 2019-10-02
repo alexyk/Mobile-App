@@ -27,7 +27,7 @@ s1=$2
 s2=${s1%apk}
 len1=${#s1}
 len2=${#s2}
-if [ $len1 -ne $len2 ]; then
+if [ "$len1" != "$len2" ]; then
 	product="$2"
 	shift
 fi
@@ -41,7 +41,7 @@ git add src/config.js
 if [ "$2" != "" ]; then
 	ver=$2
 	extra_params="-f"
-	[ $3 == "no-tag" ] && extra_params="-f --no-git-tag-version"
+	[ "$3" == "no-tag" ] && extra_params="-f --no-git-tag-version"
 	echo "Setting version to $ver"
 	npm version $ver $extra_params
 	[ $? -ne 0 ] && exit 2
