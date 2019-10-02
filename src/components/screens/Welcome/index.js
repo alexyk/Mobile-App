@@ -341,6 +341,7 @@ class Welcome extends Component {
           parent={this}
           title={this.state.messageTitle}
           message={this.state.dialogMessage}
+          content={this.state.dialogContent}
           isVisible={this.state.messageVisible}
         />
       </View>

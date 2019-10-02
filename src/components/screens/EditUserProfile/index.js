@@ -683,6 +683,7 @@ class EditUserProfile extends Component {
           parent={this}
           title={this.state.messageTitle}
           message={this.state.dialogMessage}
+          content={this.state.dialogContent}
           isVisible={this.state.messageVisible}
           onHide={this.onHideMessage}
           onCancel={this.onHideMessage}

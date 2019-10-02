@@ -28,6 +28,7 @@ import { serverRequest } from "../../../services/utilities/serverUtils";
 import { setGuestData } from "../../../redux/action/hotels";
 import { isString, isNumber, getObjectFromPath, isArray } from "js-tools";
 import MessageDialog from "../../molecules/MessageDialog";
+import { SettingsContent } from "../Settings/components";
 
 
 
@@ -305,7 +306,10 @@ class Explore extends Component {
   }
 
   gotoSettings() {
-    this.props.navigation.navigate("Settings");
+    // this.props.navigation.navigate("Settings");
+    MessageDialog.show('Settings', <SettingsContent />, 'settings')
+    // MessageDialog.showMessage('Settings', "Settings ", 'settings')
+    // this.setState({messageVisible: true, dialogContent: <Settings />, messageTitle: "Settings"})
   }
 
   _cacheLoginAndRegion() {
@@ -647,9 +651,21 @@ class Explore extends Component {
     );
   }
 
-  render() {
-    const { dialogMessage, messageVisible } = this.state;
+  renderMessageDialog() {
+    const { messageTitle, dialogContent, dialogMessage, messageVisible } = this.state;
 
+    return (
+      <MessageDialog
+        parent={this}
+        isVisible={messageVisible} 
+        title={messageTitle}
+        message={dialogMessage}
+        content={dialogContent}
+      />
+    )
+  }
+
+  render() {
     // prettier-ignore
     return (
       <View style={styles.container}>
@@ -835,13 +851,12 @@ class Explore extends Component {
             // this.setState({ singlePickerSelectedItem: result.selectedItem });
           }}
         />
-        <MessageDialog
-          parent={this}
-          isVisible={messageVisible} 
-          message={dialogMessage} />
+
+        { this.renderMessageDialog() }
       </View>
     );
   }
+
 }
 
 const pickerSelectStyles = StyleSheet.create({

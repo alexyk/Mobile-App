@@ -56,6 +56,9 @@ export const OPTIONS = {
   hotelSearchResults: {
     LAST_BEST_PRICE_TITLE: false,
     LAST_BEST_PRICE_DELAY: 2*1000, // in ms
+  },
+  hotelDetails: {
+    showLocation: false
   }
 }
 export const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line

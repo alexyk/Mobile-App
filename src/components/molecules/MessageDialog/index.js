@@ -18,8 +18,6 @@ class MessageDialog extends Component {
    * Use by adding to render method:
    *        <MessageDialog
    *          parent={this}
-   *          title={this.state.messageTitle}
-   *          message={this.state.dialogMessage}
    *          isVisible={this.state.messageVisible}
    *         />
    * Optional often used props:
@@ -31,7 +29,29 @@ class MessageDialog extends Component {
    * @param {Object|String} extraProps If in need to hide a button or set styling etc. If string - used as a name of preset, if object - presetName is name of preset if set, otherwise object props are added as custom props to MessageDialog
    */
   static showMessage(title, text, code='message', extraProps = null) {
+    MessageDialog.__showDialog(title, text, code, extraProps);
+  }
+
+  static show(title, content, code='message', extraProps = null) {
+    MessageDialog.__showDialog(title, content, code, extraProps);
+  }
+
+  static __showDialog(title, contentOrText, code, extraProps = null) {
     let presetName, customProps;
+    let text, contentState;
+
+    if (isString(contentOrText)) {
+      text = contentOrText;
+      contentState = {
+        dialogMessage: text,
+        dialogContent: null
+      }
+    } else {
+      contentState = {
+        dialogMessage: null,
+        dialogContent: contentOrText
+      }
+    }
 
     // prepare extra styling
     if (isString(extraProps)) {
@@ -47,29 +67,38 @@ class MessageDialog extends Component {
       MessageDialog.extraProps = {};
     }
 
+    // prepare basic props
+    MessageDialog.extraPropsPresets.title = title;
+    MessageDialog.extraPropsPresets.content = contentState.dialogContent;
+    MessageDialog.extraPropsPresets.message = text;
+
+
     // apply extra styling
     if (presetName && customProps) {
       MessageDialog.extraProps = {
         ...MessageDialog.extraPropsPresets[presetName],
         ...extraProps
-      };
+      };  
     } else {
       MessageDialog.extraProps = MessageDialog.extraPropsPresets[presetName];
-    }
+    }  
 
     const { parent } = MessageDialog;
-    const { messageVisible, messageTitle, dialogMessage, messageCode } = parent.state;
+    const { messageVisible, messageTitle, dialogMessage, messageCode, dialogContent } = parent.state;
 
-    if (messageVisible && (dialogMessage != text || code != messageCode || title != messageTitle)) {
-      throw new Error(
-        `[MessageDialog] Showing message "${text} with code "${code} while message is visible as "${dialogMessage}" with code "${messageCode}"`
-      );
-    } else if (messageVisible) {
-      wlog(`[MessageDialog] Message Dialog already visible`);
+    if (text && !dialogContent && dialogMessage) {
+      if (messageVisible && (dialogMessage != text || code != messageCode || title != messageTitle)) {
+        throw new Error(
+          `[MessageDialog] Showing message "${text} with code "${code} while message is visible as "${dialogMessage}" with code "${messageCode}"`
+        );
+      } else if (messageVisible) {
+        wlog(`[MessageDialog] Message Dialog already visible`);
+      }
     }
 
-    parent.setState({ messageVisible: true, messageTitle: title, dialogMessage: text, messageCode: code });
+    parent.setState({ messageVisible: true, messageTitle: title, messageCode: code, ...contentState });
   }
+
 
   static hide(code) {
     const { parent } = MessageDialog;
@@ -101,8 +130,8 @@ class MessageDialog extends Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const { message: nextMessage, isVisible: nextIsVisible } = nextProps;
-    const { message, isVisible, parent } = this.props;
+    const { message: nextMessage, isVisible: nextIsVisible, content: nextContent } = nextProps;
+    const { message, isVisible, content, parent } = this.props;
 
     if (__DEV__ && messageDialogDebug) {
       const printD = this.propsToDebug.bind(this);
@@ -110,7 +139,9 @@ class MessageDialog extends Component {
       clog(`[MessageDialog][${parentName}] current: ${printD(this.props)} next: ${printD(nextProps)}`);
     }
 
-    return nextMessage != null && nextIsVisible != null && (message != nextMessage || isVisible != nextIsVisible);
+    const result = (nextMessage != null || nextContent != null) && nextIsVisible != null && (message != nextMessage || isVisible != nextIsVisible || content != nextContent);
+
+    return result;
   }
 
   propsToDebug(props) {
@@ -157,6 +188,16 @@ class MessageDialog extends Component {
     }
   }
 
+  _renderContent(mergedProps) {
+    const { content, message, messageStyle } = mergedProps;
+
+    if (message) {
+      return <Text style={[{ fontSize: 15 }, messageStyle]}>{message}</Text>;
+    } else {
+      return content;
+    }
+  }
+
   render() {
     // merge props
     let mergedProps = cloneDeep(this.props);
@@ -167,8 +208,6 @@ class MessageDialog extends Component {
       commonButtonContainerStyle,
       commonButtonStyle,
       title,
-      message,
-      messageStyle,
       isVisible,
       okLabel,
       okStyle,
@@ -206,7 +245,7 @@ class MessageDialog extends Component {
         modalContainerStyle={modalContainerStyle}
         {...extraDialogProps}
       >
-        <Text style={[{ fontSize: 15 }, messageStyle]}>{message}</Text>
+        { this._renderContent(mergedProps) }
       </MaterialDialog>
     );
   }
@@ -254,6 +293,11 @@ class MessageDialog extends Component {
     message: {
       ...MessageDialog.orangeDesign,
       okLabel: "OK",
+      cancelLabel: ""
+    },
+    settings: {
+      ...MessageDialog.orangeDesign,
+      okLabel: "Close",
       cancelLabel: ""
     },
     "login-expired": {

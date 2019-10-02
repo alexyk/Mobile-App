@@ -1,8 +1,8 @@
-import React from "react";
-import { Text, View } from "react-native";
+import React, { Component } from "react";
+import { ScrollView, Text, View } from "react-native";
 import CustomSwitch from "react-native-customisable-switch";
 import { commonText } from "../../../common.styles";
-import { SCREEN_SIZE } from "../../../utils/designUtils";
+import { setOption, hotelSearchIsNative } from '../../../config-settings'
 
 
 const OptionSwitch = (props) => {
@@ -11,13 +11,10 @@ const OptionSwitch = (props) => {
   (!label) && (label = (labelOn && labelOff) ? (value ? labelOn : labelOff) : "");
   (!description) && (description='')
 
-  const width = SCREEN_SIZE.W - 110; // 110 is assumed Switch width + horizontal right padding/margin
-                                     // TODO: Consider finding a better way to decide width for OptionSwitch
-
   return (
-    <View style={{width: "100%", paddingVertical: 10, flexDirection: 'column'}}>
+    <View style={{width: "100%", paddingVertical: 10, flexDirection: 'column', marginVertical: 10}}>
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <Text style={{...commonText, fontSize: 16}}>{label}</Text>
+        <Text style={{...commonText, fontSize: 16, fontWeight: "bold", marginTop: 7}}>{label}</Text>
         <CustomSwitch
             value={value}
             onChangeValue={onChange}
@@ -33,14 +30,67 @@ const OptionSwitch = (props) => {
             buttonBorderColor="#fff"
             buttonBorderWidth={0}
             padding={false}
-            // containerStyle={{backgroundColor: 'pink'}}
+            containerStyle={{marginBottom: 5}}
           />
       </View>
-      <Text style={{...commonText, fontSize: 12, width}}>{description}</Text>
+      <Text style={{...commonText, marginTop: 5, fontSize: 12, marginRight: 55}}>{description}</Text>
     </View>
   )
 }
 
+class SettingsContent extends Component {
+  constructor(props) {
+    super(props);
+
+    this.toggleOption = this.toggleOption.bind(this);
+    this.onSwitchChangeFactory = this.onSwitchChangeFactory.bind(this);
+  }
+  
+  toggleOption(option) {
+    switch (option) {
+      case EXPERIMENTAL_OPTIONS.SEARCH:
+        setOption(EXPERIMENTAL_OPTIONS.SEARCH, !hotelSearchIsNative.step1Results);
+        break;
+        
+      default:
+        break;
+    }
+    
+    this.forceUpdate();
+  }
+
+  onSwitchChangeFactory(option) {
+    const owner = this;
+
+    return (
+      function () {
+        owner.toggleOption(option);
+      }
+    )
+  }
+
+  render() {
+    const { style } = this.props;
+
+    return (
+      <ScrollView showsHorizontalScrollIndicator={false} style={{ width: "100%" }}>
+        <View style={[styles.body, style]}>
+          <OptionSwitch
+            onChange={this.onSwitchChangeFactory(EXPERIMENTAL_OPTIONS.SEARCH)}
+            value={hotelSearchIsNative.step1Results}
+            label="Quick Search"
+            description="Enables a new experimental search. Map view is currently not available. Current features include - compact list of hotels, information about matches count, quick filter, UX and UX touches, etc."
+          />
+        </View>
+      </ScrollView>
+    )
+  }
+}
+
+const EXPERIMENTAL_OPTIONS = {
+  SEARCH: "experimental-search",
+}
+
 
 // named exports
-export { OptionSwitch }
+export { SettingsContent, OptionSwitch, EXPERIMENTAL_OPTIONS }

@@ -8,7 +8,7 @@ import LocationView from "../../../atoms/LocationView";
 import BackButton from "../../../atoms/BackButton";
 import styles from "./styles";
 import { connect } from "react-redux";
-import { hotelSearchIsNative } from "../../../../config-settings";
+import { hotelSearchIsNative, OPTIONS } from "../../../../config-settings";
 import { SCREEN_SIZE } from "../../../../utils/designUtils";
 import Toast from "react-native-easy-toast";
 import ImageSlides from "../../../molecules/ImageSlides";
@@ -283,6 +283,10 @@ class HotelDetails extends Component {
   }
 
   _renderLocation() {
+    if (!OPTIONS.hotelDetails.showLocation) {
+      return;
+    }
+
     return (
       <TouchableOpacity activeOpacity={1} onPress={() => this.onMapTap()}>
         <LocationView
@@ -306,13 +310,14 @@ class HotelDetails extends Component {
   }
 
   _renderMessage() {
-    const { messageTitle, dialogMessage, messageVisible } = this.state;
+    const { messageTitle, dialogMessage, dialogContent, messageVisible } = this.state;
 
     return (
       <MessageDialog
         parent={this}
         title={messageTitle}
         message={dialogMessage}
+        content={dialogContent}
         isVisible={messageVisible}
         onOk={this.onSendVerificationEmail}
       />
