@@ -105,11 +105,11 @@ export function renderCalendarAndFilters() {
         adults={adults}
         children={children}
         guests={guests}
-        gotoFilter={this.gotoFilter}
+        gotoOptions={this.gotoFilter}
+        customOptionsIcon="filter-list"
         disabled={!this.state.editable}
         showSearchButton={this.state.isNewSearch}
         showCancelButton={this.state.isNewSearch}
-        isFilterable={true}
       />
     </View>
   );

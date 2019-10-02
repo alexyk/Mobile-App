@@ -207,7 +207,12 @@ class Profile extends Component {
               onPress={() => navigate("Settings")}
               style={styles.navItem}
             >
-              <Text style={styles.navItemText}>Settings</Text>
+              <Text style={styles.navItemText}>Search Settings</Text>
+              <Image
+                resizeMode="stretch"
+                source={require("../../../assets/icons/settings.png")}
+                style={styles.navIcon}
+              />
             </TouchableOpacity>
 
             <TouchableOpacity onPress={this.logout} style={styles.navItem}>

@@ -1,45 +1,62 @@
-import { ScrollView, Text, View } from "react-native";
 import React, { Component } from "react";
+import { ScrollView, Text, View } from "react-native";
 import { connect } from "react-redux";
-import Switch from "react-native-customisable-switch";
 import BackButton from "../../atoms/BackButton";
 import styles from "./styles";
-import { hotelSearchIsNativew, setOption, hotelSearchIsNative } from '../../../config-settings'
+import { setOption, hotelSearchIsNative } from '../../../config-settings'
+import { OptionSwitch } from './components';
+import { log } from "js-tools";
 
 
 class Settings extends Component {
 
   constructor(props) {
     super(props);
+
+    this.toggleOption = this.toggleOption.bind(this);
+    this.onSwitchChangeFactory = this.onSwitchChangeFactory.bind(this);
   }
 
+  toggleOption(option) {
+    switch (option) {
+      case EXPERIMENTAL_OPTIONS.SEARCH:
+        setOption(EXPERIMENTAL_OPTIONS.SEARCH, !hotelSearchIsNative.step1Results);
+        break;
+        
+      default:
+        break;
+    }
+    
+    this.forceUpdate();
+  }
+
+  onSwitchChangeFactory(option) {
+    const owner = this;
+
+    return (
+      function () {
+        owner.toggleOption(option);
+      }
+    )
+  }
 
   render() {
     return (
       <View style={styles.container}>
         <View style={styles.navContainer}>
-          <View style={styles.titleConatiner}>
+          <View style={styles.titleContainer}>
             <BackButton style={styles.closeButton} onPress={() => this.props.navigation.goBack()} />
             <Text style={styles.title}>Settings</Text>
           </View>
         </View>
-        <ScrollView
-          showsHorizontalScrollIndicator={false}
-          style={{ width: "100%" }}
-        >
+        <ScrollView showsHorizontalScrollIndicator={false} style={{ width: "100%" }}>
           <View style={styles.body}>
-            <View style={styles.topContainer}>
-              
-            </View>
-
-            <View
-              style={[styles.lineStyle, { marginLeft: 0, marginRight: 0 }]}
-            />
             <OptionSwitch
-              onChange={() => setOption(EXPERIMENTAL_OPTIONS.SEARCH, !hotelSearchIsNative.step1Results)}
+              onChange={this.onSwitchChangeFactory(EXPERIMENTAL_OPTIONS.SEARCH)}
               value={hotelSearchIsNative.step1Results}
+              label="Quick Search"
+              description="Enables new experimental search. Results are shown only as a list - currently no map option"
             />
-            
           </View>
         </ScrollView>
       </View>
@@ -47,32 +64,9 @@ class Settings extends Component {
   }
 }
 
-const OptionSwitch = (props) => {
-  const { value, onChange } = props;
-
-  return (
-    <Switch
-      value={value}
-      onChangeValue={onChange}
-      activeTextColor="#DA7B61"
-      activeBackgroundColor="#DA7B61"
-      inactiveBackgroundColor="#e4a193"
-      switchWidth={62}
-      switchBorderColor="#e4a193"
-      switchBorderWidth={1}
-      buttonWidth={30}
-      buttonHeight={30}
-      buttonBorderRadius={15}
-      buttonBorderColor="#fff"
-      buttonBorderWidth={0}
-      padding={false}
-    />
-  )
-}
 
 const EXPERIMENTAL_OPTIONS = {
   SEARCH: "experimental-search",
-
 }
 
 const mapStateToProps = state => {

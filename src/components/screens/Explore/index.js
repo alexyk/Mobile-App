@@ -41,6 +41,7 @@ class Explore extends Component {
     this.updateData = this.updateData.bind(this);
     this.gotoGuests = this.gotoGuests.bind(this);
     this.gotoSearch = this.gotoSearch.bind(this);
+    this.gotoSettings = this.gotoSettings.bind(this);
     this.renderAutocomplete = this.renderAutocomplete.bind(this);
     this.handleAutocompleteSelect = this.handleAutocompleteSelect.bind(this);
     this.handlePopularCities = this.handlePopularCities.bind(this);
@@ -301,6 +302,10 @@ class Explore extends Component {
     this.props.navigation.navigate("GuestsScreen", {
       updateData: this.updateData
     });
+  }
+
+  gotoSettings() {
+    this.props.navigation.navigate("Settings");
   }
 
   _cacheLoginAndRegion() {
@@ -633,10 +638,9 @@ class Explore extends Component {
           gotoGuests={this.gotoGuests}
           gotoSearch={this.gotoSearch}
           onDatesSelect={this.onDatesSelect}
-          gotoSettings={this.gotoSettings}
+          gotoOptions={this.gotoSettings}
           showSearchButton={true}
           disabled={false}
-          isFilterable={false}
           containerStyle={{ paddingTop: 0 }}
         />
       </View>

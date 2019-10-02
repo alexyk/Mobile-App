@@ -13,33 +13,135 @@ class DateAndGuestPicker extends Component {
 
   componentDidMount() {
     // detach from current code execution (smoother animation)
-    if (__DEV__ && autoCalendar) setTimeout(() => this.onCalendar());
+    if (__DEV__ && autoCalendar) setImmediate(() => this.onCalendar());
   }
 
-  onFilter = () => {
+  onOption = () => {
     // detach from current code execution - avoiding button lock
-    setTimeout(() => this.props.gotoFilter());
+    setImmediate(() => this.props.gotoOptions());
   };
 
   onGuests = () => {
     // detach from current code execution - avoiding button lock
-    setTimeout(() => this.props.gotoGuests());
+    setImmediate(() => this.props.gotoGuests());
   };
 
   onSearch = () => {
     // detach from current code execution - avoiding button lock
-    setTimeout(() => this.props.gotoSearch());
+    setImmediate(() => this.props.gotoSearch());
   };
 
   onCancel = () => {
     // detach from current code execution - avoiding button lock
-    setTimeout(() => this.props.gotoCancel());
+    setImmediate(() => this.props.gotoCancel());
   };
 
   onCalendar = () => {
     // detach from current code execution - avoiding button lock
-    setTimeout(() => this.props.navigation.navigate("CalendarScreen"));
+    setImmediate(() => this.props.navigation.navigate("CalendarScreen"));
   };
+
+  _renderCheckInOutButtons(disabled, checkInDate, checkOutDate) {
+    const checkInDateText = checkInDate || "Select Date";
+    const checkOutDateText = checkOutDate || "------";
+    const isCalendarDisabled = disabled || this.props.onDatesSelect == null;
+
+    return (
+      <View style={{ flex: 1 }}>
+        <TouchableOpacity
+          onPress={isCalendarDisabled ? null : this.onCalendar}
+          style={
+            checkInDate && checkOutDate
+              ? styles.datesPickerViewComplete
+              : styles.datesPickerViewIncomplete
+          }
+          disabled={isCalendarDisabled}
+        >
+          <View style={styles.datePickerView}>
+            <Text
+              style={
+                isCalendarDisabled ? styles.label_disabled : styles.label
+              }
+            >
+              Check In
+            </Text>
+            <Text style={styles.value}>{checkInDateText}</Text>
+          </View>
+
+          <View style={styles.separator} />
+
+          <View style={styles.datePickerView}>
+            <Text
+              style={
+                isCalendarDisabled ? styles.label_disabled : styles.label
+              }
+            >
+              Check Out
+            </Text>
+            <Text style={styles.value}>{checkOutDateText}</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
+    )
+  }
+
+  _renderGuestsButton(disabled, adults, children) {
+    const isGuestsDisabled = disabled || this.props.gotoGuests == null;
+    
+    return (
+      <TouchableOpacity onPress={isGuestsDisabled ? null : this.onGuests} disabled={isGuestsDisabled}>
+        <View style={adults + children ? styles.guestPickerViewComplete : styles.guestPickerViewIncomplete}>
+          <Text style={isGuestsDisabled ? styles.label_disabled : styles.label}>Guests</Text>
+          <Text style={styles.value}>{adults + children || "-"}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+  
+  _renderOptionsButton(disabled, customOptionsIcon) {
+    const noOptions = disabled || this.props.gotoOptions == null;
+    if (noOptions) {
+      return null;
+    }
+
+    return (
+      <TouchableOpacity disabled={disabled} onPress={this.onOption}>
+        <View style={styles.optionsPickerViewIncomplete}>
+          <LTIcon
+            name={customOptionsIcon ? customOptionsIcon : 'settings'}
+            size={28}
+            color={disabled ? "#d9d9d9" : "#565656"}
+            iconSet={"material"}
+          />
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
+  _renderSearchButton(showSearchButton) {
+    return (
+      <TouchableOpacity onPress={this.onSearch}>
+        <View style={showSearchButton ? styles.searchButtonView : { height: 0 }}>
+          <Text style={showSearchButton ? styles.searchButtonText : { height: 0 }}>
+            Search
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
+  _renderCancelButton(showCancelButton) {
+    return (
+      <TouchableOpacity onPress={this.onCancel}>
+        <View style={showCancelButton ? styles.searchButtonView : { height: 0 }}>
+          <Text style={showCancelButton ? styles.searchButtonText : { height: 0 }}>
+            Cancel
+          </Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+
 
   render() {
     const {
@@ -47,113 +149,25 @@ class DateAndGuestPicker extends Component {
       checkOutDate,
       adults,
       children,
+      disabled,
       showSearchButton,
       showCancelButton,
-      disabled,
-      isFilterable,
-      containerStyle
+      containerStyle,
+      customOptionsIcon
     } = this.props;
-
-    const checkInDateText = checkInDate || "Select Date";
-    const checkOutDateText = checkOutDate || "------";
-
-    const isCalendarDisabled = disabled || this.props.onDatesSelect == null;
-    const isGuestsDisabled = disabled || this.props.gotoGuests == null;
 
     return (
       <View style={[styles.container, containerStyle]}>
+
         <View style={styles.pickerRow}>
-          <View style={{ flex: 1 }}>
-            <TouchableOpacity
-              onPress={isCalendarDisabled ? null : this.onCalendar}
-              style={
-                checkInDate && checkOutDate
-                  ? styles.datesPickerViewComplete
-                  : styles.datesPickerViewIncomplete
-              }
-              disabled={isCalendarDisabled}
-            >
-              <View style={styles.datePickerView}>
-                <Text
-                  style={
-                    isCalendarDisabled ? styles.label_disabled : styles.label
-                  }
-                >
-                  Check In
-                </Text>
-                <Text style={styles.value}>{checkInDateText}</Text>
-              </View>
-
-              <View style={styles.separator} />
-
-              <View style={styles.datePickerView}>
-                <Text
-                  style={
-                    isCalendarDisabled ? styles.label_disabled : styles.label
-                  }
-                >
-                  Check Out
-                </Text>
-                <Text style={styles.value}>{checkOutDateText}</Text>
-              </View>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            onPress={isGuestsDisabled ? null : this.onGuests}
-            disabled={isGuestsDisabled}
-          >
-            <View
-              style={
-                adults + children
-                  ? styles.guestPickerViewComplete
-                  : styles.guestPickerViewIncomplete
-              }
-            >
-              <Text
-                style={isGuestsDisabled ? styles.label_disabled : styles.label}
-              >
-                Guests
-              </Text>
-              <Text style={styles.value}>{adults + children || "-"}</Text>
-            </View>
-          </TouchableOpacity>
-          {isFilterable && (
-            <TouchableOpacity disabled={disabled} onPress={this.onFilter}>
-              <View style={styles.optionsPickerViewIncomplete}>
-                <LTIcon
-                  name={"filter-list"}
-                  size={28}
-                  color={disabled ? "#d9d9d9" : "#565656"}
-                  iconSet={"material"}
-                />
-              </View>
-            </TouchableOpacity>
-          )}
+          { this._renderCheckInOutButtons(disabled, checkInDate, checkOutDate) }
+          { this._renderGuestsButton(disabled, adults, children) }
+          { this._renderOptionsButton(disabled, customOptionsIcon) }
         </View>
 
-        <TouchableOpacity onPress={this.onSearch}>
-          <View
-            style={showSearchButton ? styles.searchButtonView : { height: 0 }}
-          >
-            <Text
-              style={showSearchButton ? styles.searchButtonText : { height: 0 }}
-            >
-              Search
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.onCancel}>
-          <View
-            style={showCancelButton ? styles.searchButtonView : { height: 0 }}
-          >
-            <Text
-              style={showCancelButton ? styles.searchButtonText : { height: 0 }}
-            >
-              Cancel
-            </Text>
-          </View>
-        </TouchableOpacity>
+        { this._renderSearchButton(showSearchButton) }
+        { this._renderCancelButton(showCancelButton) }
+
       </View>
     );
   }
@@ -168,11 +182,11 @@ DateAndGuestPicker.propTypes = {
   gotoSearch: PropTypes.func.isRequired,
   gotoCancel: PropTypes.func.isRequired,
   gotoGuests: PropTypes.func,
-  gotoFilter: PropTypes.func.isRequired,
+  gotoOptions: PropTypes.func,
   showSearchButton: PropTypes.bool.isRequired,
   showCancelButton: PropTypes.bool.isRequired,
   disabled: PropTypes.bool.isRequired,
-  isFilterable: PropTypes.bool.isRequired
+  customOptionsIcon: PropTypes.bool,
 };
 
 DateAndGuestPicker.defaultProps = {
@@ -184,11 +198,10 @@ DateAndGuestPicker.defaultProps = {
   gotoSearch: () => {},
   gotoCancel: () => {},
   gotoGuests: null,
-  gotoFilter: () => {},
+  gotoOptions: null,
   showSearchButton: false,
   showCancelButton: false,
-  disabled: false,
-  isFilterable: true
+  disabled: false
 };
 
 export default withNavigation(DateAndGuestPicker);

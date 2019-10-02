@@ -22,11 +22,22 @@ const styles = StyleSheet.create({
     elevation: 0.5
   },
 
-  titleConatiner: {
+  titleContainer: {
     flexDirection: "row"
+  },
+  
+  title: {
+    fontFamily: "FuturaStd-Light",
+    fontSize: 20,
+    color: "#000",
+    marginTop: 40,
+    marginLeft: 20,
+    height: 24
   },
 
   body: {
+    marginTop: 10,
+    marginHorizontal: 20,
     flexDirection: "column"
   },
 
