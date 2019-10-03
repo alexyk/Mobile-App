@@ -33,8 +33,6 @@ import { SettingsContent } from "../Settings/components";
 
 
 class Explore extends Component {
-  static self;
-
   constructor(props) {
     super(props);
 
@@ -125,7 +123,7 @@ class Explore extends Component {
       actions: [NavigationActions.navigate({ routeName: 'Welcome' })],
     });
     this.props.navigation.dispatch(resetAction);
-    MessageDialog.showMessage(this, "Login Expired",`Last login is not valid any more.\nPlease log in again.`, 'login-expired');
+    MessageDialog.showMessage("Login Expired",`Last login is not valid any more.\nPlease log in again.`, 'login-expired');
   }
 
   async componentWillMount() {
@@ -306,7 +304,7 @@ class Explore extends Component {
   }
 
   gotoSettings() {
-    MessageDialog.show(this, 'Settings', <SettingsContent />, 'settings');
+    MessageDialog.show('Settings', <SettingsContent />, 'settings');
   }
 
   _cacheLoginAndRegion() {

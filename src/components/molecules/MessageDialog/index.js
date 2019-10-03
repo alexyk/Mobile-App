@@ -17,8 +17,10 @@ class MessageDialog extends Component {
   /**
    * Use by adding to render method:
    *        <MessageDialog
+   *          parent={this}
    *          isVisible={this.state.messageVisible}
    *         />
+   * 
    * Optional often used props:
    *  onHide - handler that triggers (if set) on both onOk and onCancel
    * 
@@ -27,15 +29,15 @@ class MessageDialog extends Component {
    * @param {Number|String} code A code or/and style-preset, associated with this message and used to decide what to do in onOk or onCancel handlers
    * @param {Object|String} extraProps If in need to hide a button or set styling etc. If string - used as a name of preset, if object - presetName is name of preset if set, otherwise object props are added as custom props to MessageDialog
    */
-  static showMessage(parent, title, text, code='message', extraProps = null) {
-    MessageDialog.__showDialog(parent, title, text, code, extraProps);
+  static showMessage(title, text, code='message', extraProps = null) {
+    MessageDialog.__showDialog(title, text, code, extraProps);
   }
 
-  static show(parent, title, content, code='message', extraProps = null) {
-    MessageDialog.__showDialog(parent, title, content, code, extraProps);
+  static show(title, content, code='message', extraProps = null) {
+    MessageDialog.__showDialog(title, content, code, extraProps);
   }
 
-  static __showDialog(parent, title, contentOrText, code, extraProps = null) {
+  static __showDialog(title, contentOrText, code, extraProps = null) {
     let presetName, customProps;
     let text, contentState;
 
@@ -77,31 +79,33 @@ class MessageDialog extends Component {
       MessageDialog.extraProps = MessageDialog.extraPropsPresets[presetName];
     }  
 
-    // prepare basic props
-    MessageDialog.extraProps.parent = parent;
+    const parentStateUpdate = function (owner)  {
+      const parent = owner;
+      const { messageVisible, messageTitle, dialogMessage, messageCode, dialogContent } = parent.state;
+
+      if (text && !dialogContent && dialogMessage) {
+        if (messageVisible && (dialogMessage != text || code != messageCode || title != messageTitle)) {
+          throw new Error(
+            `[MessageDialog] Showing message "${text} with code "${code} while message is visible as "${dialogMessage}" with code "${messageCode}"`
+          );
+        } else if (messageVisible) {
+          wlog(`[MessageDialog] Message Dialog already visible`);
+        }
+      }
+
+      parent.setState({ messageVisible: true, messageTitle: title, messageCode: code, ...contentState });
+    }
+
     MessageDialog.extraProps.title = title;
     MessageDialog.extraProps.content = contentState.dialogContent;
     MessageDialog.extraProps.message = text;
-    
-    
-    const { messageVisible, messageTitle, dialogMessage, messageCode, dialogContent } = parent.state;
-
-    if (text && !dialogContent && dialogMessage) {
-      if (messageVisible && (dialogMessage != text || code != messageCode || title != messageTitle)) {
-        throw new Error(
-          `[MessageDialog] Showing message "${text} with code "${code} while message is visible as "${dialogMessage}" with code "${messageCode}"`
-        );
-      } else if (messageVisible) {
-        wlog(`[MessageDialog] Message Dialog already visible`);
-      }
-    }
-
-    parent.setState({ messageVisible: true, messageTitle: title, messageCode: code, ...contentState });
+    parentStateUpdate(MessageDialog.parent);
   }
 
 
   static hide(code) {
-    const { parent } = MessageDialog;
+    const parent = MessageDialog.parent;
+
     const { messageVisible, dialogMessage, messageCode } = parent.state;
 
     if (messageVisible && code != messageCode) {
@@ -145,13 +149,13 @@ class MessageDialog extends Component {
   }
 
   propsToDebug(props) {
-    const { isVisible, message, title } = props;
+    const { isVisible, message, title, content } = props;
 
     function toDebug(value, marker) {
       return `${value != null ? (value ? marker.toUpperCase() : marker.toLowerCase()) : `${marker.toLowerCase()}-`}`;
     }
 
-    return toDebug(isVisible, "v") + toDebug(message, "m") + toDebug(title, "t");
+    return toDebug(isVisible, "v") + toDebug(message, "m") + toDebug(content, "c") + toDebug(title, "t");
   }
 
   onOkInternal() {
