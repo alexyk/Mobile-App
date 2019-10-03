@@ -13,10 +13,10 @@ import { Platform } from 'react-native';
  * ALL MUST BE FALSE!!!      (unless you know what you are doing)  *
  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  */
-export const __MYDEV__                               = (__DEV__ && true);
-export const __TEST__                                = (Platform.Version == undefined);
-export const reactotronLoggingInReleaseForceEnabled  = false;
-export const forceOffline                            = false;
+var __MYDEV__                               = (__DEV__ && true);
+var __TEST__                                = (Platform.Version == undefined);
+var reactotronLoggingInReleaseForceEnabled  = false;
+var forceOffline                            = false;
 
 
 /**  
@@ -31,60 +31,60 @@ export const forceOffline                            = false;
  *    2   reactotron.error
  * 
 */
-export const errorLevel = 0;
+var errorLevel = 0;
 
   // reactotron
-export const reactotronLoggingEnabled           = true;
-export const logConverterErrorToReactotron      = false;
-export const showTypesInReactotronLog           = false;
-export const warnOnReactotronDisabledCalls      = false;
+var reactotronLoggingEnabled           = true;
+var logConverterErrorToReactotron      = false;
+var showTypesInReactotronLog           = false;
+var warnOnReactotronDisabledCalls      = false;
   // redux
-export const reduxConsoleLoggingEnabled         = false;
-export const reduxConsoleCollapsedLogging       = true;
-export const reduxReactotronLoggingEnabled      = false;
+var reduxConsoleLoggingEnabled         = false;
+var reduxConsoleCollapsedLogging       = true;
+var reduxReactotronLoggingEnabled      = false;
   // console
-export const raiseConverterExceptions           = false;
-export const logConverterError                  = false;
-export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
-export const consoleShowTimeInLogs              = true;     // prepend with time
-export const consoleClearAtStart                = true;
-export const consoleFilter                      = '' || (testFlow ? 'testFlow' : '');
-export const serverLogRequesting                = true;
-export const serverExpandErrors                 = false;
+var raiseConverterExceptions           = false;
+var logConverterError                  = false;
+var consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
+var consoleShowTimeInLogs              = true;     // prepend with time
+var consoleClearAtStart                = true;
+var consoleFilter                      = 'custom' || (testFlow ? 'testFlow' : '');
+var serverLogRequesting                = true;
+var serverExpandErrors                 = false;
   // other
-export const webviewDebugEnabled                = true;
-export const hotelsSearchMapDebugEnabled        = false;
-export const hotelsSearchSocketDebug            = false;
-export const checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
+var webviewDebugEnabled                = true;
+var hotelsSearchMapDebugEnabled        = false;
+var hotelsSearchSocketDebug            = false;
+var checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
   // offline mode
   // Enabled if: (__DEV__ == true) and (isOffline == true)
-                                let isOffline   = false || !!testFlow;
+                       let isOffline   = false || !!testFlow;
   if (forceOffline) isOffline = forceOffline;
   if (!__DEV__) isOffline = false;
-export const isOnline = (!isOffline);
-export const autoLoginInOfflineMode             = true;
-export var validationStateOfflineWallet         = -1;  // -1: none, 0: invalid, 1: valid
-export const offlineEmailVerificationValue      = true;
+var isOnline = (!isOffline);
+var autoLoginInOfflineMode             = true;
+var validationStateOfflineWallet       = -1;  // -1: none, 0: invalid, 1: valid
+var offlineEmailVerificationValue      = true;
   // automated flows
     // hotels search
-export const autoHotelSearch                    = false;
-export const autoHotelSearchFocus               = false;
-export const autoHotelSearchPlace               = 'araraquara';
-export const skipEmailVerification              = false;
+var autoHotelSearch                    = false;
+var autoHotelSearchFocus               = false;
+var autoHotelSearchPlace               = 'araraquara';
+var skipEmailVerification              = false;
     // homes search
-export const autoHomeSearch                     = false;
-export const autoHomeSearchPlace                = 'uk1'
+var autoHomeSearch                     = false;
+var autoHomeSearchPlace                = 'uk1'
   // calendar
-export const autoCalendar                       = false;
+var autoCalendar                       = false;
   // message dialog
-export const messageDialogDebug                 = false;
+var messageDialogDebug                 = true;
   // test flows
-export const testFlowURL                        = "http://beta.locktrip.com/api/hotels/searh?query=london";
-export const testFlow                           = "";
+var testFlowURL                        = "http://beta.locktrip.com/api/hotels/searh?query=london";
+var testFlow                           = "";
 
 
 // ------------ data definitions ----------------
-export const offlineTimeInSeconds = {
+var offlineTimeInSeconds = {
   getCountries: 0,
   getCurrencyRates: 0,
   login: 0,
@@ -121,7 +121,7 @@ export const offlineTimeInSeconds = {
 */
 
   // ui
-export const iconsDebugEnabled                  = false;
+var iconsDebugEnabled                  = false;
 
 
 // prettier-ignore
@@ -135,7 +135,7 @@ export const iconsDebugEnabled                  = false;
  *  - lower index in the array - means a higher priority as a filter meaning if it matches next filters are ignored
  *  - only inclusive regex is supported so far
  */
-export var filtersConfig = {
+var filtersConfig = {
   includeNonMatching: true,
   leaveOnFirstMatch: true,
   mode: 'and',
@@ -158,7 +158,67 @@ filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil
 filtersConfig.debug1  = ["mode: LiM", "error", 'serverUtils'].concat(filtersConfig.default2)
 filtersConfig.flows  = ["mode: Lim", /^search flow step/]
 
-filtersConfig.custom  = ['!Rejection'].concat(filtersConfig.default)
+filtersConfig.custom  = ["mode:Lim", "parent::",'MessageDialog', 'parent', 'error'] //'!Rejection', ].concat(filtersConfig.default)
 
-export const consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
+var consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
 
+
+function setDebugOption(name, value) {
+  switch (name) {
+    case 'reduxLog':             reduxConsoleLoggingEnabled = value;   break;
+    case 'dialogDebug':          messageDialogDebug = value;           break;
+    case 'reactotron':           reactotronLoggingEnabled = value;     break;
+    case 'skipEmailVerify':      skipEmailVerification = value;        break;
+    case 'testFlow':             testFlow = value;                     break;
+    case 'isOnline':             isOnline = value;                     break;
+    case 'consoleFilter':        consoleFilter = value;                break;
+    case 'customFilter':         consoleFilters.custom = value;        break;
+  }
+
+}
+
+export {
+  __MYDEV__,
+  __TEST__,
+  reactotronLoggingInReleaseForceEnabled,
+  forceOffline,
+  errorLevel,
+  reactotronLoggingEnabled,
+  logConverterErrorToReactotron,
+  showTypesInReactotronLog,
+  warnOnReactotronDisabledCalls,
+  reduxConsoleLoggingEnabled,
+  reduxConsoleCollapsedLogging,
+  reduxReactotronLoggingEnabled,
+  raiseConverterExceptions,
+  logConverterError,
+  consoleTimeCalculations,
+  consoleShowTimeInLogs,
+  consoleClearAtStart,
+  consoleFilter,
+  serverLogRequesting,
+  serverExpandErrors,
+  webviewDebugEnabled,
+  hotelsSearchMapDebugEnabled,
+  hotelsSearchSocketDebug,
+  checkHotelsDataWithTemplates,
+  isOnline,
+  autoLoginInOfflineMode,
+  validationStateOfflineWallet,
+  offlineEmailVerificationValue,
+  autoHotelSearch,
+  autoHotelSearchFocus,
+  autoHotelSearchPlace,
+  skipEmailVerification,
+  autoHomeSearch,
+  autoHomeSearchPlace,
+  autoCalendar,
+  messageDialogDebug,
+  testFlowURL,
+  testFlow,
+  offlineTimeInSeconds,
+  iconsDebugEnabled,
+  filtersConfig,
+  consoleFilters,
+  setDebugOption
+}
