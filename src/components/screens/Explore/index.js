@@ -99,8 +99,6 @@ class Explore extends Component {
               this.props.setLoginDetails({countryState: cloneDeep(selected[0])});
             }
           }
-          
-          this.processStates(data, {countryState, lastCountry: country});
         }
       );
     }
