@@ -1,14 +1,13 @@
 import React, { Component } from "react";
-import { ScrollView, Text, View, Platform } from "react-native";
+import { ScrollView, Text, TextInput, View, Platform } from "react-native";
 import CustomSwitch from "react-native-customisable-switch";
 import { commonText } from "../../../common.styles";
 import { setOption, hotelSearchIsNative } from '../../../config-settings'
-import { TextInput } from "react-native-gesture-handler";
 import { debugSettingsOption } from "../../../config-debug";
 
 
 const OptionSwitch = (props) => {
-  let { label, labelOn, labelOff, description, value, onChange } = props;
+  let { label, labelOn, labelOff, description, value, onChange, labelStyle } = props;
 
   (!label) && (label = (labelOn && labelOff) ? (value ? labelOn : labelOff) : "");
   (!description) && (description='');
@@ -18,7 +17,7 @@ const OptionSwitch = (props) => {
   return (
     <View style={{width: "100%", paddingVertical: 10, flexDirection: 'column', marginVertical: 10}}>
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <Text style={{...commonText, fontSize: 16, fontWeight: "bold", marginTop: 7}}>{label}</Text>
+        <Text style={{...commonText, fontSize: 16, fontWeight: "bold", marginTop: 7, ...labelStyle}}>{label}</Text>
         <CustomSwitch
             value={value}
             onChangeValue={onChange}
@@ -47,9 +46,19 @@ class DebugOptionEdit extends Component {
 
   constructor(props) {
     super(props);
-    this.state = {value: props.value, valueAsText: JSON.stringify(props.value)};
+
+    if (!props.isBool) {
+      this.state = {value: props.value, valueAsText: JSON.stringify(props.value)};
+    }
+
+    this.toggleDebugOption = this.toggleDebugOption.bind(this);
     this.onChangeText = this.onChangeText.bind(this);
   }
+
+  componentWillMount() {
+    this.setState({value: this.props.value});
+  }
+  
 
   onChangeText(text) {
     const { name, value, configDebug } = this.props;
@@ -78,7 +87,27 @@ class DebugOptionEdit extends Component {
   }
 
 
-  render() {
+  toggleDebugOption() {
+    const { name, value, configDebug } = this.props;
+    configDebug.setDebugOption(name, !value);
+    this.forceUpdate();
+  }
+
+  _renderSwitch() {
+    const { name, value } = this.props;
+
+    return (
+      <OptionSwitch
+        onChange={this.toggleDebugOption}
+        value={value}
+        label={name}
+        description=""
+        labelStyle={{fontSize: 13}}
+      />
+    )
+  }
+
+  _renderInput() {
     const { valueAsText } = this.state;
     const { name } = this.props;
 
@@ -90,6 +119,15 @@ class DebugOptionEdit extends Component {
         </View>
       </View>
     )
+  }
+
+
+  render() {
+    if (this.props.isBool) {
+      return this._renderSwitch();
+    } else {
+      return this._renderInput();
+    }
   }
 }
 
@@ -136,11 +174,11 @@ class SettingsContent extends Component {
         <ScrollView showsHorizontalScrollIndicator={false} style={{ width: "100%" }}>
           <DebugOptionEdit configDebug={configDebug} name="customFilter" value={configDebug.consoleFilters.customFilter}  />
           <DebugOptionEdit configDebug={configDebug} name="consoleFilter" value={configDebug.consoleFilter}  />
-          <DebugOptionEdit configDebug={configDebug} name="skipEmailVerify" value={configDebug.skipEmailVerification}  />
-          <DebugOptionEdit configDebug={configDebug} name="reduxLog" value={configDebug.reduxConsoleLoggingEnabled}  />
+          <DebugOptionEdit configDebug={configDebug} name="skipEmailVerify" value={configDebug.skipEmailVerification} isBool />
+          <DebugOptionEdit configDebug={configDebug} name="reduxLog" value={configDebug.reduxConsoleLoggingEnabled} isBool />
           <DebugOptionEdit configDebug={configDebug} name="testFlow" value={configDebug.testFlow}  />
-          <DebugOptionEdit configDebug={configDebug} name="dialogDebug" value={configDebug.messageDialogDebug}  />
-          <DebugOptionEdit configDebug={configDebug} name="isOnline" value={configDebug.isOnline}  />
+          <DebugOptionEdit configDebug={configDebug} name="dialogDebug" value={configDebug.messageDialogDebug} isBool />
+          <DebugOptionEdit configDebug={configDebug} name="isOnline" value={configDebug.isOnline} isBool />
         </ScrollView>
       </View>
     )
