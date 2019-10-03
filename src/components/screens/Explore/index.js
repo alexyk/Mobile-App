@@ -7,7 +7,7 @@ import { bindActionCreators } from "redux";
 import { NavigationActions, StackActions } from "react-navigation";
 import { cloneDeep } from 'lodash';
 import { domainPrefix } from "../../../config";
-import { autoHomeSearch, autoHotelSearch, autoHotelSearchFocus, autoHotelSearchPlace, isOnline, testFlow } from "../../../config-debug";
+import DBG from "../../../config-debug";
 import { testFlowExec, processError, ilog, tslog } from "../../../utils/debug/debug-tools";
 import requester from "../../../initDependencies";
 import lang from "../../../language";
@@ -135,7 +135,7 @@ class Explore extends Component {
     });
 
     if (__DEV__) {
-      if (autoHotelSearchFocus) this.searchBarRef.focus();
+      if (DBG.autoHotelSearchFocus) this.searchBarRef.focus();
     }
 
     // TODO: An old note below. To fix - investigate the commit by abhi when it was added:
@@ -155,16 +155,16 @@ class Explore extends Component {
   async componentDidMount() {
     console.disableYellowBox = true;
     // prettier-ignore
-    if (__DEV__ && testFlow) {
+    if (__DEV__ && DBG.testFlow) {
       // run a test flow - for easy debug/development/testing
-      testFlowExec(testFlow, {reduxAction: this.props.setDatesAndGuestsData});
+      testFlowExec(DBG.testFlow, {reduxAction: this.props.setDatesAndGuestsData});
       return;
-    } else if (__DEV__ && autoHotelSearch) {
+    } else if (__DEV__ && DBG.autoHotelSearch) {
       // enable automatic search
       setTimeout(() => {
-        this.onSearchHandler(autoHotelSearchPlace);
+        this.onSearchHandler(DBG.autoHotelSearchPlace);
       }, 100);
-      if (!isOnline) {
+      if (!DBG.isOnline) {
         setTimeout(() => this.gotoSearch(), 300);
       }
     }
@@ -182,7 +182,7 @@ class Explore extends Component {
       this.setCountriesInfo();
     }
 
-    if (__DEV__ && autoHotelSearchFocus && this.searchBarRef) {
+    if (__DEV__ && DBG.autoHotelSearchFocus && this.searchBarRef) {
       this.searchBarRef.focus();
     }
   }
@@ -255,7 +255,7 @@ class Explore extends Component {
           if (this.state.search != "") {
             this.setState({ cities: data }, () => {
               // enable automatic search
-              if (__DEV__ && autoHotelSearch) {
+              if (__DEV__ && DBG.autoHotelSearch) {
                 setTimeout(() => {
                   const { id, query } = data[0];
                   //logd('citites','citites',{data,id,query})
@@ -330,8 +330,8 @@ class Explore extends Component {
 
   gotoSearch() {
     tslog('search flow step 1 - from search touch/click to static data');
-    if (__DEV__ && testFlow) {
-      testFlowExec(testFlow, {reduxAction: this.props.setDatesAndGuestsData});
+    if (__DEV__ && DBG.testFlow) {
+      testFlowExec(DBG.testFlow, {reduxAction: this.props.setDatesAndGuestsData});
       return;
     }
 
@@ -512,7 +512,7 @@ class Explore extends Component {
   }
 
   renderHomeTopView() {
-    if (__DEV__ && autoHomeSearch) {
+    if (__DEV__ && DBG.autoHomeSearch) {
       setTimeout(
         () =>
           this.setState(

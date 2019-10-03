@@ -5,86 +5,101 @@ import { Platform } from 'react-native';
 // Example usage emptyFuncWithDescr, 
 // 
 
-
-/** 
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * FORCE modes - possible in RELEASE                               *
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * ALL MUST BE FALSE!!!      (unless you know what you are doing)  *
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- */
-var __MYDEV__                               = (__DEV__ && true);
-var __TEST__                                = (Platform.Version == undefined);
-var reactotronLoggingInReleaseForceEnabled  = false;
-var forceOffline                            = false;
-
-
-/**  
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * Error handling
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * errorLevel: Number
- * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- * 
- *    0   console.warn (message & data)
- *    1   console.error
- *    2   reactotron.error
- * 
-*/
-var errorLevel = 0;
-
-  // reactotron
-var reactotronLoggingEnabled           = true;
-var logConverterErrorToReactotron      = false;
-var showTypesInReactotronLog           = false;
-var warnOnReactotronDisabledCalls      = false;
-  // redux
-var reduxConsoleLoggingEnabled         = false;
-var reduxConsoleCollapsedLogging       = true;
-var reduxReactotronLoggingEnabled      = false;
-  // console
-var raiseConverterExceptions           = false;
-var logConverterError                  = false;
-var consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
-var consoleShowTimeInLogs              = true;     // prepend with time
-var consoleClearAtStart                = true;
-var consoleFilter                      = 'custom' || (testFlow ? 'testFlow' : '');
-var serverLogRequesting                = true;
-var serverExpandErrors                 = false;
-  // other
-var webviewDebugEnabled                = true;
-var hotelsSearchMapDebugEnabled        = false;
-var hotelsSearchSocketDebug            = false;
-var checkHotelsDataWithTemplates       = 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed'; // 2 valies - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
-  // offline mode
-  // Enabled if: (__DEV__ == true) and (isOffline == true)
-                       let isOffline   = false || !!testFlow;
-  if (forceOffline) isOffline = forceOffline;
-  if (!__DEV__) isOffline = false;
-var isOnline = (!isOffline);
-var autoLoginInOfflineMode             = true;
-var validationStateOfflineWallet       = -1;  // -1: none, 0: invalid, 1: valid
-var offlineEmailVerificationValue      = true;
-  // automated flows
-    // hotels search
-var autoHotelSearch                    = false;
-var autoHotelSearchFocus               = false;
-var autoHotelSearchPlace               = 'araraquara';
-var skipEmailVerification              = false;
-    // homes search
-var autoHomeSearch                     = false;
-var autoHomeSearchPlace                = 'uk1'
-  // calendar
-var autoCalendar                       = false;
-  // message dialog
-var messageDialogDebug                 = true;
-var debugSettingsOption                = false;
-  // test flows
-var testFlowURL                        = "http://beta.locktrip.com/api/hotels/searh?query=london";
-var testFlow                           = "";
+var DBG = {};
+DBG = {
+  /** 
+   * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   * FORCE modes - possible in RELEASE                               *
+   * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   * ALL MUST BE FALSE!!!      (unless you know what you are doing)  *
+   * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   */
+  __MYDEV__                               : (__DEV__ && true),
+  __TEST__                                : (Platform.Version == undefined),
+  reactotronLoggingInReleaseForceEnabled  : false,
+  forceOffline                            : false,
 
 
-// ------------ data definitions ----------------
+  /**  
+   * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   * Error handling
+   * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   * errorLevel: Number
+   * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+   * 
+   *    0   console.warn (message & data)
+   *    1   console.error
+   *    2   reactotron.error
+   * 
+  */
+  errorLevel: 0,
+
+    // reactotron
+  reactotronLoggingEnabled           : true,
+  logConverterErrorToReactotron      : false,
+  showTypesInReactotronLog           : false,
+  warnOnReactotronDisabledCalls      : false,
+    // redux
+  reduxConsoleLoggingEnabled         : false,
+  reduxConsoleCollapsedLogging       : true,
+  reduxReactotronLoggingEnabled      : false,
+    // console
+  raiseConverterExceptions           : false,
+  logConverterError                  : false,
+  consoleTimeCalculations            : false,    // enable/disable "console.time" & "console.timeEnd" calls
+  consoleShowTimeInLogs              : true,     // prepend with time
+  consoleClearAtStart                : true,
+  consoleFilter                      : 'custom',
+  serverLogRequesting                : true,
+  serverExpandErrors                 : false,
+    // other
+  webviewDebugEnabled                : true,
+  hotelsSearchMapDebugEnabled        : false,
+  hotelsSearchSocketDebug            : false,
+  checkHotelsDataWithTemplates       : 'static,static-patched,static-parsed,socket,socket-parsed,filter,filter-parsed', // 2 values - (1) string in the form "typeOfCheck1,typeOfCheck2" ... or (2) boolean - check all
+    // offline mode
+    // Enabled if: (__DEV__ == true) and (isOffline == true)
+
+  autoLoginInOfflineMode             : true,
+  validationStateOfflineWallet       : -1,  // -1: none, 0: invalid, 1: valid
+  offlineEmailVerificationValue      : true,
+    // automated flows
+      // hotels search
+  autoHotelSearch                    : false,
+  autoHotelSearchFocus               : false,
+  autoHotelSearchPlace               : 'araraquara',
+  skipEmailVerification              : false,
+      // homes search
+  autoHomeSearch                     : false,
+  autoHomeSearchPlace                : 'uk1',
+    // calendar
+  autoCalendar                       : false,
+    // message dialog
+  messageDialogDebug                 : true,
+  debugSettingsOption                : true,
+    // test flows
+  testFlowURL                        : "http://beta.locktrip.com/api/hotels/searh?query=london",
+  testFlow                           : "",
+
+  // TODO: Add the following options
+  /*
+      (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
+      (2) Logging level
+        (0) reactotron only
+        (1) combine with console.log
+        (2) only console.log
+        Note: Maybe combine with first or have (1) console logging options (2) reactotron logging options (3) combined options
+        Best - make logging defined, as per A) delete console.log/info etc. and B) replace with planned log(), logd() - no more than 3 versions
+        for example:
+          logd - only when debugging (disabled/cleaned in release)
+          log - for info/logging purposes
+        and a rule - only one line logs (for easy ato deletion in release -> select_config.rb)
+  */
+
+    // ui
+  iconsDebugEnabled                  : false
+}
+
 var offlineTimeInSeconds = {
   getCountries: 0,
   getCurrencyRates: 0,
@@ -105,24 +120,12 @@ var offlineTimeInSeconds = {
   getHotelById: 0,
   sendVerificationEmail: 0.5
 }
+DBG.offlineTimeInSeconds = offlineTimeInSeconds;
 
-// TODO: Add the following options
-/*
-    (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
-    (2) Logging level
-      (0) reactotron only
-      (1) combine with console.log
-      (2) only console.log
-      Note: Maybe combine with first or have (1) console logging options (2) reactotron logging options (3) combined options
-      Best - make logging defined, as per A) delete console.log/info etc. and B) replace with planned log(), logd() - no more than 3 versions
-      for example:
-        logd - only when debugging (disabled/cleaned in release)
-        log - for info/logging purposes
-      and a rule - only one line logs (for easy ato deletion in release -> select_config.rb)
-*/
-
-  // ui
-var iconsDebugEnabled                  = false;
+DBG.isOnline = (!DBG.isOffline);
+DBG.isOffline = (false || !!DBG.testFlow);
+(DBG.forceOffline) && (DBG.isOffline = DBG.forceOffline);
+if (!__DEV__) DBG.isOffline = false;
 
 
 // prettier-ignore
@@ -147,80 +150,44 @@ var filtersConfig = {
 filtersConfig.default2 = [].concat(filtersConfig.default, ['!<object>'])
 filtersConfig.default3 = ['mode:liM'].concat(filtersConfig.default2, [])
 filtersConfig.default4 = [`mode:liM`].concat(filtersConfig.default2, [])
-filtersConfig.fav1   = ['serverUtil'].concat(filtersConfig.default4, [])
-filtersConfig.fav2   = ['MessageDialog', 'includeNonMatching: false']
+filtersConfig.fav1 = ['serverUtil'].concat(filtersConfig.default4, [])
+filtersConfig.fav2 = ['MessageDialog', 'includeNonMatching: false']
 filtersConfig.safari = [].concat(filtersConfig.default2)
 filtersConfig.vscode = [].concat(filtersConfig.default4, ['MessageDialog', 'serverUtil'])
-filtersConfig.vscode2  = [].concat(filtersConfig.vscode, ['action'])
+filtersConfig.vscode2 = [].concat(filtersConfig.vscode, ['action'])
 filtersConfig.testFlow = [].concat(filtersConfig.default, ['includeNonMatching: true'])
 filtersConfig.simple = [].concat(filtersConfig.default4, ['includeNonMatching: false', 'serverUtil'])
 filtersConfig.server = ['includeNonMatching: false', 'serverUtil', ]
-filtersConfig.redux  = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
-filtersConfig.debug1  = ["mode: LiM", "error", 'serverUtils'].concat(filtersConfig.default2)
-filtersConfig.flows  = ["mode: Lim", /^search flow step/]
+filtersConfig.redux = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil', 'action', "Flow", 'redux', "!next state", "!prev state"])
+filtersConfig.debug1 = ["mode: LiM", "error", 'serverUtils'].concat(filtersConfig.default2)
+filtersConfig.flows = ["mode: Lim", /^search flow step/]
 
-filtersConfig.custom  = ["mode:Lim", "parent::",'MessageDialog', 'parent', 'error'] //'!Rejection', ].concat(filtersConfig.default)
+filtersConfig.custom = ["mode:Lim", "parent::",'MessageDialog', 'parent', 'error'] //'!Rejection', ].concat(filtersConfig.default)
 
-var consoleFilters                     = ( consoleFilter ? filtersConfig[consoleFilter] : null );
+var consoleFilters = ( DBG.consoleFilter ? filtersConfig[DBG.consoleFilter] : null );
+DBG.consoleFilters = consoleFilters;
+DBG.filtersConfig = filtersConfig;
+DBG.setDebugOption = setDebugOption;
 
 
 function setDebugOption(name, value) {
   switch (name) {
-    case 'reduxLog':             reduxConsoleLoggingEnabled = value;   break;
-    case 'dialogDebug':          messageDialogDebug = value;           break;
-    case 'reactotron':           reactotronLoggingEnabled = value;     break;
-    case 'skipEmailVerify':      skipEmailVerification = value;        break;
-    case 'testFlow':             testFlow = value;                     break;
-    case 'isOnline':             isOnline = value;                     break;
-    case 'consoleFilter':        consoleFilter = value;                break;
-    case 'customFilter':         consoleFilters.custom = value;        break;
+    case 'reduxLog':             DBG.reduxConsoleLoggingEnabled = value;   break;
+    case 'dialogDebug':          DBG.messageDialogDebug = value;           break;
+    case 'reactotron':           DBG.reactotronLoggingEnabled = value;     break;
+    case 'skipEmailVerify':      DBG.skipEmailVerification = value;        break;
+    case 'testFlow':             DBG.testFlow = value;                     break;
+    case 'isOnline':             DBG.isOnline = value;                     break;
+    case 'consoleFilter':        DBG.consoleFilter = value;                break;
+    case 'customFilter':         consoleFilters.custom = value;            break;
+    default:                     DBG[name] = value;                        break;
   }
-
 }
 
 export {
-  __MYDEV__,
-  __TEST__,
-  reactotronLoggingInReleaseForceEnabled,
-  forceOffline,
-  errorLevel,
-  reactotronLoggingEnabled,
-  logConverterErrorToReactotron,
-  showTypesInReactotronLog,
-  warnOnReactotronDisabledCalls,
-  reduxConsoleLoggingEnabled,
-  reduxConsoleCollapsedLogging,
-  reduxReactotronLoggingEnabled,
-  raiseConverterExceptions,
-  logConverterError,
-  consoleTimeCalculations,
-  consoleShowTimeInLogs,
-  consoleClearAtStart,
-  consoleFilter,
-  serverLogRequesting,
-  serverExpandErrors,
-  webviewDebugEnabled,
-  hotelsSearchMapDebugEnabled,
-  hotelsSearchSocketDebug,
-  checkHotelsDataWithTemplates,
-  isOnline,
-  autoLoginInOfflineMode,
-  validationStateOfflineWallet,
-  offlineEmailVerificationValue,
-  autoHotelSearch,
-  autoHotelSearchFocus,
-  autoHotelSearchPlace,
-  skipEmailVerification,
-  autoHomeSearch,
-  autoHomeSearchPlace,
-  autoCalendar,
-  messageDialogDebug,
-  testFlowURL,
-  testFlow,
-  offlineTimeInSeconds,
-  iconsDebugEnabled,
-  filtersConfig,
-  consoleFilters,
   setDebugOption,
-  debugSettingsOption
+  consoleFilters,
+  filtersConfig
 }
+
+export default DBG;

@@ -1,5 +1,5 @@
 import requester from "../../initDependencies";
-import { serverLogRequesting } from "../../config-debug";
+import DBG from "../../config-debug";
 import { processError, ilog } from "../../utils/debug/debug-tools";
 import { getObjectClassName, isString, gotoWebviewSimple } from "js-tools";
 
@@ -48,7 +48,7 @@ export function serverRequest(
   const errorFunctionWrapped = function(thisObject, errorData, errorCode, message) {
     let hasError = false;
     try {
-      if (serverLogRequesting) ilog(`[serverUtils] [${callerName}] Response-Error ${requestName}`, {callerName, requestName, callParams, errorData, errorCode, message});
+      if (DBG.serverLogRequesting) ilog(`[serverUtils] [${callerName}] Response-Error ${requestName}`, {callerName, requestName, callParams, errorData, errorCode, message});
       errorFunction.call(thisObject, errorData, errorCode);
     } 
     catch (error) {
@@ -79,7 +79,7 @@ export function serverRequest(
   let requestName = callFunction.name;  
 
   // prettier-ignore
-  if (serverLogRequesting) ilog(`[serverUtils] [${callerName}] Requesting ${requestName}`, {callerName, requestName, callParams});
+  if (DBG.serverLogRequesting) ilog(`[serverUtils] [${callerName}] Requesting ${requestName}`, {callerName, requestName, callParams});
 
   callFunction
     .apply(requester, callParams)
@@ -88,7 +88,7 @@ export function serverRequest(
         res.body
           .then(function(data) {
             try {
-              if (serverLogRequesting) ilog(`[serverUtils] [${callerName}] Response ${requestName}`, {callerName, requestName, callParams, data});
+              if (DBG.serverLogRequesting) ilog(`[serverUtils] [${callerName}] Response ${requestName}`, {callerName, requestName, callParams, data});
               successFunction.call(thisObject, data);
             } catch (error) {
               errorData = { error };

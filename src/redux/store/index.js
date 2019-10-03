@@ -4,15 +4,11 @@ import thunk from "redux-thunk";
 import appReducers from "../reducers";
 import { middleware } from "../../routing";
 import { logger } from "redux-logger";
-import {
-  reduxConsoleLoggingEnabled,
-  reduxConsoleCollapsedLogging,
-  reduxReactotronLoggingEnabled
-} from "../../config-debug";
+import DBG from "../../config-debug";
 
 let middlewares = [thunk, middleware];
-if (__DEV__ && reduxConsoleLoggingEnabled) {
-  if (reduxConsoleCollapsedLogging) {
+if (__DEV__ && DBG.reduxConsoleLoggingEnabled) {
+  if (DBG.reduxConsoleCollapsedLogging) {
     const loggerCollapsed = require("redux-logger").createLogger({
       collapsed: (getState, action, logEntry) => true
     });
@@ -35,7 +31,7 @@ const enchancer = composeWithDevTools({
 })(applyMiddleware(...middlewares));
 
 let store;
-if (console.tron.createStore && reduxReactotronLoggingEnabled) {
+if (console.tron.createStore && DBG.reduxReactotronLoggingEnabled) {
   store = console.tron.createStore(appReducers, enchancer); // eslint-disable-line
 } else {
   store = createStore(appReducers, enchancer); // eslint-disable-line

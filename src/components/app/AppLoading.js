@@ -11,7 +11,7 @@ import { bindActionCreators } from "redux";
 import { getCountries } from "../../redux/action/Country";
 import { getCurrencyRates, getLocRate } from "../../redux/action/exchangeRates";
 import { socketHost, ROOMS_XML_CURRENCY } from "../../config";
-import { autoLoginInOfflineMode } from "../../config-debug";
+import DBG from "../../config-debug";
 import { ilog, processError } from "../../utils/debug/debug-tools";
 
 const androidStomp = NativeModules.StompModule;
@@ -55,7 +55,7 @@ class AppLoading extends Component {
     const isLoggedIn = keys.includes(`${domainPrefix}.auth.locktrip`) && keys.includes(`${domainPrefix}.auth.username`);
 
     // enable auto login on reload
-    if (__DEV__ && !isLoggedIn && autoLoginInOfflineMode) {
+    if (__DEV__ && !isLoggedIn && DBG.autoLoginInOfflineMode) {
       ilog(`[AppLoading] Auto logging in - please reload the app to take effect`);
       AsyncStorage.multiSet([[`${domainPrefix}.auth.locktrip`, "oa*erh$oaeksnrtmok"], [`${domainPrefix}.auth.username`, "theUserName"]], (...args) =>
         processError("error setting auth.username/locktrip", { args })

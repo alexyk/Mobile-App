@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { View, Text } from "react-native";
-import { wlog } from "../../../config-debug";
 import Separator from "../../atoms/Separator";
 import GuestRow from "../GuestRow";
 import styles from "./styles";
 import { INVALID_CHILD_AGE } from "../../screens/Guests/utils";
 import { HOTEL_ROOM_LIMITS } from "../../../config-settings";
 import LTPicker from "../LTPicker";
+import { wlog } from "../../../utils/debug/debug-tools";
 
 export default class ChildrenView extends Component {
   constructor(props) {

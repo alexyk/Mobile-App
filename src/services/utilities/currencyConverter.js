@@ -1,8 +1,4 @@
-import {
-  raiseConverterExceptions,
-  logConverterError,
-  logConverterErrorToReactotron
-} from "../../config-debug";
+import DBG from "../../config-debug";
 
 class CurrencyConverter {
   static convert(exchangeRates, from, to, quantity) {
@@ -35,13 +31,13 @@ class CurrencyConverter {
 
     // several levels of error output - see config-debug.js
     if (result == null) {
-      if (__DEV__ && raiseConverterExceptions) {
+      if (__DEV__ && DBG.raiseConverterExceptions) {
         throw error;
       }
-      if (logConverterError) {
+      if (DBG.logConverterError) {
         console.error(`[currencyConverter] Error`, error);
       }
-      if (logConverterErrorToReactotron) {
+      if (DBG.logConverterErrorToReactotron) {
         console.tron.error(
           `[currencyConverter] Error: "${error.message}"`,
           error

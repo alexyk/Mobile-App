@@ -8,7 +8,8 @@ import Moment from "moment";
 import styles from "./styles";
 import MonthList from "../../organisms/MonthList";
 import { I18N_MAP } from "./i18n";
-import { processError } from "../../../config-debug";
+import { processError } from "../../../utils/debug/debug-tools";
+
 
 export default class Calendar extends Component {
   static propTypes = {

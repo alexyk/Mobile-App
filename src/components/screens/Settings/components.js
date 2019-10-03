@@ -2,12 +2,12 @@ import React, { Component } from "react";
 import { ScrollView, Text, TextInput, View, Platform } from "react-native";
 import CustomSwitch from "react-native-customisable-switch";
 import { commonText } from "../../../common.styles";
-import { setOption, hotelSearchIsNative } from '../../../config-settings'
-import { debugSettingsOption } from "../../../config-debug";
+import { setOption, hotelSearchIsNative } from '../../../config-settings';
+import DBG from "../../../config-debug";
 
 
 const OptionSwitch = (props) => {
-  let { label, labelOn, labelOff, description, value, onChange, labelStyle } = props;
+  let { label, labelOn, labelOff, description, value, onChange, labelStyle, containerStyle, switchStyle, descriptionStyle, noDescription } = props;
 
   (!label) && (label = (labelOn && labelOff) ? (value ? labelOn : labelOff) : "");
   (!description) && (description='');
@@ -15,7 +15,7 @@ const OptionSwitch = (props) => {
 
 
   return (
-    <View style={{width: "100%", paddingVertical: 10, flexDirection: 'column', marginVertical: 10}}>
+    <View style={{width: "100%", paddingVertical: 10, flexDirection: 'column', marginVertical: 10, ...containerStyle}}>
       <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
         <Text style={{...commonText, fontSize: 16, fontWeight: "bold", marginTop: 7, ...labelStyle}}>{label}</Text>
         <CustomSwitch
@@ -24,19 +24,20 @@ const OptionSwitch = (props) => {
             activeTextColor="#DA7B61"
             activeBackgroundColor="#DA7B61"
             inactiveBackgroundColor="#4445"
-            switchWidth={62}
+            switchWidth={42}
+            switchHeight={23}
             switchBorderWidth={borderWidth}
             switchBorderColor="#e4a193"
-            buttonWidth={30}
-            buttonHeight={30}
+            buttonWidth={20}
+            buttonHeight={20}
             buttonBorderRadius={15}
             buttonBorderColor="#555"
             buttonBorderWidth={borderWidth}
             padding={false}
-            containerStyle={{marginBottom: 5}}
+            containerStyle={{marginBottom: 5, ...switchStyle}}
           />
       </View>
-      <Text style={{...commonText, marginTop: 5, fontSize: 12, marginRight: 0, textAlign: "justify"}}>{description}</Text>
+      <Text style={{...commonText, marginTop: 5, fontSize: 12, marginRight: 0, textAlign: "justify", ...descriptionStyle}}>{description}</Text>
     </View>
   )
 }
@@ -54,14 +55,10 @@ class DebugOptionEdit extends Component {
     this.toggleDebugOption = this.toggleDebugOption.bind(this);
     this.onChangeText = this.onChangeText.bind(this);
   }
-
-  componentWillMount() {
-    this.setState({value: this.props.value});
-  }
   
 
   onChangeText(text) {
-    const { name, value, configDebug } = this.props;
+    const { name, value } = this.props;
 
     if (this.timeoutId != null) {
       clearTimeout(this.timeoutId);
@@ -76,33 +73,45 @@ class DebugOptionEdit extends Component {
     const _this = this;
     this.timeoutId = setTimeout(() => {
       if (valueParsed != null) {
-        configDebug.setDebugOption(name, valueParsed)
+        DBG.setDebugOption(name, valueParsed);
         _this.setState({value: valueParsed, valueAsText: JSON.stringify(valueParsed)});
       } else {
         _this.setState({valueAsText: JSON.stringify(value)});
       }
     }, 1000);
   
-    this.setState({valueAsText})
+    this.setState({valueAsText});
   }
 
 
   toggleDebugOption() {
-    const { name, value, configDebug } = this.props;
-    configDebug.setDebugOption(name, !value);
-    this.forceUpdate();
+    const owner = this;
+    
+    return function () {
+      const { name, value, parent } = owner.props;
+      DBG.setDebugOption(name, !value);
+      parent.forceUpdate();
+      if (name == "isOnline") {
+        refreshRequester();
+      }
+    }
   }
+
 
   _renderSwitch() {
     const { name, value } = this.props;
 
     return (
       <OptionSwitch
-        onChange={this.toggleDebugOption}
+        onChange={this.toggleDebugOption()}
         value={value}
         label={name}
         description=""
-        labelStyle={{fontSize: 13}}
+        style={{marginVertical: 0, paddingVertical: 0}}
+        labelStyle={{fontSize: 13, marginTop: 5}}
+        containerStyle={{marginVertical: 0, paddingVertical: 5}}
+        switchStyle={{marginBottom: 0}}
+        noDescription
       />
     )
   }
@@ -112,10 +121,10 @@ class DebugOptionEdit extends Component {
     const { name } = this.props;
 
     return (
-      <View style={{width: "100%", paddingVertical: 5, flexDirection: 'column', height: 40}}>
+      <View style={{width: "100%", paddingVertical: 0, flexDirection: 'column', height: 40}}>
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-          <Text style={{...commonText, fontSize: 14, fontWeight: "bold", width: 150}}>{name}</Text>
-          <TextInput value={valueAsText} onChangeText={this.onChangeText} style={{...commonText, fontSize:13, borderWidth: 0.5, padding: 3, paddingHorizontal: 3, width: 100, marginRight: 10}} autoCapitalize="none" />
+          <Text style={{...commonText, fontSize: 14, marginTop: 5, fontWeight: "bold", width: 150}}>{name}</Text>
+          <TextInput value={valueAsText} onChangeText={this.onChangeText} style={{...commonText, fontSize:13, borderWidth: 0.5, paddingHorizontal: 3, width: 100, marginRight: 10}} autoCapitalize="none" />
         </View>
       </View>
     )
@@ -163,22 +172,22 @@ class SettingsContent extends Component {
   }
 
   _renderDebugOptions() {
-    if (!__DEV__ || !debugSettingsOption) {
+    if (!__DEV__ || !DBG.debugSettingsOption) {
       return null;
     }
 
-    const configDebug = require('../../../config-debug');
+    let d= DBG
 
     return (
       <View style={{height: 200}}>
         <ScrollView showsHorizontalScrollIndicator={false} style={{ width: "100%" }}>
-          <DebugOptionEdit configDebug={configDebug} name="customFilter" value={configDebug.consoleFilters.customFilter}  />
-          <DebugOptionEdit configDebug={configDebug} name="consoleFilter" value={configDebug.consoleFilter}  />
-          <DebugOptionEdit configDebug={configDebug} name="skipEmailVerify" value={configDebug.skipEmailVerification} isBool />
-          <DebugOptionEdit configDebug={configDebug} name="reduxLog" value={configDebug.reduxConsoleLoggingEnabled} isBool />
-          <DebugOptionEdit configDebug={configDebug} name="testFlow" value={configDebug.testFlow}  />
-          <DebugOptionEdit configDebug={configDebug} name="dialogDebug" value={configDebug.messageDialogDebug} isBool />
-          <DebugOptionEdit configDebug={configDebug} name="isOnline" value={configDebug.isOnline} isBool />
+          <DebugOptionEdit parent={this} name="customFilter" value={DBG.filtersConfig.custom}  />
+          <DebugOptionEdit parent={this} name="consoleFilter" value={DBG.consoleFilter}  />
+          <DebugOptionEdit parent={this} name="skipEmailVerify" value={DBG.skipEmailVerification} isBool />
+          <DebugOptionEdit parent={this} name="reduxLog" value={DBG.reduxConsoleLoggingEnabled} isBool />
+          <DebugOptionEdit parent={this} name="testFlow" value={DBG.testFlow}  />
+          <DebugOptionEdit parent={this} name="dialogDebug" value={DBG.messageDialogDebug} isBool />
+          <DebugOptionEdit parent={this} name="isOnline" value={DBG.isOnline} isBool />
         </ScrollView>
       </View>
     )

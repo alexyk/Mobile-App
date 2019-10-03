@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import React, { Component } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { withNavigation } from "react-navigation";
-import { autoCalendar } from "../../../config-debug";
+import DBG from "../../../config-debug";
 import LTIcon from "../../atoms/LTIcon";
 import styles from "./styles";
 
@@ -13,7 +13,7 @@ class DateAndGuestPicker extends Component {
 
   componentDidMount() {
     // detach from current code execution (smoother animation)
-    if (__DEV__ && autoCalendar) setImmediate(() => this.onCalendar());
+    if (__DEV__ && DBG.autoCalendar) setImmediate(() => this.onCalendar());
   }
 
   onOption = () => {

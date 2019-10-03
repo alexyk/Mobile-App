@@ -45,7 +45,7 @@ import {
   OPTIONS
 } from "../../../../config-settings";
 import { rlog, processError, clog, elog, wlog, telog, tslog } from "../../../../utils/debug/debug-tools";
-import { isOnline, hotelsSearchSocketDebug } from "../../../../config-debug";
+import DBG from "../../../../config-debug";
 import requester from "../../../../initDependencies";
 
 import UUIDGenerator from "react-native-uuid-generator";
@@ -232,7 +232,7 @@ class HotelsSearchScreen extends Component {
 
   startSocketDataConnectionTimeOut() {
     //log({name:'SOCKET',preview:`Starting Socket connection timeout, ${isOnline?'online':'offline'}`,important:true})
-    if (!isOnline) return;
+    if (!DBG.isOnline) return;
 
     const _this = this;
     const funcSocketTimeout = function() {
@@ -349,7 +349,7 @@ class HotelsSearchScreen extends Component {
 
     this.isSocketDown = false;
 
-    if (isOnline) {
+    if (DBG.isOnline) {
       // common code
       WebsocketClient.startGrouping();
 
@@ -365,7 +365,7 @@ class HotelsSearchScreen extends Component {
 
   // TODO: Inspect this flow - and create a component to implement it
   stopSocketConnection(removeListeners = true) {
-    if (!isOnline) return;
+    if (!DBG.isOnline) return;
 
     // common code
     if (removeListeners) {
@@ -406,7 +406,7 @@ class HotelsSearchScreen extends Component {
     });
 
     stompiOSClient = stomp.client(socketHost);
-    stompiOSClient.debug = hotelsSearchSocketDebug
+    stompiOSClient.debug = DBG.hotelsSearchSocketDebug
       ? msg => rlog("debug-socket", `${msg.substr(0, 30)}`, { msg })
       : null;
     stompiOSClient.connect(

@@ -1,9 +1,9 @@
 import { gotoWebviewSimple } from "../../../../components/screens/utils";
-import { testFlowURL } from "../../../../config-debug";
+import DBG from "../../../../config-debug";
 import { rlog } from "../../../../utils/debug/debug-tools";
 
 export default function webviewHTML() {
-  fetch(testFlowURL)
+  fetch(DBG.testFlowURL)
     .then(response => {
       response
         .text()

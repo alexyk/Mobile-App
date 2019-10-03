@@ -4,7 +4,8 @@ import { Text } from "react-native";
 import FontAwesome, { Icons } from "react-native-fontawesome";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import SimpleIcon from "react-native-vector-icons/SimpleLineIcons";
-import { iconsDebugEnabled } from "../../../config-debug";
+import DBG from "../../../config-debug";
+
 
 export default function LTIcon(props) {
   let { name, style, size, textStyle, color, iconSet, isText } = props;
@@ -38,7 +39,7 @@ export default function LTIcon(props) {
   if (isAsText) {
     //TODO: Fix icon as text
     // Example Usage: SearchBar
-    if (__DEV__ && !Icons[name] && iconsDebugEnabled) {
+    if (__DEV__ && !Icons[name] && DBG.iconsDebugEnabled) {
       console.warn(`[LTIcon] Icon '${name}' as text not found`, props);
     }
 

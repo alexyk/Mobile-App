@@ -20,7 +20,8 @@ import { Wallet } from "../../../services/blockchain/wallet";
 import { CurrencyConverter } from "../../../services/utilities/currencyConverter";
 import requester from "../../../initDependencies";
 import { isNumber } from "js-tools";
-import { isOnline } from "../../../config-debug";
+import DBG from "../../../config-debug";
+
 
 const DEFAULT_CRYPTO_CURRENCY = "EUR";
 
@@ -154,7 +155,7 @@ class ProfileWalletCard extends Component {
     const addressValidationResult = validateLOCAddress(locAddress);
 
     if (addressValidationResult == 1) {
-      if (isOnline) {
+      if (DBG.isOnline) {
         Wallet.getBalance(locAddress).then(x => {
           const ethBalance = x / Math.pow(10, 18);
           this.checkBalance({ ethBalance });

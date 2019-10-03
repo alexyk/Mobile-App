@@ -1,5 +1,5 @@
 import { gotoWebviewSimple } from "../../../../components/screens/utils";
-import { testFlowURL } from "../../../../config-debug";
+import DBG from "../../../../config-debug";
 
 /**
  * Communicates to webview in both ways:
@@ -9,7 +9,7 @@ import { testFlowURL } from "../../../../config-debug";
 // prettier-ignore
 export default function webview() { 
   gotoWebviewSimple({
-    url: testFlowURL,
+    url: DBG.testFlowURL,
     message: `Loading webview test ...\n\nFor details - see testFlowURL\nin config-debug.js`,
     injectJS: `
       window.ReactNativeWebView.postMessage("Hello Inject!");

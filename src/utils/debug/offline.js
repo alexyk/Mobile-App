@@ -1,4 +1,4 @@
-import { autoHotelSearchPlace, autoHomeSearchPlace, validationStateOfflineWallet, offlineTimeInSeconds, offlineEmailVerificationValue } from '../../config-debug';
+const { autoHotelSearchPlace, autoHomeSearchPlace, validationStateOfflineWallet, offlineTimeInSeconds, offlineEmailVerificationValue } = require('../../config-debug').default;
 import { rlog, processError } from '../../utils/debug/debug-tools';
 import { isObject } from "js-tools";
 

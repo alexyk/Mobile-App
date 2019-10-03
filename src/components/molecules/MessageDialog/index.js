@@ -6,7 +6,7 @@ import lodash, { cloneDeep } from 'lodash'
 import MaterialDialog from "../../atoms/MaterialDialog/MaterialDialog";
 import { clog, wlog } from "../../../utils/debug/debug-tools";
 import { getObjectClassName, isString } from "js-tools";
-import { messageDialogDebug } from "../../../config-debug";
+import DBG from "../../../config-debug";
 
 
 class MessageDialog extends Component {
@@ -137,7 +137,7 @@ class MessageDialog extends Component {
     const { message: nextMessage, isVisible: nextIsVisible, content: nextContent } = nextProps;
     const { message, isVisible, content, parent } = this.props;
 
-    if (__DEV__ && messageDialogDebug) {
+    if (__DEV__ && DBG.messageDialogDebug) {
       const printD = this.propsToDebug.bind(this);
       const parentName = getObjectClassName(parent);
       clog(`[MessageDialog][${parentName}] current: ${printD(this.props)} next: ${printD(nextProps)}`);

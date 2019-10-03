@@ -1,10 +1,10 @@
 import { isObject, isString, getObjectClassName, isSymbol, logError } from "js-tools";
 import lodash from 'lodash';
 import moment, { isMoment } from 'moment';
-import { __MYDEV__, __TEST__,
+const { __MYDEV__, __TEST__,
   consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs,
-  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters, testFlowURL, consoleClearAtStart, filtersConfig
-} from '../../../config-debug';
+  errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters, testFlowURL, consoleClearAtStart, filtersConfig,
+} = require('../../../config-debug').default;
 
 
 // ---------------  function definitions  -----------------

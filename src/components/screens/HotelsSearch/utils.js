@@ -2,7 +2,7 @@ import lodash from "lodash";
 import { validateObject } from "../utils";
 import { isObject, isNumber, isString, isArray } from "js-tools";
 import { showNumberOnHotelItem, DEFAULT_HOTEL_PNG, OPTIONS } from "../../../config-settings";
-import { checkHotelsDataWithTemplates } from "../../../config-debug";
+import DBG from "../../../config-debug";
 import { rlog, processError } from "../../../utils/debug/debug-tools";
 
 export const DISPLAY_MODE_NONE = "mode_none";
@@ -668,9 +668,9 @@ export function printCheckHotelDataCache() {
 export function checkHotelData(data, type, index) {
   if (
     !__DEV__ ||
-    checkHotelsDataWithTemplates == false ||
-    (isString(checkHotelsDataWithTemplates) &&
-      checkHotelsDataWithTemplates.indexOf(type) == -1)
+    DBG.checkHotelsDataWithTemplates == false ||
+    (isString(DBG.checkHotelsDataWithTemplates) &&
+      DBG.checkHotelsDataWithTemplates.indexOf(type) == -1)
   ) {
     return;
   }

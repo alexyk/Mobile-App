@@ -14,7 +14,7 @@ import WebView from "react-native-webview";
 import styles from "./styles";
 
 import { generateWebviewInitialState } from "../utils";
-import { webviewDebugEnabled } from "../../../config-debug";
+import DBG from "../../../config-debug";
 import { rlog } from "../../../utils/debug/debug-tools";
 import LTLoader from "../../molecules/LTLoader";
 import TopBar from "../../molecules/TopBar";
@@ -204,7 +204,7 @@ class WebviewScreen extends Component {
   }
 
   _renderDebug() {
-    if (!__DEV__ || !webviewDebugEnabled) {
+    if (!__DEV__ || !DBG.webviewDebugEnabled) {
       // webview debug disabled in these cases
       return null;
     }

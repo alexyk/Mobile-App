@@ -17,7 +17,7 @@ import requester from "../../../../initDependencies";
 import { commonText } from "../../../../common.styles";
 import lang from "../../../../language";
 import MessageDialog from "../../../molecules/MessageDialog";
-import { skipEmailVerification } from "../../../../config-debug";
+import DBG from "../../../../config-debug";
 
 
 class HotelDetails extends Component {
@@ -109,7 +109,7 @@ class HotelDetails extends Component {
   onFacilityMore() {}
 
   onTryBooking(roomDetail) {
-    if (__DEV__ && skipEmailVerification) {
+    if (__DEV__ && DBG.skipEmailVerification) {
       this.onUserInfoSuccessAndBook({isEmailVerified: true}, roomDetail);
       return;
     }

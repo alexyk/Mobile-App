@@ -10,7 +10,7 @@ import {
 import WebView from "react-native-webview";
 
 import { showBothMapAndListHotelSearch } from "../../../../config-settings";
-import { webviewDebugEnabled, hotelsSearchMapDebugEnabled } from "../../../../config-debug";
+import DBG from "../../../../config-debug";
 
 import SearchBar from "../../../molecules/SearchBar";
 import LTLoader from "../../../molecules/LTLoader";
@@ -452,7 +452,7 @@ export function renderToast() {
 }
 
 export function renderDebugWebview() {
-  if (!__DEV__ || !webviewDebugEnabled) {
+  if (!__DEV__ || !DBG.webviewDebugEnabled) {
     // webview debug is disabled in these cases
     return null;
   }
@@ -476,7 +476,7 @@ export function renderDebugWebview() {
 }
 
 export function renderDebugMap() {
-  if (!__DEV__ || !hotelsSearchMapDebugEnabled) {
+  if (!__DEV__ || !DBG.hotelsSearchMapDebugEnabled) {
     return null;
   }
 
