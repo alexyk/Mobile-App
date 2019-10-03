@@ -4,6 +4,7 @@ import CustomSwitch from "react-native-customisable-switch";
 import { commonText } from "../../../common.styles";
 import { setOption, hotelSearchIsNative } from '../../../config-settings'
 import { TextInput } from "react-native-gesture-handler";
+import { debugSettingsOption } from "../../../config-debug";
 
 
 const OptionSwitch = (props) => {
@@ -124,7 +125,7 @@ class SettingsContent extends Component {
   }
 
   _renderDebugOptions() {
-    if (!__DEV__) {
+    if (!__DEV__ || !debugSettingsOption) {
       return null;
     }
 

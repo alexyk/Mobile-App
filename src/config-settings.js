@@ -59,7 +59,8 @@ export const OPTIONS = {
   },
   hotelDetails: {
     showLocation: false
-  }
+  },
+  settings: true
 }
 export const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
 

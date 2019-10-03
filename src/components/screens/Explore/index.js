@@ -21,7 +21,7 @@ import DateAndGuestPicker from "../../organisms/DateAndGuestPicker";
 import { gotoWebview, stringifyRoomsData, processGuestsData } from "../utils";
 import styles from "./styles";
 import { formatDatesData } from "../Calendar/utils";
-import { hotelSearchIsNative, BASIC_CURRENCY_LIST } from "../../../config-settings";
+import { hotelSearchIsNative, BASIC_CURRENCY_LIST, OPTIONS } from "../../../config-settings";
 import { setLoginDetails } from "../../../redux/action/userInterface";
 import { getSafeTopOffset } from "../../../utils/designUtils";
 import { serverRequest } from "../../../services/utilities/serverUtils";
@@ -637,7 +637,7 @@ class Explore extends Component {
           gotoGuests={this.gotoGuests}
           gotoSearch={this.gotoSearch}
           onDatesSelect={this.onDatesSelect}
-          gotoOptions={this.gotoSettings}
+          gotoOptions={OPTIONS.settings ? this.gotoSettings : null}
           showSearchButton={true}
           disabled={false}
           containerStyle={{ paddingTop: 0 }}

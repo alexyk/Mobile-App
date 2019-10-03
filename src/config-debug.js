@@ -78,6 +78,7 @@ var autoHomeSearchPlace                = 'uk1'
 var autoCalendar                       = false;
   // message dialog
 var messageDialogDebug                 = true;
+var debugSettingsOption                = false;
   // test flows
 var testFlowURL                        = "http://beta.locktrip.com/api/hotels/searh?query=london";
 var testFlow                           = "";
@@ -220,5 +221,6 @@ export {
   iconsDebugEnabled,
   filtersConfig,
   consoleFilters,
-  setDebugOption
+  setDebugOption,
+  debugSettingsOption
 }

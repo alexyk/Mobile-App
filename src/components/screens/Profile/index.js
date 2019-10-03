@@ -17,7 +17,7 @@ import ProfileWalletCard from "../../atoms/ProfileWalletCard";
 import { setCurrency } from "../../../redux/action/Currency";
 import styles from "./styles";
 import { WALLET_STATE } from "../../../redux/enum";
-import { BASIC_CURRENCY_LIST } from "../../../config-settings";
+import { BASIC_CURRENCY_LIST, OPTIONS } from "../../../config-settings";
 
 
 class Profile extends Component {
@@ -119,6 +119,27 @@ class Profile extends Component {
     );
   }
 
+  _renderSettings() {
+    if (!OPTIONS.settings) {
+      return null;
+    }
+
+    return (
+      <TouchableOpacity
+        onPress={() => this.props.navigation.navigate("Settings")}
+        style={styles.navItem}
+      >
+        <Text style={styles.navItemText}>Search Settings</Text>
+        <Image
+          resizeMode="stretch"
+          source={require("../../../assets/icons/settings.png")}
+          style={styles.navIcon}
+        />
+      </TouchableOpacity>
+
+    )
+  }
+
   render() {
     const { currency, walletData, navigation } = this.props;
     const { walletState } = walletData;
@@ -203,17 +224,8 @@ class Profile extends Component {
                 style={styles.navIcon}
               />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => navigate("Settings")}
-              style={styles.navItem}
-            >
-              <Text style={styles.navItemText}>Search Settings</Text>
-              <Image
-                resizeMode="stretch"
-                source={require("../../../assets/icons/settings.png")}
-                style={styles.navIcon}
-              />
-            </TouchableOpacity>
+
+            { this._renderSettings() }
 
             <TouchableOpacity onPress={this.logout} style={styles.navItem}>
               <Text style={styles.navItemText}>Log Out</Text>
