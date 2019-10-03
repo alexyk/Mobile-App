@@ -132,7 +132,7 @@ class EditUserProfile extends Component {
       this.setState({modalVisible: false});
     }
 
-    MessageDialog.showMessage(title, text, code, stylePreset);
+    MessageDialog.showMessage(this, title, text, code, stylePreset);
   }
 
   onHideMessage() {

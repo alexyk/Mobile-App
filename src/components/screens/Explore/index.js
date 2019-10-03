@@ -125,7 +125,7 @@ class Explore extends Component {
       actions: [NavigationActions.navigate({ routeName: 'Welcome' })],
     });
     this.props.navigation.dispatch(resetAction);
-    MessageDialog.showMessage("Login Expired",`Last login is not valid any more.\nPlease log in again.`, 'login-expired');
+    MessageDialog.showMessage(this, "Login Expired",`Last login is not valid any more.\nPlease log in again.`, 'login-expired');
   }
 
   async componentWillMount() {
@@ -306,10 +306,7 @@ class Explore extends Component {
   }
 
   gotoSettings() {
-    // this.props.navigation.navigate("Settings");
-    MessageDialog.show('Settings', <SettingsContent />, 'settings')
-    // MessageDialog.showMessage('Settings', "Settings ", 'settings')
-    // this.setState({messageVisible: true, dialogContent: <Settings />, messageTitle: "Settings"})
+    MessageDialog.show(this, 'Settings', <SettingsContent />, 'settings');
   }
 
   _cacheLoginAndRegion() {

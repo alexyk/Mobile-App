@@ -186,7 +186,7 @@ DateAndGuestPicker.propTypes = {
   showSearchButton: PropTypes.bool.isRequired,
   showCancelButton: PropTypes.bool.isRequired,
   disabled: PropTypes.bool.isRequired,
-  customOptionsIcon: PropTypes.bool,
+  customOptionsIcon: PropTypes.string,
 };
 
 DateAndGuestPicker.defaultProps = {

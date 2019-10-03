@@ -17,7 +17,6 @@ class MessageDialog extends Component {
   /**
    * Use by adding to render method:
    *        <MessageDialog
-   *          parent={this}
    *          isVisible={this.state.messageVisible}
    *         />
    * Optional often used props:
@@ -28,15 +27,15 @@ class MessageDialog extends Component {
    * @param {Number|String} code A code or/and style-preset, associated with this message and used to decide what to do in onOk or onCancel handlers
    * @param {Object|String} extraProps If in need to hide a button or set styling etc. If string - used as a name of preset, if object - presetName is name of preset if set, otherwise object props are added as custom props to MessageDialog
    */
-  static showMessage(title, text, code='message', extraProps = null) {
-    MessageDialog.__showDialog(title, text, code, extraProps);
+  static showMessage(parent, title, text, code='message', extraProps = null) {
+    MessageDialog.__showDialog(parent, title, text, code, extraProps);
   }
 
-  static show(title, content, code='message', extraProps = null) {
-    MessageDialog.__showDialog(title, content, code, extraProps);
+  static show(parent, title, content, code='message', extraProps = null) {
+    MessageDialog.__showDialog(parent, title, content, code, extraProps);
   }
 
-  static __showDialog(title, contentOrText, code, extraProps = null) {
+  static __showDialog(parent, title, contentOrText, code, extraProps = null) {
     let presetName, customProps;
     let text, contentState;
 
@@ -67,11 +66,6 @@ class MessageDialog extends Component {
       MessageDialog.extraProps = {};
     }
 
-    // prepare basic props
-    MessageDialog.extraPropsPresets.title = title;
-    MessageDialog.extraPropsPresets.content = contentState.dialogContent;
-    MessageDialog.extraPropsPresets.message = text;
-
 
     // apply extra styling
     if (presetName && customProps) {
@@ -83,7 +77,13 @@ class MessageDialog extends Component {
       MessageDialog.extraProps = MessageDialog.extraPropsPresets[presetName];
     }  
 
-    const { parent } = MessageDialog;
+    // prepare basic props
+    MessageDialog.extraProps.parent = parent;
+    MessageDialog.extraProps.title = title;
+    MessageDialog.extraProps.content = contentState.dialogContent;
+    MessageDialog.extraProps.message = text;
+    
+    
     const { messageVisible, messageTitle, dialogMessage, messageCode, dialogContent } = parent.state;
 
     if (text && !dialogContent && dialogMessage) {
