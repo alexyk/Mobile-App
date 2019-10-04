@@ -62,7 +62,9 @@ const MaterialDialog = ({
   children,
   modalProps,
   bottomSpace,
-  modalContainerStyle
+  modalContainerStyle,
+  onCustom,
+  customLabel
 }) => {
   cancelStyle = styleFromArrayToObject(cancelStyle);
   okStyle = styleFromArrayToObject(okStyle);
@@ -142,7 +144,17 @@ const MaterialDialog = ({
                           : [styles.actionsContainer, buttonsContainerStyle]
                       }
                     >
-                      {onCancel != undefined && onCancel != null && cancelLabel ? (
+                    {onCustom != null && customLabel ? (
+                        <ActionButton
+                          testID="dialog-cancel-button"
+                          colorAccent={colorAccent}
+                          style={cancelStyle}
+                          containerStyle={cancelContainerStyle}
+                          onPress={onCustom}
+                          label={customLabel}
+                        />
+                      ) : null}
+                      {onCancel != null && cancelLabel ? (
                         <ActionButton
                           testID="dialog-cancel-button"
                           colorAccent={colorAccent}
@@ -152,7 +164,7 @@ const MaterialDialog = ({
                           label={cancelLabel}
                         />
                       ) : null}
-                      {onOk != undefined && onOk != null ? (
+                      {onOk != null ? (
                         <ActionButton
                           testID="dialog-ok-button"
                           colorAccent={colorAccent}

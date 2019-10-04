@@ -221,7 +221,9 @@ class MessageDialog extends Component {
       cancelContainerStyle,
       modalProps,
       modalContainerStyle,
-      extraDialogProps
+      extraDialogProps,
+      customLabel,
+      onCustom
     } = mergedProps;
 
 
@@ -247,6 +249,8 @@ class MessageDialog extends Component {
         modalProps={modalProps}
         bottomSpace={10}
         modalContainerStyle={modalContainerStyle}
+        onCustom={onCustom}
+        customLabel={customLabel}
         {...extraDialogProps}
       >
         { this._renderContent(mergedProps) }
@@ -302,7 +306,9 @@ class MessageDialog extends Component {
     settings: {
       ...MessageDialog.orangeDesign,
       okLabel: "Close",
-      cancelLabel: ""
+      cancelLabel: "",
+      customLabel: "Clear Console",
+      onCustom: () => { console.clear(); }
     },
     "login-expired": {
       ...MessageDialog.materialDesign,
