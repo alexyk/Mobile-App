@@ -1,4 +1,4 @@
-import requester from "../../initDependencies";
+import requesterOriginal from "../../initDependencies";
 import DBG from "../../config-debug";
 import { processError, ilog } from "../../utils/debug/debug-tools";
 import { getObjectClassName, isString, gotoWebviewSimple } from "js-tools";
@@ -35,7 +35,6 @@ export function serverRequest(
   successFunction,
   errorFunction = () => {}
 ) {
-  
   let callerName;
   if (isString(thisObject)) {
     callerName = thisObject;
@@ -76,12 +75,21 @@ export function serverRequest(
     return;
   }
 
-  let requestName = callFunction.name;  
+  let requestName = callFunction.name;
 
   // prettier-ignore
   if (DBG.serverLogRequesting) ilog(`[serverUtils] [${callerName}] Requesting ${requestName}`, {callerName, requestName, callParams});
 
-  callFunction
+  let serverCall = callFunction;
+  let requester = requesterOriginal;
+
+  if (__DEV__) {
+    let requesterObject = require('../../initDependencies').refreshRequester();
+    requester = requesterObject;
+    serverCall = requester[callFunction.name];
+  }
+
+  serverCall
     .apply(requester, callParams)
     .then(function(res) {
       if (res && res.success && res.body instanceof Promise) {

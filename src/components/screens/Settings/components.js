@@ -4,10 +4,11 @@ import CustomSwitch from "react-native-customisable-switch";
 import { commonText } from "../../../common.styles";
 import { setOption, hotelSearchIsNative } from '../../../config-settings';
 import DBG from "../../../config-debug";
+import { refreshRequester } from "../../../initDependencies";
 
 
 const OptionSwitch = (props) => {
-  let { label, labelOn, labelOff, description, value, onChange, labelStyle, containerStyle, switchStyle, descriptionStyle, noDescription } = props;
+  let { label, labelOn, labelOff, description, value, onChange, labelStyle, containerStyle, switchStyle, descriptionStyle } = props;
 
   (!label) && (label = (labelOn && labelOff) ? (value ? labelOn : labelOff) : "");
   (!description) && (description='');
@@ -58,7 +59,7 @@ class DebugOptionEdit extends Component {
   
 
   onChangeText(text) {
-    const { name, value } = this.props;
+    const { name } = this.props;
 
     if (this.timeoutId != null) {
       clearTimeout(this.timeoutId);
@@ -66,19 +67,27 @@ class DebugOptionEdit extends Component {
 
     let valueAsText = text;
     let valueParsed;
+    let jsonError;
+
     try {
-      valueParsed = eval(text);
-    } catch (error) {}
+      valueAsText = valueAsText.replace(/[“”]/g, '"');
+      valueAsText = valueAsText.replace(/[’]/g, "'");
+      valueParsed = JSON.parse(valueAsText);
+      if (valueAsText != text) {
+        this.setState({valueAsText});
+      }
+    } catch (error) {
+      jsonError = error;
+    }
 
     const _this = this;
     this.timeoutId = setTimeout(() => {
-      if (valueParsed != null) {
+      if (valueParsed != null && !jsonError) {
         DBG.setDebugOption(name, valueParsed);
         _this.setState({value: valueParsed, valueAsText: JSON.stringify(valueParsed)});
-      } else {
-        _this.setState({valueAsText: JSON.stringify(value)});
       }
-    }, 1000);
+      this.setState({jsonError});
+    }, 200);
   
     this.setState({valueAsText});
   }
@@ -99,7 +108,7 @@ class DebugOptionEdit extends Component {
 
 
   _renderSwitch() {
-    const { name, value } = this.props;
+    const { name, value, error } = this.props;
 
     return (
       <OptionSwitch
@@ -111,21 +120,22 @@ class DebugOptionEdit extends Component {
         labelStyle={{fontSize: 13, marginTop: 5}}
         containerStyle={{marginVertical: 0, paddingVertical: 5}}
         switchStyle={{marginBottom: 0}}
-        noDescription
+        error={error}
       />
     )
   }
 
   _renderInput() {
-    const { valueAsText } = this.state;
+    const { valueAsText, jsonError } = this.state;
     const { name } = this.props;
 
     return (
       <View style={{width: "100%", paddingVertical: 0, flexDirection: 'column', height: 40}}>
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           <Text style={{...commonText, fontSize: 14, marginTop: 5, fontWeight: "bold", width: 150}}>{name}</Text>
-          <TextInput value={valueAsText} onChangeText={this.onChangeText} style={{...commonText, fontSize:13, borderWidth: 0.5, paddingHorizontal: 3, width: 100, marginRight: 10}} autoCapitalize="none" />
+          <TextInput value={valueAsText} onChangeText={this.onChangeText} style={{fontSize:13, borderWidth: 0.5, paddingHorizontal: 3, width: 100, marginRight: 10}} autoCapitalize="none" />
         </View>
+        {jsonError && <Text style={{...commonText, fontSize: 9, textAlign: 'right', color: 'red', marginTop: 5}}>{`${jsonError}`}</Text>}
       </View>
     )
   }
@@ -175,19 +185,17 @@ class SettingsContent extends Component {
     if (!__DEV__ || !DBG.debugSettingsOption) {
       return null;
     }
-
-    let d= DBG
-
+    
     return (
       <View style={{height: 200}}>
         <ScrollView showsHorizontalScrollIndicator={false} style={{ width: "100%" }}>
+          <DebugOptionEdit parent={this} name="reduxLog" value={DBG.reduxConsoleLoggingEnabled} isBool />
+          <DebugOptionEdit parent={this} name="isOnline" value={DBG.isOnline} isBool />
+          <DebugOptionEdit parent={this} name="skipEmailVerify" value={DBG.skipEmailVerification} isBool />
           <DebugOptionEdit parent={this} name="customFilter" value={DBG.filtersConfig.custom}  />
           <DebugOptionEdit parent={this} name="consoleFilter" value={DBG.consoleFilter}  />
-          <DebugOptionEdit parent={this} name="skipEmailVerify" value={DBG.skipEmailVerification} isBool />
-          <DebugOptionEdit parent={this} name="reduxLog" value={DBG.reduxConsoleLoggingEnabled} isBool />
-          <DebugOptionEdit parent={this} name="testFlow" value={DBG.testFlow}  />
           <DebugOptionEdit parent={this} name="dialogDebug" value={DBG.messageDialogDebug} isBool />
-          <DebugOptionEdit parent={this} name="isOnline" value={DBG.isOnline} isBool />
+          <DebugOptionEdit parent={this} name="testFlow" value={DBG.testFlow}  />
         </ScrollView>
       </View>
     )

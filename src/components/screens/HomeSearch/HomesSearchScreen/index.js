@@ -14,6 +14,7 @@ import DateAndGuestPicker from "../../../organisms/DateAndGuestPicker";
 import HomeItemView from "../../../organisms/HomeItemView";
 import styles from "./styles";
 import LTLoader from "../../../molecules/LTLoader";
+import { serverRequest } from "../../../../services/utilities/serverUtils";
 
 class HomesSearchScreen extends Component {
   isFilterResult = false;
@@ -195,12 +196,11 @@ class HomesSearchScreen extends Component {
         searchTerms.push(`page=${page - 1}`);
         //console.log("onFetch - searchTerms", searchTerms);
 
-        requester.getListingsByFilter(searchTerms).then(res => {
-          //console.log("onFetch - requester.getListingsByFilter", res);
-          res.body.then(data => {
+        serverRequest(this, requester.getListingsByFilter, [searchTerms],
+          data => {
             startFetch(data.filteredListings.content, data.filteredListings.content.length, false);
-          });
-        });
+          }
+        );
       } else {
         startFetch([], 0, false);
         abortFetch();

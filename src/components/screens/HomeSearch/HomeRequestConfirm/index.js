@@ -19,6 +19,7 @@ import { userInstance } from "../../../../utils/userInstance";
 import HomeDetailBottomBar from "../../../atoms/HomeDetailBottomBar";
 
 import styles from "./styles";
+import { serverRequest } from "../../../../services/utilities/serverUtils";
 
 class HomeRequestConfirm extends Component {
   constructor(props) {
@@ -100,25 +101,19 @@ class HomeRequestConfirm extends Component {
       phone: phoneNumber
     };
 
-    requester.requestBooking(requestInfo).then(res => {
-      //console.log("ressss----", res);
-      if (!res.success) {
-        res.errors.then(e => {
+    serverRequest(this, requester.requestBooking, [requestInfo],
+      data => {
+        if (data.success) {
+          this.props.navigation.pop(5);
+        } else {
           this.refs.toast.show(e.message, 2500);
-        });
-      } else {
-        res.body.then(data => {
-          //console.log("requester.requestBooking", requester.requestBooking);
-          if (data.success) {
-            this.props.navigation.pop(5);
-            //this.props.history.push('/profile/trips/homes');
-          } else {
-            this.refs.toast.show(e.message, 2500);
-          }
-        });
+        }
+        this.setState({ isRequesting: false });
+      },
+      (errorData, errorCode) => {
+        this.setState({ isRequesting: false });
       }
-      this.setState({ isRequesting: false });
-    });
+    );
   };
 
   getPriceForPeriod(startDate, nights, calendar) {

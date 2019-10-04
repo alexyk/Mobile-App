@@ -12,6 +12,8 @@ import styles from "./styles";
 import lang from "../../../language/";
 import SearchBar from "../../molecules/SearchBar";
 import LTIcon from "../../atoms/LTIcon";
+import { serverRequest } from "../../../services/utilities/serverUtils";
+import { OPTIONS } from "../../../config-settings";
 
 class UserMyTrips extends Component {
   static propTypes = {
@@ -157,12 +159,7 @@ class UserMyTrips extends Component {
     let pageNumber = this.state.page + 1;
     if (!this.state.isLast && !this.state.isLoading) {
       this.setState({ isLoading: true });
-      // second parameter of getMyHotelBookings() is size - 1000 is max and will return all bookings at once
-      requester.getMyHotelBookings([`page=${pageNumber}`], 1000).then(res => {
-        res.body.then(this.onServerMyTrips).catch(err => {
-          //console.log(err);
-        });
-      });
+      serverRequest(this, requester.getMyHotelBookings, [`page=0`, OPTIONS.MAX_TRIPS_TO_LOAD], this.onServerMyTrips);
     }
   }
 

@@ -64,35 +64,21 @@ class Chat extends Component {
     //here is the method to load all chats related to this id = 68
 
     this.setState({ showProgress: true });
-    requester.getChatMessages(params.id).then(res => {
-      // here you set the response in to json
-      res.body
-        .then(data => {
-          // here you parse your json
-          //let messageDate = moment(parsed.content[0].createdAt, 'DD/MM/YYYY HH:mm:ss').format('DD/MM/YYYY');
-          // messageDate to set your date
-          // here you set you data from json into your variables
-          //console.log(data);
-          this.setState({
-            showProgress: false,
-            messages: data.content
-          });
+    serverRequest(this, requester.getChatMessages, [params.id],
+      data => {
 
-          // if (params.unread == "true") {
-          // this.changeMessageFlag(params.id, params.unread);
-          this.changeMessageFlag(params.id, "false");
-          // }
-        })
-        .catch(err => {
-          this.setState({ showProgress: false });
-          Toast.showWithGravity(
-            "Cannot create wallet, Please check network connection.",
-            Toast.SHORT,
-            Toast.BOTTOM
-          );
-          //console.log(err);
+        this.setState({
+          showProgress: false,
+          messages: data.content
         });
-    });
+
+        this.changeMessageFlag(params.id, "false");
+      },
+      (errorData, errorCode) => {
+        this.setState({ showProgress: false });
+        Toast.showWithGravity("Cannot get chat messages. Please check network connection.", Toast.SHORT, Toast.BOTTOM);
+      }
+    );
   }
 
   changeMessageFlag(id, unread) {
@@ -102,7 +88,8 @@ class Chat extends Component {
     };
     //console.log(conversationObj);
 
-    requester.changeMessageStatus(conversationObj).then(() => {
+    // TODO: Investigate why this was left empty
+    // requester.changeMessageStatus(conversationObj).then(() => {
       //console.log("changeMessageFlag");
       // let messages = this.state.messages;
       //
@@ -115,7 +102,7 @@ class Chat extends Component {
       // messages.splice(messageIndex, 0, message);
       //
       // this.setState({ messages: messages });
-    });
+    // });
   }
 
   sendMessage() {

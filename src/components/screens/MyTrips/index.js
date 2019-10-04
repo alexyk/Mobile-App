@@ -8,6 +8,8 @@ import { connect } from "react-redux";
 import requester from "../../../initDependencies";
 import styles from "./styles";
 import LTLoader from "../../molecules/LTLoader";
+import { serverRequest } from "../../../services/utilities/serverUtils";
+import { OPTIONS } from "../../../config-settings";
 
 class MyTrips extends Component {
   static propTypes = {
@@ -58,28 +60,21 @@ class MyTrips extends Component {
   }
 
   getTripsFromServer() {
-    requester
-      .getMyHotelBookings()
-      .then(res => {
-        res.body.then(data => {
-          let tripArray = _.orderBy(data, ["arrival_date"], ["desc"]);
+    serverRequest(this, requester.getMyHotelBookings, ['page=0', OPTIONS.MAX_TRIPS_TO_LOAD],
+      data => {
+        let tripArray = _.orderBy(data, ["arrival_date"], ["desc"]);
 
-          this.setState({
-            myTrips: tripArray,
-            hasPendingTrips: data.length > 0,
-            isLoading: false
-          });
+        this.setState({
+          myTrips: tripArray,
+          hasPendingTrips: data.length > 0,
+          isLoading: false
         });
-      })
-      .catch(err => {
+      },
+      (errorData, errorMessages) => {
         this.hideProgress();
-        Toast.showWithGravity(
-          "Cannot get messages, Please check network connection.",
-          Toast.SHORT,
-          Toast.BOTTOM
-        );
-        //console.log(err);
-      });
+        Toast.showWithGravity("Cannot get messages, Please check network connection.", Toast.SHORT, Toast.BOTTOM);
+      }
+    );
   }
 
   gotoBooking() {

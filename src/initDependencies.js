@@ -24,6 +24,8 @@ function refreshRequester() {
     // OFFLINE
     requester = requesterOffline();
   }
+
+  return requester;
 }
 refreshRequester();
 

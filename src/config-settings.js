@@ -60,6 +60,9 @@ export const OPTIONS = {
   hotelDetails: {
     showLocation: false
   },
+  myTrips: {
+    MAX_TRIPS_TO_LOAD: 1000
+  },
   settings: (!!__DEV__)
 }
 export const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line

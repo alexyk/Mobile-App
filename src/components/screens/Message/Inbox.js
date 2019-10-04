@@ -12,6 +12,7 @@ import Toast from "react-native-simple-toast";
 import requester from "../../../initDependencies";
 import styles from "./inboxStyle";
 import LTLoader from "../../molecules/LTLoader";
+import { serverRequest } from "../../../services/utilities/serverUtils";
 
 class Inbox extends Component {
   static self;
@@ -53,30 +54,24 @@ class Inbox extends Component {
     if (isShowProgress) {
       this.setState({ showProgress: true });
     }
-    requester.getMyConversations().then(res => {
-      // here you set the response in to json
-      res.body
-        .then(data => {
+
+    serverRequest(this, requester.getMyConversations, null,
+      data => {
           // this.setState({ showProgress: false });
           this.setState({
             showProgress: false,
             inboxMessages: data.content
           });
           this.isLoading = false;
-        })
-        .catch(err => {
-          //console.log(err);
+        },
+        (errorData, errorCode) => {
           this.isLoading = false;
           if (isShowProgress) {
             this.setState({ showProgress: false });
-            Toast.showWithGravity(
-              "Cannot get messages, Please check network connection.",
-              Toast.SHORT,
-              Toast.BOTTOM
-            );
+            Toast.showWithGravity("Cannot get messages, Please check network connection.", Toast.SHORT, Toast.BOTTOM);
           }
-        });
-    });
+        }
+    );
   }
 
   onConversation(item) {
