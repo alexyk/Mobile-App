@@ -4,7 +4,8 @@ import {
   setDatesAndGuestsData,
   setWebViewURL,
   setLoginDetails,
-  setWalletData
+  setWalletData,
+  setMessageDialogState
 } from "../../action/userInterface";
 
 import moment from "moment";
@@ -95,6 +96,12 @@ export const initialState = {
       checkOutMoment,
       inputDateFormat
     )
+  },
+  messageDialog: {
+    title: '',
+    message: '',
+    content: '',
+    isVisible: false
   }
 };
 
@@ -166,6 +173,11 @@ export default handleActions(
         newState.walletData.isFirstLoading = false;
       }
 
+      return newState;
+    },
+
+    [setMessageDialogState]: (state, { payload }) => {
+      let newState = lodash.merge(cloneDeep(state),{messageDialog: {...payload}});
       return newState;
     }
   },

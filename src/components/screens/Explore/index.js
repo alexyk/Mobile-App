@@ -36,7 +36,6 @@ class Explore extends Component {
   constructor(props) {
     super(props);
 
-    this.onChangeHandler = this.onChangeHandler.bind(this);
     this.updateData = this.updateData.bind(this);
     this.gotoGuests = this.gotoGuests.bind(this);
     this.gotoSearch = this.gotoSearch.bind(this);
@@ -45,6 +44,7 @@ class Explore extends Component {
     this.handleAutocompleteSelect = this.handleAutocompleteSelect.bind(this);
     this.handlePopularCities = this.handlePopularCities.bind(this);
     this.onDatesSelect = this.onDatesSelect.bind(this);
+    this.onChangeHandler = this.onChangeHandler.bind(this);
     this.onSearchHandler = this.onSearchHandler.bind(this);
     this.onSearchEnterKey = this.onSearchEnterKey.bind(this);
 
@@ -421,6 +421,7 @@ class Explore extends Component {
     setTimeout(delayedFunction, 100);
   }
 
+
   /**
    * @param {String|Number} id Region id
    * @param {String} name Search name - for example "London, United Kingdom"
@@ -645,15 +646,9 @@ class Explore extends Component {
   }
 
   renderMessageDialog() {
-    const { messageTitle, dialogContent, dialogMessage, messageVisible } = this.state;
-
     return (
       <MessageDialog
-        parent={this}
-        isVisible={messageVisible} 
-        title={messageTitle}
-        message={dialogMessage}
-        content={dialogContent}
+        {...this.props.messageDialog}
       />
     )
   }
@@ -869,7 +864,8 @@ let mapStateToProps = state => {
     currency: state.currency.currency,
     currencySign: state.currency.currencySign,
     countries: state.country.countries,
-    datesAndGuestsData: state.userInterface.datesAndGuestsData
+    datesAndGuestsData: state.userInterface.datesAndGuestsData,
+    messageDialog: state.userInterface.messageDialog
   };
 };
 

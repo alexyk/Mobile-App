@@ -49,7 +49,6 @@ describe('validation functions', () => {
     expect(validatePhoneIssues(p3))     .toEqual(null);
     expect(validatePhoneIssues(p4))     .toEqual(null);
 
-    debugger;
     expect(validatePhoneIssues(p5))     .toEqual(PHONE_VALIDATION_ISSUES.DIGITS_ONLY);
     expect(validatePhoneIssues(p6))     .toEqual(PHONE_VALIDATION_ISSUES.DIGITS_ONLY);
     expect(validatePhoneIssues(p7))     .toEqual(PHONE_VALIDATION_ISSUES.DIGITS_ONLY);

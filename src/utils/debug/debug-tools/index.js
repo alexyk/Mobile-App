@@ -1,10 +1,11 @@
 import { isObject, isString, getObjectClassName, isSymbol, logError } from "js-tools";
 import lodash from 'lodash';
 import moment, { isMoment } from 'moment';
+import DBG from '../../../config-debug';
 const { __MYDEV__, __TEST__,
   consoleTimeCalculations, reactotronLoggingInReleaseForceEnabled, reactotronLoggingEnabled, consoleShowTimeInLogs,
   errorLevel, serverExpandErrors, showTypesInReactotronLog, testFlow, warnOnReactotronDisabledCalls, consoleFilters, testFlowURL, consoleClearAtStart, filtersConfig,
-} = require('../../../config-debug').default;
+} = DBG;
 
 
 // ---------------  function definitions  -----------------
@@ -58,7 +59,7 @@ function configureConsole() {
     
 
     const funcLog = (type) => (...args) => {
-      let isFiltered = applyConsoleFilters(args, consoleFilters);
+      let isFiltered = applyConsoleFilters(args, DBG.consoleFilters);
 
       const hasTime = /\d{2}:\d{2}:\d{2}/.test(args[0]);
       const hasColor = (/%c/.test(args[0]));
@@ -206,7 +207,7 @@ export function evalFilterConfig(filter) {
   return eval(value);
 }
 
-function applyConsoleFiltersFunc(consoleArgs, filtersOrig) {
+function applyConsoleFiltersFunc(consoleArgs, filtersOrig=[]) {
   let result = true;
   let filters = filtersOrig.concat(); // work with a copy
 

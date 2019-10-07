@@ -338,11 +338,7 @@ class Welcome extends Component {
         <LTLoader isLoading={showProgress} preloaderMessage={preloaderMessage} />
 
         <MessageDialog
-          parent={this}
-          title={this.state.messageTitle}
-          message={this.state.dialogMessage}
-          content={this.state.dialogContent}
-          isVisible={this.state.messageVisible}
+          {...this.props.messageDialog}
         />
       </View>
     );
@@ -351,7 +347,8 @@ class Welcome extends Component {
 
 let mapStateToProps = state => {
   return {
-    countries: state.country.countries
+    countries: state.country.countries,
+    messageDialog: state.userInterface.messageDialog
   };
 };
 

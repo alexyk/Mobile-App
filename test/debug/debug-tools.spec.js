@@ -1,6 +1,6 @@
 import { log } from "../common-test-utils";
 import { applyConsoleFilters, evalFilterConfig } from "../../src/utils/debug/debug-tools"
-import { filtersConfig } from "../../src/config-debug"
+const { filtersConfig } = require("../../src/config-debug").default;
 
 describe('consoleFilters', () => {
   describe('initial tests', () => {
@@ -120,7 +120,6 @@ describe('consoleFilters', () => {
       filters = ['mode: liM', 'msg', '!(object)', 'hello'];
       args = ['Hello there', {}];
       
-      debugger
       expect(args.length)                                 .toEqual(2);
       expect(applyConsoleFilters(args, filters))          .toBeTruthy();
       expect(args.length)                                 .toEqual(1);

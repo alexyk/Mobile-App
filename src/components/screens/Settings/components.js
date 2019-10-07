@@ -129,11 +129,17 @@ class DebugOptionEdit extends Component {
     const { valueAsText, jsonError } = this.state;
     const { name } = this.props;
 
+    const inputStyle = (
+      Platform.OS == "android"
+        ? {fontSize:11, borderWidth: 0.5, paddingHorizontal: 3, width: 100, marginRight: 10}
+        : {fontSize:13, borderWidth: 0.5, paddingHorizontal: 3, width: 100, marginRight: 10}
+    )
+
     return (
       <View style={{width: "100%", paddingVertical: 0, flexDirection: 'column', height: 40}}>
         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
           <Text style={{...commonText, fontSize: 14, marginTop: 5, fontWeight: "bold", width: 150}}>{name}</Text>
-          <TextInput value={valueAsText} onChangeText={this.onChangeText} style={{fontSize:13, borderWidth: 0.5, paddingHorizontal: 3, width: 100, marginRight: 10}} autoCapitalize="none" />
+          <TextInput value={valueAsText} onChangeText={this.onChangeText} style={inputStyle} autoCapitalize="none" />
         </View>
         {jsonError && <Text style={{...commonText, fontSize: 9, textAlign: 'right', color: 'red', marginTop: 5}}>{`${jsonError}`}</Text>}
       </View>
@@ -187,12 +193,13 @@ class SettingsContent extends Component {
     }
     
     return (
-      <View style={{height: 200}}>
+      <View style={{height: 400}}>
         <ScrollView showsHorizontalScrollIndicator={false} style={{ width: "100%" }}>
+          <DebugOptionEdit parent={this} name="customFilter" value={DBG.filtersConfig.custom}  />
           <DebugOptionEdit parent={this} name="reduxLog" value={DBG.reduxConsoleLoggingEnabled} isBool />
           <DebugOptionEdit parent={this} name="isOnline" value={DBG.isOnline} isBool />
           <DebugOptionEdit parent={this} name="skipEmailVerify" value={DBG.skipEmailVerification} isBool />
-          <DebugOptionEdit parent={this} name="customFilter" value={DBG.filtersConfig.custom}  />
+          <DebugOptionEdit parent={this} name="reactotronHost" value={DBG.reactotronHost}  />
           <DebugOptionEdit parent={this} name="consoleFilter" value={DBG.consoleFilter}  />
           <DebugOptionEdit parent={this} name="dialogDebug" value={DBG.messageDialogDebug} isBool />
           <DebugOptionEdit parent={this} name="testFlow" value={DBG.testFlow}  />

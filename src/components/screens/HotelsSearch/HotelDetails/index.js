@@ -310,13 +310,9 @@ class HotelDetails extends Component {
   }
 
   _renderMessage() {
-    const { messageTitle, dialogMessage, dialogContent, messageVisible } = this.state;
-
     return (
       <MessageDialog
-        parent={this}
-        isVisible={messageVisible}
-        onOk={this.onSendVerificationEmail}
+        {...this.props.messageDialog}
       />
     )
   }
@@ -351,7 +347,8 @@ let mapStateToProps = state => {
     datesAndGuestsData: state.userInterface.datesAndGuestsData,
     searchString: state.hotels.searchString,
     currency: state.currency.currency,
-    loginDetails: state.userInterface.loginDetails
+    loginDetails: state.userInterface.loginDetails,
+    messageDialog: state.userInterface.messageDialog
   };
 };
 

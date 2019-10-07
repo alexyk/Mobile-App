@@ -259,7 +259,8 @@ let mapStateToProps = state => {
     currency: state.currency.currency,
     currencySign: state.currency.currencySign,
     loginDetails: state.userInterface.loginDetails,
-    walletData: state.userInterface.walletData
+    walletData: state.userInterface.walletData,
+    messageDialog: state.userInterface.messageDialog
   };
 };
 

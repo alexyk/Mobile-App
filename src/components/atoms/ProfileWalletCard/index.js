@@ -21,6 +21,7 @@ import { CurrencyConverter } from "../../../services/utilities/currencyConverter
 import requester from "../../../initDependencies";
 import { isNumber } from "js-tools";
 import DBG from "../../../config-debug";
+import { serverRequest } from "../../../services/utilities/serverUtils";
 
 
 const DEFAULT_CRYPTO_CURRENCY = "EUR";
@@ -40,7 +41,7 @@ class ProfileWalletCard extends Component {
 
     this.createWallet = this.createWallet.bind(this);
     this.refreshWalletFromServer = this.refreshWalletFromServer.bind(this);
-    this.processWalletError = this.processWalletError.bind(this);
+    this.onWalletError = this.onWalletError.bind(this);
     this.refreshWalletBalance = this.refreshWalletBalance.bind(this);
   }
 
@@ -65,7 +66,7 @@ class ProfileWalletCard extends Component {
     ];
   }
 
-  processWalletError(error) {
+  onWalletError(errorData, errorCode) {
     this.props.setWalletData({
       walletState: WALLET_STATE.CONNECTION_ERROR,
       caller: "ProfileWalletCard: case 8 - error"
@@ -94,52 +95,44 @@ class ProfileWalletCard extends Component {
       caller: "ProfileWalletCard: case 2 - checking"
     });
 
-    requester
-      .getUserInfo()
-      .then(res => {
-        if (res && res.body) {
-          res.body
-            .then(data => {
-              const { locAddress } = data;
-              const locAddressValidationResult = validateLOCAddress(locAddress);
+    serverRequest(this, requester.getUserInfo, 
+      data => {
+        const { locAddress } = data;
+        const locAddressValidationResult = validateLOCAddress(locAddress);
 
-              switch (locAddressValidationResult) {
-                case -1:
-                  this.props.setWalletData({
-                    locAddress,
-                    walletState: WALLET_STATE.NONE,
-                    caller: "ProfileWalletCard: case 3 - none"
-                  });
-                  break;
+        switch (locAddressValidationResult) {
+          case -1:
+            this.props.setWalletData({
+              locAddress,
+              walletState: WALLET_STATE.NONE,
+              caller: "ProfileWalletCard: case 3 - none"
+            });
+            break;
 
-                case 0:
-                  this.props.setWalletData({
-                    locAddress,
-                    walletState: WALLET_STATE.INVALID,
-                    caller: "ProfileWalletCard: case 4 - invalid"
-                  });
-                  break;
+          case 0:
+            this.props.setWalletData({
+              locAddress,
+              walletState: WALLET_STATE.INVALID,
+              caller: "ProfileWalletCard: case 4 - invalid"
+            });
+            break;
 
-                case 1:
-                  this.props.setWalletData({
-                    locAddress,
-                    walletState: WALLET_STATE.LOADING,
-                    caller: "ProfileWalletCard: case 5 - loading"
-                  });
-                  this.refreshWalletBalance(false, locAddress);
-                  break;
-              }
-
-              if (callback != null) {
-                callback(locAddressValidationResult);
-              }
-            })
-            .catch(error => this.processWalletError(error));
-        } else {
-          this.processWalletError();
+          case 1:
+            this.props.setWalletData({
+              locAddress,
+              walletState: WALLET_STATE.LOADING,
+              caller: "ProfileWalletCard: case 5 - loading"
+            });
+            this.refreshWalletBalance(false, locAddress);
+            break;
         }
-      })
-      .catch(error => this.processWalletError(error));
+
+        if (callback != null) {
+          callback(locAddressValidationResult);
+        }
+      },
+      this.onWalletError
+    );
   }
 
   refreshWalletBalance(changeState = false, locAddress = null) {
@@ -166,9 +159,8 @@ class ProfileWalletCard extends Component {
           this.checkBalance({ locBalance });
         });
       } else {
-        requester.getWalletFromEtherJS(data => {
-          this.checkBalance(data);
-        });
+        const offlineRequester = require('../../../utils/debug/offline').default();
+        offlineRequester.getWalletFromEtherJS(data => this.checkBalance(data));
       }
     } else {
       console.warn(

@@ -678,13 +678,8 @@ class EditUserProfile extends Component {
           message="Saving Profile info..."
         />
 
-
         <MessageDialog
-          parent={this}
-          title={this.state.messageTitle}
-          message={this.state.dialogMessage}
-          content={this.state.dialogContent}
-          isVisible={this.state.messageVisible}
+          {...this.props.messageDialog}
           onHide={this.onHideMessage}
           onCancel={this.onHideMessage}
         />
@@ -696,7 +691,8 @@ class EditUserProfile extends Component {
 const mapStateToProps = state => {
   return {
     loginDetails: state.userInterface.loginDetails,
-    countries: state.country.countries
+    countries: state.country.countries,
+    messageDialog: state.userInterface.messageDialog
   };
 };
 const mapDispatchToProps = dispatch => ({

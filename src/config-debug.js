@@ -100,7 +100,7 @@ DBG = {
   iconsDebugEnabled                  : false
 }
 
-var offlineTimeInSeconds = {
+DBG.offlineTimeInSeconds = {
   getCountries: 0,
   getCurrencyRates: 0,
   login: 0,
@@ -120,12 +120,11 @@ var offlineTimeInSeconds = {
   getHotelById: 0,
   sendVerificationEmail: 0.5
 }
-DBG.offlineTimeInSeconds = offlineTimeInSeconds;
 
+DBG.isOffline = false
+if (!__DEV__) DBG.isOffline = false;  // automatic false value for release
+(DBG.forceOffline) && (DBG.isOffline = DBG.forceOffline);   // force release value with forceOffline
 DBG.isOnline = (!DBG.isOffline);
-DBG.isOffline = (false || !!DBG.testFlow);
-(DBG.forceOffline) && (DBG.isOffline = DBG.forceOffline);
-if (!__DEV__) DBG.isOffline = false;
 
 
 // prettier-ignore
@@ -139,7 +138,7 @@ if (!__DEV__) DBG.isOffline = false;
  *  - lower index in the array - means a higher priority as a filter meaning if it matches next filters are ignored
  *  - only inclusive regex is supported so far
  */
-var filtersConfig = {
+DBG.filtersConfig = {
   includeNonMatching: true,
   leaveOnFirstMatch: true,
   mode: 'and',
@@ -147,6 +146,7 @@ var filtersConfig = {
   0: [],
   default: ['!\`scale', '!Require cycle', "!Async Storage ", "!SocketRocket", '!Disabling console.time', '!deprecated', "!RCTSplashScreen", "!using weak randomBytes", "!Running application", "!serverUtils"],
 }
+const filtersConfig = DBG.filtersConfig;
 filtersConfig.default2 = [].concat(filtersConfig.default, ['!<object>'])
 filtersConfig.default3 = ['mode:liM'].concat(filtersConfig.default2, [])
 filtersConfig.default4 = [`mode:liM`].concat(filtersConfig.default2, [])
@@ -164,9 +164,7 @@ filtersConfig.flows = ["mode: Lim", /^search flow step/]
 
 filtersConfig.custom = ["mode:Lim", "parent::",'MessageDialog', 'parent', 'error'] //'!Rejection', ].concat(filtersConfig.default)
 
-var consoleFilters = ( DBG.consoleFilter ? filtersConfig[DBG.consoleFilter] : null );
-DBG.consoleFilters = consoleFilters;
-DBG.filtersConfig = filtersConfig;
+DBG.consoleFilters = ( DBG.consoleFilter ? filtersConfig[DBG.consoleFilter] : null );
 DBG.setDebugOption = setDebugOption;
 
 
@@ -177,17 +175,27 @@ function setDebugOption(name, value) {
     case 'reactotron':           DBG.reactotronLoggingEnabled = value;     break;
     case 'skipEmailVerify':      DBG.skipEmailVerification = value;        break;
     case 'testFlow':             DBG.testFlow = value;                     break;
-    case 'isOnline':             DBG.isOnline = value;                     break;
-    case 'consoleFilter':        DBG.consoleFilter = value;                break;
-    case 'customFilter':         consoleFilters.custom = value;            break;
+    case 'isOffline':            
+    case 'isOnline':
+      DBG.isOnline = value;
+      DBG.isOffline = !value;
+      break;
+
+    case 'consoleFilter':
+      DBG.consoleFilter = value;
+      DBG.consoleFilters = DBG.filtersConfig[value]
+      break;
+    
+    case 'customFilter':
+      DBG.filtersConfig.custom = value;
+      DBG.consoleFilters = value;
+      break;
     default:                     DBG[name] = value;                        break;
   }
 }
 
 export {
-  setDebugOption,
-  consoleFilters,
-  filtersConfig
+  setDebugOption
 }
 
 export default DBG;

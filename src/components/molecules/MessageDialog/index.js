@@ -5,26 +5,28 @@ import lodash, { cloneDeep } from 'lodash'
 
 import MaterialDialog from "../../atoms/MaterialDialog/MaterialDialog";
 import { clog, wlog } from "../../../utils/debug/debug-tools";
-import { getObjectClassName, isString } from "js-tools";
+import { isString } from "js-tools";
 import DBG from "../../../config-debug";
+import store from "../../../redux/store"
+import { setMessageDialogState } from "../../../redux/action/userInterface";
+import navigationService from "../../../services/navigationService";
 
 
 class MessageDialog extends Component {
-  static self = null;
-  static parent = null;
   static extraProps = {};
 
   /**
    * Use by adding to render method:
-   *        <MessageDialog
-   *          parent={this}
-   *          isVisible={this.state.messageVisible}
-   *         />
+   *   <MessageDialog
+   *       {...this.props.messageDialog}
+   *   />
+   * where this.props.messageDialog come from redux state for messageDialog in state.userInterface.messageDialog
+   * (for an example see HotelDetails, Explore, Profile etc.)
    * 
    * Optional often used props:
    *  onHide - handler that triggers (if set) on both onOk and onCancel
    * 
-   * State is taken care of by using parent.setState(...)
+   * State is taken care of by using redux (See static getter and setter -> MessageDialog.state)
    * @param {String} text The message text
    * @param {Number|String} code A code or/and style-preset, associated with this message and used to decide what to do in onOk or onCancel handlers
    * @param {Object|String} extraProps If in need to hide a button or set styling etc. If string - used as a name of preset, if object - presetName is name of preset if set, otherwise object props are added as custom props to MessageDialog
@@ -44,13 +46,13 @@ class MessageDialog extends Component {
     if (isString(contentOrText)) {
       text = contentOrText;
       contentState = {
-        dialogMessage: text,
-        dialogContent: null
+        message: text,
+        content: null
       }
     } else {
       contentState = {
-        dialogMessage: null,
-        dialogContent: contentOrText
+        message: null,
+        content: contentOrText
       }
     }
 
@@ -79,71 +81,75 @@ class MessageDialog extends Component {
       MessageDialog.extraProps = MessageDialog.extraPropsPresets[presetName];
     }  
 
-    const parentStateUpdate = function (owner)  {
-      const parent = owner;
-      const { messageVisible, messageTitle, dialogMessage, messageCode, dialogContent } = parent.state;
+    const stateUpdate = function (previousState)  {
+      const { isVisible, title, message, code: prevCode, content } = previousState;
 
-      if (text && !dialogContent && dialogMessage) {
-        if (messageVisible && (dialogMessage != text || code != messageCode || title != messageTitle)) {
+      if (text && !content && message) {
+        if (isVisible && (message != text || code != prevCode || title != title)) {
           throw new Error(
-            `[MessageDialog] Showing message "${text} with code "${code} while message is visible as "${dialogMessage}" with code "${messageCode}"`
+            `[MessageDialog] Showing message "${text} with code "${code} while message is visible as "${message}" with code "${prevCode}"`
           );
-        } else if (messageVisible) {
+        } else if (isVisible) {
           wlog(`[MessageDialog] Message Dialog already visible`);
         }
       }
 
-      parent.setState({ messageVisible: true, messageTitle: title, messageCode: code, ...contentState });
+      const newState = { isVisible: true, title: title, code, ...contentState };
+      MessageDialog.state = newState;
     }
 
     MessageDialog.extraProps.title = title;
-    MessageDialog.extraProps.content = contentState.dialogContent;
+    MessageDialog.extraProps.content = contentState.content;
     MessageDialog.extraProps.message = text;
-    parentStateUpdate(MessageDialog.parent);
+    stateUpdate(MessageDialog.state);
   }
 
 
   static hide(code) {
-    const parent = MessageDialog.parent;
+    const { isVisible, message, code: prevCode } = MessageDialog.state;
+    MessageDialog.state = { isVisible: false, code };
 
-    const { messageVisible, dialogMessage, messageCode } = parent.state;
-
-    if (messageVisible && code != messageCode) {
+    if (isVisible && code != prevCode) {
       throw new Error(
-        `[MessageDialog] Trying to hide message "${dialogMessage} with code "${code} while message is visible as code "${messageCode}"`
+        `[MessageDialog] Trying to hide message "${message} with code "${code} while message is visible as code "${prevCode}"`
       );
-    } else if (!messageVisible) {
+    } else if (!isVisible) {
       throw new Error(
-        `[MessageDialog] Trying to hide message "${dialogMessage} with code "${code} while message is not visible and code is "${messageCode}"`
+        `[MessageDialog] Trying to hide message "${message} with code "${code} while message is not visible and code is "${prevCode}"`
       );
     }
+  }
 
-    parent.setState({ messageVisible: false, messageCode: code });
+  /**
+   * Write state to Redux cache
+   */
+  static set state(newState) {
+    store.dispatch(setMessageDialogState(newState));
+  }
+
+
+  /**
+   * Get state from Redux cache
+   */
+  static get state() {
+    return store.getState().userInterface.messageDialog;
   }
 
   constructor(props) {
     super(props);
-
-    const { parent } = props;
-
-    MessageDialog.self = this;
-    MessageDialog.parent = parent;
 
     this.onOkInternal = this.onOkInternal.bind(this);
     this.onCancelInternal = this.onCancelInternal.bind(this);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    const { message: nextMessage, isVisible: nextIsVisible, content: nextContent } = nextProps;
-    const { message, isVisible, content, parent } = this.props;
+    let result = true;
 
     if (__DEV__ && DBG.messageDialogDebug) {
       const printD = this.propsToDebug.bind(this);
-      const parentName = getObjectClassName(parent);
+      const parentName = navigationService.getCurrentScreenName();
       clog(`[MessageDialog][${parentName}] current: ${printD(this.props)} next: ${printD(nextProps)}`);
     }
-
-    const result = (nextMessage != null || nextContent != null) && nextIsVisible != null && (message != nextMessage || isVisible != nextIsVisible || content != nextContent);
 
     return result;
   }
@@ -158,37 +164,43 @@ class MessageDialog extends Component {
     return toDebug(isVisible, "v") + toDebug(message, "m") + toDebug(content, "c") + toDebug(title, "t");
   }
 
-  onOkInternal() {
-    const { parent, onOk, onHide } = this.props;
-    let messageCode;
+  onOkInternal(mergedProps) {
+    return function () {
+      const { onOk, onHide } = mergedProps;
 
-    if (parent != null) {
-      messageCode = parent.state.messageCode;
-      parent.setState({ messageVisible: false });
-    }
+      let { code } = MessageDialog.state;
+      MessageDialog.state = { isVisible: false };
 
-    if (onOk) {
-      onOk(messageCode);
-    }
-    if (onHide) {
-      onHide(messageCode);
+      if (onOk) {
+        onOk(code, mergedProps);
+      }
+      if (onHide) {
+        onHide(code, mergedProps);
+      }
     }
   }
 
-  onCancelInternal() {
-    const { parent, onCancel, onHide } = this.props;
-    let messageCode;
+  onCancelInternal(mergedProps) {
+    return function () {
+      const { onCancel, onHide } = mergedProps;
+      let { code } = MessageDialog.state;
+      MessageDialog.state = { isVisible: false };
 
-    if (parent != null) {
-      messageCode = parent.state.messageCode;
-      parent.setState({ messageVisible: false });
+      if (onCancel) {
+        onCancel(code, mergedProps);
+      }
+      if (onHide) {
+        onHide(code, mergedProps);
+      }
     }
+  }
 
-    if (onCancel) {
-      onCancel(messageCode);
-    }
-    if (onHide) {
-      onHide(messageCode);
+  onCustomInternal(mergedProps) {
+    return function() {
+      const { onCustom } = mergedProps;
+      if (onCustom) {
+        onCustom(mergedProps);
+      }
     }
   }
 
@@ -223,7 +235,7 @@ class MessageDialog extends Component {
       modalContainerStyle,
       extraDialogProps,
       customLabel,
-      onCustom
+    
     } = mergedProps;
 
 
@@ -237,10 +249,10 @@ class MessageDialog extends Component {
         visible={isVisible}
         isVisibleBottomBar={true}
         cancelLabel={cancelLabel != null ? cancelLabel : "No"}
-        onCancel={this.onCancelInternal}
+        onCancel={this.onCancelInternal(mergedProps)}
         okLabel={okLabel || "Yes"}
         style={{ paddingBottom: 10, fontSize: 12 }}
-        onOk={this.onOkInternal}
+        onOk={this.onOkInternal(mergedProps)}
         okStyle={[commonButtonStyle, okStyle]}
         cancelStyle={[commonButtonStyle, cancelStyle]}
         cancelContainerStyle={[commonButtonContainerStyle, cancelContainerStyle]}
@@ -249,7 +261,7 @@ class MessageDialog extends Component {
         modalProps={modalProps}
         bottomSpace={10}
         modalContainerStyle={modalContainerStyle}
-        onCustom={onCustom}
+        onCustom={this.onCustomInternal(mergedProps)}
         customLabel={customLabel}
         {...extraDialogProps}
       >
@@ -296,7 +308,9 @@ class MessageDialog extends Component {
   static extraPropsPresets = {
     exit: {
       ...MessageDialog.materialDesign,
-      onOk: () => BackHandler.exitApp()
+      onOk: () => {
+        BackHandler.exitApp()
+      }
     },
     message: {
       ...MessageDialog.orangeDesign,
@@ -308,7 +322,7 @@ class MessageDialog extends Component {
       okLabel: "Close",
       cancelLabel: "",
       customLabel: "Clear Console",
-      onCustom: () => { console.clear(); }
+      onCustom: (mergedProps) => { console.clear(); }
     },
     "login-expired": {
       ...MessageDialog.materialDesign,
@@ -324,6 +338,6 @@ class MessageDialog extends Component {
   };
 }
 
-MessageDialog.defaultProps = {}
+MessageDialog.defaultProps = {};
 
 export default MessageDialog;
