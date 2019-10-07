@@ -63,7 +63,7 @@ class WebviewScreen extends Component {
     if (this.state.injectedJS == null) {
       this.state.injectedJS = `
       window.document.addEventListener('click', function (event) {
-        window.ReactNativeWebView.postMessage("history++")
+        window.ReactNativeWebView.postMessage("history++");
       }, false);
       `;
     }
@@ -134,9 +134,9 @@ class WebviewScreen extends Component {
   }
 
   onBackPress(event) {
-    const { canGoBack, history } = this.state;
+    const { history } = this.state;
 
-    if (canGoBack && history > 0 && this && this.webViewRef.ref) {
+    if (history > 0 && this && this.webViewRef.ref) {
       this.webViewRef.ref.goBack();
       this.setState({ history: history - 1 });
     } else {
@@ -166,16 +166,15 @@ class WebviewScreen extends Component {
     const { data, canGoBack, canGoForward } = event.nativeEvent;
     rlog("weview-message", `${data}`, { title: "onWebviewMessage", event, canGoBack, canGoForward });
 
-    const s = this.state;
-    if (s.canGoBack != canGoBack || s.canGoForward != canGoForward) {
-      this.setState({ canGoBack, canGoForward });
-    }
-
     // Default cases of HTML/JS to Native communication
     // See also - injectedJS in constructor and onBackPress
     switch (data) {
       case "history++":
-        this.setState({ history: s.history + 1 });
+        this.setState({ history: this.state.history + 1 });
+        break;
+
+      case "history--":
+        this.setState({ history: this.state.history - 1 });
         break;
     }
   }
