@@ -460,17 +460,17 @@ class EditUserProfile extends Component {
 
   handleDatePicked(date) {
     // here date is selected by the picker in local TZ
-    const dateObject = {
+    this.setState({
       day: date.getDate().toString(),
       month: (date.getMonth()+1).toString(),
-      year: date.getFullYear().toString()
-    };
-    this.setState(dateObject);
+      year: date.getFullYear().toString(),
+      hasChanged: true
+    });
     this.hideDateTimePicker();
   }
 
   updateProfile() {
-    this.setState({showProgress: true});
+    this.setState({showProgress: true, hasChanged: false});
 
     const { firstName, lastName, phoneNumber, preferredLanguage, gender, locAddress, jsonFile, countryState, day, month, year } = this.state;
 
@@ -495,7 +495,7 @@ class EditUserProfile extends Component {
         this.setState({showProgress: false});
       },
       (errorData, errorCode) => {
-        this.setState({showProgress: false});
+        this.setState({showProgress: false, hasChanged: true});
       }
     );
   }
