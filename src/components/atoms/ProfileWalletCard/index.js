@@ -95,7 +95,7 @@ class ProfileWalletCard extends Component {
       caller: "ProfileWalletCard: case 2 - checking"
     });
 
-    serverRequest(this, requester.getUserInfo, 
+    serverRequest(this, requester.getUserInfo, [],
       data => {
         const { locAddress } = data;
         const locAddressValidationResult = validateLOCAddress(locAddress);
