@@ -130,13 +130,7 @@ class Login extends Component {
           } else if (errors && errors.hasOwnProperty("EmailNotVerified")) {
             this.setState({ verificationDialogVisible: true });
           } else {
-            Object.keys(errors).forEach(key => {
-              if (typeof key !== "function") {
-                // Toast.showWithGravity(errors[key].message, Toast.SHORT, Toast.BOTTOM);
-                //console.log('Error logging in  :', errors[key].message);
-                alert(errors[key].message);
-              }
-            });
+            alert('A server error occurred.');
           }
           break;
     }
