@@ -301,7 +301,7 @@ class GuestInfoForm extends Component {
           const bookingId = preparedBookingId;
           let startDate, endDate;
           let { checkInMoment, checkOutMoment } = this.props.datesAndGuestsData;
-          startDate = (createdDate == null ? checkInMoment.clone() : moment(createdDate));
+          startDate = (createdDate == null ? checkInMoment.clone() : moment.utc(createdDate));
           endDate = checkOutMoment.clone();
 
           this.setState({

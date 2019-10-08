@@ -209,7 +209,7 @@ export function evalFilterConfig(filter) {
 
 function applyConsoleFiltersFunc(consoleArgs, filtersOrig=[]) {
   let result = true;
-  let filters = filtersOrig.concat(); // work with a copy
+  let filters = (filtersOrig || []).concat(); // work with a copy
 
   let isMatching = false;
   let { includeNonMatching, leaveOnFirstMatch, mode } = filtersConfig;
