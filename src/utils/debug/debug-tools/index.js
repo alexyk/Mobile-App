@@ -193,13 +193,14 @@ export function evalFilterConfig(filter) {
         return value;
     
       default:
-        if (value.toLowerCase() != 'lim') {
+        if (value.toLowerCase() != 'lim' && value.toLowerCase() != 'limc') {
           throw new Error(`[debug-tools] evalFilterConfig() - unexpected mode value - "${value}"`);
         }
         return {
           lOFM: value[0] == 'L',
           iNM: value[1] == 'I',
-          m: value[2] == 'm' ? 'or' : 'and'
+          m: value[2] == 'm' ? 'or' : 'and',
+          caps: (value[3] || 'c') == 'C'
         }
     }
   }
@@ -212,7 +213,7 @@ function applyConsoleFiltersFunc(consoleArgs, filtersOrig=[]) {
   let filters = (filtersOrig || []).concat(); // work with a copy
 
   let isMatching = false;
-  let { includeNonMatching, leaveOnFirstMatch, mode } = filtersConfig;
+  let { includeNonMatching, leaveOnFirstMatch, mode, matchCase } = filtersConfig;
   let results = [];
   
   let filter;
@@ -235,13 +236,18 @@ function applyConsoleFiltersFunc(consoleArgs, filtersOrig=[]) {
         leaveOnFirstMatch = evalFilterConfig(filter);
         continue;
       }
+      if (filter.includes('matchCase')) {
+        matchCase = evalFilterConfig(filter);
+        continue;
+      }
       if (filter.includes('mode')) {
         const res = evalFilterConfig(filter);
         if (isObject(res)) {
-          const { m, lOFM, iNM } = res;
+          const { m, lOFM, iNM, caps } = res;
           leaveOnFirstMatch = lOFM;
           includeNonMatching = iNM;
           mode = m;
+          matchCase = caps;
         } else {
           mode = res;
         }
@@ -285,6 +291,11 @@ function applyConsoleFiltersFunc(consoleArgs, filtersOrig=[]) {
             break;
           }
         } else {
+          if (!matchCase) {
+            filter = filter.toLowerCase();
+            arg = arg.toLowerCase();
+          }
+  
           if (isExclusive) {
             isMatching = arg.includes(filter);
             if (isMatching) {

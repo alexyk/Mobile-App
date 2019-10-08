@@ -75,7 +75,7 @@ DBG = {
     // calendar
   autoCalendar                       : false,
     // message dialog
-  messageDialogDebug                 : true,
+  messageDialogDebug                 : false,
   debugSettingsOption                : true,
     // test flows
   testFlowURL                        : "http://beta.locktrip.com/api/hotels/searh?query=london",
@@ -141,6 +141,7 @@ DBG.isOnline = (!DBG.isOffline);
 DBG.filtersConfig = {
   includeNonMatching: true,
   leaveOnFirstMatch: true,
+  matchCase: true,
   mode: 'and',
   empty: [],
   0: [],
@@ -162,7 +163,7 @@ filtersConfig.redux = ["mode: liM"].concat(filtersConfig.default2, ['serverUtil'
 filtersConfig.debug1 = ["mode: LiM", "error", 'serverUtils'].concat(filtersConfig.default2)
 filtersConfig.flows = ["mode: Lim", /^search flow step/]
 
-filtersConfig.custom = ["mode:Lim", "parent::",'MessageDialog', 'parent', 'error'] //'!Rejection', ].concat(filtersConfig.default)
+filtersConfig.custom = ["mode:Limc", 'MessageDialog', 'error','server']
 
 DBG.consoleFilters = ( DBG.consoleFilter ? filtersConfig[DBG.consoleFilter] : null );
 DBG.setDebugOption = setDebugOption;
