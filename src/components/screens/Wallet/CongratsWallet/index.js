@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { Text, View, StatusBar } from "react-native";
-import { NavigationActions, StackActions } from "react-navigation";
 import { BackHandler } from "react-native";
 import Image from "react-native-remote-svg";
 import styles from "./styles";
 import Button from "../../../atoms/Button";
+import navigationService from "../../../../services/navigationService";
 
 class CongratsWallet extends Component {
   constructor(props) {
@@ -25,7 +25,7 @@ class CongratsWallet extends Component {
   };
 
   gotoRoot() {
-    this.props.navigation.pop(4);
+    navigationService.reset("MainScreen", 'PROFILE');
   }
 
   render() {

@@ -24,6 +24,7 @@ import LoginLocationDialog from "../../../atoms/LoginLocationDialog";
 import LoginEmailVerifyDialog from "../../../atoms/LoginEmailVerifyDialog";
 import { SERVER_ERROR, serverRequest } from "../../../../services/utilities/serverUtils";
 import LTLoader from "../../../molecules/LTLoader";
+import { isFunction } from "js-tools";
 
 class Login extends Component {
   static propTypes = {
@@ -130,7 +131,15 @@ class Login extends Component {
           } else if (errors && errors.hasOwnProperty("EmailNotVerified")) {
             this.setState({ verificationDialogVisible: true });
           } else {
-            alert('A server error occurred.');
+            if (errors) {
+              for (let key in errors) {
+                const error = errors[key];
+                if (!isFunction(error)) {
+                  alert(error.message);
+                  break;
+                }
+              }
+            }
           }
           break;
     }

@@ -29,6 +29,7 @@ import { setGuestData } from "../../../redux/action/hotels";
 import { isString, isNumber, getObjectFromPath, isArray } from "js-tools";
 import MessageDialog from "../../molecules/MessageDialog";
 import { SettingsContent } from "../Settings/components";
+import navigationService from "../../../services/navigationService";
 
 
 
@@ -116,11 +117,7 @@ class Explore extends Component {
   }
 
   onServerGetUserInfoError(errorData, errorCode) {
-    const resetAction = StackActions.reset({
-      index: 0,
-      actions: [NavigationActions.navigate({ routeName: 'Welcome' })],
-    });
-    this.props.navigation.dispatch(resetAction);
+    navigationService.reset('Welcome');
     MessageDialog.showMessage("Login Expired",`Last login is not valid any more.\nPlease log in again.`, 'login-expired');
   }
 

@@ -15,6 +15,10 @@ import SmartInput from "../../../atoms/SmartInput";
 import WhiteBackButton from "../../../atoms/WhiteBackButton";
 import { userInstance } from "../../../../utils/userInstance";
 import requester from "../../../../initDependencies";
+import { serverRequest } from "../../../../services/utilities/serverUtils";
+import moment from "moment";
+import store from "../../../../initDependencies";
+import { setLoginDetails } from "../../../../redux/action/userInterface";
 
 var arr = [];
 
@@ -115,11 +119,9 @@ class WalletKeywordValidation extends Component {
       //console.log("onClickAccept", user);
 
       this.setState({ showProgress: true });
-      requester
-        .getUserInfo()
-        .then(res => res.body)
-        .then(userInfo => {
-          if (userInfo.birthday) {
+      serverRequest(this, requester.getUserInfo, [],
+        userInfo => {
+          if (userInfo.birthday != null) {
             let birthday = moment.utc(userInfo.birthday);
             const day = birthday.add(1, "days").format("D");
             const month = birthday.format("MM");
@@ -138,65 +140,27 @@ class WalletKeywordValidation extends Component {
           userInfo.locAddress = params.walletAddress;
           userInfo.jsonFile = params.walletJson;
 
-          requester.updateUserInfo(userInfo, null).then(res => {
-            //console.log("save wallet ----------", res);
-            this.setState({ showProgress: false });
-            if (res.success) {
-              userInstance.setLocAddress(params.walletAddress);
-              userInstance.setJsonFile(params.walletJson);
-
+          serverRequest(this, requester.updateUserInfo, [userInfo, null],
+            data => {
+              this.setState({ showProgress: false });
               navigate("CongratsWallet");
-            } else {
-              res.errors.then(e => {
-                this.setState({ showProgress: false });
-                Toast.showWithGravity(
-                  "Cannot get messages, Please check network connection.",
-                  Toast.SHORT,
-                  Toast.BOTTOM
-                );
-                //console.log(err);
-              });
+
+              store.dispatch(setLoginDetails({walletAddress: params.walletAddress, walletJson: params.walletJson}));
+            },
+            (errorData, errorCode) => {
+              this.setState({ showProgress: false });
+              Toast.showWithGravity(
+                "Cannot get messages, Please check network connection.",
+                Toast.SHORT,
+                Toast.BOTTOM
+              );
             }
-
-            this.closeModal(CONFIRM_WALLET);
-          });
-        });
-      // user['image'] = PUBLIC_URL + "images/default.png";
-      // user['jsonFile'] = this.state.walletJson;
-      // user['locAddress'] = this.state.walletAddress;
-
-      // const options = {
-      //     title:"",
-      //     message:"Registering...",
-      //     isCancelable:false
-      // };
-
-      // this.setState({ showProgress: true });
-      // requester.register(user, null).then(res => {
-      //     //console.log("register ----------", res);
-      //         this.setState({ showProgress: false });
-      //         if (res.success) {
-      //             //console.log("Error");
-      //             //console.log(res);
-      //             navigate('CongratsWallet')
-      //         } else {
-      //             //console.log("Error");
-      //             res.errors.then(data => {
-      //                 const { errors } = data;
-      //                 Object.keys(errors).forEach((key) => {
-      //                     if (typeof key !== 'function') {
-      //                         Toast.showWithGravity(errors[key].message, Toast.SHORT, Toast.BOTTOM);
-      //                         //console.log('Error logging in:', errors[key].message);
-      //                     }
-      //                 });
-      //             });
-      //         }
-      //     })
-      //     .catch(err => {
-      //         this.setState({ showProgress: false });
-      //         Toast.showWithGravity('Cannot get messages, Please check network connection.', Toast.SHORT, Toast.BOTTOM);
-      //         //console.log(err);
-      //     });
+          );
+        },
+        (errorData, errorCode) => {
+          this.setState({ showProgress: false });
+        }
+      );
     } else {
       alert("Answers are not correct please retry");
     }
@@ -263,27 +227,6 @@ class WalletKeywordValidation extends Component {
                   placeholderTextColor="#fff"
                 />
               </View>
-
-              {/*{walletMnemonic.split(' ').map(function (value) {*/}
-              {/*i++;*/}
-              {/*return (*/}
-              {/*<View key={i} style={styles.inputView}>*/}
-              {/*<SmartInput value={`${i}. ${value}`} placeholderTextColor="#fff" />*/}
-              {/*</View>*/}
-              {/*)*/}
-              {/*})}*/}
-
-              {/*<View style={styles.nextButtonView}>*/}
-              {/*<TouchableOpacity*/}
-              {/*onPress={() => this.test()}>*/}
-              {/*<View style={styles.nextButton}>*/}
-              {/* <LTIcon
-                                            textStyle={styles.buttonText}>
-                                            name={'arrowRight'}
-                                        /> */}
-              {/*</View>*/}
-              {/*</TouchableOpacity>*/}
-              {/*</View>*/}
 
               <View style={styles.buttonsView}>
                 <TouchableOpacity
