@@ -199,7 +199,7 @@ class Calendar extends Component {
       } else if (this.maxUpdate < day) {
         this.maxUpdate = day;
       }
-    } else {
+    } else if (day != this.checkInMoment) {
       this.checkOutMoment = day;
       dayFormatted = formatDay(this.year, day, inputFormat, false);
       newData = { ...dayFormatted };
