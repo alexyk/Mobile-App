@@ -19,6 +19,7 @@ import { serverRequest } from "../../../../services/utilities/serverUtils";
 import moment from "moment";
 import store from "../../../../initDependencies";
 import { setLoginDetails } from "../../../../redux/action/userInterface";
+import DBG from "../../../../config-debug";
 
 var arr = [];
 
@@ -48,14 +49,15 @@ class WalletKeywordValidation extends Component {
       keyword2: "",
       keyword3: ""
     };
+
+    this.onClickAccept = this.onClickAccept.bind(this);
   }
 
   async componentDidMount() {
+    // TODO: Remove usage of AsyncStorage
     this.setState({
-      walletAddress: await AsyncStorage.getItem("walletAddress")
-    });
-    this.setState({ walletJson: await AsyncStorage.getItem("walletJson") });
-    this.setState({
+      walletAddress: await AsyncStorage.getItem("walletAddress"),
+      walletJson: await AsyncStorage.getItem("walletJson"),
       walletMnemonic: await AsyncStorage.getItem("walletMnemonic")
     });
     this.load();
@@ -111,10 +113,18 @@ class WalletKeywordValidation extends Component {
     return count;
   };
 
-  onClickAccept = async () => {
+  async onClickAccept() {
+    const { navigate } = this.props.navigation;
+
+    // Debugging wallet registration flow
+    if (__DEV__ && DBG.walletFlowDebug) {
+      navigate("CongratsWallet");
+      return;
+    }
+
+
     if (this.correctAnswersCount() === 3) {
       const { params } = this.props.navigation.state;
-      const { navigate } = this.props.navigation;
       let user = params;
       //console.log("onClickAccept", user);
 

@@ -200,6 +200,13 @@ class ProfileWalletCard extends Component {
 
   createWallet() {
     const { navigate } = this.props.navigation;
+
+    if (__DEV__ && DBG.walletFlowDebug) {
+      // Debugging wallet registration flow
+      navigate("CreateWallet");
+      return;
+    }
+
     const callback = locAddressValidationResult => {
       if (locAddressValidationResult != 1) {
         navigate("CreateWallet");
@@ -462,7 +469,11 @@ class ProfileWalletCard extends Component {
 
   _renderCreateWalletButton() {
     const { walletState } = this.props.walletData;
-    const isButtonEnabled = walletState == WALLET_STATE.NONE;
+    let isButtonEnabled = walletState == WALLET_STATE.NONE;
+
+    if (__DEV__ && DBG.walletFlowDebug) {
+      isButtonEnabled = true;
+    }
 
     return (
       isButtonEnabled && (

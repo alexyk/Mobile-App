@@ -4,7 +4,6 @@ import Toast from "react-native-easy-toast"; //eslint-disable-line
 import RNPickerSelect from "react-native-picker-select"; //eslint-disable-line
 import { connect } from "react-redux";
 import { bindActionCreators } from "redux";
-import { NavigationActions, StackActions } from "react-navigation";
 import { cloneDeep } from 'lodash';
 import { domainPrefix } from "../../../config";
 import DBG from "../../../config-debug";
@@ -36,6 +35,8 @@ import navigationService from "../../../services/navigationService";
 class Explore extends Component {
   constructor(props) {
     super(props);
+
+    navigationService.setTabNavigation(props.navigation);
 
     this.updateData = this.updateData.bind(this);
     this.gotoGuests = this.gotoGuests.bind(this);

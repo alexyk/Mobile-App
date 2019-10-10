@@ -62,6 +62,7 @@ DBG = {
 
   autoLoginInOfflineMode             : true,
   validationStateOfflineWallet       : -1,  // -1: none, 0: invalid, 1: valid
+  walletFlowDebug                    : false,
   offlineEmailVerificationValue      : true,
     // automated flows
       // hotels search

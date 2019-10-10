@@ -2,13 +2,16 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { Text, TouchableWithoutFeedback, View } from "react-native";
 import LTIcon from "../LTIcon";
+import navigationService from "../../../services/navigationService";
+import { NavigationActions } from "react-navigation";
+
 
 export default function NavButton(props) {
-  const { name, navigate, active, icon } = props;
+  const { name, navigation, active, icon } = props;
   const text = name.replace("_", " ");
 
   const onPress = function() {
-    navigate(name);
+    navigation.navigate(name);
   };
 
   return (

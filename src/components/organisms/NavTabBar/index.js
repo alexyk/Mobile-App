@@ -43,17 +43,11 @@ export default class NavTabBar extends Component {
   }
 
   render() {
-    const { navigate, state } = this.props.navigation;
-    const { index, routes } = state;
+    const { navigation } = this.props;
+    const { index, routes } = navigation.state;
     const active = routes[index].key;
 
-    // return (
-    //     <View style={{width:"100%", height:50, backgroundColor:'red', justifyContent: 'center', alignItems: 'center'}}>
-    //         <Text>Hello there - I am the navigator</Text>
-    //     </View>
-    // )
-
-    const commonProps = { active, navigate };
+    const commonProps = { active, navigation };
 
     return (
       <View>

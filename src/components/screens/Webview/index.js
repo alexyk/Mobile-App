@@ -18,7 +18,6 @@ import DBG from "../../../config-debug";
 import { rlog } from "../../../utils/debug/debug-tools";
 import LTLoader from "../../molecules/LTLoader";
 import TopBar from "../../molecules/TopBar";
-import navigationService from "../../../services/navigationService";
 
 // TODO: Clean and test - the implementation is not cleaned since migration from previous developers. Tests were not added when migrating
 class WebviewScreen extends Component {
@@ -214,19 +213,11 @@ class WebviewScreen extends Component {
     }
 
     return (
-      <View>
-
       <TouchableOpacity key={"webview-debug"} onPress={this.onDebugPress}>
         <View style={{ backgroundColor: "#777A", width: 130, borderRadius: 5 }}>
           <Text style={{ textAlign: "center" }}>{"RELOAD WEBVIEW"}</Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity key={"webview-debug-reset"} onPress={() => navigationService.reset("MainScreen", 'PROFILE')}>
-        <View style={{ backgroundColor: "#777A", width: 130, borderRadius: 5 }}>
-          <Text style={{ textAlign: "center" }}>{"RESET"}</Text>
-        </View>
-      </TouchableOpacity>
-      </View>
     );
   }
 

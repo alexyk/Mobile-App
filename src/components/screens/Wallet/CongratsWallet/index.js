@@ -4,7 +4,7 @@ import { BackHandler } from "react-native";
 import Image from "react-native-remote-svg";
 import styles from "./styles";
 import Button from "../../../atoms/Button";
-import navigationService from "../../../../services/navigationService";
+
 
 class CongratsWallet extends Component {
   constructor(props) {
@@ -25,7 +25,7 @@ class CongratsWallet extends Component {
   };
 
   gotoRoot() {
-    navigationService.reset("MainScreen", 'PROFILE');
+    this.props.navigation.popToTop();
   }
 
   render() {

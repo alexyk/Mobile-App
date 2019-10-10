@@ -15,6 +15,7 @@ import SmartInput from "../../../atoms/SmartInput";
 import WhiteBackButton from "../../../atoms/WhiteBackButton";
 import LTIcon from "../../../atoms/LTIcon";
 import styles from "./styles";
+import DBG from "../../../../config-debug";
 
 class WalletRecoveryKeywords extends Component {
   static propTypes = {
@@ -40,11 +41,10 @@ class WalletRecoveryKeywords extends Component {
   }
 
   async componentDidMount() {
+    // TODO: Remove usage of AsyncStorage
     this.setState({
-      walletAddress: await AsyncStorage.getItem("walletAddress")
-    });
-    this.setState({ walletJson: await AsyncStorage.getItem("walletJson") });
-    this.setState({
+      walletAddress: await AsyncStorage.getItem("walletAddress"),
+      walletJson: await AsyncStorage.getItem("walletJson"),
       walletMnemonic: await AsyncStorage.getItem("walletMnemonic")
     });
   }

@@ -18,6 +18,8 @@ import { setCurrency } from "../../../redux/action/Currency";
 import styles from "./styles";
 import { WALLET_STATE } from "../../../redux/enum";
 import { BASIC_CURRENCY_LIST, OPTIONS } from "../../../config-settings";
+import MessageDialog from "../../molecules/MessageDialog";
+import DBG from "../../../config-debug";
 
 
 class Profile extends Component {
@@ -28,6 +30,21 @@ class Profile extends Component {
       currencySelectionVisible: false
     };
   }
+
+  componentDidMount() {
+    if (__DEV__ && DBG.walletFlowDebug) {
+      this.onFocus = this.props.navigation.addListener('didFocus', () => {
+        this.showToast(`Debugging wallet flow is ON\nPressing create wallet button will guide you.\n(see walletCongratsDebug in config-debug)`);
+      });
+    }
+  }
+
+  componentWillUnmount() {
+    if (__DEV__ && this.onFocus) {
+      this.onFocus.remove();
+    }
+  }
+
 
   onCurrency = () => {
     this.setState({ currencySelectionVisible: true });
@@ -61,11 +78,8 @@ class Profile extends Component {
     this.props.navigation.navigate("PaymentMethods", {});
   };
 
-  showToast = () => {
-    this.refs.toast.show(
-      "This feature is not enabled yet in the current alpha version.",
-      1500
-    );
+  showToast = (msg, delayInMS=3000) => {
+    this.refs.toast.show(msg, delayInMS);
   };
 
   onSendToken = () => {
@@ -74,33 +88,21 @@ class Profile extends Component {
 
     switch (walletState) {
       case WALLET_STATE.NONE:
-        this.refs.toast.show(
-          "Please create LOC wallet before sending token.",
-          1500
-        );
+        this.showToast("Please create LOC wallet before sending token.");
         return;
 
       case WALLET_STATE.CONNECTION_ERROR:
       case WALLET_STATE.INVALID:
-        this.refs.toast.show(
-          "There was an error while loading your wallet. Please try again later or contact support.",
-          1500
-        );
+        this.showToast("There was an error while loading your wallet. Please try again later or contact support.");
         return;
 
       case WALLET_STATE.LOADING:
       case WALLET_STATE.CHECKING:
-        this.refs.toast.show(
-          "Your LOC wallet is loading. Please wait until this process ends before sending tokens.",
-          1500
-        );
+        this.showToast("Your LOC wallet is loading. Please wait until this process ends before sending tokens.");
         return;
 
       case WALLET_STATE.CREATING:
-        this.refs.toast.show(
-          "Please wait for the process of creating your LOC wallet to be complete before sending token.",
-          1500
-        );
+        this.showToast("Please wait for the process of creating your LOC wallet to be complete before sending token.");
         return;
     }
 
@@ -152,7 +154,7 @@ class Profile extends Component {
       <View style={styles.container}>
         <Toast
           ref="toast"
-          style={{ backgroundColor: "#DA7B61", top: 500 }}
+          style={{ backgroundColor: "#DA7B61" }}
           position="center"
           positionValue={100}
           fadeInDuration={500}
@@ -212,10 +214,6 @@ class Profile extends Component {
               <Text style={styles.navItemText}>Currency</Text>
               <Text style={styles.navCurrency}>{currency}</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity onPress={this.showToast} style={styles.navItem}>
-                            <Text style={styles.navItemText}>Switch to Hosting</Text>
-                            <Image resizeMode="stretch" source={require('../../../assets/png/Profile/icon-switch.png')} style={styles.navIcon} />
-                        </TouchableOpacity> */}
             <TouchableOpacity onPress={this.onSendToken} style={styles.navItem}>
               <Text style={styles.navItemText}>Send Tokens</Text>
               <Image
@@ -249,6 +247,8 @@ class Profile extends Component {
             // this.props.actions.getCurrency(result.selectedItem.label);
           }}
         />
+
+        <MessageDialog {...this.props.messageDialog} />
       </View>
     );
   }

@@ -22,6 +22,7 @@ import { Wallet } from "../../../../services/blockchain/wallet";
 import LineProgressDialog from "../../../atoms/SimpleDialogs/LineProgressDialog";
 import WhiteBackButton from "../../../atoms/WhiteBackButton";
 import LTIcon from "../../../atoms/LTIcon";
+import DBG from "../../../../config-debug";
 
 class CreateWallet extends Component {
   constructor(props) {
@@ -70,7 +71,25 @@ class CreateWallet extends Component {
     };
   }
 
-  submitPassword() {
+  async submitPassword() {
+    if (__DEV__ && DBG.walletFlowDebug) {
+      // Debugging wallet registration flow
+      const walletAddress = "897043dbe9873b0834ce";
+      const walletMnemonic = "hello there everywhere maybe here or else if sure then do it";
+      const walletJson = `{"walletJson": "some string"}`;
+
+      // TODO: Remove usage of AsyncStorage
+      await AsyncStorage.setItem("walletAddress", walletAddress);
+      await AsyncStorage.setItem("walletMnemonic", walletMnemonic);
+      await AsyncStorage.setItem("walletJson", walletJson);
+
+      this.props.navigation.navigate("WalletRecoveryKeywords", {
+        ...params, walletAddress, walletJson, walletMnemonic
+      });
+      return;
+    }
+
+
     const { params } = this.props.navigation.state;
     // return;
     if (this.state.password.length < 8) {
@@ -119,7 +138,7 @@ class CreateWallet extends Component {
             this.stopAnimation();
             this.setState({ progress: 1 });
             setTimeout(() => {
-              //console.log(wallet);
+              // TODO: Remove usage of AsyncStorage
               AsyncStorage.setItem("walletAddress", wallet.address);
               AsyncStorage.setItem("walletMnemonic", wallet.mnemonic);
               const walletJson = JSON.stringify(wallet.jsonFile);
