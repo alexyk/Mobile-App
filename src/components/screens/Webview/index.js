@@ -134,11 +134,13 @@ class WebviewScreen extends Component {
   }
 
   onBackPress(event) {
-    const { history } = this.state;
+    let { history } = this.state;
 
     if (history > 0 && this && this.webViewRef.ref) {
       this.webViewRef.ref.goBack();
-      this.setState({ history: history - 1 });
+      history--;
+      rlog("history", `Setting Webview history to ${history} (was ${this.state.history})`);
+      this.setState({ history });
     } else {
       this.props.navigation.goBack();
     }
@@ -168,15 +170,19 @@ class WebviewScreen extends Component {
 
     // Default cases of HTML/JS to Native communication
     // See also - injectedJS in constructor and onBackPress
+    let newValue = this.state.history;
     switch (data) {
       case "history++":
-        this.setState({ history: this.state.history + 1 });
+        newValue++;
         break;
-
+        
       case "history--":
-        this.setState({ history: this.state.history - 1 });
+        newValue--;
         break;
     }
+
+    rlog("history", `Setting Webview history to ${newValue} (was ${this.state.history})`);
+    this.setState({ history: newValue });
   }
 
   onWebViewLoadEnd(event) {
