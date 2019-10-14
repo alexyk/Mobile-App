@@ -61,7 +61,6 @@ class WalletKeywordValidation extends Component {
       walletMnemonic: await AsyncStorage.getItem("walletMnemonic")
     });
     this.load();
-    this.props.navigation.addListener("willFocus", this.load);
   }
 
   load = () => {
