@@ -425,7 +425,7 @@ class ProfileWalletCard extends Component {
       switch (uiState) {
         case WALLET_STATE.NONE:
           result = this._renderMessage(
-            `Please click the button to create your LOC Wallet!`,
+            `Click the button to create your LOC Wallet`,
             true
           );
           skipRenderingWalletContent = true;
