@@ -63,7 +63,7 @@ export const OPTIONS = {
   myTrips: {
     MAX_TRIPS_TO_LOAD: 1000
   },
-  settings: (!!__DEV__)
+  settings: (!!__DEV__) && false
 }
 export const BASIC_CURRENCY_LIST = ["EUR", "USD", "GBP"]; //eslint-disable-line
 

@@ -77,7 +77,7 @@ DBG = {
   autoCalendar                       : false,
     // message dialog
   messageDialogDebug                 : false,
-  debugSettingsOption                : true,
+  debugSettingsOption                : false,
     // test flows
   testFlowURL                        : "http://beta.locktrip.com/api/hotels/searh?query=london",
   testFlow                           : "",
