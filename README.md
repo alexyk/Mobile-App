@@ -51,8 +51,8 @@ ___
 
 ## Requirements to Run Mobile-App
 ### Common 
-  * `node 8.14.1` (with `npm 6.4.1`)  
-  <small>NodeJS version 8.15.x also is likely to work</small>
+  * `node 10+` (with `npm 6.4.1`)  
+  <small>Last known-to-work NodeJS versions - 10.14.2, 11.5.0, 12.0.7. (`npm rebuild` or `npm install` would be needed because of `react-native-make` if changing node version after initially installing dependencies with `npm install`)</small>
   * ninja (for Android)  
   <small>macOS - `brew install ninja`, Windows - instructions [here](https://github.com/rwols/CMakeBuilder/wiki/Ninja-for-Windows-Installation-Instructions)</small>
   * react-native-cli `npm install -g react-native-cli`
