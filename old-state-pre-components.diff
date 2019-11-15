@@ -1,0 +1,344 @@
+diff --git a/.gitignore b/.gitignore
+index edd98ffd..5659dde7 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -74,3 +74,4 @@ build/
+ 
+ Pods/
+ .vscode/.react
++builds-arch
+diff --git a/src/components/molecules/LTLoader/index.js b/src/components/molecules/LTLoader/index.js
+index d16d54e4..64772316 100644
+--- a/src/components/molecules/LTLoader/index.js
++++ b/src/components/molecules/LTLoader/index.js
+@@ -33,7 +33,7 @@ export default class LTLoader extends PureComponent {
+         
+         display: (this.props.isLoading ? "flex" : 'none'),
+         
+-        backgroundColor: '#FFFFFFF8'
++        backgroundColor: '#FFFFFFFC'
+       }
+ 
+       const style = (
+diff --git a/src/components/screens/HotelsSearch/HotelFilters/index.js b/src/components/screens/HotelsSearch/HotelFilters/index.js
+index ee1db63b..d6c34cc5 100644
+--- a/src/components/screens/HotelsSearch/HotelFilters/index.js
++++ b/src/components/screens/HotelsSearch/HotelFilters/index.js
+@@ -1,7 +1,7 @@
+ import React, {Component} from 'react';
+ import { bindActionCreators } from 'redux';
+ import { connect } from 'react-redux';
+-import {View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, SafeAreaView} from 'react-native';
++import {View, Text, TouchableOpacity, ScrollView, TextInput, StyleSheet, SafeAreaView, Platform} from 'react-native';
+ import Image from 'react-native-remote-svg';
+ import styles, {orderbyPickerSelectStyles} from './styles';
+ import PropTypes from 'prop-types';
+@@ -68,6 +68,42 @@ class HotelFilters extends Component {
+ 
+     this.priceMin = params.priceRange[0];
+     this.priceMax = params.priceRange[1];
++    
++    this.markerStyle = {
++			...Platform.select({
++				ios: {
++				height: 30,
++				width: 30,
++				borderRadius: 30,
++				borderWidth: 1,
++				borderColor: '#DDDDDD',
++				backgroundColor: '#FFFFFF',
++				shadowColor: '#000000',
++				shadowOffset: {
++					width: 0,
++					height: 3,
++				},
++				shadowRadius: 1,
++				shadowOpacity: 0.2,
++				},
++				android: {
++				height: 30,
++				width: 30,
++				borderRadius: 30,
++				backgroundColor: '#0D8675',
++				},
++			})
++		}
++		this.pressedMarkerStyle = {
++			...Platform.select({
++				ios: {},
++				android: {
++					height: 35,
++					width: 35,
++					borderRadius: 35,
++				},
++			}),
++		}
+   }
+ 
+   componentWillReceiveProps(nextProps) {
+@@ -278,6 +314,11 @@ class HotelFilters extends Component {
+   }
+ 
+   renderFilterPricing() {
++  	const min = this.state.priceRange[0]
++  	const max = this.state.priceRange[1]
++  	const step = (min-max)/100;
++  	let values = [min, max];
++  
+     return (
+       <View>
+         <View style= {this.state.isHotelSelected ? styles.pricingView :styles.emptyPricingView}>
+@@ -299,10 +340,13 @@ class HotelFilters extends Component {
+             isMarkersSeparated = {true}
+             selectedStyle = {{backgroundColor: '#cc8068',}}
+             unselectedStyle = {{backgroundColor: 'silver',}}
+-            values = {[this.state.priceRange[0], this.state.priceRange[1]]}
++            values = {values}
++            touchDimensions
+             min = {this.priceMin}
+             max = {this.priceMax}
+             step = {1}
++            markerStyle={this.markerStyle}
++            pressedMarkerStyle={this.pressedMarkerStyle}
+             onValuesChangeFinish={this.multiSliderValuesChange}
+           />
+           {/* <View style={{width: '80%', flexDirection: 'row', justifyContent: 'space-between'}}>
+diff --git a/src/components/screens/HotelsSearch/HotelsSearchScreen/index.js b/src/components/screens/HotelsSearch/HotelsSearchScreen/index.js
+index 6ee0019d..c20df9c6 100644
+--- a/src/components/screens/HotelsSearch/HotelsSearchScreen/index.js
++++ b/src/components/screens/HotelsSearch/HotelsSearchScreen/index.js
+@@ -825,7 +825,7 @@ class HotelsSearchScreen extends Component {
+                   : prevState.displayMode,
+               hotelsInfoForMap,
+               hotelsInfo: hotelsInfoFresh,
+-              totalHotels: data.totalElements,
++              totalHotels: data.totalElements
+             };
+           },
+           function() {
+@@ -885,7 +885,7 @@ class HotelsSearchScreen extends Component {
+       `#hotel-search# [HotelsSearchScreen] onFetch / onRefreshResultsOnListView, page:${page}`
+     );*/
+ 
+-    log('fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`)
++    //log('fetch',`res:${this.state.isFilterResult} && loaded:${this.isAllHotelsLoaded}`)
+ 
+     if (this.isAllHotelsLoaded) {
+       // TODO: Figure this out - how to load results after isDoneSocket
+@@ -1177,25 +1177,29 @@ class HotelsSearchScreen extends Component {
+   );
+ 
+   renderPaginationWaitingView = () => {
+-    return (
+-      <View
+-        style={{
+-          flex: 0,
+-          width,
+-          height: 55,
+-          flexDirection: "row",
+-          justifyContent: "center",
+-          alignItems: "center"
+-        }}
+-      >
+-        <DotIndicator
+-          color="#d97b61"
+-          count={3}
+-          size={9}
+-          animationDuration={777}
+-        />
+-      </View>
+-    );
++  	if (this.isAllHotelsLoaded) {
++  		return <View/>
++  	} else {
++		return (
++		  <View
++			style={{
++			  flex: 0,
++			  width,
++			  height: 55,
++			  flexDirection: "row",
++			  justifyContent: "center",
++			  alignItems: "center"
++			}}
++		  >
++			<DotIndicator
++			  color="#d97b61"
++			  count={3}
++			  size={9}
++			  animationDuration={777}
++			/>
++		  </View>
++		);
++  	}
+   };
+ 
+   renderPaginationAllLoadedView = () => {
+@@ -1444,7 +1448,7 @@ class HotelsSearchScreen extends Component {
+   renderMapButton() {
+     const hasValidCoordinates = hasValidCoordinatesForMap(this.state, true);
+ 
+-    if (hasValidCoordinates) {
++    if (hasValidCoordinates && !this.state.isLoading) {
+       // if (this.state.allElements) {
+       const isMap = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_MAP);
+       const isList = (this.state.displayMode == DISPLAY_MODE_RESULTS_AS_LIST);
+@@ -1538,34 +1542,6 @@ class HotelsSearchScreen extends Component {
+     return result;
+   }
+ 
+-  renderContent() {
+-    let result = null;
+-
+-    switch (this.state.displayMode) {
+-      case DISPLAY_MODE_NONE:
+-      case DISPLAY_MODE_RESULTS_AS_LIST:
+-      case DISPLAY_MODE_RESULTS_AS_MAP:
+-      case DISPLAY_MODE_SEARCHING:
+-        // see render() method
+-        break;
+-
+-      case DISPLAY_MODE_HOTEL_DETAILS:
+-        if (!isNative.hotelItem) {
+-          result = this.renderHotelDetailsAsWebview();
+-        } else {
+-          // TODO: Render native item inside here
+-          // this.renderContentMessage("TODO: Native hotel details");
+-        }
+-        break;
+-
+-      default:
+-        result = this.renderContentMessage(`N/A (${this.state.displayMode})`);
+-        break;
+-    }
+-
+-    return result;
+-  }
+-
+   renderDebug() {
+     if (!__DEV__ || !webviewDebugEnabled) {
+       // webview debug is disabled in these cases
+@@ -1608,6 +1584,16 @@ class HotelsSearchScreen extends Component {
+       return null;
+     }
+   }
++  
++  renderPreloader() {
++	return ( 
++		<LTLoader
++			isLoading={this.state.isLoading || this.props.isApplyingFilter}
++			message={`Loading matches for your search ...`} 
++		/>
++	)
++  }
++  
+ 
+   render() {
+     // TODO: @@debug - remove this
+@@ -1625,33 +1611,29 @@ class HotelsSearchScreen extends Component {
+     return (
+       <SafeAreaView style={styles.safeArea}>
+         <View style={styles.container}>
++        
+           {this.renderWebViewBack()}
+           {this.renderBackButtonAndSearchField()}
+           {this.renderCalendarAndFilters()}
+ 
+           <View style={styles.containerHotels}>
++          
+             {this.renderHotelDetailsAsWebview()}
+             {this.renderResultsAsMap()}
+             {this.renderResultsAsList()}
+-            {/* {this.renderContent()} */}
+-  
+-            <LTLoader isLoading={this.state.isLoading} message={`Loading matches for your search ...`} />
+             {this.renderMapButton()}
++            
++            {this.renderPreloader()}
++            
+           </View>
+ 
+           {this.renderFooter()}
+           {this.renderToast() }
+ 
+           {this.renderDebug()}
++          
+         </View>
+-
+-        {/* <ProgressDialog
+-                      visible={this.state.isLoading}
+-                      title="Please Wait"
+-                      message="Loading..."
+-                      animationType="slide"
+-                      activityIndicatorSize="large"
+-                      activityIndicatorColor="black"/> */}
++        
+       </SafeAreaView>
+     );
+   }
+diff --git a/src/components/screens/HotelsSearch/MapModeHotelsSearch/index.js b/src/components/screens/HotelsSearch/MapModeHotelsSearch/index.js
+index 006b4670..52da4371 100644
+--- a/src/components/screens/HotelsSearch/MapModeHotelsSearch/index.js
++++ b/src/components/screens/HotelsSearch/MapModeHotelsSearch/index.js
+@@ -260,11 +260,15 @@ class MapModeHotelsSearch extends Component {
+     }
+     
+     onRegionChangeComplete(region) {
++		//log('map-view', `Region change`, {region})
++
+         const hasSelectedMarkRendered = (this.selected_mark != null);
+ 		if (hasSelectedMarkRendered) {
+ 			this.selected_mark.showCallout();
+ 		}
+-		log('map-view', `Region change`, {region})
++		const {latitudeDelta,longitudeDelta} = region;
++		
++		
+     }
+ 
+     render() {
+diff --git a/src/config-debug.js b/src/config-debug.js
+index 219536e7..3cb15558 100644
+--- a/src/config-debug.js
++++ b/src/config-debug.js
+@@ -148,4 +148,4 @@ export function log(tag, description, data, isImportant = false) {
+ export function configureDebug() {
+   configureReactotron()
+   configureConsole()
+-}
+\ No newline at end of file
++}
+diff --git a/src/utils/reactotronLogging.js b/src/utils/reactotronLogging.js
+index e3afb547..1c341cf5 100644
+--- a/src/utils/reactotronLogging.js
++++ b/src/utils/reactotronLogging.js
+@@ -8,7 +8,8 @@ const {openInEditor,trackGlobalErrors} = r;
+ Reactotron
+   .configure({
+     name: `Locktrip - Mobile App (${(Platform.OS == 'android' ? 'Android' : 'iOS')})`,
+-    host: "localhost"
++    //host: "localhost",
++    host: "192.168.13.2"
+   })
+   .useReactNative({
+     // asyncStorage: false, // there are more options to the async storage.
+@@ -24,4 +25,4 @@ Reactotron
+   .connect()
+   .clear();
+ 
+-  console.tron = Reactotron;
+\ No newline at end of file
++  console.tron = Reactotron;
+diff --git a/src/version.js b/src/version.js
+index 075bf37a..f47f60e3 100644
+--- a/src/version.js
++++ b/src/version.js
+@@ -5,7 +5,7 @@ const exploreIsNative = true;   // false: webview version, true: native search v
+ const hotelitemIsNative = false;// this line is updated by scripts/select_config.rb
+ const travisVersion='';         // this line is updated by scripts/select_config.rb
+ const branchName='';            // this line is updated by scripts/select_config.rb
+-const compilationTime = "";     // this line is updated by scripts/select_config.rb
++const compilationTime = '2019-05-06 14:00:46';
+ 
+ let ui = '';
+ ui += `${exploreIsNative ? 'NX' : 'wvX'}`;

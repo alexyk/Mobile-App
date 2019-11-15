@@ -81,6 +81,7 @@ class Calendar extends Component {
         // console.time('**** setCalendarData 1');
         const {
             internalFormat, inputFormat, minDate: minDateSrc, maxDate: maxDateSrc,
+            calendarMarkedDays: oldMarked
         } = this.props.datesAndGuestsData;
         let newData = {};
         const checkInDateMoment = moment(this.startDate, inputFormat);
@@ -100,7 +101,7 @@ class Calendar extends Component {
                 };
                 this.isFirst = false;
             } else {
-                const calendarMarkedDays = updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateMoment,this.today,internalFormat);
+                const calendarMarkedDays = updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,checkOutDateMoment,this.today,internalFormat);
                 newData = {
                     ...extraData,
                     calendarMarkedDays
@@ -178,7 +179,9 @@ class Calendar extends Component {
     }
     
     clear() {
-        const calendarMarkedDays = updateMarkedCalendarData(this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
+	const { internalFormat } = this.props.datesAndGuestsData;
+	const { calendarMarkedDays:oldMarked } = ( useRedux ? this.props.datesAndGuestsData : this.state );
+        const calendarMarkedDays = updateMarkedCalendarData(oldMarked,this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
         const newState = {
             startDate: null,
             endDate: null,

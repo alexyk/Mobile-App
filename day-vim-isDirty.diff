@@ -1,0 +1,148 @@
+diff --git a/src/components/atoms/Day/index.js b/src/components/atoms/Day/index.js
+index cc4f5703..d128d31a 100644
+--- a/src/components/atoms/Day/index.js
++++ b/src/components/atoms/Day/index.js
+@@ -39,13 +39,9 @@ export default class Day extends PureComponent {
+         this.chooseDay = this.chooseDay.bind(this);        
+     }
+ 
+-    /* shouldComponentUpdate(nextProps) {
+-        const prevStatus = this.isFocus;
+-        const { isFocus } = this.props;
+-        if (prevStatus || isFocus) return true;
+-
+-        return false;
+-    } */
++    shouldComponentUpdate(nextProps) {
++        return nextProps.isDirty;
++    }
+ 
+     chooseDay() {
+         if (this.props.isValid) {
+diff --git a/src/components/screens/Calendar/index.js b/src/components/screens/Calendar/index.js
+index 65ebc074..6dabc55c 100644
+--- a/src/components/screens/Calendar/index.js
++++ b/src/components/screens/Calendar/index.js
+@@ -81,6 +81,7 @@ class Calendar extends Component {
+         // console.time('**** setCalendarData 1');
+         const {
+             internalFormat, inputFormat, minDate: minDateSrc, maxDate: maxDateSrc,
++            calendarMarkedDays: oldMarked
+         } = this.props.datesAndGuestsData;
+         let newData = {};
+         const checkInDateMoment = moment(this.startDate, inputFormat);
+@@ -100,7 +101,7 @@ class Calendar extends Component {
+                 };
+                 this.isFirst = false;
+             } else {
+-                const calendarMarkedDays = updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateMoment,this.today,internalFormat);
++                const calendarMarkedDays = updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,checkOutDateMoment,this.today,internalFormat);
+                 newData = {
+                     ...extraData,
+                     calendarMarkedDays
+@@ -178,7 +179,9 @@ class Calendar extends Component {
+     }
+     
+     clear() {
+-        const calendarMarkedDays = updateMarkedCalendarData(this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
++	const { internalFormat } = this.props.datesAndGuestsData;
++	const { calendarMarkedDays:oldMarked } = ( useRedux ? this.props.datesAndGuestsData : this.state );
++        const calendarMarkedDays = updateMarkedCalendarData(oldMarked,this.minDate, null, null, this.today, this.props.datesAndGuestsData.internalFormat);
+         const newState = {
+             startDate: null,
+             endDate: null,
+@@ -377,4 +380,4 @@ const mapDispatchToProps = dispatch => ({
+     setDatesAndGuestsData: bindActionCreators(setDatesAndGuestsData, dispatch),
+ })
+ 
+-export default connect(mapStateToProps, mapDispatchToProps)(Calendar);
+\ No newline at end of file
++export default connect(mapStateToProps, mapDispatchToProps)(Calendar);
+diff --git a/src/components/screens/Calendar/utils.js b/src/components/screens/Calendar/utils.js
+index a886a8d2..85074c53 100644
+--- a/src/components/screens/Calendar/utils.js
++++ b/src/components/screens/Calendar/utils.js
+@@ -19,7 +19,7 @@ export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment
+ 
+       while ( current.isSameOrBefore(maxDate) ) {
+           const dateClone = current.clone();
+-          const {days, marked} = createInitialCalendarData(dateClone,checkInDateMoment,checkOutDateMoment,today,internalFormat)
++          const {days, marked} = createInitialCalendarData({},dateClone,checkInDateMoment,checkOutDateMoment,today,internalFormat)
+           let month = {
+               days,
+               date: dateClone
+@@ -35,7 +35,7 @@ export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment
+   return {calendarData, calendarMarkedDays};
+ }
+ 
+-export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
++export function updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
+   let result = {};
+   
+   let current = minDate.clone();
+@@ -56,7 +56,7 @@ export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateM
+ 
+     while (daysDifference >= 0) {
+ 
+-      const {marked: dayMarked} = calculateDayData(current, checkInDateMoment, checkOutDateMoment, today, internalFormat, true);
++      const {marked: dayMarked} = calculateDayData(oldMarked, current, checkInDateMoment, checkOutDateMoment, today, internalFormat, true);
+       if (dayMarked) {
+           result[dayMarked.asStr] = dayMarked.data;
+       }
+@@ -81,7 +81,7 @@ export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateM
+  * @param {moment} checkOutDateMoment 
+  * @param {String} internalFormat 
+  */
+-export function createInitialCalendarData(monthDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
++export function createInitialCalendarData(oldMarked, monthDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
+     // const now = Date.now()
+     // console.time(`*** Calendar::utils::createInitialCalendarData ${now}`);
+ 
+@@ -101,7 +101,7 @@ export function createInitialCalendarData(monthDate,checkInDateMoment,checkOutDa
+ 
+     // parse all days
+     while (current.month() === month) {
+-      const {day: newDay, marked: dayMarked} = calculateDayData(current, checkInDateMoment, checkOutDateMoment, today, internalFormat);
++      const {day: newDay, marked: dayMarked} = calculateDayData(oldMarked,current, checkInDateMoment, checkOutDateMoment, today, internalFormat);
+       days.push(newDay);
+       current.add(1, 'days');
+       if (dayMarked) {
+@@ -136,7 +136,7 @@ export function createInitialCalendarData(monthDate,checkInDateMoment,checkOutDa
+  * @param {String} internalFormat 
+  * @param {Boolean}   onlyMarked 
+  */
+-export function calculateDayData(date, checkInDateMoment, checkOutDateMoment, today, internalFormat, onlyMarked=false) {
++export function calculateDayData(oldMarked, date, checkInDateMoment, checkOutDateMoment, today, internalFormat, onlyMarked=false) {
+     let result = {};
+     let marked = null;
+     
+@@ -148,17 +148,19 @@ export function calculateDayData(date, checkInDateMoment, checkOutDateMoment, to
+     const isToday = date.isSame(today);
+     const isValid = (date.isSameOrAfter(today));
+     const isStartPart = (isStart && (checkOutDateMoment != null));
+-
+     const isMarked = (isStart || isMid || isEnd || isFocus || isStartPart || isToday);
++    const old = oldMarked[asStr];
++    const isDirty = (old && (old.isMarked != isMarked));
++
+     if (isMarked || !isValid) {
+       if (!isValid && !isMarked) {
+-          marked = {asStr, data: {isValid}};
++          marked = {asStr, data: {isValid,isMarked,isDirty}};
+       } else {
+           marked = {
+             asStr,
+             data: {
+                 isStart, isMid, isEnd, isStartPart,
+-                isToday, isValid, isFocus
++                isToday, isValid, isFocus, isMarked, isDirty
+             }
+           }
+         }
+@@ -177,4 +179,4 @@ export function calculateDayData(date, checkInDateMoment, checkOutDateMoment, to
+     }
+ 
+     return result;
+-}
+\ No newline at end of file
++}

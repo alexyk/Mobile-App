@@ -7,6 +7,7 @@ import moment from 'moment';
 import styles from './styles';
 import Day from '../../atoms/Day';
 import { I18N_MAP } from './i18n';
+import { ilog } from '../../../config-debug'
 
 export default class Month extends PureComponent {
     static propTypes = {
@@ -133,6 +134,8 @@ export default class Month extends PureComponent {
         const { date } = this.props.data;
         const subColor = { color: color.subColor };
         const titleText = this.getMonthText();
+
+        if (date.format('YY-MM') == '19-06') ilog(`month 06-2019`);
 
         return (
             <View style={styles.month}>

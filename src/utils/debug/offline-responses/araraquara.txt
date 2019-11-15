@@ -1,0 +1,49 @@
+{
+  "content": [
+    {
+      "star": 3,
+      "price": 38.04,
+      "priceForSort": 38.04,
+      "latitude": "-21.784816156803",
+      "name": "Araraquara Othon Suites",
+      "id": 80226,
+      "generalDescription": "<b>Araraquara Othon Suites</b> is a contemporary business hotel with onsite meeting facilities and cost-saving features like free parking and wireless Internet access. The property is situated on the main city avenue and offers easy access to downtown <b>",
+      "hotelPhoto": "RXLImages/1143/90/01/16/74/Araraquara-Othon-Suites-Salao-de-Eventos.jpg",
+      "longitude": "-48.200634449074"
+    },
+    {
+      "star": 3,
+      "price": 38.94,
+      "priceForSort": 38.94,
+      "latitude": "-21.808813",
+      "name": "Arco Hotel Express Araraquara",
+      "id": 80225,
+      "generalDescription": "<b>Arco Hotel Express Araraquara</b> offers affordable rates and basic features as well as a convenient location near the downtown area. This simple <b>Araraquara</b> property is equipped with a guest laundry and business center and also provides guests w",
+      "hotelPhoto": null,
+      "longitude": "-48.160566"
+    },
+    {
+      "star": 3,
+      "price": null,
+      "priceForSort": 657657657868678,
+      "latitude": "-21.795479",
+      "name": "Gran Hotel Morada Do Sol",
+      "id": 80227,
+      "generalDescription": "<b>Gran Hotel Morada do Sol</b> is conveniently located in the city center of <b>Araraquara</b> and offers comfortable rooms along with leisure facilities like a swimming pool, a sports court, a sauna and a gym. Gran Hotel Morada do Sol is an excellent op",
+      "hotelPhoto": "RXLImages/1143/90/00/35/64/Araraquara-Gran-Hotel-Morada-Sol-Kids-Club.jpg",
+      "longitude": "-48.175922"
+    },
+    {
+      "star": 3,
+      "price": null,
+      "priceForSort": 657657657868678,
+      "latitude": "-21.8067113",
+      "name": "Shelton Inn Hotel Araraquara",
+      "id": 22395,
+      "generalDescription": "General Information:Shelton Inn Araraquara makes use of comfortable apartments equipped with conditional air, TV the handle, mini bar and telephone with direct dialing. The rooms still possess point for connection with computer. The hotel also offers to s",
+      "hotelPhoto": "RXLImages/1013/hotel1205171-Shelton-Inn-Araraquara-exte.jpg",
+      "longitude": "-48.1723117"
+    }
+  ],
+  "isCacheExpired": false
+}

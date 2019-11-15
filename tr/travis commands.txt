@@ -1,0 +1,28 @@
+ip=...
+
+# from mac os to travis
+scp alex@$ip:??? ./
+
+# configure remote Reactotron
+    vi src/utils/reactotronLogging.js
+    host: "$ip"
+
+# configure remote Node.JS
+vi +56 node_modules/react-native/Libraries/WebSocket/RCTWebSocketExecutor.m
+  # replace localhost with address
+  $ip
+vi +60 node_modules/react-native/Libraries/WebSocket/RCTWebSocketExecutor.m
+  # add log
+  NSLog(@"URL: %@", _url);
+
+
+
+
+
+
+# ------------ additional info
+
+# vim - show lines:
+:set number
+# vim - show lines:
+vi +54 $filename

@@ -1,4 +1,4 @@
-import { processError } from "../../../config-debug";
+import { processError, ilog } from "../../../config-debug";
 
 /**
  * Returns initial days data (calendarData:Array) and initial marked data (calendarMarkedDays:Object)
@@ -19,7 +19,7 @@ export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment
 
       while ( current.isSameOrBefore(maxDate) ) {
           const dateClone = current.clone();
-          const {days, marked} = createInitialCalendarData(dateClone,checkInDateMoment,checkOutDateMoment,today,internalFormat)
+          const {days, marked} = createInitialCalendarData({},dateClone,checkInDateMoment,checkOutDateMoment,today,internalFormat)
           let month = {
               days,
               date: dateClone
@@ -35,7 +35,7 @@ export function generateInitialCalendarData(checkInDateMoment,checkOutDateMoment
   return {calendarData, calendarMarkedDays};
 }
 
-export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
+export function updateMarkedCalendarData(oldMarked, minDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
   let result = {};
   
   let current = minDate.clone();
@@ -56,7 +56,7 @@ export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateM
 
     while (daysDifference >= 0) {
 
-      const {marked: dayMarked} = calculateDayData(current, checkInDateMoment, checkOutDateMoment, today, internalFormat, true);
+      const {marked: dayMarked} = calculateDayData(oldMarked, current, checkInDateMoment, checkOutDateMoment, today, internalFormat, true);
       if (dayMarked) {
           result[dayMarked.asStr] = dayMarked.data;
       }
@@ -81,7 +81,7 @@ export function updateMarkedCalendarData(minDate,checkInDateMoment,checkOutDateM
  * @param {moment} checkOutDateMoment 
  * @param {String} internalFormat 
  */
-export function createInitialCalendarData(monthDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
+export function createInitialCalendarData(oldMarked, monthDate,checkInDateMoment,checkOutDateMoment,today,internalFormat) {
     // const now = Date.now()
     // console.time(`*** Calendar::utils::createInitialCalendarData ${now}`);
 
@@ -101,7 +101,7 @@ export function createInitialCalendarData(monthDate,checkInDateMoment,checkOutDa
 
     // parse all days
     while (current.month() === month) {
-      const {day: newDay, marked: dayMarked} = calculateDayData(current, checkInDateMoment, checkOutDateMoment, today, internalFormat);
+      const {day: newDay, marked: dayMarked} = calculateDayData(oldMarked,current, checkInDateMoment, checkOutDateMoment, today, internalFormat);
       days.push(newDay);
       current.add(1, 'days');
       if (dayMarked) {
@@ -136,7 +136,7 @@ export function createInitialCalendarData(monthDate,checkInDateMoment,checkOutDa
  * @param {String} internalFormat 
  * @param {Boolean}   onlyMarked 
  */
-export function calculateDayData(date, checkInDateMoment, checkOutDateMoment, today, internalFormat, onlyMarked=false) {
+export function calculateDayData(oldMarked, date, checkInDateMoment, checkOutDateMoment, today, internalFormat, onlyMarked=false) {
     let result = {};
     let marked = null;
     
@@ -148,17 +148,20 @@ export function calculateDayData(date, checkInDateMoment, checkOutDateMoment, to
     const isToday = date.isSame(today);
     const isValid = (date.isSameOrAfter(today));
     const isStartPart = (isStart && (checkOutDateMoment != null));
-
     const isMarked = (isStart || isMid || isEnd || isFocus || isStartPart || isToday);
+    const old = oldMarked[asStr];
+    const isDirty = (old && (old.isMarked != isMarked)) || false;
+    if (isDirty) ilog(`${asStr} is dirty`);
+
     if (isMarked || !isValid) {
       if (!isValid && !isMarked) {
-          marked = {asStr, data: {isValid}};
+          marked = {asStr, data: {isValid,isMarked,isDirty}};
       } else {
           marked = {
             asStr,
             data: {
                 isStart, isMid, isEnd, isStartPart,
-                isToday, isValid, isFocus
+                isToday, isValid, isFocus, isMarked, isDirty
             }
           }
         }

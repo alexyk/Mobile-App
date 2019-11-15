@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 
@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import styles from './styles';
 
-export default class Day extends PureComponent {
+export default class Day extends Component {
     static propTypes = {
         onChoose: PropTypes.func,
         // date: PropTypes.oneOfType([PropTypes.string]),
@@ -39,13 +39,10 @@ export default class Day extends PureComponent {
         this.chooseDay = this.chooseDay.bind(this);        
     }
 
-    /* shouldComponentUpdate(nextProps) {
-        const prevStatus = this.isFocus;
-        const { isFocus } = this.props;
-        if (prevStatus || isFocus) return true;
-
-        return false;
-    } */
+    shouldComponentUpdate(nextProps) {
+        //console.info(`${nextProps.asStr}: ${nextProps.isDirty}`)
+        return nextProps.isDirty;
+    }
 
     chooseDay() {
         if (this.props.isValid) {

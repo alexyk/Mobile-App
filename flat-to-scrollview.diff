@@ -1,0 +1,685 @@
+diff --git a/src/components/atoms/Day/index.js b/src/components/atoms/Day/index.js
+index cc4f5703..19cc6457 100644
+--- a/src/components/atoms/Day/index.js
++++ b/src/components/atoms/Day/index.js
+@@ -48,7 +48,7 @@ export default class Day extends PureComponent {
+     } */
+ 
+     chooseDay() {
+-        if (this.props.isValid) {
++        if (!this.props.isEmpty) {
+             setTimeout(() => this.props.onChoose(this.props.date));
+         }
+     }
+@@ -58,36 +58,38 @@ export default class Day extends PureComponent {
+             return <View style={styles.dayContainer} />
+         }
+ 
+-        const { color, text, date,
+-            isMid, isStartPart, isStart, isEnd, isValid, isFocus, isToday
++        const {
++            color:propsColor, text, date, isMid, isStartPart, isStart, isEnd, isValid, isFocus, isToday
+         } = this.props;
+ 
+-        const mainColor = { color: color.mainColor };
+-        const subColor = { color: color.subColor };
+-        const subBack = { backgroundColor: color.primaryColor };
++        const { mainColor,subColor,primaryColor} = propsColor;
+ 
+-        let stylesCollection = [styles.dayContainer];
+-        if (isMid) stylesCollection.push(subBack);
+-        if (isStartPart) stylesCollection.push(styles.startContainer);
+-        if (isEnd) stylesCollection.push(styles.endContainer);
+-        if (isStartPart || isEnd) stylesCollection.push(subBack);
++        // const mainColor = { color: color.mainColor };
++        // const subColor = { color: color.subColor };
++        // const subBack = { backgroundColor: color.primaryColor };
++        let color = null;
++
++        // let stylesCollection = [styles.dayContainer];
++        let style = styles.dayContainer;
++        let style2;
++        if (isMid) color = subColor;
++        if (isStartPart) style2 = styles.startContainer//stylesCollection.push(styles.startContainer);
++        if (isEnd) style = styles.endContainer //stylesCollection.push(styles.endContainer);
++        if (isStartPart || isEnd) color = primaryColor; //stylesCollection.push(subBack);
++
++        style.color = color;
+ 
+         return (
+             <View
+-                style={stylesCollection}
++                style={[style,style2]}
+             >
+-                {isValid ?
+                     <TouchableHighlight
+-                        style={[styles.day, isToday && styles.today, isFocus && subBack]}
++                        //style={style}
+                         underlayColor="rgba(255, 255, 255, 0.35)"
+                         onPress={this.chooseDay}
+                     >
+                         <Text style={[styles.dayText, subColor, isFocus && mainColor]}>{text}</Text>
+-                    </TouchableHighlight> :
+-                    <View style={[styles.day, isToday && styles.today]}>
+-                        <Text style={styles.dayTextDisabled}>{text}</Text>
+-                    </View>
+-                }
++                    </TouchableHighlight>
+             </View>
+         );
+     }
+diff --git a/src/components/molecules/Month/index.js b/src/components/molecules/Month/index.js
+index 95f0d514..c9041874 100644
+--- a/src/components/molecules/Month/index.js
++++ b/src/components/molecules/Month/index.js
+@@ -7,6 +7,7 @@ import moment from 'moment';
+ import styles from './styles';
+ import Day from '../../atoms/Day';
+ import { I18N_MAP } from './i18n';
++import { ilog } from '../../../config-debug'
+ 
+ export default class Month extends PureComponent {
+     static propTypes = {
+@@ -53,6 +54,7 @@ export default class Month extends PureComponent {
+ 
+     getMonthText() {
+         const { data, i18n } = this.props;
++        //ilog('month data',data)
+         const month = data.date;
+ 
+         const y = month.year();
+diff --git a/src/components/organisms/MonthList/index.js b/src/components/organisms/MonthList/index.js
+index 47092b4a..41bf058c 100644
+--- a/src/components/organisms/MonthList/index.js
++++ b/src/components/organisms/MonthList/index.js
+@@ -1,6 +1,6 @@
+ import React, { PureComponent } from 'react';
+ import PropTypes from 'prop-types';
+-import { FlatList } from 'react-native';
++import { FlatList, ScrollView } from 'react-native';
+ import moment from 'moment';
+ import Month from '../../molecules/Month';
+ import LTLoader from '../../molecules/LTLoader';
+@@ -34,7 +34,7 @@ export default class MonthList extends PureComponent {
+         this._renderMonth = this._renderMonth.bind(this);
+         this._keyExtractor = this._keyExtractor.bind(this);
+         // this.shouldUpdate = this.shouldUpdate.bind(this);
+-        this.checkRange = this.checkRange.bind(this);
++        // this.checkRange = this.checkRange.bind(this);
+         this.getWeekNums = this.getWeekNums.bind(this);
+         this._scrollToSelectedMonth = this._scrollToSelectedMonth.bind(this);
+     }
+@@ -71,7 +71,7 @@ export default class MonthList extends PureComponent {
+             clonedMoment.add(1, 'months');
+         }
+ 
+-        rlog(`month-list`,`Start: ${start} End: ${end} Total Weeks: ${total}`)
++        // rlog(`month-list`,`Start: ${start} End: ${end} Total Weeks: ${total}`)
+ 
+         return total;
+     }
+@@ -92,16 +92,16 @@ export default class MonthList extends PureComponent {
+         return false;
+     }*/
+ 
+-    checkRange(date, start, end) {
++/*     checkRange(date, start, end) {
+         if (!date || !start) return false;
+         if (!end) return date.year() === start.year() && date.month() === start.month();
+         if (date.year() < start.year() || (date.year() === start.year() && date.month() < start.month())) return false;
+         if (date.year() > end.year() || (date.year() === end.year() && date.month() > end.month())) return false;
+         return true;
+     }
+-
++ */
+     _scrollToSelectedMonth() {
+-        setTimeout(() => {
++/*         setTimeout(() => {
+             const { startDate, minDate } = this.props;
+             const date1 = minDate.startOf('month');
+             const date2 = startDate.startOf('month');
+@@ -120,12 +120,13 @@ export default class MonthList extends PureComponent {
+                 processError(`[MonthList] Trying to scroll to index ${index} failed - this.list or item is not defined. Try again: ${tryAgain}`,{hasList:(this.list != null),hasItem: (item!=null),tryAgain});
+             }
+         }, 200);
+-    }
++ */    }
+ 
+ 
+     _renderMonth({item,index}) {
+ 
+-        const {markedData, color, onChoose} = this.props;
++      const {markedData, color, onChoose} = this.props;
++      this.itemK = (this.itemK != null ? this.itemK+1 : 0);
+ 
+       //console.log('&&&render',`Result: ${item.days?item.days.length:'n/a'}`,{item,index,props:this.props})
+       //clog(`&render `,{item,index,markedData});
+@@ -136,6 +137,7 @@ export default class MonthList extends PureComponent {
+             data={item}
+             markedData={markedData}
+             color={color}
++            key={`month_${this.itemK}`}
+             onChoose={onChoose}
+         />
+       );
+@@ -143,6 +145,24 @@ export default class MonthList extends PureComponent {
+ 
+       return result;
+     }
++                        // Virtualised List
++                        // initialNumToRender={2}
++                        // windowSize={10}
++                        // other
++                        // ListView
++                        // legacyImplementation={true}
++                    /* <FlatList
++                        ref={(list) => { this.list = list; }}
++                        style={{flex: 1}}
++                        data={data}
++                        style={{paddingHorizontal:10}}
++                        keyExtractor={this._keyExtractor}
++                        renderItem={this._renderMonth}
++                        updateCellsBatchingPeriod={200}
++                        maxToRenderPerBatch={2}
++                        initialNumToRender={2}
++                        removeClippedSubviews={true}
++                    /> */
+ 
+     render() {
+ 
+@@ -151,24 +171,10 @@ export default class MonthList extends PureComponent {
+         let result = (
+             (!data || data.length == 0)
+                 ? <LTLoader message={'Loading ...'} isLoading={true} opacity={'FF'} />
+-                :
+-                    <FlatList
+-                        ref={(list) => { this.list = list; }}
+-                        style={{flex: 1}}
+-                        data={data}
+-                        style={{paddingHorizontal:10}}
+-                        keyExtractor={this._keyExtractor}
+-                        renderItem={this._renderMonth}
+-                        // Virtualised List
+-                        // updateCellsBatchingPeriod={100}
+-                        // maxToRenderPerBatch={3}
+-                        // initialNumToRender={2}
+-                        // windowSize={10}
+-                        // other
+-                        // ListView
+-                        // legacyImplementation={true}
+-
+-                    />
++                : ( <ScrollView style={{top:40}} >
++                        {data.map((item,index) => this._renderMonth({item,index}))}
++                    </ScrollView>
++                  )
+         );
+ 
+         if (this.isFirst && data && data.length > 0) {
+diff --git a/src/components/screens/Calendar/index.js b/src/components/screens/Calendar/index.js
+index 65ebc074..060e29f7 100644
+--- a/src/components/screens/Calendar/index.js
++++ b/src/components/screens/Calendar/index.js
+@@ -274,43 +274,6 @@ class Calendar extends Component {
+ 
+         const result = (
+             <View style={[styles.container, mainBack]}>
+-                <View style={{justifyContent: 'space-between', flexDirection: 'row',}}>
+-                    <CloseButton onPress={this.cancel} />
+-                    {
+-                        isClearVisible &&
+-                        <TouchableHighlight
+-                            underlayColor="transparent"
+-                            activeOpacity={0.8}
+-                            onPress={this.clear}
+-                            style={{marginTop: 45, marginRight:18, alignItems:'flex-end', justifyContent:'center'}}
+-                        >
+-                            <Text style={[styles.clearText, subFontColor]}>{this.i18n('clear', 'text')}</Text>
+-                        </TouchableHighlight>
+-                    }
+-                </View>
+-                
+-                <View style={styles.result}>
+-                    <View style={styles.resultPart}>
+-                        <Text style={[styles.resultText, styles.weekdayText, subFontColor]}>
+-                            {startWeekdayText || this.i18n('date', 'text')}
+-                        </Text>
+-                        <Text style={[styles.resultText, styles.dateText, primaryFontColor]}>
+-                            {startDateText || this.i18n('start', 'text')}
+-                        </Text>
+-                    </View>
+-                    <View style={[styles.resultSlash, subBack]} />
+-                    <View style={styles.resultPart}>
+-                        <Text style={[styles.resultText, styles.weekdayText, subFontColor]}>
+-                            {endWeekdayText || this.i18n('date', 'text')}
+-                        </Text>
+-                        <Text style={[styles.resultText, styles.dateText, primaryFontColor]}>
+-                            {endDateText || this.i18n('end', 'text')}
+-                        </Text>
+-                    </View>
+-                </View>
+-                <View style={styles.week}>
+-                    {weekDays}
+-                </View>
+                 <View style={[styles.scroll]}>
+                     <MonthList
+                         today={this.today}
+@@ -328,7 +291,6 @@ class Calendar extends Component {
+                     />
+                 </View>
+                 <View style={styles.btn}>
+-                    {isValid ?
+                         <TouchableHighlight
+                             underlayColor={primaryColor}
+                             style={styles.confirmContainer}
+@@ -343,18 +305,7 @@ class Calendar extends Component {
+                                     {this.i18n('save', 'text')}
+                                 </Text>
+                             </View>
+-                        </TouchableHighlight> :
+-                        <View style={[styles.confirmContainer, styles.confirmContainerDisabled]}>
+-                            <View style={styles.confirmBtn}>
+-                                <Text
+-                                    ellipsisMode="tail"
+-                                    numberOfLines={1}
+-                                    style={[styles.confirmText, styles.confirmTextDisabled]}
+-                                >
+-                                    {this.i18n('save', 'text')}
+-                                </Text>
+-                            </View>
+-                        </View>
++                        </TouchableHighlight>
+                     }
+                 </View>
+             </View>
+diff --git a/src/components/screens/HomeSearch/HomesSearchScreen/index.js b/src/components/screens/HomeSearch/HomesSearchScreen/index.js
+index df8c05e6..0eecd562 100644
+--- a/src/components/screens/HomeSearch/HomesSearchScreen/index.js
++++ b/src/components/screens/HomeSearch/HomesSearchScreen/index.js
+@@ -151,10 +151,10 @@ class HomesSearchScreen extends Component {
+         //console.log("searchTerms", searchTerms);
+ 
+         requester.getListingsByFilter(searchTerms).then(res => {
+-            rlog('homes-1',"requester.getListingsByFilter", {searchTerms,res},true);
++            // rlog('homes-1',"requester.getListingsByFilter", {searchTerms,res},true);
+ 
+             res.body.then(data => {
+-                rlog('homes-2',"requester.getListingsByFilter", {data},true);
++                // rlog('homes-2',"requester.getListingsByFilter", {data},true);
+ 
+                 if (this.isFilterResult) {
+                     this.setState({
+diff --git a/src/components/screens/HotelsSearch/HotelsSearchScreen/index.js b/src/components/screens/HotelsSearch/HotelsSearchScreen/index.js
+index 9625116c..381790c4 100644
+--- a/src/components/screens/HotelsSearch/HotelsSearchScreen/index.js
++++ b/src/components/screens/HotelsSearch/HotelsSearchScreen/index.js
+@@ -310,7 +310,7 @@ class HotelsSearchScreen extends Component {
+ 
+   // TODO: Inspect this flow - and create a component to implement it
+   async startSocketConnection() {
+-    rlog('socket',`startSocketConnection`);
++    // rlog('socket',`startSocketConnection`);
+ 
+     this.isSocketDown = false;
+ 
+@@ -367,7 +367,7 @@ class HotelsSearchScreen extends Component {
+     const data = { uuid: this.uuid, query: this.searchString };
+ 
+     //console.log("stompiOSConnect ---------------");
+-    rlog('socket',`stompiOSConnect`,{socketHost,data,headers});
++    // rlog('socket',`stompiOSConnect`,{socketHost,data,headers});
+     
+     stompiOSClient = stomp.client(socketHost);
+     stompiOSClient.debug = (hotelsSearchSocketDebug
+@@ -543,7 +543,7 @@ class HotelsSearchScreen extends Component {
+ 
+   onDoneSocket = data => {
+     console.log( `#hotel-search# [HotelsSearchScreen] onDoneSocket, totalElements: ${data.totalElements}`);
+-    rlog('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
++    // rlog('list-donesocket',`elements: ${data.totalElements}`, {data,hotelsAll:this.hotelsAll,state:this.state,socketCache:this.hotelsSocketCacheMap})
+     
+     //TODO: @@@debug remove
+ //     let asArray = []
+@@ -635,7 +635,7 @@ class HotelsSearchScreen extends Component {
+         // webview inside
+         let initialState = generateWebviewInitialState(extraParams, state);
+ 
+-        rlog('item-click',`url: ${initialState.webViewUrl}`)
++        // rlog('item-click',`url: ${initialState.webViewUrl}`)
+         /*console.log(`[HotelsSearchScreen] Loading hotel info`, {
+           initialState,
+           extraParams,
+@@ -724,7 +724,7 @@ class HotelsSearchScreen extends Component {
+         const hotelsAll = data.content;
+         checkHotelData(hotelsAll,'filter')
+ 
+-        rlog('@@filter-on-server',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
++        // rlog('@@filter-on-server',`${count} filtered hotels, before parsing`, {hotelsAll}, true)
+ 
+         // parse data
+         mergeAllHotelData(hotelsAll, this.hotelsSocketCacheMap, this.hotelsStaticCacheMap)
+@@ -852,7 +852,7 @@ class HotelsSearchScreen extends Component {
+       console.error(
+         "[HotelsSearchScreen] Could not fetch Static Data for hotels"
+       );
+-      rlog('error',`Could not get hotels static data`,{res})
++      // rlog('error',`Could not get hotels static data`,{res})
+       this.listStartFetch([], 0);
+     }
+   }
+@@ -939,7 +939,7 @@ class HotelsSearchScreen extends Component {
+     console.time('*** HotelsSearchScreen::gotoFilter()')
+ 
+     // log('HotelsSearchScreen','gotoFilter', {props:this.props, state: this.state})
+-    rlog('HotelsSearchScreen',`gotoFilter  isLoading: ${this.state.isLoading} isFiltering: ${this.props.isApplyingFilter}`, {props:this.props, state: this.state})
++    // rlog('HotelsSearchScreen',`gotoFilter  isLoading: ${this.state.isLoading} isFiltering: ${this.props.isApplyingFilter}`, {props:this.props, state: this.state})
+ 
+     if (this.state.isLoading || this.props.isApplyingFilter) {
+       //log('[HotelsSearch] gotoFilter::toast', {state:this.state, props:this.props})
+@@ -998,7 +998,7 @@ class HotelsSearchScreen extends Component {
+       const count = filtered.length;
+       //this.props.setSearchFiltered(filtered)
+       
+-      rlog('@@filter-fromUI',`Filtered from UI: ${count} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams},true);
++      // rlog('@@filter-fromUI',`Filtered from UI: ${count} / ${hotelsAll.length}`,{filtered,hotelsAll,filterParams},true);
+       checkHotelData(filtered,'filter-fromUI')
+ 
+       // add no
+diff --git a/src/components/screens/HotelsSearch/MapModeHotelsSearch/index.js b/src/components/screens/HotelsSearch/MapModeHotelsSearch/index.js
+index eb249dee..44df1018 100644
+--- a/src/components/screens/HotelsSearch/MapModeHotelsSearch/index.js
++++ b/src/components/screens/HotelsSearch/MapModeHotelsSearch/index.js
+@@ -245,7 +245,7 @@ class MapModeHotelsSearch extends Component {
+     }
+ 
+     onPressMap = (e) => {
+-        rlog('map-press',`e: ${e}`,{e})
++        // rlog('map-press',`e: ${e}`,{e})
+         const index = this.state.selectedMarkerIndex;
+         /* if (index != -1 && this._markers[index]) {
+             //this._markers[index].hideCallout();
+diff --git a/src/components/screens/HotelsSearch/utils.js b/src/components/screens/HotelsSearch/utils.js
+index 24cb79f3..713bf7cd 100644
+--- a/src/components/screens/HotelsSearch/utils.js
++++ b/src/components/screens/HotelsSearch/utils.js
+@@ -120,7 +120,7 @@ export function hasValidCoordinatesForMap(data, isInitial = false) {
+     }
+   }
+   catch (e) {
+-    rlog('error-coordinates',`[utils::hasValidCoordinatesForMap] error in calculating coordinates`,e)
++    // rlog('error-coordinates',`[utils::hasValidCoordinatesForMap] error in calculating coordinates`,e)
+   }
+ 
+   //log('utils', `hasValidCoordinatesForMap(), lat/lon: ${lat}/${lon}`,{lat,lon})
+@@ -808,7 +808,7 @@ export function checkHotelData(data, type, index) {
+   }
+ 
+   if (result.length > 0) {
+-    rlog(`X-${type}`, `@${result}@, index: ${index} failed: ${isArrayInstance ? failed : 'n/a'}, isArray: ${isArrayInstance}`,{invalid_types:result,data,type,props, isArrayInstance},true);
++    // rlog(`X-${type}`, `@${result}@, index: ${index} failed: ${isArrayInstance ? failed : 'n/a'}, isArray: ${isArrayInstance}`,{invalid_types:result,data,type,props, isArrayInstance},true);
+     //console.warn(`[utils::checkHotelData] @${result}@, index: ${index}`,{result,data,type,props})
+   }
+ }
+diff --git a/src/components/screens/Webview/index.js b/src/components/screens/Webview/index.js
+index a05d6ab6..d0d43d3f 100644
+--- a/src/components/screens/Webview/index.js
++++ b/src/components/screens/Webview/index.js
+@@ -18,7 +18,7 @@ import ProgressDialog from '../../atoms/SimpleDialogs/ProgressDialog';
+ 
+ import lang from '../../../language'
+ import { generateWebviewInitialState } from '../utils';
+-import { webviewDebugEnabled, clog, wlog } from '../../../config-debug';
++import { webviewDebugEnabled, clog, wlog, ilog, rlog } from '../../../config-debug';
+ 
+ class WebviewScreen extends Component {
+     useDelay = true;
+@@ -37,6 +37,9 @@ class WebviewScreen extends Component {
+     constructor(props) {
+         super(props);
+         const { params } = this.props.navigation.state;
++	
++	console.info('Webview constructor')
++	
+ 
+         // TODO: Figure out what is this for and how was it supposed to work  / commented on by Alex K, 2019-03-06
+         // UUIDGenerator.getRandomUUID((uuid) => {
+@@ -47,7 +50,7 @@ class WebviewScreen extends Component {
+         const allParams = Object.assign({},params,{currency:props.currency});
+         this.state = generateWebviewInitialState(allParams);
+ 
+-        clog(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
++        console.log(`[Webview] URL: ${this.state.webViewUrl}`, {url: this.state.webViewUrl});
+ 
+         // Fix for using WebView::onMessage
+         this.patchPostMessageFunction = function() {
+@@ -91,6 +94,11 @@ class WebviewScreen extends Component {
+         if (this.useDelay) {
+             this.showContentWithDelay(this.showPageTimeout);
+         }
++	rlog('heree')
++	rlog('here')
++
++	setInterval(() => rlog(`[webview tick]`, {ref:this.webViewRef.ref}),2000)
++	console.log('there')
+     }
+     
+ 
+@@ -157,13 +165,13 @@ class WebviewScreen extends Component {
+     }
+ 
+     onWebViewLoadStart(event) {
+-        /** console.log(`[${this.debug()}] %c WebView::onLoadStart %c`,
+-            // {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state},
+-            // 'background: #899; color: #F55; font-weight: bold',
++        console.log(`[${this.debug()}] %c WebView::onLoadStart %c`,
++             {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state},
++             'background: #899; color: #F55; font-weight: bold',
+             'color: #F55; font-weight: bold',
+             'background: #FFF; color: #000',
+         );
+-        */
++        
+ 
+         this.setState({
+             canGoToResults: true
+@@ -171,16 +179,14 @@ class WebviewScreen extends Component {
+     }
+     
+     onWebViewMessage(event) {
+-        //console.log(`[${this.debug()}] WebView::onMessage`,
+-            // {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state,event},
+-        // );
++        console.log(`[${this.debug()}] WebView::onMessage`, {source: this.state.webViewUrl,wview:this.webViewRef,state:this.state,event});
+     }
+ 
+     onWebViewLoadEnd(event) {
+         const target = event.target;
+         const ev = target.nativeEvent;
+ 
+-        /*console.log(`[${this.debug()}] %c WebView::onLoadEnd %c `+
++        console.log(`[${this.debug()}] %c WebView::onLoadEnd %c `+
+             ((ev != null)
+                 ? (
+                     `url:${ev ? ev.url.substr(29,40) : 'n/a'}` +
+@@ -195,7 +201,7 @@ class WebviewScreen extends Component {
+             // 'background: #757; color: #0F0; font-weight: bold',
+             'color: #0A0; font-weight: bold',
+             'background: #FFF; color: #000',
+-        );*/
++        );
+ 
+         if (this.useDelay) {
+             if (this.state.showProgress) {
+@@ -207,7 +213,7 @@ class WebviewScreen extends Component {
+     }
+ 
+     onWebViewNavigationState(navState) {
+-        log('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
++        ilog('webview',`[NavigationEvent] url: ${this.webViewRef.ref.url}`,{navState,ref:this.webViewRef.ref, className:this.webViewRef.ref.constructor ? this.webViewRef.ref.constructor.name : 'n/a'});
+ 
+         this.webViewRef.canGoBackAndroid = navState.canGoBack;
+         this.setState({canGoForward:    navState.canGoForward});
+diff --git a/src/config-debug.js b/src/config-debug.js
+index ed7728c7..c315ed56 100644
+--- a/src/config-debug.js
++++ b/src/config-debug.js
+@@ -10,7 +10,7 @@ import { isMoment } from 'moment';
+  * - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+  */
+ export const __MYDEV__                               = (__DEV__ && true);
+-export const reactotronLoggingInReleaseForceEnabled  = true;
++export const reactotronLoggingInReleaseForceEnabled  = false;
+ export const forceOffline                            = false;
+ 
+ /**  
+@@ -32,13 +32,13 @@ export const reactotronLoggingEnabled           = false;
+ export const logConverterErrorToReactrotron     = false;
+ export const showTypesInReactotronLog           = true;
+   // redux
+-  export const reduxConsoleLoggingEnabled         = true;
++export const reduxConsoleLoggingEnabled         = false;
+ export const reduxConsoleCollapsedLogging       = true;
+ export const reduxReactotronLoggingEnabled      = false;
+   // console
+ export const raiseConverterExceptions           = false;
+ export const logConverterError                  = false;
+-export const consoleTimeCalculations            = true;    // enable/disable "console.time" & "console.timeEnd" calls
++export const consoleTimeCalculations            = false;    // enable/disable "console.time" & "console.timeEnd" calls
+   // other
+ export const webviewDebugEnabled                = false;
+ export const hotelsSearchMapDebugEnabled        = false;
+@@ -50,17 +50,17 @@ export const checkHotelsDataWithTemplates       = 'filter-parsed,socket-parsed';
+   if (forceOffline) isOffline = forceOffline;
+   if (!__DEV__) isOffline = false;
+ export const isOnline = (!isOffline);
+-export const autoLoginInOfflineMode             = true;
++export const autoLoginInOfflineMode             = false;
+   // automated flows
+     // hotels search
+ export const autoHotelSearch                    = false;
+ export const autoHotelSearchFocus               = false;
+-export const autoHotelSearchPlace               = 'london'
++export const autoHotelSearchPlace               = 'sofia'
+     // homes search
+ export const autoHomeSearch                     = false;
+ export const autoHomeSearchPlace                = 'uk1'
+   // calendar
+-export const autoCalendar                       = false;
++export const autoCalendar                       = true;
+ // TODO: Add the following options
+ /*
+     (1) reactotronLogsLevel - (0) reactotron only  (1) combine with console.log (2) only console.log
+@@ -259,7 +259,7 @@ function dlogFunc(obj, title=null, isInternal=false, indent=' ') {
+  */
+ export function rlogd(tag, description, data, isImportant = false) {
+   if (__DEV__) {
+-    rlog('dev-debug', `[${tag}] `+description, data, isImportant);
++    // rlog('dev-debug', `[${tag}] `+description, data, isImportant);
+   }
+ }
+ 
+diff --git a/src/routing/index.js b/src/routing/index.js
+index dd9701c3..a1dc53bd 100644
+--- a/src/routing/index.js
++++ b/src/routing/index.js
+@@ -2,7 +2,8 @@ import React, { PureComponent } from 'react';
+ import { connect } from 'react-redux';
+ import {
+     createStackNavigator,
+-    createBottomTabNavigator,
++    // createBottomTabNavigator,
++    createSwitchNavigator,
+     NavigationActions
+ } from 'react-navigation';
+ 
+@@ -31,7 +32,7 @@ import CongratsWallet from '../components/screens/Wallet/CongratsWallet'
+ import Explore from '../components/screens/Explore';
+ import Profile from '../components/screens/Profile'
+ 
+-import NavTabBar from '../components/organisms/NavTabBar';
++// import NavTabBar from '../components/organisms/NavTabBar';
+ import Inbox from '../components/screens/Message/Inbox';
+ import Chat from '../components/screens/Message/Chat';
+ 
+@@ -100,7 +101,8 @@ export const MyTripNavigator = createStackNavigator(
+     }
+ );
+ 
+-const MainNavigator = createBottomTabNavigator(
++// const MainNavigator = createBottomTabNavigator(
++const MainNavigator = createSwitchNavigator(
+     {
+         PROFILE: { screen: Profile },
+         MESSAGES: { screen: Inbox },
+@@ -110,8 +112,8 @@ const MainNavigator = createBottomTabNavigator(
+     },
+     {
+         initialRouteName: 'EXPLORE',
+-        tabBarComponent: NavTabBar,
+-        tabBarPosition: 'bottom'
++        // tabBarComponent: NavTabBar,
++        // tabBarPosition: 'bottom'
+     }
+ );
+ 
+diff --git a/src/utils/debug/offline.js b/src/utils/debug/offline.js
+index 13b01d1c..af8e6cfa 100644
+--- a/src/utils/debug/offline.js
++++ b/src/utils/debug/offline.js
+@@ -60,10 +60,10 @@ export default function createOfflineRequester() {
+           const keysDetails = keys.map( key => `${key}:${isObject(data[key])?'{...}':data[key]} ` )
+         
+           // log('API-OFFLINE', `${title} -> ${keysStr.substr(0,80)}...`, {data,keysDetails,keys} )
+-          rlog('API-OFFLINE', `${title}`, {data,keysDetails,keys,keysStr} )
++          // rlog('API-OFFLINE', `${title}`, {data,keysDetails,keys,keysStr} )
+           // log('API-OFFLINE', title, {data})
+         } catch (e) {
+-          rlog('API-OFFLINE',`ERROR in ${title}: ${e.message}`, {e}, true)
++          // rlog('API-OFFLINE',`ERROR in ${title}: ${e.message}`, {e}, true)
+         }
+         // console.tron.display({title,value:data})
+         success(data);
+@@ -127,7 +127,7 @@ export default function createOfflineRequester() {
+ 		startSocketConnection: (onData,_this) => {
+       let arr = require('./offline-responses/fromSocket.json');
+       try {
+-        const tmp = offlinePacks[autoHotelSearchPlace].socket;
++        const tmp = offlinePackHotels[autoHotelSearchPlace].socket;
+         if (tmp) arr = tmp;
+       } catch (e) {
+         processError(`[offline::startSocketConnection] Error in getting offline pack: ${e.message}`, {error:e})
+@@ -139,7 +139,7 @@ export default function createOfflineRequester() {
+ 			arr.map((item,index) => {
+ 				const func = () => {
+           onData.apply( _this, [ { body: JSON.stringify(item) } ] )
+-          rlog('SOCKET-OFFLINE',`onData ${index}`,{item,index})
++          // rlog('SOCKET-OFFLINE',`onData ${index}`,{item,index})
+         }
+ 				setTimeout(func, index*delayPerRefresh + delay2);
+ 
+diff --git a/src/utils/designUtils.js b/src/utils/designUtils.js
+index 6d38c377..d18dfa78 100644
+--- a/src/utils/designUtils.js
++++ b/src/utils/designUtils.js
+@@ -31,7 +31,7 @@ export function getFontSize(value,caller='') {
+   let result = PixelRatio.roundToNearestPixel(asFloat);
+ 
+   if (__DEV__) {
+-    rlogd('getFontSizeByWidth',`[designUtils] ${caller} result:${result} asFloat:${asFloat.toFixed(2)}`,{asFloat,result,value,caller})
++    // rlogd('getFontSizeByWidth',`[designUtils] ${caller} result:${result} asFloat:${asFloat.toFixed(2)}`,{asFloat,result,value,caller})
+   }
+ 
+   return result;
+diff --git a/src/version.js b/src/version.js
+index 1c6fdfce..2d70a926 100644
+--- a/src/version.js
++++ b/src/version.js
+@@ -5,7 +5,7 @@ const exploreIsNative = true;   // false: webview version, true: native search v
+ const hotelitemIsNative = false;// this line is updated by scripts/select_config.rb
+ const travisVersion='';         // this line is updated by scripts/select_config.rb
+ const branchName='';            // this line is updated by scripts/select_config.rb
+-const compilationTime = '';     // this line is updated by scripts/select_config.rb
++const compilationTime = '2019-06-01 02:28:01 EEST';
+ 
+ let ui = '';
+ ui += `\n${exploreIsNative
